@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+<!-- Baidu Tongji -->
+<script>var _hmt = _hmt || []</script>
+<script async src="//hm.baidu.com/hm.js?539edd59c73e53f3fe82e2a7f4eb7dc4"></script>
+<!-- End Baidu Tongji -->
+
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>unicode、utf-8、utf-16之间的联系 | 代码段小站 | CodeBand CodeTool - 个人计算机类练手小博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="unicode,基础知识">
+    <meta name="description" content="致谢： 本文参考网页：Unicode字符集以及UTF-8，UTF-16编码的总结 - vcj1009784814的博客 - CSDN博客 Unicodeunicode的码点从U+0000到U+10FFFF，即共有2^20+2^16-1=1114111个码点。通常来说，常见字符可以用2个字节（16位）来表示。但还有很多其他表意字符、辅助字符需要表示。 Unicode将所有码点分成了17个代码级别，又">
+<meta name="keywords" content="unicode,基础知识">
+<meta property="og:type" content="article">
+<meta property="og:title" content="unicode、utf-8、utf-16之间的联系">
+<meta property="og:url" content="https:&#x2F;&#x2F;www.codetool.top&#x2F;article&#x2F;unicode%E7%9F%A5%E8%AF%86&#x2F;index.html">
+<meta property="og:site_name" content="代码段小站">
+<meta property="og:description" content="致谢： 本文参考网页：Unicode字符集以及UTF-8，UTF-16编码的总结 - vcj1009784814的博客 - CSDN博客 Unicodeunicode的码点从U+0000到U+10FFFF，即共有2^20+2^16-1=1114111个码点。通常来说，常见字符可以用2个字节（16位）来表示。但还有很多其他表意字符、辅助字符需要表示。 Unicode将所有码点分成了17个代码级别，又">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https:&#x2F;&#x2F;www.ibm.com&#x2F;developerworks&#x2F;cn&#x2F;java&#x2F;unicode-programming-language&#x2F;image001.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;www.ibm.com&#x2F;developerworks&#x2F;cn&#x2F;java&#x2F;unicode-programming-language&#x2F;image001.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;www.ibm.com&#x2F;developerworks&#x2F;cn&#x2F;java&#x2F;unicode-programming-language&#x2F;image003.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;s2.ax1x.com&#x2F;2019&#x2F;11&#x2F;26&#x2F;MzutAS.jpg">
+<meta property="og:updated_time" content="2019-11-26T07:40:01.612Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;www.ibm.com&#x2F;developerworks&#x2F;cn&#x2F;java&#x2F;unicode-programming-language&#x2F;image001.jpg">
+    
+        <link rel="alternate" type="application/atom+xml" title="代码段小站" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu"  >
+  <div class="inner flex-row-vertical">
+    <a class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Rhett Peng</h5>
+          <a href="mailto:pctdyx@qq.com" target="_blank" rel="noopener" title="pctdyx@qq.com" class="mail">pctdyx@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                归档
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                标签
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                分类
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/runcode"  >
+                <i class="icon icon-lg icon-code"></i>
+                在线写代码
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-globe"></i>
+                关于
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="http://wpa.qq.com/msgrd?v=3&uin=995632825&site=qq&menu=yes" target="_blank" rel="noopener"  >
+                <i class="icon icon-lg icon-qq"></i>
+                qq
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/codeband-top" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">unicode、utf-8、utf-16之间的联系</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">unicode、utf-8、utf-16之间的联系</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-11-25T14:16:19.000Z" itemprop="datePublished" class="page-time">
+  2019-11-25
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/">中间件/软件设计</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Unicode"><span class="post-toc-number">1.</span> <span class="post-toc-text">Unicode</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#utf-8"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">utf-8</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#utf-16"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">utf-16</span></a></li></ol></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#java中的unicode"><span class="post-toc-number">2.</span> <span class="post-toc-text">java中的unicode</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#char"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">char</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#String"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">String</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-unicode知识"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">unicode、utf-8、utf-16之间的联系</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-11-25 22:16:19" datetime="2019-11-25T14:16:19.000Z"  itemprop="datePublished">2019-11-25</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/">中间件/软件设计</a></li></ul>
+
+
+
+            
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p><strong>致谢：</strong></p>
+<p>本文参考网页：<br><a href="https://blog.csdn.net/vcj1009784814/article/details/93477957" target="_blank" rel="noopener">Unicode字符集以及UTF-8，UTF-16编码的总结 - vcj1009784814的博客 - CSDN博客</a></p>
+<h1 id="Unicode"><a href="#Unicode" class="headerlink" title="Unicode"></a>Unicode</h1><p>unicode的码点从U+0000到U+10FFFF，即共有<code>2^20+2^16-1=1114111</code>个码点。<br>通常来说，常见字符可以用2个字节（16位）来表示。但还有很多其他表意字符、辅助字符需要表示。</p>
+<p>Unicode将所有码点分成了17个代码级别，又称<strong>平面</strong>。</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://www.ibm.com/developerworks/cn/java/unicode-programming-language/image001.jpg" alt="img" title="unicode的17个平面">
+                </div>
+                <div class="image-caption">unicode的17个平面</div>
+            </figure>
+
+<p>其中第一个平面称为基本的多语言级别（basic multilingual plane, <code>BMP</code>），其他的统称为<strong>辅助平面</strong></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://www.ibm.com/developerworks/cn/java/unicode-programming-language/image001.jpg" alt="img" title="unicode的平面划分">
+                </div>
+                <div class="image-caption">unicode的平面划分</div>
+            </figure>
+
+<h2 id="utf-8"><a href="#utf-8" class="headerlink" title="utf-8"></a>utf-8</h2><p>由于unicode会有1个字节-4个字节不等，如果定长存储每个字符都需要占用四个字节，十分浪费空间，utf-8是一种变长存储方式，具体编码方式如下：</p>
+<ul>
+<li>第一个字节提示了这个unicode编码由几个字节组成<ol>
+<li>首字节以0开头，表示单字节编码</li>
+<li>首字节以110开头，表示双字节编码，后续字节以10开头</li>
+<li>首字节以1110开头，表示三字节编码，后续字节以10开头</li>
+<li>首字节以11110开头，表示四字节编码，后续字节以10开头</li>
+</ol>
+</li>
+<li>有效位对应的字节数<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://www.ibm.com/developerworks/cn/java/unicode-programming-language/image003.jpg" alt="img" title="有效位对应的字节数，最后两行应该是用不上的">
+                </div>
+                <div class="image-caption">有效位对应的字节数，最后两行应该是用不上的</div>
+            </figure>
+
+</li>
+</ul>
+<h2 id="utf-16"><a href="#utf-16" class="headerlink" title="utf-16"></a>utf-16</h2><p>UTF-16源于UCS-2，UCS-2将字符码点直接映射为字符编码，中间无特别的编码算法。</p>
+<p>UCS-2编码方式固定2字节编码，只覆盖了BMP的码点，对于SMP的码点，2字节的16位二进制数是不足以表示的。</p>
+<p>而UTF-16扩展了原来的UCS-2编码，解决了辅助平面码点的字符无法表示的问题：</p>
+<ul>
+<li>BMP中的有效码点，用固定2字节16位来为其编码，数值等于对应的码点，同UCS-2</li>
+<li>辅助平面中的有效码点，使用<strong>代理对</strong>进行编码。<strong>在BMP中，有一个范围的码点是未定义的</strong>，被称为<strong>代理区</strong>，其码点范围是<code>0xD800~0xDFFF</code>，共2<sup>11</sup>个码点，代理区又被分为<strong>高代理码点</strong>和<strong>低代理码点</strong>，其中高代理码点范围是<code>0xD800~0XDBFF</code>，低代理码点范围是<code>0xDC00~0XDFFF</code>，高代理码点和低代理码点结合在一起，就表示一个辅助平面中的字符。由于辅助平面中的字符共有2<sup>20</sup>个（<code>0x10000~0x10FFFF</code>），高代理码点和低代理码点皆有2<sup>10</sup>个取值，两者结合，恰好有2<sup>20</sup>种不同的组合。</li>
+</ul>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://s2.ax1x.com/2019/11/26/MzutAS.jpg" alt="img" title="">
+                </div>
+                <div class="image-caption">img</div>
+            </figure>
+
+<p>也就是说，UTF-16可以表示完unicode中的字符，BMP中的字符需要一个字节，其他的需要两个字节。</p>
+<h1 id="java中的unicode"><a href="#java中的unicode" class="headerlink" title="java中的unicode"></a>java中的unicode</h1><p>这里使用到一个工具：<br><a href="https://www.qqxiuzi.cn/bianma/Unicode-UTF.php" target="_blank" rel="noopener">Unicode编码转换，UTF编码转换（UTF-8、UTF-16、UTF-32）</a></p>
+<h2 id="char"><a href="#char" class="headerlink" title="char"></a>char</h2><p>java中的char是定长以16位（两个字节存储的），并且内部编码为utf-16。<br>也就是说，一个char只能表示BMP中的字符，若要表示一个辅助平面内的字符，需要两个char。</p>
+<p>来看一个BMP中的字符：”我”</p>
+<blockquote>
+<p>Unicode编码：<code>U+6211</code><br>UTF8编码：<code>E68891</code><br>UTF16BE编码：<code>FEFF6211</code><br>UTF16LE编码：<code>FFFE1162</code></p>
+</blockquote>
+<p>UTF16BE、UTF16LE分别指的是机器中的大端表示和小端表示，前面的<code>FEFF</code>或<code>FFFE</code>编译器会帮我们过滤掉，我们这里只看大端表示。</p>
+<p>对于UTF-8表示，先将<code>6211</code>转换为二进制编码<code>110 001000 010001</code>，是15个有效位。对照utf-8编码表，可知需要用三个字节(<code>1110xxxx 10xxxxxxxx 10xxxxxxxx</code>)来表示，将有效位填入，得utf-8编码：<code>11100110 10001000 10010001</code>，转换为16进制，就是<code>E68891</code>。</p>
+<p>对于UTF-16表示，6211是可以有两个字节表示完的，所以UTF-16的编码就是<code>6621</code>。</p>
+<p>验证：</p>
+<iframe src="https://run.codetool.top/?id=1" frameBorder="0" height="400" style="width:100%;border:1px solid #ccc;"></iframe>
+
+<h2 id="String"><a href="#String" class="headerlink" title="String"></a>String</h2><p>对于辅助平面内的字符，一个char可不够用了，需要由两个char来存储，或是用String来表示。</p>
+<p>来看一个emoji字符：”👉”</p>
+<blockquote>
+<p>Unicode编码：<code>U+1F449</code><br>UTF8编码：<code>F09F9189</code><br>UTF16BE编码：<code>FEFFD83DDC49</code><br>UTF16LE编码：<code>FFFE3DD849DC</code>  </p>
+</blockquote>
+<p>对于UTF-8表示，先将<code>1F449</code>转换为二进制编码<code>11111 010001 001001</code>，是17个有效位。对照utf-8编码表，可知需要用四个字节(<code>11110xxx 10xxxxxxxx 10xxxxxxxx 10xxxxxx</code>)来表示，将有效位填入，得utf-8编码：<code>11110000 10011111 10010001 10001001</code>，转换为16进制，就是<code>F09F9189</code>。</p>
+<p>对于UTF-16表示，需要用到代理对进行编码：首先用<code>1F449</code>-<code>10000</code>得到<code>F449</code>，将<code>F449</code>转换为20位二进制<code>0000111101 0001001001</code>，高10位转成十六进制得<code>3D</code>,加上<code>D800</code>得<code>D83D</code>，后10位转成十六进制得<code>49</code>，加上<code>DC00</code>得<code>DC49</code>,所以它的utf-16编码为<code>D83D DC49</code>。</p>
+<p>验证：  </p>
+<iframe src="https://run.codetool.top/?id=3" frameBorder="0" height="400" style="width:100%;border:1px solid #ccc;"></iframe>
+
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2019-11-26T07:40:01.612Z" itemprop="dateUpdated">2019-11-26 15:40:01</time>
+</span><br>
+
+
+        
+        感谢您的阅读
+        
+    </div>
+    
+    <footer>
+        <a href="https://www.codetool.top">
+            <img src="/img/avatar.png" alt="Rhett Peng">
+            Rhett Peng
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/unicode/" rel="tag">unicode</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" rel="tag">基础知识</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/&title=《unicode、utf-8、utf-16之间的联系》 — 代码段小站&pic=https://www.codetool.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/&title=《unicode、utf-8、utf-16之间的联系》 — 代码段小站&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《unicode、utf-8、utf-16之间的联系》 — 代码段小站&url=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/&via=https://www.codetool.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/article/AVL%E6%A0%91-%E8%87%AA%E5%B9%B3%E8%A1%A1%E7%9A%84%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">AVL树-自平衡的二叉搜索树</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <!-- Valine Comments -->
+    <div class="comments vcomment" id="comments"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
+    <!-- Valine Comments script -->
+    <script>
+        var GUEST_INFO = ['nick','mail','link'];
+        var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+          return GUEST_INFO.indexOf(item) > -1
+        });
+        new Valine({
+            el: '#comments',
+            notify: 'true' == 'true',
+            verify: 'true' == 'true',
+            appId: "VUmN3m0ICuwaL4jNPnxBRln8-gzGzoHsz",
+            appKey: "QH8FVT32jvi4qBllLg6Cf0dU",
+            avatar: "mm",
+            placeholder: "说点什么吧",
+            guest_info: guest_info.length == 0 ? GUEST_INFO : guest_info,
+            pageSize: "10"
+        })
+    </script>
+    <!-- Valine Comments end -->
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>Rhett Peng &copy; 2018 - 2019</span>
+            <span>
+                
+                <a href="http://www.miitbeian.gov.cn/" target="_blank">赣ICP备19011928号</a><br>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/&title=《unicode、utf-8、utf-16之间的联系》 — 代码段小站&pic=https://www.codetool.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/&title=《unicode、utf-8、utf-16之间的联系》 — 代码段小站&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《unicode、utf-8、utf-16之间的联系》 — 代码段小站&url=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/&via=https://www.codetool.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACHklEQVR42u3aO3LDMAwFQN//0kqbmUykB0AuSK4qT6xIXBYw8fl84uv6c91/+/ue5L/u73ztwsDAWJZx3V69e3rI3nsxMDDOYfwXwe7vuX/Ow4uD5yRrw8DAwKg+Og/NCRgDAwNjzkhCajUQY2BgYEyS2KQodhWvJOC+nItjYGAsyJgklt/+/JX+BgYGxlKMXnCsJp+T5kG0KgwMjK0Z1aJ/74CYYHpNCAwMjHMY+WBE8sq8DVANxy8cFjEwMDZlTF5QLatNtgMDA+M0xqTROG9YfqUBgIGBsSwjT0qriWgOKIxTJNMiGBgY2zGqxa/qIa86cNbbXAwMjL0Zk5T13VL+JEnGwMDYm5GExd7IxTwZzteGgYGxNyM/P/bCa5VafUI2eYGBgbEPo9donCeik03BwMA4gVE9ovVKcr0ktrk1GBgY2zGSQtt8VCKf+2geQDEwMLZmTBqT+RbMU9yIioGBsTWjmrjmqe+krJb8AJQHLzAwMJZlTFLWd0NwFfDQicXAwNiOkZfJJkG2OhaWJ7QYGBinMfLSWLW4Vm2ORsMWGBgYWzOu4pUUv3pLrFIxMDDOYfQeXY3oeRM0H91oYjAwMJZlTBLR6vjFJOA+bCsGBsYBjHysobe43mhFofSGgYGB0Wpz9toDo2kRDAwMjDj5TJZVDdAvHw0xMDAWZCRJbP5tfgSs/h0DA+NMRjXk9RbXG8t4tzmKgYGxIOMHHAdqmN1X7jIAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
