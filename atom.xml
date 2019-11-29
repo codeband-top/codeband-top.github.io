@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.codetool.top/"/>
-  <updated>2019-11-28T14:09:23.897Z</updated>
+  <updated>2019-11-29T15:09:41.931Z</updated>
   <id>https://www.codetool.top/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>tomcat整体架构</title>
+    <link href="https://www.codetool.top/article/tomcat%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84/"/>
+    <id>https://www.codetool.top/article/tomcat整体架构/</id>
+    <published>2019-11-29T15:04:49.000Z</published>
+    <updated>2019-11-29T15:09:41.931Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="tomcat整体架构"><a href="#tomcat整体架构" class="headerlink" title="tomcat整体架构"></a>tomcat整体架构</h1><p>Tomcat Http服务器不直接调用业务类，而是将请求转发给Servlet容器，Servlet加载业务类处理请求。</p><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://s2.ax1x.com/2019/11/28/QFym4I.png" alt="img" title="Servlet容器工作流程">                </div>                <div class="image-caption">Servlet容器工作流程</div>            </figure><p>核心组件：</p><ul><li>连接器 Connector</li><li>容器 Container</li></ul><p>连接器处理Socket请求，容器进行servlet的调用。</p><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://s2.ax1x.com/2019/11/29/QkgeFH.png" alt="img" title="Tomcat整体架构">                </div>                <div class="image-caption">Tomcat整体架构</div>            </figure><h1 id="连接器-Coyote"><a href="#连接器-Coyote" class="headerlink" title="连接器 Coyote"></a>连接器 Coyote</h1><p>Coyote 是 Tomcat的连接器框架的名称，是Tomcat服务器提供的供客户端访问的外部接口。客户端通过Coyote与服务器建立连接、发送请求并接受相应。</p><p>Coyote封装了底层的网络通信（Socket请求及相应处理），为Catalina容器提供了统一的接口，使<strong>Catalina容器与具体的请求协议及IO操作方式完全解耦</strong>。Coyote将Socket输入转换封装为Request对象，交由Catalina容器进行处理，处理请求完成后，Catalina通过Coyote提供的Response对象将结果写入输出流。</p><p>Coyote作为独立的模块，只负责<strong>具体协议和IO的相关操作</strong>，与Servlet规范实现没有直接关系，因此即使是Request和Response对象也并未实现Servlet规范对应的接口，而是<strong>在Catalina中将他们进一步封装为ServletRequest和ServletResponse</strong>。</p><h2 id="IO模型与协议"><a href="#IO模型与协议" class="headerlink" title="IO模型与协议"></a>IO模型与协议</h2><p>在Coyote中，Tomcat支持的多种I/O模型和应用层协议：</p><p>Tomcat支持的IO模型（8.0前默认是BIO，自8.5/9.0版本起，tomcat移除了对BIO的支持）：</p><table><thead><tr><th>IO模型</th><th>描述</th></tr></thead><tbody><tr><td>NIO</td><td>非阻塞I/O，采用Java NIO类库实现。</td></tr><tr><td>NIO2</td><td>异步I/O，采用JDK7最新的NIO2类库实现。</td></tr><tr><td>APR</td><td>采用Apache可移植运行库实现，是C/C++编写的本地库。如果选择该方案，需要单独安装APR库。</td></tr></tbody></table><p>Tomcat支持的应用层协议：</p><table><thead><tr><th>应用层协议</th><th>描述</th></tr></thead><tbody><tr><td>HTTP/1.1</td><td>这是大部分Web应用采用的访问协议。</td></tr><tr><td>AJP</td><td>用于和Web服务器集成（如Apache），以实现对静态资源的优化以及集群部署，当前支持AJP/1.3。</td></tr><tr><td>HTTP/2</td><td>HTTP2.0大幅度地提升了Web性能。下一代HTTP协议，自8.5以及9.0版本之后支持。</td></tr></tbody></table><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://s2.ax1x.com/2019/11/29/QkW5n0.png" alt="" title="">                </div>                <div class="image-caption"></div>            </figure><h2 id="连接器组件"><a href="#连接器组件" class="headerlink" title="连接器组件"></a>连接器组件</h2><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://s2.ax1x.com/2019/11/29/QkfEjI.png" alt="" title="">                </div>                <div class="image-caption"></div>            </figure><ul><li>EndPoint</li><li>Processor</li><li>Adapter</li><li>ProtocolHandler</li></ul><h3 id="EndPoint"><a href="#EndPoint" class="headerlink" title="EndPoint"></a>EndPoint</h3><ol><li>Coyote通信端点，即通信监听的接口，是具体Socket接收和发送处理器，是对传输层的抽象，因此EndPoint用来实现TCP/IP协议的。</li><li>Tomcat并没有EndPoint接口，而是提供了一个抽象类AbstractEndPoint，里面定义了两个内部类：Acceptor和SocketProcessor。Acceptor用于监听Socket连接请求。SocketProcessor用于处理接收到的Socket请求，它实现Runnable接口，在Run方法里调用协议处理组件Processor进行处理。为了提高处理能力，SocketProcessor被提交到线程池来执行。而这个线程池叫执行器（Executor）。</li></ol><h3 id="Processor"><a href="#Processor" class="headerlink" title="Processor"></a>Processor</h3><p>Coyote协议处理接口，如果说EndPoint是用来实现TCP/IP协议的，那么Processor用来实现HTTP协议，Processor接收来自EndPoint的Socket，读取字节流解析成Tomcat Recuest和Response对象,并通过Adapter将其提交到容器处理, Processor是对应用层协议的抽象。</p><h3 id="ProtocolHandler"><a href="#ProtocolHandler" class="headerlink" title="ProtocolHandler"></a>ProtocolHandler</h3><p>Coyote 协议接口，通过Endpoint和Processor，实现针对具体协议的处理能力。Tomcat按照协议和I/O提供了6个实现类：AjpNioProtocol，AjpAprProtocol,AjpNio2Protocol,Http11NioProtocol,Http11Nio2Protocol,Http11AprProtocol。我们在配置tomcat/conf/server.xml时，至少要指定具体的ProtocolHandler,当然也可以指定协议名称，如：HTTP/1.1，如果安装了APR，那么将使用Http11AprProtocol，否则使用 Http11NioProtocol。</p><h3 id="Adapter"><a href="#Adapter" class="headerlink" title="Adapter"></a>Adapter</h3><p>由于协议不同，客户端发过来的请求信息也不尽相同，Tomcat定义了自己的Request类来“存放”这些请求信息。ProtocolHandler接口负责解析请求并生成Tomcat Request类。但是这个Request对象不是标准的ServletRequest，也就意味着，不能用Tomcat Request作为参数来调用容器。Tomcat设计者的解决方案是引入CoyoteAdapter，这是适配器模式的经典运用，连接器调用CoyoteAdapter的Sevice方法，传入的是Tomcat Request对象，CoyoteAdapter负责将Tomcat Request转成ServletRequest，再调用容器的Service方法。</p><h1 id="容器-Catalina"><a href="#容器-Catalina" class="headerlink" title="容器 Catalina"></a>容器 Catalina</h1><h2 id="Tomcat的模块分层图"><a href="#Tomcat的模块分层图" class="headerlink" title="Tomcat的模块分层图"></a>Tomcat的模块分层图</h2><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://s2.ax1x.com/2019/11/29/QANBtK.png" alt="" title="">                </div>                <div class="image-caption"></div>            </figure><p>和org.apache包下的包一一对应</p><h2 id="容器组件"><a href="#容器组件" class="headerlink" title="容器组件"></a>容器组件</h2><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://s2.ax1x.com/2019/11/29/QAUp3F.png" alt="" title="">                </div>                <div class="image-caption"></div>            </figure><p>如上图所示，Catalina负责管理Server，而Server表示着整个服务器。Server下面有多个服务Service，每个服务都包含着多个连接器组件Connector（Coyote 实现）和一个容器组件Container。在Tomcat启动的时候，会初始化一个Catalina的实例。</p><p>Catalina各个组件的职责：</p><table><thead><tr><th>组件</th><th>职责</th></tr></thead><tbody><tr><td>Catalina</td><td>负责解析Tomcat的配置文件，以此来创建服务器Server组件，并根据命令来对其进行管理。</td></tr><tr><td>Server</td><td>服务器表示整个Catalina Servlet容器以及其它组件，负责组装并启动Servlet引擎，Tomcat连接器。Server通过实现Lifecycle接口，提供了一种优雅的启动和关闭整个系统的方式。</td></tr><tr><td>Service</td><td>服务是Server内部的组件，一个Server包含多个Service。它将若干个Connector组件绑定到一个Container(Engine)上</td></tr><tr><td>Connector</td><td>连接器，处理与客户端的通信，它负责接收客户请求，然后转给相关的容器处理，最后向客户返回响应结果</td></tr><tr><td>Container</td><td>容器，负责处理用户的servlet请求，并返回对象给web用户的模块。</td></tr></tbody></table><h2 id="Container结构"><a href="#Container结构" class="headerlink" title="Container结构"></a>Container结构</h2><p>Tomcat设计了4种容器，分别是Engine、Host、Context和Wrapper。这4种容器不是平行关系，而是父子关系，Tomcat通过一种分层的架构，使得Servlet容器具有很好的灵活性。</p><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://s2.ax1x.com/2019/11/29/QABy1f.png" alt="" title="">                </div>                <div class="image-caption"></div>            </figure><table><thead><tr><th>组件</th><th>职责</th></tr></thead><tbody><tr><td>Engine</td><td>表示整个Catalina的Servlet引擎,用来管理多个虚拟站点，一个Service最多只能有一个Engine ,但是一个引擎可包含多个Host。</td></tr><tr><td>Host</td><td>代表一个虚拟主机， 或者说一个站点，可以给Tomcat配置多个虚拟主机地址，而一个虚拟主机下可包含多个Context。</td></tr><tr><td>Context</td><td>表示一个web应用程序，一个Web应用可包含多个Wrapper。</td></tr><tr><td>Wrapper</td><td>表示一个Servlet，Wrapper作为容器中的最底层。 不能包含子容器。</td></tr></tbody></table><p>我们也可以再通过Tomcat的server.xml配置文件来加深对Tomcat容器的理解。Tomcat采用了组件化的设计，它的构成组件都是可配置的，其中最外层的是Server，其他组件按照一定的格式要求配置在这个顶层容器中。</p><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Server</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Service</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Connector</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Connector</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Engine</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">Host</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">Context</span>&gt;</span><span class="tag">&lt;/<span class="name">Context</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">Host</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">Engine</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Service</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Server</span>&gt;</span></span><br></pre></td></tr></table></figure><p>那么，Tomcat是怎么管理这些容器的呢？你会发现这些容器具有父子关系，形成一个树形结构，你可能马上就想到了设计模式中的组合模式。没错，Tomcat就是用组合模式来管理这些容器的。具体实现方法是，所有容器组件都实现了Container接口，因此组合模式可以使得用户对单容器对象和组合容器对象的使用具有一致性。这里单容器对象指的是最底层的Wrapper，组合容器对象指的是上面的Context、Host或者Engine。</p><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://s2.ax1x.com/2019/11/29/QAfb7V.png" alt="" title="">                </div>                <div class="image-caption"></div>            </figure><p>LifeCycle接口用于统一管理各组件的生命周期。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;tomcat整体架构&quot;&gt;&lt;a href=&quot;#tomcat整体架构&quot; class=&quot;headerlink&quot; title=&quot;tomcat整体架构&quot;&gt;&lt;/a&gt;tomcat整体架构&lt;/h1&gt;&lt;p&gt;Tomcat Http服务器不直接调用业务类，而是将请求转发给Servlet
+      
+    
+    </summary>
+    
+    
+      <category term="中间件/软件设计" scheme="https://www.codetool.top/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/"/>
+    
+    
+      <category term="tomcat" scheme="https://www.codetool.top/tags/tomcat/"/>
+    
+      <category term="javaEE" scheme="https://www.codetool.top/tags/javaEE/"/>
+    
+  </entry>
   
   <entry>
     <title>使用maven方式编译tomcat源码</title>
@@ -577,37 +605,6 @@
       
       
         &lt;h1 id=&quot;原题&quot;&gt;&lt;a href=&quot;#原题&quot; class=&quot;headerlink&quot; title=&quot;原题&quot;&gt;&lt;/a&gt;原题&lt;/h1&gt;&lt;p&gt;给定一个数组 &lt;em&gt;nums&lt;/em&gt; 和一个值 &lt;em&gt;val*，你需要原地移除所有数值等于 *val&lt;/em&gt; 的元素，返回移除后数组
-      
-    
-    </summary>
-    
-    
-      <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
-    
-    
-      <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
-    
-      <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
-    
-      <category term="双指针技巧" scheme="https://www.codetool.top/tags/%E5%8F%8C%E6%8C%87%E9%92%88%E6%8A%80%E5%B7%A7/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>leetcode167-两数之和II-输入有序数组</title>
-    <link href="https://www.codetool.top/article/leetcode167-%E4%B8%A4%E6%95%B0%E4%B9%8B%E5%92%8CII-%E8%BE%93%E5%85%A5%E6%9C%89%E5%BA%8F%E6%95%B0%E7%BB%84/"/>
-    <id>https://www.codetool.top/article/leetcode167-两数之和II-输入有序数组/</id>
-    <published>2019-11-20T09:44:33.000Z</published>
-    <updated>2019-11-20T10:16:12.932Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="原题"><a href="#原题" class="headerlink" title="原题"></a>原题</h1><p>给定一个已按照 <strong><em>升序排列</em></strong> 的有序数组，找到两个数使得它们相加之和等于目标数。</p><p>函数应该返回这两个下标值<code>index1</code>和<code>index2</code>，其中<code>index1</code>必须小于<code>index2</code>。</p><p><strong>说明:</strong></p><ul><li>返回的下标值（index1 和 index2）不是从零开始的。</li><li>你可以假设每个输入只对应唯一的答案，而且你不可以重复使用相同的元素。</li></ul><p><strong>示例:</strong></p><blockquote><p><strong>输入:</strong>  numbers = [2, 7, 11, 15], target = 9<br><strong>输出:</strong>   [1,2]<br><strong>解释</strong> 2 与 7 之和等于目标数 9 。因此 index1 = 1, index2 = 2 。</p></blockquote><h1 id="解法"><a href="#解法" class="headerlink" title="解法"></a>解法</h1><h2 id="思想"><a href="#思想" class="headerlink" title="思想"></a>思想</h2><p>因为给的数组是有序的，可以使用双指针逼近目标数。</p><h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] twoSum(<span class="keyword">int</span>[] numbers, <span class="keyword">int</span> target) &#123;</span><br><span class="line"><span class="keyword">int</span>[] index = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">2</span>];</span><br><span class="line"><span class="keyword">int</span> index1 = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">int</span> index2 = numbers.length - <span class="number">1</span>;</span><br><span class="line"><span class="keyword">while</span> (index1 &lt; index2) &#123;</span><br><span class="line"><span class="keyword">if</span> (numbers[index1] + numbers[index2] &gt; target)</span><br><span class="line">index2--;</span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> (numbers[index1] + numbers[index2] &lt; target)</span><br><span class="line">index1++;</span><br><span class="line"><span class="comment">//找到了</span></span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">index[<span class="number">0</span>] = index1 + <span class="number">1</span>;</span><br><span class="line">index[<span class="number">1</span>] = index2 + <span class="number">1</span>;</span><br><span class="line"><span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> index;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h1 id=&quot;原题&quot;&gt;&lt;a href=&quot;#原题&quot; class=&quot;headerlink&quot; title=&quot;原题&quot;&gt;&lt;/a&gt;原题&lt;/h1&gt;&lt;p&gt;给定一个已按照 &lt;strong&gt;&lt;em&gt;升序排列&lt;/em&gt;&lt;/strong&gt; 的有序数组，找到两个数使得它们相加之和等于目标数。&lt;/p&gt;
-&lt;
       
     
     </summary>
