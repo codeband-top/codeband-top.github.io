@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+<!-- Baidu Tongji -->
+<script>var _hmt = _hmt || []</script>
+<script async src="//hm.baidu.com/hm.js?539edd59c73e53f3fe82e2a7f4eb7dc4"></script>
+<!-- End Baidu Tongji -->
+
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>Java自动装箱缓存机制 | 代码段小站 | CodeBand CodeTool - 个人计算机类练手小博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="java,包装类">
+    <meta name="description" content="尝试运行这段代码：   相似的两段代码，得到的结果却完全不相同。 首先要知道在java中==比较的是对象的引用，从直觉出发，无论是integer1、integer2还是integer3、integer4都是不同的引用，结果都应该是不等的。 造成这个结果的原因是JDK1.5引入的包装类自动装箱时的缓存机制 自动装箱的概念： 12Integer a = 10; &#x2F;&#x2F;自动装箱，相当于下面这句Intege">
+<meta name="keywords" content="java,包装类">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java自动装箱缓存机制">
+<meta property="og:url" content="https:&#x2F;&#x2F;www.codetool.top&#x2F;article&#x2F;Java%E8%87%AA%E5%8A%A8%E8%A3%85%E7%AE%B1%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6&#x2F;index.html">
+<meta property="og:site_name" content="代码段小站">
+<meta property="og:description" content="尝试运行这段代码：   相似的两段代码，得到的结果却完全不相同。 首先要知道在java中==比较的是对象的引用，从直觉出发，无论是integer1、integer2还是integer3、integer4都是不同的引用，结果都应该是不等的。 造成这个结果的原因是JDK1.5引入的包装类自动装箱时的缓存机制 自动装箱的概念： 12Integer a = 10; &#x2F;&#x2F;自动装箱，相当于下面这句Intege">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-05T14:53:26.478Z">
+<meta name="twitter:card" content="summary">
+    
+        <link rel="alternate" type="application/atom+xml" title="代码段小站" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu"  >
+  <div class="inner flex-row-vertical">
+    <a class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Rhett Peng</h5>
+          <a href="mailto:pctdyx@qq.com" target="_blank" rel="noopener" title="pctdyx@qq.com" class="mail">pctdyx@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                归档
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                标签
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                分类
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/runcode"  >
+                <i class="icon icon-lg icon-code"></i>
+                在线写代码
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-globe"></i>
+                关于
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="http://wpa.qq.com/msgrd?v=3&uin=995632825&site=qq&menu=yes" target="_blank" rel="noopener"  >
+                <i class="icon icon-lg icon-qq"></i>
+                qq
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/codeband-top" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Java自动装箱缓存机制</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">Java自动装箱缓存机制</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-12-05T14:27:24.000Z" itemprop="datePublished" class="page-time">
+  2019-12-05
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/">编程语言</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+<article id="post-Java自动装箱缓存机制"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Java自动装箱缓存机制</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-12-05 22:27:24" datetime="2019-12-05T14:27:24.000Z"  itemprop="datePublished">2019-12-05</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/">编程语言</a></li></ul>
+
+
+
+            
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>尝试运行这段代码：</p>
+<iframe src="https://run.codetool.top/?id=21" frameBorder="0" height="500" style="width:100%;border:1px solid #ccc;"></iframe>
+
+<p>相似的两段代码，得到的结果却完全不相同。</p>
+<p>首先要知道在java中<code>==</code>比较的是对象的引用，从直觉出发，无论是integer1、integer2还是integer3、integer4都是不同的引用，结果都应该是不等的。</p>
+<p>造成这个结果的原因是JDK1.5引入的包装类自动装箱时的<strong>缓存机制</strong></p>
+<p><strong>自动装箱的概念：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Integer a = <span class="number">10</span>; <span class="comment">//自动装箱，相当于下面这句</span></span><br><span class="line">Integer a = Integer.valueOf(<span class="number">10</span>);</span><br></pre></td></tr></table></figure>
+
+<p>而看看Integer中<code>valueOf(int)</code>的源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Integer <span class="title">valueOf</span><span class="params">(<span class="keyword">int</span> i)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (i &gt;= IntegerCache.low &amp;&amp; i &lt;= IntegerCache.high)</span><br><span class="line">        <span class="keyword">return</span> IntegerCache.cache[i + (-IntegerCache.low)];<span class="comment">//这句就是我们要研究的重点</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Integer(i);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>IntegerCache</strong>是一个缓存类，它的内部有一个静态的<code>Integer cache[]</code>数组，在这个类第一次被加载时，会用整数值在-128~127之间的Integer实例对象填充这个数组，如果调用valueOf方法的时候参数值在这个范围内，就会从IntegerCache中的cache数组去取出这样一个共享对象。</p>
+<p>这样就能回答一开始的程序integer1、integer2为什么相等了，因为他们都是从cache数组中取出来的同一个引用。</p>
+<p>而300这个数是不在-128~127之间的，缓存数组中不存在这样的对象，最终是调用了构造方法创建了两个不同的Integer对象。</p>
+<hr>
+<p><strong>拓展：IntegerCache的静态代码块</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">    <span class="comment">// 缓存的数据范围可以由用户设置，这里从配置中获取了用户设置的缓存范围</span></span><br><span class="line">    <span class="keyword">int</span> h = <span class="number">127</span>;</span><br><span class="line">    String integerCacheHighPropValue =</span><br><span class="line">        sun.misc.VM.getSavedProperty(<span class="string">"java.lang.Integer.IntegerCache.high"</span>);</span><br><span class="line">    <span class="keyword">if</span> (integerCacheHighPropValue != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">int</span> i = parseInt(integerCacheHighPropValue);</span><br><span class="line">            i = Math.max(i, <span class="number">127</span>);</span><br><span class="line">            <span class="comment">// Maximum array size is Integer.MAX_VALUE</span></span><br><span class="line">            h = Math.min(i, Integer.MAX_VALUE - (-low) -<span class="number">1</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span>( NumberFormatException nfe) &#123;</span><br><span class="line">            <span class="comment">// If the property cannot be parsed into an int, ignore it.</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    high = h;</span><br><span class="line"></span><br><span class="line">    cache = <span class="keyword">new</span> Integer[(high - low) + <span class="number">1</span>];</span><br><span class="line">    <span class="keyword">int</span> j = low;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 这里循环构造Integer对象填充cache数组</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> k = <span class="number">0</span>; k &lt; cache.length; k++)</span><br><span class="line">        cache[k] = <span class="keyword">new</span> Integer(j++);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// range [-128, 127] must be interned (JLS7 5.1.7)</span></span><br><span class="line">    <span class="keyword">assert</span> IntegerCache.high &gt;= <span class="number">127</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2019-12-05T14:53:26.478Z" itemprop="dateUpdated">2019-12-05 22:53:26</time>
+</span><br>
+
+
+        
+        感谢您的阅读
+        
+    </div>
+    
+    <footer>
+        <a href="https://www.codetool.top">
+            <img src="/img/avatar.png" alt="Rhett Peng">
+            Rhett Peng
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/" rel="tag">java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%8C%85%E8%A3%85%E7%B1%BB/" rel="tag">包装类</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://www.codetool.top/article/Java%E8%87%AA%E5%8A%A8%E8%A3%85%E7%AE%B1%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6/&title=《Java自动装箱缓存机制》 — 代码段小站&pic=https://www.codetool.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://www.codetool.top/article/Java%E8%87%AA%E5%8A%A8%E8%A3%85%E7%AE%B1%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6/&title=《Java自动装箱缓存机制》 — 代码段小站&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://www.codetool.top/article/Java%E8%87%AA%E5%8A%A8%E8%A3%85%E7%AE%B1%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Java自动装箱缓存机制》 — 代码段小站&url=https://www.codetool.top/article/Java%E8%87%AA%E5%8A%A8%E8%A3%85%E7%AE%B1%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6/&via=https://www.codetool.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://www.codetool.top/article/Java%E8%87%AA%E5%8A%A8%E8%A3%85%E7%AE%B1%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/article/winform%E6%88%AA%E5%9B%BEOCR%E5%B0%8F%E9%A1%B9%E7%9B%AE%E7%9A%84%E5%BC%80%E5%8F%91-%E7%9E%A5%E8%A7%81%E7%9F%A5%E8%AF%86%E7%9A%84%E8%9E%8D%E4%BC%9A%E8%B4%AF%E9%80%9A/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">WinForm截图OCR小项目的开发-瞥见知识的融会贯通</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <!-- Valine Comments -->
+    <div class="comments vcomment" id="comments"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
+    <!-- Valine Comments script -->
+    <script>
+        var GUEST_INFO = ['nick','mail','link'];
+        var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+          return GUEST_INFO.indexOf(item) > -1
+        });
+        new Valine({
+            el: '#comments',
+            notify: 'true' == 'true',
+            verify: 'true' == 'true',
+            appId: "VUmN3m0ICuwaL4jNPnxBRln8-gzGzoHsz",
+            appKey: "QH8FVT32jvi4qBllLg6Cf0dU",
+            avatar: "mm",
+            placeholder: "说点什么吧",
+            guest_info: guest_info.length == 0 ? GUEST_INFO : guest_info,
+            pageSize: "10"
+        })
+    </script>
+    <!-- Valine Comments end -->
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>Rhett Peng &copy; 2018 - 2019</span>
+            <span>
+                
+                <a href="http://www.miitbeian.gov.cn/" target="_blank">赣ICP备19011928号</a><br>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://www.codetool.top/article/Java%E8%87%AA%E5%8A%A8%E8%A3%85%E7%AE%B1%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6/&title=《Java自动装箱缓存机制》 — 代码段小站&pic=https://www.codetool.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://www.codetool.top/article/Java%E8%87%AA%E5%8A%A8%E8%A3%85%E7%AE%B1%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6/&title=《Java自动装箱缓存机制》 — 代码段小站&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://www.codetool.top/article/Java%E8%87%AA%E5%8A%A8%E8%A3%85%E7%AE%B1%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Java自动装箱缓存机制》 — 代码段小站&url=https://www.codetool.top/article/Java%E8%87%AA%E5%8A%A8%E8%A3%85%E7%AE%B1%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6/&via=https://www.codetool.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://www.codetool.top/article/Java%E8%87%AA%E5%8A%A8%E8%A3%85%E7%AE%B1%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQ4AAAEOCAAAAABd2qZ5AAAD4ElEQVR42u3dS47bQAwFQN//0hMgqwCB7fdI2smitBrIcktdWtD8APN4xMfP7+P1mb/P//xxPPv02ZXJ3Z8dr5/w4MCBAwcOHMFWk6XzM985n+Mme8SBAwcOHLccecjMyZJwu38xbYB/s3ccOHDgwPFFjjakvUbJ75Jg5SvjwIEDB47/jaO9Jin/taXJTzw/Dhw4cOC45ZiV3pJkLA+cyZWz0PuRWikOHDhw4JhHuiKd+z///uB8Bw4cOHDgKANVUnrbpHxJwGuLgLMDBw4cOHDsOdpUqi3MXf0K+EQJsshoceDAgQPH4sq2LHg1prBHmRX73nwLBw4cOHCUHJuxtpwvfyf54N2mmfT0mXHgwIEDx5qjHRfIk7fZwMRs83kiGt0RBw4cOHAsODbDank43Led8nVmaScOHDhw4LjimKVtebq1H1nYDEbMAjYOHDhw4NhwzIp0bSlws7FNSla/ABw4cODAccSRt/zb65NNbo48nYtYceDAgQPHUUxsxxeuRtzydldevpw1uoa5LA4cOHDgeBkr86+128hbU7Mhifz1JOvgwIEDB449R1JWm201D4ftJpM7DtfBgQMHDhwLjrwxc5VizcJwm7y1oxI4cODAgeOKI0+i9gMKj/LYt7sOVsaBAwcOHIuV21GAWdHwthw5Wz96tThw4MCBY8TRjqDNEqek8Jdwt+G8fn4cOHDgwLHmyJv9+5vtA2FSlGwD+Zv5Dhw4cODAUXLkS89KbLOBtpZ7duDAgQMHjk9wtG2kzfmD8YL4Z0GbtuHAgQMHjluOtgA3S6VyjnyTOW4RtnHgwIEDxxHHbEBhVo8c1i/LtHBYlMSBAwcOHB/gaFtNm5TsE0yrlhgOHDhw4FhwbMJVEsw2JcJNSpm3rx7tpThw4MCBI+j7z1pBbTzflALbZCz/Vl0cxIEDBw4cC462zJcUFmfDcHki1wZ7HDhw4MDxfY48uOajDzPuWZmyTflw4MCBA8eeY5Y+JSEtSeTa8Lynj54fBw4cOHCMOJIg18agPA0rZi7WJcXoUxw4cODAccSxHzuYleFm6d8tel1NxIEDBw4c7+Pmx/95c3v9LKmbpX84cODAgeOW46c8Wqa8OLhpd7WDdHVxEAcOHDhwzPtERfDLHy7pfb3ezBX91Y8GHDhw4MDx+tM8uM6KgLeFvHzbw73gwIEDB44jjk27aP+tvPC3WaeoleLAgQMHjq9wtAMQ+5G4zRBDOzyHAwcOHDj+FUebbiXDB22Lq12haDvhwIEDB44jjk1xcLaxNv3Ln6Glx4EDBw4ctxy3Aw2bpK5NvdrS4QEEDhw4cOB4tdov/dxoOj9NI2cAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
