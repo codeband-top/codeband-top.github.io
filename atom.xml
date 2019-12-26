@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.codetool.top/"/>
-  <updated>2019-12-26T06:00:10.691Z</updated>
+  <updated>2019-12-26T14:50:46.975Z</updated>
   <id>https://www.codetool.top/</id>
   
   <author>
@@ -15,6 +15,69 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>leetcode3-无重复字符的最长子串</title>
+    <link href="https://www.codetool.top/article/leetcode3-%E6%97%A0%E9%87%8D%E5%A4%8D%E5%AD%97%E7%AC%A6%E7%9A%84%E6%9C%80%E9%95%BF%E5%AD%90%E4%B8%B2/"/>
+    <id>https://www.codetool.top/article/leetcode3-无重复字符的最长子串/</id>
+    <published>2019-12-26T14:18:21.000Z</published>
+    <updated>2019-12-26T14:50:46.975Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="原题"><a href="#原题" class="headerlink" title="原题"></a>原题</h1><p>给定一个字符串，请你找出其中不含有重复字符的 <strong>最长子串</strong> 的长度。</p><p><strong>示例1：</strong></p><blockquote><p><strong>输入：</strong> “abcabcbb”<br><strong>输出：</strong> 3<br><strong>解释：</strong> 因为无重复字符的最长子串是 “abc”，所以其长度为 3。</p></blockquote><p><strong>示例2：</strong></p><blockquote><p><strong>输入：</strong> “bbbbb”<br><strong>输出：</strong> 1<br><strong>解释：</strong> 因为无重复字符的最长子串是 “b”，所以其长度为 1。</p></blockquote><p><strong>示例3：</strong></p><blockquote><p><strong>输入：</strong> “pwwkew”<br><strong>输出：</strong> 3<br><strong>解释：</strong> 因为无重复字符的最长子串是 “wke”，所以其长度为 3。<br>     请注意，你的答案必须是 子串 的长度，”pwke” 是一个子序列，不是子串。</p></blockquote><h1 id="解法"><a href="#解法" class="headerlink" title="解法"></a>解法</h1><h2 id="思想"><a href="#思想" class="headerlink" title="思想"></a>思想</h2><p>滑动窗口，将出现的字符和下标在哈希表中对应起来。</p><p>该问题的关键是获取所有不重复字符子串的长度，比较出最大的长度，我们用last记录当前计算的子串的第一个字符位置。</p><p>那么不重复字符子串的长度的计算方法就是：</p><p>假设从last开始都是不重复字符，如果遇到一个在哈希集中出现过的字符并且是last或last之后的，如下图的d，则此时的不重复字符子串<code>adv</code>的长度为<code>3-0=3</code>（后面的d不计入长度）。然后将last移到v上（第一个d后面的那个元素），便可继续进行操作。</p><p>这样依次进行无重复字符子串的长度计算，当最后遍历到最后一个字符c的时候，都和last以及last之后出现的字符无重复，那么此时<code>vdfc</code>的长度是<code>5-2+1=4</code>（因为c是计入子串的）</p><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://api.codetool.top/img/15773707565495.png" alt="" title="">                </div>                <div class="image-caption"></div>            </figure><p>那么假设最后一个字符是v，当最后遍历到最后一个字符v的时候，和当前子串中的v重复了(<code>vdfv</code>)，那么和之前计算子串长度的方法一样是<code>5-2=3</code>（最后一个v不计入长度）</p><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://api.codetool.top/img/15773708371431.png" alt="" title="">                </div>                <div class="image-caption"></div>            </figure><h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">lengthOfLongestSubstring</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">        Map&lt;Character,Integer&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">        <span class="keyword">int</span> max = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">int</span> last = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">char</span>[] chars = s.toCharArray();</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>;i&lt;chars.length;i++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(map.containsKey(chars[i])&amp;&amp;map.get(chars[i])&gt;=last)&#123;</span><br><span class="line">                <span class="keyword">if</span>(i-last&gt;=max) max = i-last;</span><br><span class="line">                last = map.get(chars[i]) + <span class="number">1</span>;</span><br><span class="line">            &#125;<span class="keyword">else</span> <span class="keyword">if</span>(i == chars.length-<span class="number">1</span>&amp;&amp;i-last+<span class="number">1</span>&gt;=max)&#123;</span><br><span class="line">                max = i-last+<span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            map.put(chars[i],i);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> max;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;原题&quot;&gt;&lt;a href=&quot;#原题&quot; class=&quot;headerlink&quot; title=&quot;原题&quot;&gt;&lt;/a&gt;原题&lt;/h1&gt;&lt;p&gt;给定一个字符串，请你找出其中不含有重复字符的 &lt;strong&gt;最长子串&lt;/strong&gt; 的长度。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;示例1：&lt;
+      
+    
+    </summary>
+    
+    
+      <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
+    
+    
+      <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
+    
+      <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
+    
+      <category term="双指针技巧" scheme="https://www.codetool.top/tags/%E5%8F%8C%E6%8C%87%E9%92%88%E6%8A%80%E5%B7%A7/"/>
+    
+      <category term="哈希表" scheme="https://www.codetool.top/tags/%E5%93%88%E5%B8%8C%E8%A1%A8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>leetcode771-宝石与石头</title>
+    <link href="https://www.codetool.top/article/leetcode771-%E5%AE%9D%E7%9F%B3%E4%B8%8E%E7%9F%B3%E5%A4%B4/"/>
+    <id>https://www.codetool.top/article/leetcode771-宝石与石头/</id>
+    <published>2019-12-26T14:13:37.000Z</published>
+    <updated>2019-12-26T14:17:31.552Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="原题"><a href="#原题" class="headerlink" title="原题"></a>原题</h1><p>给定字符串<code>J</code> 代表石头中宝石的类型，和字符串 <code>S</code>代表你拥有的石头。 <code>S</code> 中每个字符代表了一种你拥有的石头的类型，你想知道你拥有的石头中有多少是宝石。</p><p><code>J</code> 中的字母不重复，<code>J</code> 和 <code>S</code>中的所有字符都是字母。字母区分大小写，因此<code>&quot;a&quot;</code>和<code>&quot;A&quot;</code>是不同类型的石头。</p><p><strong>示例 1:</strong></p><blockquote><p><strong>输入：</strong>  J = “aA”, S = “aAAbbbb”<br><strong>输出：</strong> 3</p></blockquote><p><strong>示例 2:</strong></p><blockquote><p><strong>输入：</strong> J = “z”, S = “ZZ”<br><strong>输出：</strong> 0</p></blockquote><p><strong>注意：</strong></p><ul><li><code>S</code> 和 <code>J</code> 最多含有50个字母。</li><li><code>J</code> 中的字符不重复。</li></ul><h1 id="解法"><a href="#解法" class="headerlink" title="解法"></a>解法</h1><h2 id="思想"><a href="#思想" class="headerlink" title="思想"></a>思想</h2><p>将代表宝石的字符存放在哈希集中。</p><h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">numJewelsInStones</span><span class="params">(String J, String S)</span> </span>&#123;</span><br><span class="line">        Set&lt;Character&gt; set = <span class="keyword">new</span> HashSet&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">char</span> i:J.toCharArray())&#123;</span><br><span class="line">            set.add(i);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">char</span> i:S.toCharArray())&#123;</span><br><span class="line">            <span class="keyword">if</span>(set.contains(i)) count++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> count;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;原题&quot;&gt;&lt;a href=&quot;#原题&quot; class=&quot;headerlink&quot; title=&quot;原题&quot;&gt;&lt;/a&gt;原题&lt;/h1&gt;&lt;p&gt;给定字符串&lt;code&gt;J&lt;/code&gt; 代表石头中宝石的类型，和字符串 &lt;code&gt;S&lt;/code&gt;代表你拥有的石头。 &lt;code&gt;S&lt;/c
+      
+    
+    </summary>
+    
+    
+      <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
+    
+    
+      <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
+    
+      <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
+    
+      <category term="哈希集" scheme="https://www.codetool.top/tags/%E5%93%88%E5%B8%8C%E9%9B%86/"/>
+    
+  </entry>
   
   <entry>
     <title>leetcode652-寻找重复的子树</title>
@@ -388,36 +451,6 @@
   </entry>
   
   <entry>
-    <title>leetcode136-只出现一次的数字</title>
-    <link href="https://www.codetool.top/article/leetcode136-%E5%8F%AA%E5%87%BA%E7%8E%B0%E4%B8%80%E6%AC%A1%E7%9A%84%E6%95%B0%E5%AD%97/"/>
-    <id>https://www.codetool.top/article/leetcode136-只出现一次的数字/</id>
-    <published>2019-12-18T10:05:23.000Z</published>
-    <updated>2019-12-19T08:16:46.721Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="原题"><a href="#原题" class="headerlink" title="原题"></a>原题</h1><p>给定一个<strong>非空</strong>整数数组，除了某个元素只出现一次以外，其余每个元素均出现两次。找出那个只出现了一次的元素。</p><p><strong>说明：</strong></p><p>你的算法应该具有线性时间复杂度。 你可以不使用额外空间来实现吗？</p><blockquote><p><strong>输入：</strong> [2,2,1]<br><strong>输出：</strong> 1</p></blockquote><p><strong>示例2：</strong></p><blockquote><p><strong>输入：</strong> [4,1,2,1,2]<br><strong>输出：</strong> 4</p></blockquote><h1 id="解法"><a href="#解法" class="headerlink" title="解法"></a>解法</h1><h2 id="思想"><a href="#思想" class="headerlink" title="思想"></a>思想</h2><ol><li>哈希集<br>第一次出现加到集合中，第二次出现从集合中删除，最后集合中剩下的那个元素即为只出现一次的数。</li><li>亦或<ul><li>两个相同的数亦或的结果为0</li><li>0和n亦或的结果为n<br>=&gt; 则所有数亦或的结果即为只出现一次的数。</li></ul></li></ol><h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><ol><li>哈希集</li></ol><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">singleNumber</span><span class="params">(<span class="keyword">int</span>[] nums)</span> </span>&#123;</span><br><span class="line">        Set&lt;Integer&gt; set = <span class="keyword">new</span> HashSet&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i:nums)&#123;</span><br><span class="line">            <span class="keyword">if</span>(set.contains(i)) set.remove(i);</span><br><span class="line">            <span class="keyword">else</span> set.add(i);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i:nums)&#123;</span><br><span class="line">            <span class="keyword">if</span>(set.contains(i)) <span class="keyword">return</span> i;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><ol start="2"><li>亦或</li></ol><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">singleNumber</span><span class="params">(<span class="keyword">int</span>[] nums)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> i,res=<span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;nums.length;i++)&#123;</span><br><span class="line">            res=res^nums[i];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h1 id=&quot;原题&quot;&gt;&lt;a href=&quot;#原题&quot; class=&quot;headerlink&quot; title=&quot;原题&quot;&gt;&lt;/a&gt;原题&lt;/h1&gt;&lt;p&gt;给定一个&lt;strong&gt;非空&lt;/strong&gt;整数数组，除了某个元素只出现一次以外，其余每个元素均出现两次。找出那个只出现了一次的元素。&lt;/
-      
-    
-    </summary>
-    
-    
-      <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
-    
-    
-      <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
-    
-      <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
-    
-      <category term="哈希集" scheme="https://www.codetool.top/tags/%E5%93%88%E5%B8%8C%E9%9B%86/"/>
-    
-  </entry>
-  
-  <entry>
     <title>leetcode705-设计哈希集合</title>
     <link href="https://www.codetool.top/article/leetcode705-%E8%AE%BE%E8%AE%A1%E5%93%88%E5%B8%8C%E9%9B%86%E5%90%88/"/>
     <id>https://www.codetool.top/article/leetcode705-设计哈希集合/</id>
@@ -445,37 +478,6 @@
       <category term="数据结构" scheme="https://www.codetool.top/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
     
       <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
-    
-      <category term="哈希集" scheme="https://www.codetool.top/tags/%E5%93%88%E5%B8%8C%E9%9B%86/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>leetcode217-存在重复元素</title>
-    <link href="https://www.codetool.top/article/leetcode217-%E5%AD%98%E5%9C%A8%E9%87%8D%E5%A4%8D%E5%85%83%E7%B4%A0/"/>
-    <id>https://www.codetool.top/article/leetcode217-存在重复元素/</id>
-    <published>2019-12-18T10:05:23.000Z</published>
-    <updated>2019-12-19T08:18:01.741Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="原题"><a href="#原题" class="headerlink" title="原题"></a>原题</h1><p>给定一个整数数组，判断是否存在重复元素。</p><p>如果任何值在数组中出现至少两次，函数返回 true。如果数组中每个元素都不相同，则返回 false。</p><p><strong>示例1：</strong></p><blockquote><p><strong>输入：</strong> [1,2,3,1]<br><strong>输出：</strong> true</p></blockquote><p><strong>示例2：</strong></p><blockquote><p><strong>输入：</strong> [1,2,3,4]<br><strong>输出：</strong> false</p></blockquote><p><strong>示例3：</strong></p><blockquote><p><strong>输入：</strong> [1,1,1,3,3,4,3,2,4,2]<br><strong>输出：</strong> true</p></blockquote><h1 id="解法"><a href="#解法" class="headerlink" title="解法"></a>解法</h1><h2 id="思想"><a href="#思想" class="headerlink" title="思想"></a>思想</h2><p>哈希集</p><h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">containsDuplicate</span><span class="params">(<span class="keyword">int</span>[] nums)</span> </span>&#123;</span><br><span class="line">        Set&lt;Integer&gt; set = <span class="keyword">new</span> HashSet&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i:nums)&#123;</span><br><span class="line">            <span class="keyword">if</span>(set.contains(i)) <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            set.add(i);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h1 id=&quot;原题&quot;&gt;&lt;a href=&quot;#原题&quot; class=&quot;headerlink&quot; title=&quot;原题&quot;&gt;&lt;/a&gt;原题&lt;/h1&gt;&lt;p&gt;给定一个整数数组，判断是否存在重复元素。&lt;/p&gt;
-&lt;p&gt;如果任何值在数组中出现至少两次，函数返回 true。如果数组中每个元素都不相同，则返
-      
-    
-    </summary>
-    
-    
-      <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
-    
-    
-      <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
-    
-      <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
     
       <category term="哈希集" scheme="https://www.codetool.top/tags/%E5%93%88%E5%B8%8C%E9%9B%86/"/>
     
@@ -515,20 +517,19 @@
   </entry>
   
   <entry>
-    <title>leetcode21-合并两个有序链表</title>
-    <link href="https://www.codetool.top/article/leetcode21-%E5%90%88%E5%B9%B6%E4%B8%A4%E4%B8%AA%E6%9C%89%E5%BA%8F%E9%93%BE%E8%A1%A8/"/>
-    <id>https://www.codetool.top/article/leetcode21-合并两个有序链表/</id>
-    <published>2019-12-17T10:05:23.000Z</published>
-    <updated>2019-12-19T08:18:01.741Z</updated>
+    <title>leetcode136-只出现一次的数字</title>
+    <link href="https://www.codetool.top/article/leetcode136-%E5%8F%AA%E5%87%BA%E7%8E%B0%E4%B8%80%E6%AC%A1%E7%9A%84%E6%95%B0%E5%AD%97/"/>
+    <id>https://www.codetool.top/article/leetcode136-只出现一次的数字/</id>
+    <published>2019-12-18T10:05:23.000Z</published>
+    <updated>2019-12-19T08:16:46.721Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="原题"><a href="#原题" class="headerlink" title="原题"></a>原题</h1><p>将两个有序链表合并为一个新的有序链表并返回。新链表是通过拼接给定的两个链表的所有节点组成的。</p><p><strong>示例：</strong></p><blockquote><p><strong>输入：</strong> 1-&gt;2-&gt;4, 1-&gt;3-&gt;4<br><strong>输出：</strong> 1-&gt;1-&gt;2-&gt;3-&gt;4-&gt;4</p></blockquote><h1 id="解法"><a href="#解法" class="headerlink" title="解法"></a>解法</h1><h2 id="思想"><a href="#思想" class="headerlink" title="思想"></a>思想</h2><p>比较两个有序链表的头指针指向的值，取其中值更小的连接到一个哨兵节点后面，然后该链表的头指针向后移一格，继续和另一个节点的头指针比较。</p><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://api.codetool.top/img/15767434737117.png" alt="" title="">                </div>                <div class="image-caption"></div>            </figure><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://api.codetool.top/img/15767434773529.png" alt="" title="">                </div>                <div class="image-caption"></div>            </figure><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://api.codetool.top/img/15767434804819.png" alt="" title="">                </div>                <div class="image-caption"></div>            </figure><h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Definition for singly-linked list.</span></span><br><span class="line"><span class="comment"> * public class ListNode &#123;</span></span><br><span class="line"><span class="comment"> *     int val;</span></span><br><span class="line"><span class="comment"> *     ListNode next;</span></span><br><span class="line"><span class="comment"> *     ListNode(int x) &#123; val = x; &#125;</span></span><br><span class="line"><span class="comment"> * &#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> ListNode <span class="title">mergeTwoLists</span><span class="params">(ListNode l1, ListNode l2)</span> </span>&#123;</span><br><span class="line">        ListNode virtualHead = <span class="keyword">new</span> ListNode(<span class="number">0</span>);</span><br><span class="line">        ListNode cur = virtualHead;</span><br><span class="line">        ListNode min;</span><br><span class="line">        <span class="keyword">while</span>(l1!=<span class="keyword">null</span> || l2 != <span class="keyword">null</span>)&#123;</span><br><span class="line">            min = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">if</span>(l1==<span class="keyword">null</span> || l2!=<span class="keyword">null</span>&amp;&amp;l1.val&gt;=l2.val)&#123;</span><br><span class="line">                min = l2;</span><br><span class="line">                l2 = l2.next;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span>(l2==<span class="keyword">null</span> || l1!=<span class="keyword">null</span>&amp;&amp;l2.val&gt;l1.val)&#123;</span><br><span class="line">                min = l1;</span><br><span class="line">                l1 = l1.next;</span><br><span class="line">            &#125; </span><br><span class="line">            cur.next = min;</span><br><span class="line">            cur = cur.next;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> virtualHead.next;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+    <content type="html"><![CDATA[<h1 id="原题"><a href="#原题" class="headerlink" title="原题"></a>原题</h1><p>给定一个<strong>非空</strong>整数数组，除了某个元素只出现一次以外，其余每个元素均出现两次。找出那个只出现了一次的元素。</p><p><strong>说明：</strong></p><p>你的算法应该具有线性时间复杂度。 你可以不使用额外空间来实现吗？</p><blockquote><p><strong>输入：</strong> [2,2,1]<br><strong>输出：</strong> 1</p></blockquote><p><strong>示例2：</strong></p><blockquote><p><strong>输入：</strong> [4,1,2,1,2]<br><strong>输出：</strong> 4</p></blockquote><h1 id="解法"><a href="#解法" class="headerlink" title="解法"></a>解法</h1><h2 id="思想"><a href="#思想" class="headerlink" title="思想"></a>思想</h2><ol><li>哈希集<br>第一次出现加到集合中，第二次出现从集合中删除，最后集合中剩下的那个元素即为只出现一次的数。</li><li>亦或<ul><li>两个相同的数亦或的结果为0</li><li>0和n亦或的结果为n<br>=&gt; 则所有数亦或的结果即为只出现一次的数。</li></ul></li></ol><h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><ol><li>哈希集</li></ol><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">singleNumber</span><span class="params">(<span class="keyword">int</span>[] nums)</span> </span>&#123;</span><br><span class="line">        Set&lt;Integer&gt; set = <span class="keyword">new</span> HashSet&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i:nums)&#123;</span><br><span class="line">            <span class="keyword">if</span>(set.contains(i)) set.remove(i);</span><br><span class="line">            <span class="keyword">else</span> set.add(i);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i:nums)&#123;</span><br><span class="line">            <span class="keyword">if</span>(set.contains(i)) <span class="keyword">return</span> i;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><ol start="2"><li>亦或</li></ol><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">singleNumber</span><span class="params">(<span class="keyword">int</span>[] nums)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> i,res=<span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;nums.length;i++)&#123;</span><br><span class="line">            res=res^nums[i];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;h1 id=&quot;原题&quot;&gt;&lt;a href=&quot;#原题&quot; class=&quot;headerlink&quot; title=&quot;原题&quot;&gt;&lt;/a&gt;原题&lt;/h1&gt;&lt;p&gt;将两个有序链表合并为一个新的有序链表并返回。新链表是通过拼接给定的两个链表的所有节点组成的。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;示例：&lt;/str
+        &lt;h1 id=&quot;原题&quot;&gt;&lt;a href=&quot;#原题&quot; class=&quot;headerlink&quot; title=&quot;原题&quot;&gt;&lt;/a&gt;原题&lt;/h1&gt;&lt;p&gt;给定一个&lt;strong&gt;非空&lt;/strong&gt;整数数组，除了某个元素只出现一次以外，其余每个元素均出现两次。找出那个只出现了一次的元素。&lt;/
       
     
     </summary>
@@ -541,7 +542,38 @@
     
       <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
     
-      <category term="链表" scheme="https://www.codetool.top/tags/%E9%93%BE%E8%A1%A8/"/>
+      <category term="哈希集" scheme="https://www.codetool.top/tags/%E5%93%88%E5%B8%8C%E9%9B%86/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>leetcode217-存在重复元素</title>
+    <link href="https://www.codetool.top/article/leetcode217-%E5%AD%98%E5%9C%A8%E9%87%8D%E5%A4%8D%E5%85%83%E7%B4%A0/"/>
+    <id>https://www.codetool.top/article/leetcode217-存在重复元素/</id>
+    <published>2019-12-18T10:05:23.000Z</published>
+    <updated>2019-12-19T08:18:01.741Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="原题"><a href="#原题" class="headerlink" title="原题"></a>原题</h1><p>给定一个整数数组，判断是否存在重复元素。</p><p>如果任何值在数组中出现至少两次，函数返回 true。如果数组中每个元素都不相同，则返回 false。</p><p><strong>示例1：</strong></p><blockquote><p><strong>输入：</strong> [1,2,3,1]<br><strong>输出：</strong> true</p></blockquote><p><strong>示例2：</strong></p><blockquote><p><strong>输入：</strong> [1,2,3,4]<br><strong>输出：</strong> false</p></blockquote><p><strong>示例3：</strong></p><blockquote><p><strong>输入：</strong> [1,1,1,3,3,4,3,2,4,2]<br><strong>输出：</strong> true</p></blockquote><h1 id="解法"><a href="#解法" class="headerlink" title="解法"></a>解法</h1><h2 id="思想"><a href="#思想" class="headerlink" title="思想"></a>思想</h2><p>哈希集</p><h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">containsDuplicate</span><span class="params">(<span class="keyword">int</span>[] nums)</span> </span>&#123;</span><br><span class="line">        Set&lt;Integer&gt; set = <span class="keyword">new</span> HashSet&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i:nums)&#123;</span><br><span class="line">            <span class="keyword">if</span>(set.contains(i)) <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            set.add(i);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;原题&quot;&gt;&lt;a href=&quot;#原题&quot; class=&quot;headerlink&quot; title=&quot;原题&quot;&gt;&lt;/a&gt;原题&lt;/h1&gt;&lt;p&gt;给定一个整数数组，判断是否存在重复元素。&lt;/p&gt;
+&lt;p&gt;如果任何值在数组中出现至少两次，函数返回 true。如果数组中每个元素都不相同，则返
+      
+    
+    </summary>
+    
+    
+      <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
+    
+    
+      <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
+    
+      <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
+    
+      <category term="哈希集" scheme="https://www.codetool.top/tags/%E5%93%88%E5%B8%8C%E9%9B%86/"/>
     
   </entry>
   
@@ -577,20 +609,19 @@
   </entry>
   
   <entry>
-    <title>leetcode138-复制带随机指针的链表</title>
-    <link href="https://www.codetool.top/article/leetcode138-%E5%A4%8D%E5%88%B6%E5%B8%A6%E9%9A%8F%E6%9C%BA%E6%8C%87%E9%92%88%E7%9A%84%E9%93%BE%E8%A1%A8/"/>
-    <id>https://www.codetool.top/article/leetcode138-复制带随机指针的链表/</id>
+    <title>leetcode2-两数相加</title>
+    <link href="https://www.codetool.top/article/leetcode2-%E4%B8%A4%E6%95%B0%E7%9B%B8%E5%8A%A0/"/>
+    <id>https://www.codetool.top/article/leetcode2-两数相加/</id>
     <published>2019-12-17T10:05:23.000Z</published>
-    <updated>2019-12-19T08:16:52.672Z</updated>
+    <updated>2019-12-19T08:17:52.628Z</updated>
     
-    <content type="html"><![CDATA[<p>这道题和<a href="https://www.codetool.top/article/leetcode133-克隆图/">leetcode133-克隆图</a>有异曲同工之妙。</p><h1 id="原题"><a href="#原题" class="headerlink" title="原题"></a>原题</h1><p>给定一个链表，每个节点包含一个额外增加的随机指针，该指针可以指向链表中的任何节点或空节点。</p><p>要求返回这个链表的深拷贝。</p><p><strong>示例：</strong></p><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://api.codetool.top/img/1576743411668.png" alt="" title="">                </div>                <div class="image-caption"></div>            </figure><blockquote><p><strong>输入:</strong><br>{“$id”:”1”,”next”:{“$id”:”2”,”next”:null,”random”:{“$ref”:”2”},”val”:2},”random”:{“$ref”:”2”},”val”:1}</p><p><strong>解释:</strong><br>节点 1 的值是 1，它的下一个指针和随机指针都指向节点 2 。<br>节点 2 的值是 2，它的下一个指针指向 null，随机指针指向它自己。</p></blockquote><p><strong>提示:</strong></p><ol><li>你必须返回<strong>给定头的拷贝</strong>作为对克隆列表的引用。</li></ol><h1 id="解法"><a href="#解法" class="headerlink" title="解法"></a>解法</h1><h2 id="思想"><a href="#思想" class="headerlink" title="思想"></a>思想</h2><p>和<a href="https://www.codetool.top/article/leetcode133-克隆图/">leetcode133-克隆图</a>的解法一致，甚至只需要改几行代码。</p><h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">// Definition for a Node.</span></span><br><span class="line"><span class="comment">class Node &#123;</span></span><br><span class="line"><span class="comment">    public int val;</span></span><br><span class="line"><span class="comment">    public Node next;</span></span><br><span class="line"><span class="comment">    public Node random;</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    public Node() &#123;&#125;</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    public Node(int _val,Node _next,Node _random) &#123;</span></span><br><span class="line"><span class="comment">        val = _val;</span></span><br><span class="line"><span class="comment">        next = _next;</span></span><br><span class="line"><span class="comment">        random = _random;</span></span><br><span class="line"><span class="comment">    &#125;</span></span><br><span class="line"><span class="comment">&#125;;</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="comment">//hashmap维持原链表和克隆链表之间节点的对应关系</span></span><br><span class="line">    Map&lt;Node, Node&gt; lookup;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Node <span class="title">copyRandomList</span><span class="params">(Node head)</span> </span>&#123;</span><br><span class="line">        lookup = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">        <span class="keyword">return</span> dfs(head);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> Node <span class="title">dfs</span><span class="params">(Node node)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (node == <span class="keyword">null</span>) <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        <span class="comment">//存在对应的克隆节点直接返回</span></span><br><span class="line">        <span class="keyword">if</span> (lookup.containsKey(node)) <span class="keyword">return</span> lookup.get(node);</span><br><span class="line">        <span class="comment">//先创建对应的克隆节点，next和random在递归返回的时候添加。</span></span><br><span class="line">        Node clone = <span class="keyword">new</span> Node(node.val,<span class="keyword">null</span>,<span class="keyword">null</span>);</span><br><span class="line">        lookup.put(node, clone);</span><br><span class="line">        clone.next = dfs(node.next);</span><br><span class="line">        clone.random = dfs(node.random);</span><br><span class="line">        <span class="keyword">return</span> clone;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+    <content type="html"><![CDATA[<h1 id="原题"><a href="#原题" class="headerlink" title="原题"></a>原题</h1><p>给出两个 <strong>非空</strong> 的链表用来表示两个非负的整数。其中，它们各自的位数是按照 <strong>逆序</strong> 的方式存储的，并且它们的每个节点只能存储 <strong>一位</strong> 数字。</p><p>如果，我们将这两个数相加起来，则会返回一个新的链表来表示它们的和。</p><p>您可以假设除了数字 0 之外，这两个数都不会以 0 开头。</p><p><strong>示例：</strong></p><blockquote><p><strong>输入：</strong> (2 -&gt; 4 -&gt; 3) + (5 -&gt; 6 -&gt; 4)<br><strong>输出：</strong> 7 -&gt; 0 -&gt; 8<br><strong>原因：</strong> 342 + 465 = 807</p></blockquote><h1 id="解法"><a href="#解法" class="headerlink" title="解法"></a>解法</h1><h2 id="思想"><a href="#思想" class="headerlink" title="思想"></a>思想</h2><p>模拟数学规则，将每一位对应的值和进位相加，将null一般化为0。</p><h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Definition for singly-linked list.</span></span><br><span class="line"><span class="comment"> * public class ListNode &#123;</span></span><br><span class="line"><span class="comment"> *     int val;</span></span><br><span class="line"><span class="comment"> *     ListNode next;</span></span><br><span class="line"><span class="comment"> *     ListNode(int x) &#123; val = x; &#125;</span></span><br><span class="line"><span class="comment"> * &#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> ListNode <span class="title">addTwoNumbers</span><span class="params">(ListNode l1, ListNode l2)</span> </span>&#123;</span><br><span class="line">        ListNode preHead = <span class="keyword">new</span> ListNode(<span class="number">0</span>);</span><br><span class="line">        <span class="keyword">int</span> val1,val2,sum = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">int</span> carry = <span class="number">0</span>;</span><br><span class="line">        ListNode cur = preHead;</span><br><span class="line">        <span class="keyword">while</span>(l1!=<span class="keyword">null</span> || l2!=<span class="keyword">null</span> || carry != <span class="number">0</span>)&#123;</span><br><span class="line">            val1 = l1==<span class="keyword">null</span>?<span class="number">0</span>:l1.val;</span><br><span class="line">            val2 = l2==<span class="keyword">null</span>?<span class="number">0</span>:l2.val;</span><br><span class="line">            sum = val1+val2+carry;</span><br><span class="line">            <span class="keyword">if</span>(sum&gt;=<span class="number">10</span>) &#123;</span><br><span class="line">                carry = <span class="number">1</span>;</span><br><span class="line">                sum -= <span class="number">10</span>;    </span><br><span class="line">            &#125;<span class="keyword">else</span> carry = <span class="number">0</span>;</span><br><span class="line">            cur.next = <span class="keyword">new</span> ListNode(sum);</span><br><span class="line">            cur = cur.next;</span><br><span class="line">            l1 = l1 == <span class="keyword">null</span>?<span class="keyword">null</span>:l1.next;</span><br><span class="line">            l2 = l2 == <span class="keyword">null</span>?<span class="keyword">null</span>:l2.next;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> preHead.next;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;p&gt;这道题和&lt;a href=&quot;https://www.codetool.top/article/leetcode133-克隆图/&quot;&gt;leetcode133-克隆图&lt;/a&gt;有异曲同工之妙。&lt;/p&gt;
-&lt;h1 id=&quot;原题&quot;&gt;&lt;a href=&quot;#原题&quot; class=&quot;headerli
+        &lt;h1 id=&quot;原题&quot;&gt;&lt;a href=&quot;#原题&quot; class=&quot;headerlink&quot; title=&quot;原题&quot;&gt;&lt;/a&gt;原题&lt;/h1&gt;&lt;p&gt;给出两个 &lt;strong&gt;非空&lt;/strong&gt; 的链表用来表示两个非负的整数。其中，它们各自的位数是按照 &lt;strong&gt;逆序&lt;/stro
       
     
     </summary>
@@ -602,40 +633,6 @@
       <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
     
       <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
-    
-      <category term="DFS" scheme="https://www.codetool.top/tags/DFS/"/>
-    
-      <category term="链表" scheme="https://www.codetool.top/tags/%E9%93%BE%E8%A1%A8/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>leetcode430-扁平化多级双向链表</title>
-    <link href="https://www.codetool.top/article/leetcode430-%E6%89%81%E5%B9%B3%E5%8C%96%E5%A4%9A%E7%BA%A7%E5%8F%8C%E5%90%91%E9%93%BE%E8%A1%A8/"/>
-    <id>https://www.codetool.top/article/leetcode430-扁平化多级双向链表/</id>
-    <published>2019-12-17T10:05:23.000Z</published>
-    <updated>2019-12-19T08:18:26.366Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="原题"><a href="#原题" class="headerlink" title="原题"></a>原题</h1><p>您将获得一个双向链表，除了下一个和前一个指针之外，它还有一个子指针，可能指向单独的双向链表。这些子列表可能有一个或多个自己的子项，依此类推，生成多级数据结构，如下面的示例所示。</p><p>扁平化列表，使所有结点出现在单级双链表中。您将获得列表第一级的头部。</p><p><strong>示例：</strong></p><blockquote><p><strong>输入：</strong><br>1—2—3—4—5—6–NULL<br>            |<br>            7—8—9—10–NULL<br>                |<br>                11–12–NULL</p><p><strong>输出：</strong><br>1-2-3-7-8-11-12-9-10-4-5-6-NULL</p></blockquote><p><strong>以上示例的说明:</strong></p><p>给出以下多级双向链表:</p><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://api.codetool.top/img/15767435022654.png" alt="" title="">                </div>                <div class="image-caption"></div>            </figure><p>我们应该返回如下所示的扁平双向链表:</p><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://api.codetool.top/img/15767435053166.png" alt="" title="">                </div>                <div class="image-caption"></div>            </figure><h1 id="解法"><a href="#解法" class="headerlink" title="解法"></a>解法</h1><h2 id="思想"><a href="#思想" class="headerlink" title="思想"></a>思想</h2><p>深度优先搜索，将每次最后一个搜索到节点记录下来，回溯的时候能继续附加在上一个节点之后。</p><h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">// Definition for a Node.</span></span><br><span class="line"><span class="comment">class Node &#123;</span></span><br><span class="line"><span class="comment">    public int val;</span></span><br><span class="line"><span class="comment">    public Node prev;</span></span><br><span class="line"><span class="comment">    public Node next;</span></span><br><span class="line"><span class="comment">    public Node child;</span></span><br><span class="line"><span class="comment">&#125;;</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    Node pre = <span class="keyword">null</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Node <span class="title">flatten</span><span class="params">(Node head)</span> </span>&#123;</span><br><span class="line">        dfs(head);</span><br><span class="line">        <span class="keyword">return</span> head;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">dfs</span><span class="params">(Node node)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(node==<span class="keyword">null</span>) <span class="keyword">return</span>;</span><br><span class="line">        Node child = node.child;</span><br><span class="line">        Node next = node.next;</span><br><span class="line">        node.child = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">if</span>(pre != <span class="keyword">null</span>)&#123;</span><br><span class="line">            pre.next = node;</span><br><span class="line">            node.prev = pre;</span><br><span class="line">        &#125;</span><br><span class="line">        pre = node;</span><br><span class="line">        dfs(child);</span><br><span class="line">        dfs(next);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h1 id=&quot;原题&quot;&gt;&lt;a href=&quot;#原题&quot; class=&quot;headerlink&quot; title=&quot;原题&quot;&gt;&lt;/a&gt;原题&lt;/h1&gt;&lt;p&gt;您将获得一个双向链表，除了下一个和前一个指针之外，它还有一个子指针，可能指向单独的双向链表。这些子列表可能有一个或多个自己的子项，依此类推，
-      
-    
-    </summary>
-    
-    
-      <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
-    
-    
-      <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
-    
-      <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
-    
-      <category term="DFS" scheme="https://www.codetool.top/tags/DFS/"/>
     
       <category term="链表" scheme="https://www.codetool.top/tags/%E9%93%BE%E8%A1%A8/"/>
     
