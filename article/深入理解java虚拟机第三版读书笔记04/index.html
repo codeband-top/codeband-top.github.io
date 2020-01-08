@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+<!-- Baidu Tongji -->
+<script>var _hmt = _hmt || []</script>
+<script async src="//hm.baidu.com/hm.js?539edd59c73e53f3fe82e2a7f4eb7dc4"></script>
+<!-- End Baidu Tongji -->
+
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>深入理解java虚拟机第三版读书笔记04 | 代码段小站 | CodeBand CodeTool - 个人计算机类练手小博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="java,jvm,深入理解java虚拟机">
+    <meta name="description" content="以下是第三章 垃圾收集器与内存分配策略的内容 概述程序计数器、虚拟机栈、本地方法栈是线程独有的，栈帧更是随方法结束而消亡，不需要垃圾回收。而堆和方法区则需要经过垃圾回收的设计 如何确定一个对象是否该回收了引用计数算法在对象中添加一个引用计数器，每当有一个地方引用它时，计数器值就加一；当引用失效时，计数器值就减一；任何时刻计数器为零的对象就是不可能再被使用的。 特点：虽然占用了一些额外的内存空间来进">
+<meta name="keywords" content="java,jvm,深入理解java虚拟机">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入理解java虚拟机第三版读书笔记04">
+<meta property="og:url" content="https:&#x2F;&#x2F;www.codetool.top&#x2F;article&#x2F;%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B004&#x2F;index.html">
+<meta property="og:site_name" content="代码段小站">
+<meta property="og:description" content="以下是第三章 垃圾收集器与内存分配策略的内容 概述程序计数器、虚拟机栈、本地方法栈是线程独有的，栈帧更是随方法结束而消亡，不需要垃圾回收。而堆和方法区则需要经过垃圾回收的设计 如何确定一个对象是否该回收了引用计数算法在对象中添加一个引用计数器，每当有一个地方引用它时，计数器值就加一；当引用失效时，计数器值就减一；任何时刻计数器为零的对象就是不可能再被使用的。 特点：虽然占用了一些额外的内存空间来进">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https:&#x2F;&#x2F;api.codetool.top&#x2F;img&#x2F;15784962041632.jpg">
+<meta property="og:updated_time" content="2020-01-08T15:51:26.709Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;api.codetool.top&#x2F;img&#x2F;15784962041632.jpg">
+    
+        <link rel="alternate" type="application/atom+xml" title="代码段小站" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=1.7.2">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu"  >
+  <div class="inner flex-row-vertical">
+    <a class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Rhett Peng</h5>
+          <a href="mailto:pctdyx@qq.com" target="_blank" rel="noopener" title="pctdyx@qq.com" class="mail">pctdyx@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                归档
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                标签
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                分类
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/runcode"  >
+                <i class="icon icon-lg icon-code"></i>
+                在线写代码
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-globe"></i>
+                关于
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="http://wpa.qq.com/msgrd?v=3&uin=995632825&site=qq&menu=yes" target="_blank" rel="noopener"  >
+                <i class="icon icon-lg icon-qq"></i>
+                qq
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/codeband-top" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">深入理解java虚拟机第三版读书笔记04</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">深入理解java虚拟机第三版读书笔记04</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-01-08T14:45:04.000Z" itemprop="datePublished" class="page-time">
+  2020-01-08
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/">编程语言</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>目录</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#概述"><span class="post-toc-number">1.</span> <span class="post-toc-text">概述</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#如何确定一个对象是否该回收了"><span class="post-toc-number">2.</span> <span class="post-toc-text">如何确定一个对象是否该回收了</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#引用计数算法"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">引用计数算法</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#可达性分析算法"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">可达性分析算法</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#再谈引用"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">再谈引用</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+
+
+
+<article id="post-深入理解java虚拟机第三版读书笔记04"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">深入理解java虚拟机第三版读书笔记04</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-01-08 22:45:04" datetime="2020-01-08T14:45:04.000Z"  itemprop="datePublished">2020-01-08</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/">编程语言</a></li></ul>
+
+
+
+            
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>以下是<strong>第三章 垃圾收集器与内存分配策略</strong>的内容</p>
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>程序计数器、虚拟机栈、本地方法栈是线程独有的，栈帧更是随方法结束而消亡，不需要垃圾回收。而堆和方法区则需要经过垃圾回收的设计</p>
+<h1 id="如何确定一个对象是否该回收了"><a href="#如何确定一个对象是否该回收了" class="headerlink" title="如何确定一个对象是否该回收了"></a>如何确定一个对象是否该回收了</h1><h2 id="引用计数算法"><a href="#引用计数算法" class="headerlink" title="引用计数算法"></a>引用计数算法</h2><p>在对象中添加一个引用计数器，每当有一个地方引用它时，计数器值就加一；当引用失效时，计数器值就减一；任何时刻计数器为零的对象就是不可能再被使用的。</p>
+<p>特点：虽然占用了一些额外的内存空间来进行计数，但它的原理简单，判定效率也很高，在大多数情况下它都是一个不错的算法。<br>但是，在Java 领域，至少主流的Java虚拟机里面都没有选用引用计数算法来管理内存，主要原因是，这个看似简单的算法有很多例外情况要考虑，必须要配合大量额外处理才能保证正确地工作，譬如单纯的引用计数就很难解决对象之间相互循环引用的问题。</p>
+<h2 id="可达性分析算法"><a href="#可达性分析算法" class="headerlink" title="可达性分析算法"></a>可达性分析算法</h2><p>这个算法的基本思路就是通过一系列称为“GC Roots”的根对象作为起始节点集，从这些节点开始，根据引用关系向下搜索，搜索过程所走过的路径称为“引用链”，如果某个对象到GC Roots间没有任何引用链相连，或者用图论的话来说就是从GC Roots到这个对象不可达时，则证明此对象是不可能再被使用的。</p>
+<p>如图所示，对象object 5、object 6、object 7虽然互有关联，但是它们到GC Roots是不可达的，因此它们将会被判定为可回收的对象。</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://api.codetool.top/img/15784962041632.jpg" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<p>固定可作为GC Roots的对象包括以下几种：</p>
+<ul>
+<li>在<strong>虚拟机栈（栈帧中的本地变量表）中引用的对象</strong>，譬如各个线程被调用的方法堆栈中使用到的参数、局部变量、临时变量等。</li>
+<li>在方法区中<strong>类静态属性引用的对象</strong>，譬如Java类的引用类型静态变量。</li>
+<li>在方法区中<strong>常量引用的对象</strong>，譬如字符串常量池（String Table）里的引用。 ·在本地方法栈中JNI（即通常所说的Native方法）引用的对象。</li>
+<li><strong>Java虚拟机内部的引用</strong>，如基本数据类型对应的Class对象，一些常驻的异常对象（比如<br>NullPointExcepiton、OutOfMemoryError）等，还有系统类加载器。</li>
+<li>所有<strong>被同步锁（synchronized关键字）持有的对象</strong>。</li>
+<li>反映Java虚拟机内部情况的JMXBean、JVMTI中注册的回调、本地代码缓存等。</li>
+</ul>
+<h2 id="再谈引用"><a href="#再谈引用" class="headerlink" title="再谈引用"></a>再谈引用</h2><p>需求：有一类对象，当内存空间还足够时，能保留在内存之中，如果内存空间在进行垃圾收集后仍然非常紧张，那就可以抛弃这些对象——很多系统的缓存功能都符合这样的应用场景。</p>
+<p>在JDK 1.2版之后，Java对引用的概念进行了扩充，将引用分为<strong>强引用、软引用、弱引用和虚引用</strong>4种，这4种引用强度依次逐渐减弱。</p>
+<ul>
+<li>强引用：传统的引用关系，无论任何情况下，只要强引用关系还存在，垃圾收集器就永远不会回收掉被引用的对象。</li>
+<li>软引用：还有用，但非必须的对象。在系统将要发生内存溢出异常前，会把这些对象列进回收范围之中进行第二次回收，在JDK 1.2版之后提供了<code>SoftReference</code>类来实现软引用。</li>
+<li>弱引用：非必须对象，但是它的强度比软引用更弱一些。当垃圾收集器开始工作，无论当前内存是否足够，都会回收掉<strong>只被弱引用关联的对象</strong>。在JDK 1.2版之后提供了<code>WeakReference</code>类来实现弱引用</li>
+<li>虚引用：一个对象是否有虚引用的存在，完全不会对其生存时间构成影响，也无法通过虚引用来取得一个对象实例。为一个对象设置虚引用关联的唯一目的只是为了能在这个对象被收集器回收时收到一个系统通知。在JDK 1.2版之后提供了<code>PhantomReference</code>类来实现虚引用。</li>
+</ul>
+<p>##　生存还是死亡？</p>
+<p>即使在可达性分析算法中判定为不可达的对象，也不是“非死不可”的，这时候它们暂时还处于“缓刑”阶段，<strong>要真正宣告一个对象死亡，至少要经历两次标记过程</strong>：如果对象在进行可达性分析后发现没有与GC Roots相连接的引用链，那它将会被第一次标记，随后进行一次筛选，筛选的条件是此对象是否有必要执行finalize()方法。<strong>假如对象没有覆盖finalize()方法，或者finalize()方法已经被虚拟机调用过</strong>，那么虚拟机将这两种情况都视为“没有必要执行”。</p>
+<p>如果这个对象被判定为确有必要执行finalize()方法，那么该对象将会被放置在一个名为F-Queue的队列之中，并在稍后由一条由虚拟机自动建立的、低调度优先级的Finalizer线程去执行它们的finalize()方法。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-01-08T15:51:26.709Z" itemprop="dateUpdated">2020-01-08 23:51:26</time>
+</span><br>
+
+
+        
+        感谢您的阅读
+        
+    </div>
+    
+    <footer>
+        <a href="https://www.codetool.top">
+            <img src="/img/avatar.png" alt="Rhett Peng">
+            Rhett Peng
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/" rel="tag">java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/jvm/" rel="tag">jvm</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">深入理解java虚拟机</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B004/&title=《深入理解java虚拟机第三版读书笔记04》 — 代码段小站&pic=https://www.codetool.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B004/&title=《深入理解java虚拟机第三版读书笔记04》 — 代码段小站&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B004/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《深入理解java虚拟机第三版读书笔记04》 — 代码段小站&url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B004/&via=https://www.codetool.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B004/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/article/leetcode287-%E5%AF%BB%E6%89%BE%E9%87%8D%E5%A4%8D%E6%95%B0/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">leetcode287-寻找重复数</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <!-- Valine Comments -->
+    <div class="comments vcomment" id="comments"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
+    <!-- Valine Comments script -->
+    <script>
+        var GUEST_INFO = ['nick','mail','link'];
+        var guest_info = 'nick,mail'.split(',').filter(function(item){
+          return GUEST_INFO.indexOf(item) > -1
+        });
+        new Valine({
+            el: '#comments',
+            notify: 'true' == 'true',
+            verify: 'true' == 'true',
+            appId: "VUmN3m0ICuwaL4jNPnxBRln8-gzGzoHsz",
+            appKey: "QH8FVT32jvi4qBllLg6Cf0dU",
+            avatar: "mm",
+            placeholder: "说点什么吧",
+            guest_info: guest_info.length == 0 ? GUEST_INFO : guest_info,
+            pageSize: "10"
+        })
+    </script>
+    <!-- Valine Comments end -->
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>Rhett Peng &copy; 2018 - 2020</span>
+            <span>
+                
+                <a href="http://beian.miit.gov.cn/" target="_blank">赣ICP备19011928号</a><br>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B004/&title=《深入理解java虚拟机第三版读书笔记04》 — 代码段小站&pic=https://www.codetool.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B004/&title=《深入理解java虚拟机第三版读书笔记04》 — 代码段小站&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B004/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《深入理解java虚拟机第三版读书笔记04》 — 代码段小站&url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B004/&via=https://www.codetool.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B004/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAT4AAAE+CAAAAAAxUyPsAAAFSklEQVR42u3dwWojSRAEUP//T+9eB0bSRES2hoV9OhlZ7q561aCsyAL//MSvf357/fp+8rfJO+1d3n1yu0Iyl/GFDx8+fPjwBUN/d/vPk9+G+Pm+yW8vi53f98UV8OHDhw8fvonvc8HRkiVlTVLQtMTtddor4MOHDx8+fP8dvpwjL4yKaUzjfOC++PDhw4cP39f4ki30paTYEvI8Prg3IfDhw4cPH76n+PJYPA/H2yXJp5QvXtue/2KvAx8+fPjw4SsLhf/Pzw+/8OHDhw8fvuDrOT9Y1m7v21ElhUh+rG2LRV5cDR8+fPjw4Zs08sjgqbb6fSueRAaXMqV4aPDhw4cPH76Jb4vXt215G/23I/xeuI8PHz58+PDd+bbI/hIKtCXI/Tha23S/HAXAhw8fPnz4PvPlF7ps0S/FwVY85U/NVk7hw4cPHz58LV8bXidDTCZ8365v6JeS6MVd8OHDhw8fvpIv+YL//E77+aSYaFsCbUxwbx78JLUPPnz48OHD9zEsaI9t1V/t0wGyZGJtWH8vVl7Uffjw4cOHD1+862+Lg3yrf48Skmm07fMcK7o+Pnz48OHDF/N9ryBoN/b58bW2+HiKDB8+fPjw4XuKr20k55PPX/mCteVFe4Ui0MeHDx8+fPhKvmRj34bsW3nRjuRSyiQBRLEY+PDhw4cP3/49/sC/TkxwtzAiL4DapnhSpkQzwocPHz58+JZOdMTUFh85btLSzqe0lU3bA4QPHz58+PB95ttC6jbWfyrQbwOL/PPjo4MPHz58+PAd+LYv76e25W3BsbXPW6A/jBkfPnz48OGb+Fq4LTjIA4Vtq38pUxL0t0fT8OHDhw8fvpgvGVxeUrRhwbaNH5vWZTRQfB4fPnz48OGLP39vG29kbZOg3eS37YRT3YcPHz58+PBNfNvGu91gt/fawoWkwMofi7efxIcPHz58+Ca+vBF+n1LbYm+b3Mlib/HHi/niw4cPHz58j/Llg8sDhYQviRvarf6lfY4PHz58+PA9y5dsrfNNeF76tLhtk+DyV9Hy4MOHDx8+fCXfvRxpy46f86s9EpcvXh5z4MOHDx8+fBe++4DySebt86hRHcTuebi/RRL48OHDhw/fs3x5KfPUEbdteZLrtI9C9Hl8+PDhw4cv5suHODaSS7h2wS6hwwPxBz58+PDhwzcl55cNdrtp346sPdXevrQf3o4HHz58+PDh2/fvj/0DwuR1jxW2sP5+lA0fPnz48OHb+NpbJqF2zhFtyA/hRf7sbOPEhw8fPnz4Wr57u3rb/G/v5wufXLOddXFMDR8+fPjw4Xtztbbx/FRjeztMdmmWb4HCHxYYHz58+PDhK/na2+TFRFLK5CVOi3IfyRZM4MOHDx8+fC1ZHs3nN94i/rax/WxMX8wUHz58+PDhi2e6bZWTQeTx+v1gWRtDbAvztr+BDx8+fPjwdTv6+jDWZZJ5YZQXScnSbiVL0R7Ahw8fPnz4gtklx7DyA1v3guPZK7Qhfv244MOHDx8+fBNf3qLOt9xt/P1UUz+541auvfgrfPjw4cOH78yXb9Hvrei8PbDBbSjFwTh8+PDhw4ev5LtcemuZX1rjl7LjsiTJA4QPHz58+PDlfFsrOpn2JYhPptoeemvjjKhUwocPHz58+Ca+5It8azbnkXoezX87kiiWEx8+fPjw4fsyX36DrY19mV47i8tv8eHDhw8fvr/Dd5nY1kPYgLZDAHU3Ax8+fPjw4Zv47mH9FgG0jfBL0J/Mro488OHDhw8fviUtL4qbz8O6fNe3jfC8Gd8217foBB8+fPjw4fvI9y+dQ+dPuSz8+gAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="/js/main.min.js?v=1.7.2"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="/js/search.min.js?v=1.7.2" async></script>
+
+
+
+
+
+
+
+
+
+
+    
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":200,"height":200,"hOffset":20,"vOffset":100},"mobile":{"show":false},"dialog":{"enable":true,"hitokoto":false},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div id="chat_input"><input id="question" type="text" placeholder="陪我聊聊天吧" onkeypress="return onKeyPress(event)"/></div>
+</html>
+
+<!--动态线条背景-->
+<script type="text/javascript"
+color="0,0,0" opacity='0.5' zIndex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+</script>
+
+<script>
+
+//聊天框按回车
+function onKeyPress(e){
+    var keyCode = null;
+    if(e.which)
+        keyCode = e.which;
+    else if(e.keyCode)
+        keyCode = e.keyCode;
+        
+    //如果按下回车
+    if(keyCode == 13) {
+        // 1.获取界面上的元素value
+        var question_box = document.getElementById('question')
+        var question = question_box.value
+        question_box.value = ""
+        question_box.setAttribute("disabled","disabled")
+        var api_key = "78c33a07808c7b9e1905c89c88b3be14"
+        var api_secret = "q707tevnk00f"
+
+        // 2.通过XHR发送一个POST请求
+        var xhr = new XMLHttpRequest()
+        xhr.open('GET','https://api.codetool.top/robottalk?question='+encodeURIComponent(question)+"&api_key="+api_key+"&api_secret="+api_secret)
+		xhr.send(null)
+		xhr.onload = function(){
+            question_box.removeAttribute('disabled');
+            var live2d_dialog = document.getElementsByClassName("live2d-widget-dialog")[0]
+            live2d_dialog.style.opacity=1
+            live2d_dialog.innerHTML = this.responseText
+            window.setTimeout(()=>{
+                live2d_dialog.style.opacity=0
+            }, 5000);
+		}
+    }
+
+}
+
+</script>
+
+<style> 
+#chat_input{
+    width: 200px;
+    height: 40px;
+    position: fixed;
+    right: 0px;
+    bottom: 80px;
+    right: 20px;
+} 
+
+#question{
+    border: none;
+    border-bottom: 1px #aaaaaa solid;
+    background-color: transparent;
+    padding: 5px;
+}
+
+@media screen and (max-width: 480px) {
+    #chat_input{
+        display: none;
+    }
+    #live2d-widget{
+        display: none;
+    }
+}
+</style>
