@@ -122,7 +122,7 @@
       
       <i class="fas fa-code" style="zoom: 0.6;"></i>
       
-      <span>Runcode</span>
+      <span>写代码</span>
     </a>
     
   </li>
@@ -224,7 +224,7 @@
 			
 			    <i class="fa-fw fas fa-code"></i>
 			
-			Runcode
+			写代码
 		</a>
           
         </li>
@@ -408,7 +408,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    2.1k
+                    2.2k
                 </div>
                 
 
@@ -572,8 +572,16 @@
 <span class="token punctuation">}</span></code></pre>
 <p>这段代码在JDK 6中运行，会得到两个false，而在JDK 7中运行，会得到一个true和一个false。产生差异的原因是，在JDK 6中，intern()方法会把首次遇到的字符串实例复制到永久代的字符串常量池中存储，返回的也是永久代里面这个字符串实例的引用，而由StringBuilder创建的字符串对象实例在 Java堆上，所以必然不可能是同一个引用，结果将返回false。</p>
 <p>而JDK 7（以及部分其他虚拟机，例如JRockit）的<strong>intern()方法实现就不需要再拷贝字符串的实例到永久代</strong>了，既然字符串常量池已经移到Java堆中，那只需要在常量池里记录一下首次出现的实例引用即可，因此intern()返回的引用和由StringBuilder创建的那个字符串实例就是同一个。而对str2比较返回false，这是因为“java”这个字符串在执行String-Builder.toString()之前就已经出现过了（sun.misc.Version类中加载），字符串常量池中已经有它的引用，不符合intern()方法要求“首次遇到”的原则，“计算机软件”这个字符串则是首次出现的，因此结果返回true。</p>
-<h2 id="直接内存">1.7 直接内存</h2><p>直接内存就是机器的内存，JDK1.4中的NIO可以使用Native函数库直接分配堆外内存</p>
-<p><code>-XX：MaxDirectMemorySize</code>指定可使用的直接内存大小，如果不去指定，则默认与Java堆最大值（由-Xmx指定）一致</p>
+<h2 id="直接内存">1.7 直接内存</h2><h3 id="特点-4">1.7.1 特点</h3><ul>
+<li>直接内存就是机器的内存，JDK1.4中的NIO可以使用Native函数库直接分配堆外内存</li>
+<li>分配回收成本较高，但读写性能高</li>
+<li>不受JVM内存回收管理</li>
+<li><code>-XX：MaxDirectMemorySize</code>指定可使用的直接内存大小，如果不去指定，则默认与Java堆最大值（由-Xmx指定）一致</li>
+</ul>
+<h3 id="分配与回收">1.7.2 分配与回收</h3><ul>
+<li>使用了Unsafe对象完成直接内存的分配回收,并且回收需要主动调用freeMemory方法</li>
+<li>ByteBuffer的实现类内部,使用了Cleaner(虚引用)来监测ByteBuffer对象,一旦ByteBuffer对象被垃<br>圾回收,那么就会由ReferenceHandler线程通过Cleaner的clean方法调用freeMemory来释放直接内存</li>
+</ul>
 
             </div>
             <hr/>
@@ -1196,7 +1204,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">64.5k</span>&nbsp;字
+                class="white-color">64.9k</span>&nbsp;字
             
             
             
