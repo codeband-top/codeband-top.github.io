@@ -1,235 +1,440 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
 <head>
-    
-
-    
-
-    
-<!-- Baidu Tongji -->
-<script>var _hmt = _hmt || []</script>
-<script async src="//hm.baidu.com/hm.js?539edd59c73e53f3fe82e2a7f4eb7dc4"></script>
-<!-- End Baidu Tongji -->
-
-
-
-
     <meta charset="utf-8">
-    
-    
-    
-    
-    <title>深入理解java虚拟机第三版读书笔记02 | 代码段小站 | CodeBand CodeTool - 个人计算机类练手小博客</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    
-    <meta name="theme-color" content="#3F51B5">
-    
-    
-    <meta name="keywords" content="java,jvm,深入理解java虚拟机">
-    <meta name="description" content="以下是第二章 Java内存区域与内存溢出异常的内容 运行时数据区域                                                                                                            程序计数器特点 程序计数器是一块较小的内存空间，它可以看作是当前线程所执行的字节码的行号指示器。 程序计数器是线程私有">
-<meta name="keywords" content="java,jvm,深入理解java虚拟机">
-<meta property="og:type" content="article">
-<meta property="og:title" content="深入理解java虚拟机第三版读书笔记02">
-<meta property="og:url" content="https:&#x2F;&#x2F;www.codetool.top&#x2F;article&#x2F;%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B002&#x2F;index.html">
-<meta property="og:site_name" content="代码段小站">
-<meta property="og:description" content="以下是第二章 Java内存区域与内存溢出异常的内容 运行时数据区域                                                                                                            程序计数器特点 程序计数器是一块较小的内存空间，它可以看作是当前线程所执行的字节码的行号指示器。 程序计数器是线程私有">
-<meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https:&#x2F;&#x2F;api.codetool.top&#x2F;img&#x2F;15782333435215.jpg">
-<meta property="og:updated_time" content="2020-01-06T13:33:59.726Z">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https:&#x2F;&#x2F;api.codetool.top&#x2F;img&#x2F;15782333435215.jpg">
-    
-        <link rel="alternate" type="application/atom+xml" title="代码段小站" href="/atom.xml">
-    
-    <link rel="shortcut icon" href="/img/favicon.ico">
-    <link rel="stylesheet" href="/css/style.css?v=1.7.2">
-    <script>window.lazyScripts=[]</script>
+    <meta name="keywords" content="深入理解java虚拟机第三版读书笔记02, 代码段小站">
+    <meta name="description" content="以下是第二章 Java内存区域与内存溢出异常的内容
+1 运行时数据区域
+1.1 程序计数器1.1.1 特点
+程序计数器是一块较小的内存空间，它可以看作是当前线程所执行的字节码的行号指示器。
+程序计数器是线程私有的，线程轮换之后通过程序计数器">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>深入理解java虚拟机第三版读书笔记02 | 代码段小站</title>
+    <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon.ico">
 
-    <!-- custom head -->
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
     
+    <script src="/libs/jquery/jquery.min.js"></script>
+    
+<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
 
-</head>
 
 <body>
-    <div id="loading" class="active"></div>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper head-container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/code.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">代码段小站</span>
+                </a>
+            </div>
+            
 
-    <aside id="menu"  >
-  <div class="inner flex-row-vertical">
-    <a class="header-icon waves-effect waves-circle waves-light" id="menu-off">
-        <i class="icon icon-lg icon-close"></i>
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
     </a>
-    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
-      <div class="brand">
-        <a href="/" class="avatar waves-effect waves-circle waves-light">
-          <img src="/img/avatar.png">
-        </a>
-        <hgroup class="introduce">
-          <h5 class="nickname">Rhett Peng</h5>
-          <a href="mailto:pctdyx@qq.com" target="_blank" rel="noopener" title="pctdyx@qq.com" class="mail">pctdyx@qq.com</a>
-        </hgroup>
-      </div>
-    </div>
-    <div class="scroll-wrap flex-col">
-      <ul class="nav">
-        
-            <li class="waves-block waves-effect">
-              <a href="/"  >
-                <i class="icon icon-lg icon-home"></i>
-                主页
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/archives"  >
-                <i class="icon icon-lg icon-archives"></i>
-                归档
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/tags"  >
-                <i class="icon icon-lg icon-tags"></i>
-                标签
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/categories"  >
-                <i class="icon icon-lg icon-th-list"></i>
-                分类
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/runcode"  >
-                <i class="icon icon-lg icon-code"></i>
-                在线写代码
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/about"  >
-                <i class="icon icon-lg icon-globe"></i>
-                关于
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="http://wpa.qq.com/msgrd?v=3&uin=995632825&site=qq&menu=yes" target="_blank" rel="noopener"  >
-                <i class="icon icon-lg icon-qq"></i>
-                qq
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="https://github.com/codeband-top" target="_blank" >
-                <i class="icon icon-lg icon-github"></i>
-                Github
-              </a>
-            </li>
-        
-      </ul>
-    </div>
-  </div>
-</aside>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/runcode" class="waves-effect waves-light">
+      
+      <i class="fas fa-code" style="zoom: 0.6;"></i>
+      
+      <span>Runcode</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
 
-    <main id="main">
-        <header class="top-header" id="header">
-    <div class="flex-row">
-        <a class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
-          <i class="icon icon-lg icon-navicon"></i>
-        </a>
-        <div class="flex-col header-title ellipsis">深入理解java虚拟机第三版读书笔记02</div>
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
         
-        <div class="search-wrap" id="search-wrap">
-            <a class="header-icon waves-effect waves-circle waves-light" id="back">
-                <i class="icon icon-lg icon-chevron-left"></i>
-            </a>
-            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
-            <a class="header-icon waves-effect waves-circle waves-light" id="search">
-                <i class="icon icon-lg icon-search"></i>
-            </a>
+        <img src="/medias/code.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">代码段小站</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
         </div>
-        
-        
-        <a class="header-icon waves-effect waves-circle waves-light" id="menuShare">
-            <i class="icon icon-lg icon-share-alt"></i>
-        </a>
-        
-    </div>
-</header>
-<header class="content-header post-header">
-
-    <div class="container fade-scale">
-        <h1 class="title">深入理解java虚拟机第三版读书笔记02</h1>
-        <h5 class="subtitle">
-            
-                <time datetime="2020-01-05T12:08:33.000Z" itemprop="datePublished" class="page-time">
-  2020-01-05
-</time>
-
-
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/">编程语言</a></li></ul>
-
-            
-        </h5>
     </div>
 
     
 
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/runcode" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-code"></i>
+			
+			Runcode
+		</a>
+          
+        </li>
+        
+        
+    </ul>
+</div>
+
+        </div>
+
+        
+    </nav>
 
 </header>
 
-
-<div class="container body-wrap">
     
-    <aside class="post-widget">
-        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
-            <h4>目录</h4>
-            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#运行时数据区域"><span class="post-toc-number">1.</span> <span class="post-toc-text">运行时数据区域</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#程序计数器"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">程序计数器</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#特点"><span class="post-toc-number">1.1.1.</span> <span class="post-toc-text">特点</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Java虚拟机栈"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">Java虚拟机栈</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#特点-1"><span class="post-toc-number">1.2.1.</span> <span class="post-toc-text">特点</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#异常"><span class="post-toc-number">1.2.2.</span> <span class="post-toc-text">异常</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#本地方法栈"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">本地方法栈</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Java堆"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">Java堆</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#特点-2"><span class="post-toc-number">1.4.1.</span> <span class="post-toc-text">特点</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#异常-1"><span class="post-toc-number">1.4.2.</span> <span class="post-toc-text">异常</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#方法区"><span class="post-toc-number">1.5.</span> <span class="post-toc-text">方法区</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#特点-3"><span class="post-toc-number">1.5.1.</span> <span class="post-toc-text">特点</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#异常-2"><span class="post-toc-number">1.5.2.</span> <span class="post-toc-text">异常</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#运行时常量池"><span class="post-toc-number">1.6.</span> <span class="post-toc-text">运行时常量池</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#异常-3"><span class="post-toc-number">1.6.1.</span> <span class="post-toc-text">异常</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#intern方法有意思的点"><span class="post-toc-number">1.6.2.</span> <span class="post-toc-text">intern方法有意思的点</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#直接内存"><span class="post-toc-number">1.7.</span> <span class="post-toc-text">直接内存</span></a></li></ol></li></ol>
-        </nav>
-    </aside>
 
 
 
-<article id="post-深入理解java虚拟机第三版读书笔记02"
-  class="post-article article-type-post fade" itemprop="blogPost">
-
-    <div class="post-card">
-        <h1 class="post-card-title">深入理解java虚拟机第三版读书笔记02</h1>
-        <div class="post-meta">
-            <time class="post-time" title="2020-01-05 20:08:33" datetime="2020-01-05T12:08:33.000Z"  itemprop="datePublished">2020-01-05</time>
-
-            
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/">编程语言</a></li></ul>
-
-
-
-            
-
-        </div>
-        <div class="post-content" id="post-content" itemprop="postContent">
-            <p>以下是<strong>第二章 Java内存区域与内存溢出异常</strong>的内容</p>
-<h1 id="运行时数据区域"><a href="#运行时数据区域" class="headerlink" title="运行时数据区域"></a>运行时数据区域</h1><figure class="image-bubble">
-                <div class="img-lightbox">
-                    <div class="overlay"></div>
-                    <img src="https://api.codetool.top/img/15782333435215.jpg" alt="" title="">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/18.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">深入理解java虚拟机第三版读书笔记02</h1>
                 </div>
-                <div class="image-caption"></div>
-            </figure>
+            </div>
+        </div>
+    </div>
+</div>
 
-<h2 id="程序计数器"><a href="#程序计数器" class="headerlink" title="程序计数器"></a>程序计数器</h2><h3 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h3><ul>
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        margin: 35px 0 15px 0;
+        padding-left: 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        height: calc(100vh - 250px);
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #toc-content .is-active-link::before {
+        background-color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/java/">
+                                <span class="chip bg-color">java</span>
+                            </a>
+                        
+                            <a href="/tags/jvm/">
+                                <span class="chip bg-color">jvm</span>
+                            </a>
+                        
+                            <a href="/tags/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/">
+                                <span class="chip bg-color">深入理解java虚拟机</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/" class="post-category">
+                                编程语言
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2020-01-05
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    2.1k
+                </div>
+                
+
+                
+				
+                
+            </div>
+            
+        </div>
+        <hr class="clearfix">
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>以下是<strong>第二章 Java内存区域与内存溢出异常</strong>的内容</p>
+<h1 id="运行时数据区域">1 运行时数据区域</h1><p><img src="https://api.codetool.top/img/15782333435215.jpg" alt></p>
+<h2 id="程序计数器">1.1 程序计数器</h2><h3 id="特点">1.1.1 特点</h3><ul>
 <li>程序计数器是一块较小的内存空间，它可以看作是当前线程所执行的字节码的行号指示器。</li>
 <li>程序计数器是线程私有的，线程轮换之后通过程序计数器确定要执行的指令位置。</li>
 <li>不存在内存溢出。</li>
 </ul>
-<h2 id="Java虚拟机栈"><a href="#Java虚拟机栈" class="headerlink" title="Java虚拟机栈"></a>Java虚拟机栈</h2><h3 id="特点-1"><a href="#特点-1" class="headerlink" title="特点"></a>特点</h3><ul>
+<h2 id="Java虚拟机栈">1.2 Java虚拟机栈</h2><h3 id="特点-1">1.2.1 特点</h3><ul>
 <li>Java虚拟机栈也是线程私有的,它的生命周期与线程相同。</li>
 <li>虚拟机栈描述的是Java方法执行的<strong>线程内存模型</strong>：每个方法被执行的时候，Java虚拟机都<br>会同步创建一个栈帧用于存储<strong>局部变量表、操作数栈、动态连接、方法出口等信息</strong>。栈帧的入栈出栈对应一个方法的调用。</li>
 <li>局部变量表存放了编译期可知的各种Java虚拟机基本数据类型、对象引用和返回地址。</li>
 <li>局部变量表中的存储空间以 <strong>局部变量槽（Slot）</strong> 来表示，其中64位长度的long和double类型的数据会占用两个变量槽，其余的数据类型只占用一个。局部变量表所需的内存空间在编译期间完成分配。</li>
 </ul>
-<h3 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h3><ul>
+<h3 id="异常">1.2.2 异常</h3><ul>
 <li>如果线程请求的栈深度大于虚拟机所允许的深度，将抛出<code>StackOverflowError</code>异常，可能会有这两种情况：<ul>
 <li>栈帧过多</li>
 <li>栈帧过大</li>
@@ -239,23 +444,109 @@
 </ul>
 <p>代码演示：通过<code>-Xss</code>参数来设定栈的大小</p>
 <p>（无限递归导致栈帧过多）</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">*	VM Args：-Xss128k</span></span><br><span class="line"><span class="comment">*	<span class="doctag">@author</span> zzm</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JavaVMStackSOF</span> </span>&#123;     </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> stackLength = <span class="number">1</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">stackLeak</span><span class="params">()</span> </span>&#123;         </span><br><span class="line">        stackLength++;         </span><br><span class="line">        stackLeak();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">        JavaVMStackSOF oom = <span class="keyword">new</span> JavaVMStackSOF();         </span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            oom.stackLeak();         </span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">            System.out.println(<span class="string">"stack length:"</span> + oom.stackLength);</span><br><span class="line">            <span class="keyword">throw</span> e;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
+*    VM Args：-Xss128k
+*    @author zzm
+ */</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">JavaVMStackSOF</span> <span class="token punctuation">{</span>     
+    <span class="token keyword">private</span> <span class="token keyword">int</span> stackLength <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">stackLeak</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>         
+        stackLength<span class="token operator">++</span><span class="token punctuation">;</span>         
+        <span class="token function">stackLeak</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> Throwable <span class="token punctuation">{</span>
+        JavaVMStackSOF oom <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">JavaVMStackSOF</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>         
+        <span class="token keyword">try</span> <span class="token punctuation">{</span>
+            oom<span class="token punctuation">.</span><span class="token function">stackLeak</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>         
+        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Throwable</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"stack length:"</span> <span class="token operator">+</span> oom<span class="token punctuation">.</span>stackLength<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">throw</span> e<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
 <p>（栈帧太大）</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> zzm</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JavaVMStackSOF</span> </span>&#123;     </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> stackLength = <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">long</span> unused1, unused2, unused3, unused4, unused5,</span><br><span class="line">        unused6, unused7, unused8, unused9, unused10,              </span><br><span class="line">        unused11, unused12, unused13, unused14, unused15,</span><br><span class="line">        unused16, unused17, unused18, unused19, unused20,</span><br><span class="line">        unused21, unused22, unused23, unused24, unused25,</span><br><span class="line">        unused26, unused27, unused28, unused29, unused30,</span><br><span class="line">        unused31, unused32, unused33, unused34, unused35,</span><br><span class="line">        unused36, unused37, unused38, unused39, unused40, </span><br><span class="line">        unused41, unused42, unused43, unused44, unused45,</span><br><span class="line">        unused46, unused47, unused48, unused49, unused50, </span><br><span class="line">        unused51, unused52, unused53, unused54, unused55, </span><br><span class="line">        unused56, unused57, unused58, unused59, unused60,</span><br><span class="line">        unused61, unused62, unused63, unused64, unused65,</span><br><span class="line">        unused66, unused67, unused68, unused69, unused70,</span><br><span class="line">        unused71, unused72, unused73, unused74, unused75,</span><br><span class="line">        unused76, unused77, unused78, unused79, unused80,</span><br><span class="line">        unused81, unused82, unused83, unused84, unused85,</span><br><span class="line">        unused86, unused87, unused88, unused89, unused90,</span><br><span class="line">        unused91, unused92, unused93, unused94, unused95,</span><br><span class="line">        unused96, unused97, unused98, unused99, unused100;</span><br><span class="line">        stackLength ++;</span><br><span class="line">        test();</span><br><span class="line">        unused1 = unused2 = unused3 = unused4 = unused5 =</span><br><span class="line">        unused6 = unused7 = unused8 = unused9 = unused10 = </span><br><span class="line">        unused11 = unused12 = unused13 = unused14 = unused15 =</span><br><span class="line">        unused16 = unused17 = unused18 = unused19 = unused20 =</span><br><span class="line">        unused21 = unused22 = unused23 = unused24 = unused25 =</span><br><span class="line">        unused26 = unused27 = unused28 = unused29 = unused30 =</span><br><span class="line">        unused31 = unused32 = unused33 = unused34 = unused35 =</span><br><span class="line">        unused36 = unused37 = unused38 = unused39 = unused40 =</span><br><span class="line">        unused41 = unused42 = unused43 = unused44 = unused45 = </span><br><span class="line">        unused46 = unused47 = unused48 = unused49 = unused50 =</span><br><span class="line">        unused51 = unused52 = unused53 = unused54 = unused55 =</span><br><span class="line">        unused56 = unused57 = unused58 = unused59 = unused60 =</span><br><span class="line">        unused61 = unused62 = unused63 = unused64 = unused65 =</span><br><span class="line">        unused66 = unused67 = unused68 = unused69 = unused70 =</span><br><span class="line">        unused71 = unused72 = unused73 = unused74 = unused75 =</span><br><span class="line">        unused76 = unused77 = unused78 = unused79 = unused80 =</span><br><span class="line">        unused81 = unused82 = unused83 = unused84 = unused85 =</span><br><span class="line">        unused86 = unused87 = unused88 = unused89 = unused90 =</span><br><span class="line">        unused91 = unused92 = unused93 = unused94 = unused95 =</span><br><span class="line">        unused96 = unused97 = unused98 = unused99 = unused100 = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;             </span><br><span class="line">            test();         </span><br><span class="line">        &#125;<span class="keyword">catch</span> (Error e)&#123;</span><br><span class="line">            System.out.println(<span class="string">"stack length:"</span> + stackLength);</span><br><span class="line">            <span class="keyword">throw</span> e;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="本地方法栈"><a href="#本地方法栈" class="headerlink" title="本地方法栈"></a>本地方法栈</h2><p>是java虚拟机栈的native方法版。<br>HotSpot虚拟机中并不区分虚拟机栈和本地方法栈</p>
-<h2 id="Java堆"><a href="#Java堆" class="headerlink" title="Java堆"></a>Java堆</h2><h3 id="特点-2"><a href="#特点-2" class="headerlink" title="特点"></a>特点</h3><ul>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
+ * @author zzm
+ */</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">JavaVMStackSOF</span> <span class="token punctuation">{</span>     
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">int</span> stackLength <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">long</span> unused1<span class="token punctuation">,</span> unused2<span class="token punctuation">,</span> unused3<span class="token punctuation">,</span> unused4<span class="token punctuation">,</span> unused5<span class="token punctuation">,</span>
+        unused6<span class="token punctuation">,</span> unused7<span class="token punctuation">,</span> unused8<span class="token punctuation">,</span> unused9<span class="token punctuation">,</span> unused10<span class="token punctuation">,</span>              
+        unused11<span class="token punctuation">,</span> unused12<span class="token punctuation">,</span> unused13<span class="token punctuation">,</span> unused14<span class="token punctuation">,</span> unused15<span class="token punctuation">,</span>
+        unused16<span class="token punctuation">,</span> unused17<span class="token punctuation">,</span> unused18<span class="token punctuation">,</span> unused19<span class="token punctuation">,</span> unused20<span class="token punctuation">,</span>
+        unused21<span class="token punctuation">,</span> unused22<span class="token punctuation">,</span> unused23<span class="token punctuation">,</span> unused24<span class="token punctuation">,</span> unused25<span class="token punctuation">,</span>
+        unused26<span class="token punctuation">,</span> unused27<span class="token punctuation">,</span> unused28<span class="token punctuation">,</span> unused29<span class="token punctuation">,</span> unused30<span class="token punctuation">,</span>
+        unused31<span class="token punctuation">,</span> unused32<span class="token punctuation">,</span> unused33<span class="token punctuation">,</span> unused34<span class="token punctuation">,</span> unused35<span class="token punctuation">,</span>
+        unused36<span class="token punctuation">,</span> unused37<span class="token punctuation">,</span> unused38<span class="token punctuation">,</span> unused39<span class="token punctuation">,</span> unused40<span class="token punctuation">,</span> 
+        unused41<span class="token punctuation">,</span> unused42<span class="token punctuation">,</span> unused43<span class="token punctuation">,</span> unused44<span class="token punctuation">,</span> unused45<span class="token punctuation">,</span>
+        unused46<span class="token punctuation">,</span> unused47<span class="token punctuation">,</span> unused48<span class="token punctuation">,</span> unused49<span class="token punctuation">,</span> unused50<span class="token punctuation">,</span> 
+        unused51<span class="token punctuation">,</span> unused52<span class="token punctuation">,</span> unused53<span class="token punctuation">,</span> unused54<span class="token punctuation">,</span> unused55<span class="token punctuation">,</span> 
+        unused56<span class="token punctuation">,</span> unused57<span class="token punctuation">,</span> unused58<span class="token punctuation">,</span> unused59<span class="token punctuation">,</span> unused60<span class="token punctuation">,</span>
+        unused61<span class="token punctuation">,</span> unused62<span class="token punctuation">,</span> unused63<span class="token punctuation">,</span> unused64<span class="token punctuation">,</span> unused65<span class="token punctuation">,</span>
+        unused66<span class="token punctuation">,</span> unused67<span class="token punctuation">,</span> unused68<span class="token punctuation">,</span> unused69<span class="token punctuation">,</span> unused70<span class="token punctuation">,</span>
+        unused71<span class="token punctuation">,</span> unused72<span class="token punctuation">,</span> unused73<span class="token punctuation">,</span> unused74<span class="token punctuation">,</span> unused75<span class="token punctuation">,</span>
+        unused76<span class="token punctuation">,</span> unused77<span class="token punctuation">,</span> unused78<span class="token punctuation">,</span> unused79<span class="token punctuation">,</span> unused80<span class="token punctuation">,</span>
+        unused81<span class="token punctuation">,</span> unused82<span class="token punctuation">,</span> unused83<span class="token punctuation">,</span> unused84<span class="token punctuation">,</span> unused85<span class="token punctuation">,</span>
+        unused86<span class="token punctuation">,</span> unused87<span class="token punctuation">,</span> unused88<span class="token punctuation">,</span> unused89<span class="token punctuation">,</span> unused90<span class="token punctuation">,</span>
+        unused91<span class="token punctuation">,</span> unused92<span class="token punctuation">,</span> unused93<span class="token punctuation">,</span> unused94<span class="token punctuation">,</span> unused95<span class="token punctuation">,</span>
+        unused96<span class="token punctuation">,</span> unused97<span class="token punctuation">,</span> unused98<span class="token punctuation">,</span> unused99<span class="token punctuation">,</span> unused100<span class="token punctuation">;</span>
+        stackLength <span class="token operator">++</span><span class="token punctuation">;</span>
+        <span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        unused1 <span class="token operator">=</span> unused2 <span class="token operator">=</span> unused3 <span class="token operator">=</span> unused4 <span class="token operator">=</span> unused5 <span class="token operator">=</span>
+        unused6 <span class="token operator">=</span> unused7 <span class="token operator">=</span> unused8 <span class="token operator">=</span> unused9 <span class="token operator">=</span> unused10 <span class="token operator">=</span> 
+        unused11 <span class="token operator">=</span> unused12 <span class="token operator">=</span> unused13 <span class="token operator">=</span> unused14 <span class="token operator">=</span> unused15 <span class="token operator">=</span>
+        unused16 <span class="token operator">=</span> unused17 <span class="token operator">=</span> unused18 <span class="token operator">=</span> unused19 <span class="token operator">=</span> unused20 <span class="token operator">=</span>
+        unused21 <span class="token operator">=</span> unused22 <span class="token operator">=</span> unused23 <span class="token operator">=</span> unused24 <span class="token operator">=</span> unused25 <span class="token operator">=</span>
+        unused26 <span class="token operator">=</span> unused27 <span class="token operator">=</span> unused28 <span class="token operator">=</span> unused29 <span class="token operator">=</span> unused30 <span class="token operator">=</span>
+        unused31 <span class="token operator">=</span> unused32 <span class="token operator">=</span> unused33 <span class="token operator">=</span> unused34 <span class="token operator">=</span> unused35 <span class="token operator">=</span>
+        unused36 <span class="token operator">=</span> unused37 <span class="token operator">=</span> unused38 <span class="token operator">=</span> unused39 <span class="token operator">=</span> unused40 <span class="token operator">=</span>
+        unused41 <span class="token operator">=</span> unused42 <span class="token operator">=</span> unused43 <span class="token operator">=</span> unused44 <span class="token operator">=</span> unused45 <span class="token operator">=</span> 
+        unused46 <span class="token operator">=</span> unused47 <span class="token operator">=</span> unused48 <span class="token operator">=</span> unused49 <span class="token operator">=</span> unused50 <span class="token operator">=</span>
+        unused51 <span class="token operator">=</span> unused52 <span class="token operator">=</span> unused53 <span class="token operator">=</span> unused54 <span class="token operator">=</span> unused55 <span class="token operator">=</span>
+        unused56 <span class="token operator">=</span> unused57 <span class="token operator">=</span> unused58 <span class="token operator">=</span> unused59 <span class="token operator">=</span> unused60 <span class="token operator">=</span>
+        unused61 <span class="token operator">=</span> unused62 <span class="token operator">=</span> unused63 <span class="token operator">=</span> unused64 <span class="token operator">=</span> unused65 <span class="token operator">=</span>
+        unused66 <span class="token operator">=</span> unused67 <span class="token operator">=</span> unused68 <span class="token operator">=</span> unused69 <span class="token operator">=</span> unused70 <span class="token operator">=</span>
+        unused71 <span class="token operator">=</span> unused72 <span class="token operator">=</span> unused73 <span class="token operator">=</span> unused74 <span class="token operator">=</span> unused75 <span class="token operator">=</span>
+        unused76 <span class="token operator">=</span> unused77 <span class="token operator">=</span> unused78 <span class="token operator">=</span> unused79 <span class="token operator">=</span> unused80 <span class="token operator">=</span>
+        unused81 <span class="token operator">=</span> unused82 <span class="token operator">=</span> unused83 <span class="token operator">=</span> unused84 <span class="token operator">=</span> unused85 <span class="token operator">=</span>
+        unused86 <span class="token operator">=</span> unused87 <span class="token operator">=</span> unused88 <span class="token operator">=</span> unused89 <span class="token operator">=</span> unused90 <span class="token operator">=</span>
+        unused91 <span class="token operator">=</span> unused92 <span class="token operator">=</span> unused93 <span class="token operator">=</span> unused94 <span class="token operator">=</span> unused95 <span class="token operator">=</span>
+        unused96 <span class="token operator">=</span> unused97 <span class="token operator">=</span> unused98 <span class="token operator">=</span> unused99 <span class="token operator">=</span> unused100 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">try</span> <span class="token punctuation">{</span>             
+            <span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>         
+        <span class="token punctuation">}</span><span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Error</span> e<span class="token punctuation">)</span><span class="token punctuation">{</span>
+            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"stack length:"</span> <span class="token operator">+</span> stackLength<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">throw</span> e<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<h2 id="本地方法栈">1.3 本地方法栈</h2><p>是java虚拟机栈的native方法版。<br>HotSpot虚拟机中并不区分虚拟机栈和本地方法栈</p>
+<h2 id="Java堆">1.4 Java堆</h2><h3 id="特点-2">1.4.1 特点</h3><ul>
 <li>是各个进程共享的。</li>
 <li>所有的对象实例以及数组都应当在堆上分配，日后可能出现值类型的支持。</li>
 <li>Java堆中可以划分出多个线程私有的<strong>分配缓冲区</strong>，以提升对象分配时的效率。</li>
 <li>Java堆既可以被实现成固定大小的，也可以是可扩展的，不过当前主流的Java虚拟机都是按照可扩展来实现的（通过参数-Xmx和-Xms设定）。</li>
 </ul>
-<h3 id="异常-1"><a href="#异常-1" class="headerlink" title="异常"></a>异常</h3><p>如果在Java堆中没有内存完成实例分配，并且堆也无法再扩展时，Java虚拟机将会抛出<code>OutOfMemoryError</code>异常。</p>
+<h3 id="异常-1">1.4.2 异常</h3><p>如果在Java堆中没有内存完成实例分配，并且堆也无法再扩展时，Java虚拟机将会抛出<code>OutOfMemoryError</code>异常。</p>
 <p>代码演示：<br>(将堆的最小值<code>-Xms</code>参数与最大值<code>-Xmx</code>参数设置为一样即可避免堆自动扩展，通过参数<code>-XX：+HeapDumpOnOutOf-MemoryError</code>可以让虚拟机在出现内存溢出异常的时候Dump出当前的内存堆转储快照以便进行事后分析)</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**·</span></span><br><span class="line"><span class="comment">*	VM Args：-Xms20m -Xmx20m -XX:+HeapDumpOnOutOfMemoryError</span></span><br><span class="line"><span class="comment">*	<span class="doctag">@author</span> zzm</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HeapOOM</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">OOMObject</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;OOMObject&gt; list = <span class="keyword">new</span> ArrayList&lt;OOMObject&gt;();</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            list.add(<span class="keyword">new</span> OOMObject());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="方法区"><a href="#方法区" class="headerlink" title="方法区"></a>方法区</h2><h3 id="特点-3"><a href="#特点-3" class="headerlink" title="特点"></a>特点</h3><ul>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**·
+*    VM Args：-Xms20m -Xmx20m -XX:+HeapDumpOnOutOfMemoryError
+*    @author zzm
+*/</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">HeapOOM</span> <span class="token punctuation">{</span>
+    <span class="token keyword">static</span> <span class="token keyword">class</span> <span class="token class-name">OOMObject</span> <span class="token punctuation">{</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        List<span class="token operator">&lt;</span>OOMObject<span class="token operator">></span> list <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token operator">&lt;</span>OOMObject<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            list<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">OOMObject</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<h2 id="方法区">1.5 方法区</h2><h3 id="特点-3">1.5.1 特点</h3><ul>
 <li>是各个进程共享的。</li>
 <li>它用于存储<strong>已被虚拟机加载的类型信息、常量、静态变量、即时编译器编译后的代码缓存</strong>等数据。</li>
 <li>JAVA8以前HotSpot使用永久代实现方法区，把堆的垃圾回收机制延申至方法区，JAVA8开始使用位于本地内存中的<strong>元空间</strong>实现方法区。</li>
@@ -264,160 +555,672 @@
 <li><code>-XX：MetaspaceSize</code>：指定元空间的初始空间大小，以字节为单位，达到该值就会触发垃圾收集进行类型卸载，同时收集器会对该值进行调整：如果释放了大量的空间，就适当降低该值；如果释放了很少的空间，那么在不超过-XX：MaxMetaspaceSize（如果设置了的话）的情况下，适当提高该值。</li>
 <li><code>-XX：MinMetaspaceFreeRatio</code>：作用是在垃圾收集之后控制最小的元空间剩余容量的百分比，可减少因为元空间不足导致的垃圾收集的频率。类似的还有-XX：Max-MetaspaceFreeRatio，用于控制最大的元空间剩余容量的百分比。</li>
 </ul>
-<h3 id="异常-2"><a href="#异常-2" class="headerlink" title="异常"></a>异常</h3><p>如果方法区无法满足新的内存分配需求时，将抛出<code>OutOfMemoryError</code>异常。(由于JAVA8后方法区位于本地内存中，很少出现这种情况，一般是涉及到动态加载过多类)</p>
-<h2 id="运行时常量池"><a href="#运行时常量池" class="headerlink" title="运行时常量池"></a>运行时常量池</h2><ul>
+<h3 id="异常-2">1.5.2 异常</h3><p>如果方法区无法满足新的内存分配需求时，将抛出<code>OutOfMemoryError</code>异常。(由于JAVA8后方法区位于本地内存中，很少出现这种情况，一般是涉及到动态加载过多类)</p>
+<h2 id="运行时常量池">1.6 运行时常量池</h2><ul>
 <li>运行时常量池是方法区的一部分。</li>
 <li>类的字节码中有一项信息是常量池表，用于存放编译期生成的<strong>类名、方法名、参数类型与字面量</strong>，这部分内容将在类加载后存放到方法区的运行时常量池中。</li>
 <li>Java语言并不要求常量一定只有编译期才能产生，String类的intern方法可以将字符串常量放进字符串常量池表。</li>
 </ul>
-<h3 id="异常-3"><a href="#异常-3" class="headerlink" title="异常"></a>异常</h3><p>常量池无法再申请到内存时会抛出OutOfMemoryError异常。</p>
-<h3 id="intern方法有意思的点"><a href="#intern方法有意思的点" class="headerlink" title="intern方法有意思的点"></a>intern方法有意思的点</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RuntimeConstantPoolOOM</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        String str1 = <span class="keyword">new</span> StringBuilder(<span class="string">"计算机"</span>).append(<span class="string">"软件"</span>).toString();</span><br><span class="line">        System.out.println(str1.intern() == str1);</span><br><span class="line">        String str2 = <span class="keyword">new</span> StringBuilder(<span class="string">"ja"</span>).append(<span class="string">"va"</span>).toString();</span><br><span class="line">        System.out.println(str2.intern() == str2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="异常-3">1.6.1 异常</h3><p>常量池无法再申请到内存时会抛出OutOfMemoryError异常。</p>
+<h3 id="intern方法有意思的点">1.6.2 intern方法有意思的点</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">RuntimeConstantPoolOOM</span> <span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        String str1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StringBuilder</span><span class="token punctuation">(</span><span class="token string">"计算机"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token string">"软件"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>str1<span class="token punctuation">.</span><span class="token function">intern</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> str1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        String str2 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StringBuilder</span><span class="token punctuation">(</span><span class="token string">"ja"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token string">"va"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>str2<span class="token punctuation">.</span><span class="token function">intern</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> str2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
 <p>这段代码在JDK 6中运行，会得到两个false，而在JDK 7中运行，会得到一个true和一个false。产生差异的原因是，在JDK 6中，intern()方法会把首次遇到的字符串实例复制到永久代的字符串常量池中存储，返回的也是永久代里面这个字符串实例的引用，而由StringBuilder创建的字符串对象实例在 Java堆上，所以必然不可能是同一个引用，结果将返回false。</p>
 <p>而JDK 7（以及部分其他虚拟机，例如JRockit）的<strong>intern()方法实现就不需要再拷贝字符串的实例到永久代</strong>了，既然字符串常量池已经移到Java堆中，那只需要在常量池里记录一下首次出现的实例引用即可，因此intern()返回的引用和由StringBuilder创建的那个字符串实例就是同一个。而对str2比较返回false，这是因为“java”这个字符串在执行String-Builder.toString()之前就已经出现过了（sun.misc.Version类中加载），字符串常量池中已经有它的引用，不符合intern()方法要求“首次遇到”的原则，“计算机软件”这个字符串则是首次出现的，因此结果返回true。</p>
-<h2 id="直接内存"><a href="#直接内存" class="headerlink" title="直接内存"></a>直接内存</h2><p>直接内存就是机器的内存，JDK1.4中的NIO可以使用Native函数库直接分配堆外内存</p>
+<h2 id="直接内存">1.7 直接内存</h2><p>直接内存就是机器的内存，JDK1.4中的NIO可以使用Native函数库直接分配堆外内存</p>
 <p><code>-XX：MaxDirectMemorySize</code>指定可使用的直接内存大小，如果不去指定，则默认与Java堆最大值（由-Xmx指定）一致</p>
 
-        </div>
+            </div>
+            <hr/>
 
-        <blockquote class="post-copyright">
-    
-    <div class="content">
+            
+
+    <div class="reprint" id="reprint-statement">
         
-<span class="post-time">
-    最后更新时间：<time datetime="2020-01-06T13:33:59.726Z" itemprop="dateUpdated">2020-01-06 21:33:59</time>
-</span><br>
-
-
-        
-        感谢您的阅读
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://www.codetool.top" rel="external nofollow noreferrer">Rhett Peng</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+                    !
+                </span>
+            </div>
         
     </div>
-    
-    <footer>
-        <a href="https://www.codetool.top">
-            <img src="/img/avatar.png" alt="Rhett Peng">
-            Rhett Peng
-        </a>
-    </footer>
-</blockquote>
 
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/java/">
+                                    <span class="chip bg-color">java</span>
+                                </a>
+                            
+                                <a href="/tags/jvm/">
+                                    <span class="chip bg-color">jvm</span>
+                                </a>
+                            
+                                <a href="/tags/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/">
+                                    <span class="chip bg-color">深入理解java虚拟机</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="https://unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'VUmN3m0ICuwaL4jNPnxBRln8-gzGzoHsz',
+        appKey: 'QH8FVT32jvi4qBllLg6Cf0dU',
+        notify: 'false' === 'true',
+        verify: 'true' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: '说点什么吧'
+    });
+</script>
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
         
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/19.jpg" class="responsive-img" alt="深入理解java虚拟机第三版读书笔记03">
+                        
+                        <span class="card-title">深入理解java虚拟机第三版读书笔记03</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            1 HotSpot虚拟机对象探秘1.1 对象的创建
+当Java虚拟机遇到一条字节码new指令时，首先将去检查这个指令的参数是否能在常量池中定位到一个类的符号引用，并且检查这个符号引用代表的类是否已被加载、解析和初始化过。如果没有，那必须先执
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2020-01-06
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/" class="post-category">
+                                    编程语言
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/java/">
+                        <span class="chip bg-color">java</span>
+                    </a>
+                    
+                    <a href="/tags/jvm/">
+                        <span class="chip bg-color">jvm</span>
+                    </a>
+                    
+                    <a href="/tags/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/">
+                        <span class="chip bg-color">深入理解java虚拟机</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/article/leetcode744-%E5%AF%BB%E6%89%BE%E6%AF%94%E7%9B%AE%E6%A0%87%E5%AD%97%E6%AF%8D%E5%A4%A7%E7%9A%84%E6%9C%80%E5%B0%8F%E5%AD%97%E6%AF%8D/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/15.jpg" class="responsive-img" alt="leetcode744-寻找比目标字母大的最小字母">
+                        
+                        <span class="card-title">leetcode744-寻找比目标字母大的最小字母</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            1 原题给定一个只包含小写字母的有序数组letters 和一个目标字母 target，寻找有序数组里面比目标字母大的最小字母。
+数组里字母的顺序是循环的。举个例子，如果目标字母target = &#39;z&#39; 并且有序数组为 let
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-01-05
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-category">
+                                    算法/数据结构
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/leetcode/">
+                        <span class="chip bg-color">leetcode</span>
+                    </a>
+                    
+                    <a href="/tags/%E7%AE%97%E6%B3%95/">
+                        <span class="chip bg-color">算法</span>
+                    </a>
+                    
+                    <a href="/tags/%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE/">
+                        <span class="chip bg-color">二分查找</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
 
 
-        <div class="post-footer">
-            
-	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/" rel="tag">java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/jvm/" rel="tag">jvm</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">深入理解java虚拟机</a></li></ul>
 
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
 
-            
-<div class="page-share-wrap">
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
     
+<!-- 代码块复制 -->
 
-<div class="page-share" id="pageShare">
-    <ul class="reset share-icons">
-      <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B002/&title=《深入理解java虚拟机第三版读书笔记02》 — 代码段小站&pic=https://www.codetool.top/img/avatar.png" data-title="微博">
-          <i class="icon icon-weibo"></i>
-        </a>
-      </li>
-      <li>
-        <a class="weixin share-sns wxFab" data-title="微信">
-          <i class="icon icon-weixin"></i>
-        </a>
-      </li>
-      <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B002/&title=《深入理解java虚拟机第三版读书笔记02》 — 代码段小站&source=" data-title=" QQ">
-          <i class="icon icon-qq"></i>
-        </a>
-      </li>
-      <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B002/" data-title=" Facebook">
-          <i class="icon icon-facebook"></i>
-        </a>
-      </li>
-      <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《深入理解java虚拟机第三版读书笔记02》 — 代码段小站&url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B002/&via=https://www.codetool.top" data-title=" Twitter">
-          <i class="icon icon-twitter"></i>
-        </a>
-      </li>
-      <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B002/" data-title=" Google+">
-          <i class="icon icon-google-plus"></i>
-        </a>
-      </li>
-    </ul>
- </div>
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
 
 
+<!-- 代码块收缩 -->
 
-    <a id="shareFab" class="page-share-fab waves-effect waves-circle">
-        <i class="icon icon-share-alt icon-lg"></i>
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+<!-- 代码块折行 -->
+
+<style type="text/css">
+code[class*="language-"], pre[class*="language-"] { white-space: pre !important; }
+</style>
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
     </a>
 </div>
 
 
-
-        </div>
-    </div>
-
-    
-<nav class="post-nav flex-row flex-justify-between">
-  
-    <div class="waves-block waves-effect prev">
-      <a href="/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/" id="post-prev" class="post-nav-link">
-        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
-        <h4 class="title">深入理解java虚拟机第三版读书笔记03</h4>
-      </a>
-    </div>
-  
-
-  
-    <div class="waves-block waves-effect next">
-      <a href="/article/leetcode744-%E5%AF%BB%E6%89%BE%E6%AF%94%E7%9B%AE%E6%A0%87%E5%AD%97%E6%AF%8D%E5%A4%A7%E7%9A%84%E6%9C%80%E5%B0%8F%E5%AD%97%E6%AF%8D/" id="post-next" class="post-nav-link">
-        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
-        <h4 class="title">leetcode744-寻找比目标字母大的最小字母</h4>
-      </a>
-    </div>
-  
-</nav>
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-    <!-- Valine Comments -->
-    <div class="comments vcomment" id="comments"></div>
-    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-    <script src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
-    <!-- Valine Comments script -->
-    <script>
-        var GUEST_INFO = ['nick','mail','link'];
-        var guest_info = 'nick,mail'.split(',').filter(function(item){
-          return GUEST_INFO.indexOf(item) > -1
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h1, h2, h3, h4'
         });
-        new Valine({
-            el: '#comments',
-            notify: 'true' == 'true',
-            verify: 'true' == 'true',
-            appId: "VUmN3m0ICuwaL4jNPnxBRln8-gzGzoHsz",
-            appKey: "QH8FVT32jvi4qBllLg6Cf0dU",
-            avatar: "mm",
-            placeholder: "说点什么吧",
-            guest_info: guest_info.length == 0 ? GUEST_INFO : guest_info,
-            pageSize: "10"
-        })
-    </script>
-    <!-- Valine Comments end -->
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h1, h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+    <footer class="page-footer bg-color">
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            <span id="year">2019</span>
+            <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">63.6k</span>&nbsp;字
+            
+            
+            
+            
+            
+            <br>
+            
+            <br>
+            
+            <span id="icp"><img src="/medias/icp.png" style="vertical-align: text-bottom;" />
+                <a href="http://beian.miit.gov.cn/" target="_blank">赣ICP备19011928号</a>
+            </span>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/codeband-top" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:pctdyx@qq.net" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
 
 
 
@@ -425,128 +1228,94 @@
 
 
 
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=995632825" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 995632825" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
 
 
 
-</article>
+
 
 
 
 </div>
-
-        <footer class="footer">
-    <div class="top">
-        
-
-        <p>
-            
-                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
-            
-            <span>博客内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
-        </p>
-    </div>
-    <div class="bottom">
-        <p><span>Rhett Peng &copy; 2018 - 2020</span>
-            <span>
-                
-                <a href="http://beian.miit.gov.cn/" target="_blank">赣ICP备19011928号</a><br>
-                
-                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
-            </span>
-        </p>
     </div>
 </footer>
 
-    </main>
-    <div class="mask" id="mask"></div>
-<a id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+<div class="progress-bar"></div>
 
 
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
 
-<div class="global-share" id="globalShare">
-    <ul class="reset share-icons">
-      <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B002/&title=《深入理解java虚拟机第三版读书笔记02》 — 代码段小站&pic=https://www.codetool.top/img/avatar.png" data-title="微博">
-          <i class="icon icon-weibo"></i>
-        </a>
-      </li>
-      <li>
-        <a class="weixin share-sns wxFab" data-title="微信">
-          <i class="icon icon-weixin"></i>
-        </a>
-      </li>
-      <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B002/&title=《深入理解java虚拟机第三版读书笔记02》 — 代码段小站&source=" data-title=" QQ">
-          <i class="icon icon-qq"></i>
-        </a>
-      </li>
-      <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B002/" data-title=" Facebook">
-          <i class="icon icon-facebook"></i>
-        </a>
-      </li>
-      <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《深入理解java虚拟机第三版读书笔记02》 — 代码段小站&url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B002/&via=https://www.codetool.top" data-title=" Twitter">
-          <i class="icon icon-twitter"></i>
-        </a>
-      </li>
-      <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B002/" data-title=" Google+">
-          <i class="icon icon-google-plus"></i>
-        </a>
-      </li>
-    </ul>
- </div>
-
-
-<div class="page-modal wx-share" id="wxShare">
-    <a class="close"><i class="icon icon-close"></i></a>
-    <p>扫一扫，分享到微信</p>
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAT4AAAE+CAAAAAAxUyPsAAAFPUlEQVR42u3awY7iMBAEUP7/p2evK0FCVbezWmleTiMGYvsFiXa1X6/4+nm7/n79/Z2zV/JR3j/VzvP+/YcvfPjw4cOHL5j61fD3i79iup/i/bjJf2cPO38Ml/PHhw8fPnz4RnxXN23JcrjklZa4vU97B3z48OHDh+9/4MsLl2S6w2XEj/nwuPjw4cOHD99jfKfChbPNgzw+2DQh8OHDhw8fvrN8eSyeR97tI8mX1JZKefn1YK8DHz58+PDhKwuF3/P34QsfPnz48OGLg4BTxUo+uXwbn5Q1s3Z+pIEPHz58+PCNNPYR/KatPtuKzw69bQ6xXY6CDx8+fPjwjfhm8fpsW54ca8tx23E34T4+fPjw4cO355tF9ptQoC1B9sfR2qZ73lDHhw8fPnz4Wr78Rpst+qY4mBVP+bdmVk7hw4cPHz58LV8bXidTTBa8367P0Dcl0YdR8OHDhw8fvpIv+YG/f6V9f1JMtC2BNibYNw9eSe2DDx8+fPjw3YYF+2NbswbzvqHehvX7YuVD3YcPHz58+PDFu/7NZn7W3s6jhGQZbfs8x4rujw8fPnz48MV8P7dXMunkDnm8npRK7SinyPDhw4cPH75TfLOGd7L4PFDIN/9tedHeoQj08eHDhw8fvgVfMmQbK8zigPzOs1ImL8iKNjk+fPjw4cNX8uXb7PZTbaDfFh+bQqQNRL6cMsCHDx8+fPgCvhwoWXBbjsxa2nlJ1LYNisePDx8+fPjwLfjykHo26dfRKy+MZvOJvgr48OHDhw/fgm8fx+fR/6wxMAv924NxxYrw4cOHDx++Ed+ssT1bfN7Mbrf6+7KpDSnw4cOHDx++li+ZXEuzIZ4tbxNJtJ/Fhw8fPnz4Nnz7tnEelCfXvoTKD58dq/vw4cOHDx++Ed+pjXcSBORjzcKFPLaYjXt5ygAfPnz48OEL+PKCo93eP9Fiz9vks1g/L27w4cOHDx++s3z55PJAIeHbFEP7uRVzwIcPHz58+EZ87WGynKA9lDbb3iflUfup6PHgw4cPHz58Jd++HGnLjtf6ysuU5Csyiznw4cOHDx++Dd9+Qvki8/Z51KgOYvc83J9FEvjw4cOHD99ZvryUmR1xawOFNlbYVHPR+/Hhw4cPH76YL5/isJFcwrUPbBM6HIg/8OHDhw8fvlFyvtlgt5v22ZG1U+3tTfvhcj748OHDhw/ffP8+DM2Tg2vtMp6YVdtKx4cPHz58+M7ytdv1JNRenZI7+qn8u5OH9ash8eHDhw/fr+ebtas3m/+83NnEE8k9N6v+ckwNHz58+PDhu7hb23huG+ftJjyPD9rCYhYofHnA+PDhw4cP35pvU7hsypS2rR4tLy6qks8Onwk+fPjw4cM3Csefa37Piph8qbOYPn/M+PDhw4cP34yvbXVvXsmLlX3ocOrBrM704cOHDx8+fKMDXm2ZMosDNuHCKY62CMOHDx8+fPgSvuQYVj7ptshoj5HNYvo8xM8PB3xok+PDhw8fPnwx36ZBnsDlBVB75S2BYRBwPy4+fPjw4cO35mtb4HkRsC9lWrgZSnEwDh8+fPjw4Sv5Nrd+upk9a9hvaDYH5vDhw4cPH76cbx/N5+3tHCVZatuSb+OMqFTChw8fPnz4RnzJD/ms2ZxH6nk0vxm3bRV8eT8+fPjw4cP3MF8+wKyNvVleu4rNf/Hhw4cPH75/w7dZ2KyHMAOaHQKouxn48OHDhw/fiG8W1u8jgLYRvgn6k9XVkQc+fPjw4cM3ScuL4uZ+Wpvf+rYRnjfj2+b6LDrBhw8fPnz4bvn+AJG83XWgXDUWAAAAAElFTkSuQmCC" alt="微信分享二维码">
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+$(function () {
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+});
+</script>
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
 </div>
 
 
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
 <script>
-var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
-
-
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
 </script>
 
-<script src="/js/main.min.js?v=1.7.2"></script>
-
-
-<div class="search-panel" id="search-panel">
-    <ul class="search-result" id="search-result"></ul>
-</div>
-<template id="search-tpl">
-<li class="item">
-    <a href="{path}" class="waves-block waves-effect">
-        <div class="title ellipsis" title="{title}">{title}</div>
-        <div class="flex-row flex-middle">
-            <div class="tags ellipsis">
-                {tags}
-            </div>
-            <time class="flex-col time">{date}</time>
-        </div>
-    </a>
-</li>
-</template>
-
-<script src="/js/search.min.js?v=1.7.2" async></script>
-
-
-
-
-
-
-
-
-
+    
+    
 
     
+
+    
+
+    
+
+    
+
+    
+    
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":200,"height":200,"hOffset":20,"vOffset":100},"mobile":{"show":false},"dialog":{"enable":true,"hitokoto":false},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
 <div id="chat_input"><input id="question" type="text" placeholder="陪我聊聊天吧" onkeypress="return onKeyPress(event)"/></div>
 </html>

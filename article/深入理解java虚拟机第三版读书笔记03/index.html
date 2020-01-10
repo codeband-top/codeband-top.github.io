@@ -1,219 +1,424 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
 <head>
-    
-
-    
-
-    
-<!-- Baidu Tongji -->
-<script>var _hmt = _hmt || []</script>
-<script async src="//hm.baidu.com/hm.js?539edd59c73e53f3fe82e2a7f4eb7dc4"></script>
-<!-- End Baidu Tongji -->
-
-
-
-
     <meta charset="utf-8">
-    
-    
-    
-    
-    <title>深入理解java虚拟机第三版读书笔记03 | 代码段小站 | CodeBand CodeTool - 个人计算机类练手小博客</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    
-    <meta name="theme-color" content="#3F51B5">
-    
-    
-    <meta name="keywords" content="java,jvm,深入理解java虚拟机">
-    <meta name="description" content="HotSpot虚拟机对象探秘对象的创建 当Java虚拟机遇到一条字节码new指令时，首先将去检查这个指令的参数是否能在常量池中定位到一个类的符号引用，并且检查这个符号引用代表的类是否已被加载、解析和初始化过。如果没有，那必须先执行相应的类加载过程  类加载检查通过后，为新生对象分配内存。有两种方法：  假设Java堆中内存是绝对规整的，所有被使用过的内存都被放在一边，空闲的内存被放在另一边，中间放">
-<meta name="keywords" content="java,jvm,深入理解java虚拟机">
-<meta property="og:type" content="article">
-<meta property="og:title" content="深入理解java虚拟机第三版读书笔记03">
-<meta property="og:url" content="https:&#x2F;&#x2F;www.codetool.top&#x2F;article&#x2F;%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003&#x2F;index.html">
-<meta property="og:site_name" content="代码段小站">
-<meta property="og:description" content="HotSpot虚拟机对象探秘对象的创建 当Java虚拟机遇到一条字节码new指令时，首先将去检查这个指令的参数是否能在常量池中定位到一个类的符号引用，并且检查这个符号引用代表的类是否已被加载、解析和初始化过。如果没有，那必须先执行相应的类加载过程  类加载检查通过后，为新生对象分配内存。有两种方法：  假设Java堆中内存是绝对规整的，所有被使用过的内存都被放在一边，空闲的内存被放在另一边，中间放">
-<meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https:&#x2F;&#x2F;api.codetool.top&#x2F;img&#x2F;15783086203644.png">
-<meta property="og:image" content="https:&#x2F;&#x2F;api.codetool.top&#x2F;img&#x2F;15783086492674.png">
-<meta property="og:image" content="https:&#x2F;&#x2F;api.codetool.top&#x2F;img&#x2F;15783093332239.png">
-<meta property="og:image" content="https:&#x2F;&#x2F;api.codetool.top&#x2F;img&#x2F;1578313342112.jpg">
-<meta property="og:image" content="https:&#x2F;&#x2F;api.codetool.top&#x2F;img&#x2F;15783134884212.jpg">
-<meta property="og:updated_time" content="2020-01-06T13:36:12.916Z">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https:&#x2F;&#x2F;api.codetool.top&#x2F;img&#x2F;15783086203644.png">
-    
-        <link rel="alternate" type="application/atom+xml" title="代码段小站" href="/atom.xml">
-    
-    <link rel="shortcut icon" href="/img/favicon.ico">
-    <link rel="stylesheet" href="/css/style.css?v=1.7.2">
-    <script>window.lazyScripts=[]</script>
+    <meta name="keywords" content="深入理解java虚拟机第三版读书笔记03, 代码段小站">
+    <meta name="description" content="1 HotSpot虚拟机对象探秘1.1 对象的创建
+当Java虚拟机遇到一条字节码new指令时，首先将去检查这个指令的参数是否能在常量池中定位到一个类的符号引用，并且检查这个符号引用代表的类是否已被加载、解析和初始化过。如果没有，那必须先执">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>深入理解java虚拟机第三版读书笔记03 | 代码段小站</title>
+    <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon.ico">
 
-    <!-- custom head -->
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
     
+    <script src="/libs/jquery/jquery.min.js"></script>
+    
+<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
 
-</head>
 
 <body>
-    <div id="loading" class="active"></div>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper head-container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/code.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">代码段小站</span>
+                </a>
+            </div>
+            
 
-    <aside id="menu"  >
-  <div class="inner flex-row-vertical">
-    <a class="header-icon waves-effect waves-circle waves-light" id="menu-off">
-        <i class="icon icon-lg icon-close"></i>
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
     </a>
-    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
-      <div class="brand">
-        <a href="/" class="avatar waves-effect waves-circle waves-light">
-          <img src="/img/avatar.png">
-        </a>
-        <hgroup class="introduce">
-          <h5 class="nickname">Rhett Peng</h5>
-          <a href="mailto:pctdyx@qq.com" target="_blank" rel="noopener" title="pctdyx@qq.com" class="mail">pctdyx@qq.com</a>
-        </hgroup>
-      </div>
-    </div>
-    <div class="scroll-wrap flex-col">
-      <ul class="nav">
-        
-            <li class="waves-block waves-effect">
-              <a href="/"  >
-                <i class="icon icon-lg icon-home"></i>
-                主页
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/archives"  >
-                <i class="icon icon-lg icon-archives"></i>
-                归档
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/tags"  >
-                <i class="icon icon-lg icon-tags"></i>
-                标签
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/categories"  >
-                <i class="icon icon-lg icon-th-list"></i>
-                分类
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/runcode"  >
-                <i class="icon icon-lg icon-code"></i>
-                在线写代码
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/about"  >
-                <i class="icon icon-lg icon-globe"></i>
-                关于
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="http://wpa.qq.com/msgrd?v=3&uin=995632825&site=qq&menu=yes" target="_blank" rel="noopener"  >
-                <i class="icon icon-lg icon-qq"></i>
-                qq
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="https://github.com/codeband-top" target="_blank" >
-                <i class="icon icon-lg icon-github"></i>
-                Github
-              </a>
-            </li>
-        
-      </ul>
-    </div>
-  </div>
-</aside>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/runcode" class="waves-effect waves-light">
+      
+      <i class="fas fa-code" style="zoom: 0.6;"></i>
+      
+      <span>Runcode</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
 
-    <main id="main">
-        <header class="top-header" id="header">
-    <div class="flex-row">
-        <a class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
-          <i class="icon icon-lg icon-navicon"></i>
-        </a>
-        <div class="flex-col header-title ellipsis">深入理解java虚拟机第三版读书笔记03</div>
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
         
-        <div class="search-wrap" id="search-wrap">
-            <a class="header-icon waves-effect waves-circle waves-light" id="back">
-                <i class="icon icon-lg icon-chevron-left"></i>
-            </a>
-            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
-            <a class="header-icon waves-effect waves-circle waves-light" id="search">
-                <i class="icon icon-lg icon-search"></i>
-            </a>
+        <img src="/medias/code.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">代码段小站</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
         </div>
-        
-        
-        <a class="header-icon waves-effect waves-circle waves-light" id="menuShare">
-            <i class="icon icon-lg icon-share-alt"></i>
-        </a>
-        
-    </div>
-</header>
-<header class="content-header post-header">
-
-    <div class="container fade-scale">
-        <h1 class="title">深入理解java虚拟机第三版读书笔记03</h1>
-        <h5 class="subtitle">
-            
-                <time datetime="2020-01-06T08:36:25.000Z" itemprop="datePublished" class="page-time">
-  2020-01-06
-</time>
-
-
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/">编程语言</a></li></ul>
-
-            
-        </h5>
     </div>
 
     
 
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/runcode" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-code"></i>
+			
+			Runcode
+		</a>
+          
+        </li>
+        
+        
+    </ul>
+</div>
+
+        </div>
+
+        
+    </nav>
 
 </header>
 
-
-<div class="container body-wrap">
     
-    <aside class="post-widget">
-        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
-            <h4>目录</h4>
-            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#HotSpot虚拟机对象探秘"><span class="post-toc-number">1.</span> <span class="post-toc-text">HotSpot虚拟机对象探秘</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#对象的创建"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">对象的创建</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#对象的内存布局"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">对象的内存布局</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#对象头"><span class="post-toc-number">1.2.1.</span> <span class="post-toc-text">对象头</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#实例数据"><span class="post-toc-number">1.2.2.</span> <span class="post-toc-text">实例数据</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#对齐填充"><span class="post-toc-number">1.2.3.</span> <span class="post-toc-text">对齐填充</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#对象的访问定位"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">对象的访问定位</span></a></li></ol></li></ol>
-        </nav>
-    </aside>
 
 
 
-<article id="post-深入理解java虚拟机第三版读书笔记03"
-  class="post-article article-type-post fade" itemprop="blogPost">
-
-    <div class="post-card">
-        <h1 class="post-card-title">深入理解java虚拟机第三版读书笔记03</h1>
-        <div class="post-meta">
-            <time class="post-time" title="2020-01-06 16:36:25" datetime="2020-01-06T08:36:25.000Z"  itemprop="datePublished">2020-01-06</time>
-
-            
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/">编程语言</a></li></ul>
-
-
-
-            
-
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/19.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">深入理解java虚拟机第三版读书笔记03</h1>
+                </div>
+            </div>
         </div>
-        <div class="post-content" id="post-content" itemprop="postContent">
-            <h1 id="HotSpot虚拟机对象探秘"><a href="#HotSpot虚拟机对象探秘" class="headerlink" title="HotSpot虚拟机对象探秘"></a>HotSpot虚拟机对象探秘</h1><h2 id="对象的创建"><a href="#对象的创建" class="headerlink" title="对象的创建"></a>对象的创建</h2><ol>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        margin: 35px 0 15px 0;
+        padding-left: 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        height: calc(100vh - 250px);
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #toc-content .is-active-link::before {
+        background-color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/java/">
+                                <span class="chip bg-color">java</span>
+                            </a>
+                        
+                            <a href="/tags/jvm/">
+                                <span class="chip bg-color">jvm</span>
+                            </a>
+                        
+                            <a href="/tags/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/">
+                                <span class="chip bg-color">深入理解java虚拟机</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/" class="post-category">
+                                编程语言
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2020-01-06
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    1.5k
+                </div>
+                
+
+                
+				
+                
+            </div>
+            
+        </div>
+        <hr class="clearfix">
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h1 id="HotSpot虚拟机对象探秘">1 HotSpot虚拟机对象探秘</h1><h2 id="对象的创建">1.1 对象的创建</h2><ol>
 <li><p>当Java虚拟机遇到一条字节码new指令时，首先将去检查这个指令的参数<strong>是否能在常量池中定位到一个类的符号引用</strong>，并且检查这个<strong>符号引用代表的类是否已被加载、解析和初始化过</strong>。如果没有，那必须先执行相应的<strong>类加载过程</strong></p>
 </li>
 <li><p>类加载检查通过后，为新生对象分配内存。有两种方法：</p>
@@ -232,208 +437,686 @@
 </li>
 <li><p>对对象进行必要的设置，例如这个对象是哪个类的实例、如何才能找到类的元数据信息、对象的哈希码（实际上对象的哈希码会延后到真正调用Object::hashCode()方法时才计算）、对象的GC分代年龄等信息。</p>
 </li>
-<li><p>执行<init> ()方法（构造函数）</p>
+<li><p>执行<init> ()方法（构造函数）</init></p>
 </li>
 </ol>
-<h2 id="对象的内存布局"><a href="#对象的内存布局" class="headerlink" title="对象的内存布局"></a>对象的内存布局</h2><p>在HotSpot虚拟机里，对象在堆内存中的存储布局可以划分为三个部分：对象头（Header）、实例数据（Instance Data）和对齐填充（Padding）。</p>
-<h3 id="对象头"><a href="#对象头" class="headerlink" title="对象头"></a>对象头</h3><p>Markword:存储对象自身的运行时数据，如哈希码（HashCode）、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID、偏向时间戳等，这部分数据的长度在32位和64位的虚拟机（未开启压缩指针）中分别为32个比特和64个比特。</p>
-<figure class="image-bubble">
-                <div class="img-lightbox">
-                    <div class="overlay"></div>
-                    <img src="https://api.codetool.top/img/15783086203644.png" alt="markword" title="">
-                </div>
-                <div class="image-caption">markword</div>
-            </figure>
-
+<h2 id="对象的内存布局">1.2 对象的内存布局</h2><p>在HotSpot虚拟机里，对象在堆内存中的存储布局可以划分为三个部分：对象头（Header）、实例数据（Instance Data）和对齐填充（Padding）。</p>
+<h3 id="对象头">1.2.1 对象头</h3><p>Markword:存储对象自身的运行时数据，如哈希码（HashCode）、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID、偏向时间戳等，这部分数据的长度在32位和64位的虚拟机（未开启压缩指针）中分别为32个比特和64个比特。</p>
+<p><img src="https://api.codetool.top/img/15783086203644.png" alt="markword"></p>
 <p>类型指针，即对象指向它的类型元数据的指针，Java虚拟机通过这个指针来确定该对象是哪个类的实例。并不是所有的虚拟机实现都必须在对象数据上保留类型指针，这部分数据的长度在32位和64位的虚拟机（未开启压缩指针）中分别为32个比特和64个比特，如果开启指针压缩，可以在64位机上也变成32比特。</p>
 <p>开启指针压缩：<code>-XX:+UseCompressedOops</code></p>
-<figure class="image-bubble">
-                <div class="img-lightbox">
-                    <div class="overlay"></div>
-                    <img src="https://api.codetool.top/img/15783086492674.png" alt="kclass" title="">
-                </div>
-                <div class="image-caption">kclass</div>
-            </figure>
-
+<p><img src="https://api.codetool.top/img/15783086492674.png" alt="kclass"></p>
 <p>数组长度： 如果对象是一个Java数组，那在对象头中还必须有一块用于记录数组长度的数据，这部分数据的长度是32比特。</p>
-<h3 id="实例数据"><a href="#实例数据" class="headerlink" title="实例数据"></a>实例数据</h3><p>对象真正存储的有效信息，即我们在程序代码里面所定义的各种类型的字段内容，无论是从父类继承下来的，还是在子类中定义的字段都必须记录起来。</p>
-<figure class="image-bubble">
-                <div class="img-lightbox">
-                    <div class="overlay"></div>
-                    <img src="https://api.codetool.top/img/15783093332239.png" alt="实例数据" title="">
-                </div>
-                <div class="image-caption">实例数据</div>
-            </figure>
-
+<h3 id="实例数据">1.2.2 实例数据</h3><p>对象真正存储的有效信息，即我们在程序代码里面所定义的各种类型的字段内容，无论是从父类继承下来的，还是在子类中定义的字段都必须记录起来。</p>
+<p><img src="https://api.codetool.top/img/15783093332239.png" alt="实例数据"></p>
 <p>这部分的存储顺序会受到虚拟机分配策略参数（-XX：FieldsAllocationStyle参数）和字段在Java源码中定义顺序的影响。</p>
-<h3 id="对齐填充"><a href="#对齐填充" class="headerlink" title="对齐填充"></a>对齐填充</h3><p>由于HotSpot虚拟机的自动内存管理系统要求对象起始地址必须是8字节的整数倍，因此如果对象实例数据部分没有对齐的话，就需要通过对齐填充来补全。</p>
-<h2 id="对象的访问定位"><a href="#对象的访问定位" class="headerlink" title="对象的访问定位"></a>对象的访问定位</h2><p>Java程序会<strong>通过栈上的reference数据来操作堆上的具体对象</strong>。<br>对象访问方式是由虚拟机实现而定的，主流的访问方式主要有<strong>使用句柄和直接指针</strong>两种：</p>
+<h3 id="对齐填充">1.2.3 对齐填充</h3><p>由于HotSpot虚拟机的自动内存管理系统要求对象起始地址必须是8字节的整数倍，因此如果对象实例数据部分没有对齐的话，就需要通过对齐填充来补全。</p>
+<h2 id="对象的访问定位">1.3 对象的访问定位</h2><p>Java程序会<strong>通过栈上的reference数据来操作堆上的具体对象</strong>。<br>对象访问方式是由虚拟机实现而定的，主流的访问方式主要有<strong>使用句柄和直接指针</strong>两种：</p>
 <ul>
 <li>句柄访问：可能会划分出一块内存来作为<strong>句柄池</strong>，reference中存储的就是对象的<strong>句柄地址</strong>，而句柄中包含了<strong>对象实例数据与类型数据</strong>各自具体的地址信息，其结构如图所示：</li>
 </ul>
-<figure class="image-bubble">
-                <div class="img-lightbox">
-                    <div class="overlay"></div>
-                    <img src="https://api.codetool.top/img/1578313342112.jpg" alt="" title="">
-                </div>
-                <div class="image-caption"></div>
-            </figure>
-
+<p><img src="https://api.codetool.top/img/1578313342112.jpg" alt></p>
 <p>好处：好处就是reference中存储的是稳定句柄地址，在对象被移动（垃圾收集时移动对象是非常普遍的行为）时只会改变句柄中的实例数据指针，而reference本身不需要被修改。</p>
 <ul>
 <li>直接指针访问:Java堆中对象的内存布局就必须考虑如何<strong>放置访问类型数据</strong>的相关信息，reference中存储的直接就是<strong>对象地址</strong>，如果只是访问对象本身的话，就不需要多一次间接访问的开销，如图所示:</li>
 </ul>
-<figure class="image-bubble">
-                <div class="img-lightbox">
-                    <div class="overlay"></div>
-                    <img src="https://api.codetool.top/img/15783134884212.jpg" alt="" title="">
-                </div>
-                <div class="image-caption"></div>
-            </figure>
-
+<p><img src="https://api.codetool.top/img/15783134884212.jpg" alt></p>
 <p>好处：速度更快，它节省了一次指针定位的时间开销，由于对象访问在Java中非常频繁，因此这类开销积少成多也是一项极为可观的执行成本，HotSpot是使用的这种方式。</p>
 
-        </div>
+            </div>
+            <hr/>
 
-        <blockquote class="post-copyright">
-    
-    <div class="content">
+            
+
+    <div class="reprint" id="reprint-statement">
         
-<span class="post-time">
-    最后更新时间：<time datetime="2020-01-06T13:36:12.916Z" itemprop="dateUpdated">2020-01-06 21:36:12</time>
-</span><br>
-
-
-        
-        感谢您的阅读
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://www.codetool.top" rel="external nofollow noreferrer">Rhett Peng</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+                    !
+                </span>
+            </div>
         
     </div>
-    
-    <footer>
-        <a href="https://www.codetool.top">
-            <img src="/img/avatar.png" alt="Rhett Peng">
-            Rhett Peng
-        </a>
-    </footer>
-</blockquote>
 
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/java/">
+                                    <span class="chip bg-color">java</span>
+                                </a>
+                            
+                                <a href="/tags/jvm/">
+                                    <span class="chip bg-color">jvm</span>
+                                </a>
+                            
+                                <a href="/tags/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/">
+                                    <span class="chip bg-color">深入理解java虚拟机</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="https://unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'VUmN3m0ICuwaL4jNPnxBRln8-gzGzoHsz',
+        appKey: 'QH8FVT32jvi4qBllLg6Cf0dU',
+        notify: 'false' === 'true',
+        verify: 'true' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: '说点什么吧'
+    });
+</script>
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
         
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/article/leetcode154-%E5%AF%BB%E6%89%BE%E6%97%8B%E8%BD%AC%E6%8E%92%E5%BA%8F%E6%95%B0%E7%BB%84%E4%B8%AD%E7%9A%84%E6%9C%80%E5%B0%8F%E5%80%BCII/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/17.jpg" class="responsive-img" alt="leetcode154-寻找旋转排序数组中的最小值II">
+                        
+                        <span class="card-title">leetcode154-寻找旋转排序数组中的最小值II</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            1 原题假设按照升序排序的数组在预先未知的某个点上进行了旋转。
+( 例如，数组 [0,1,2,4,5,6,7] 可能变为 [4,5,6,7,0,1,2] )。
+请找出其中最小的元素。
+注意数组中可能存在重复的元素。
+示例1：
+
+输入： [1
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2020-01-07
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-category">
+                                    算法/数据结构
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/leetcode/">
+                        <span class="chip bg-color">leetcode</span>
+                    </a>
+                    
+                    <a href="/tags/%E7%AE%97%E6%B3%95/">
+                        <span class="chip bg-color">算法</span>
+                    </a>
+                    
+                    <a href="/tags/%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE/">
+                        <span class="chip bg-color">二分查找</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B002/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/18.jpg" class="responsive-img" alt="深入理解java虚拟机第三版读书笔记02">
+                        
+                        <span class="card-title">深入理解java虚拟机第三版读书笔记02</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            以下是第二章 Java内存区域与内存溢出异常的内容
+1 运行时数据区域
+1.1 程序计数器1.1.1 特点
+程序计数器是一块较小的内存空间，它可以看作是当前线程所执行的字节码的行号指示器。
+程序计数器是线程私有的，线程轮换之后通过程序计数器
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-01-05
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/" class="post-category">
+                                    编程语言
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/java/">
+                        <span class="chip bg-color">java</span>
+                    </a>
+                    
+                    <a href="/tags/jvm/">
+                        <span class="chip bg-color">jvm</span>
+                    </a>
+                    
+                    <a href="/tags/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/">
+                        <span class="chip bg-color">深入理解java虚拟机</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
 
 
-        <div class="post-footer">
-            
-	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/" rel="tag">java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/jvm/" rel="tag">jvm</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">深入理解java虚拟机</a></li></ul>
 
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
 
-            
-<div class="page-share-wrap">
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
     
+<!-- 代码块复制 -->
 
-<div class="page-share" id="pageShare">
-    <ul class="reset share-icons">
-      <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/&title=《深入理解java虚拟机第三版读书笔记03》 — 代码段小站&pic=https://www.codetool.top/img/avatar.png" data-title="微博">
-          <i class="icon icon-weibo"></i>
-        </a>
-      </li>
-      <li>
-        <a class="weixin share-sns wxFab" data-title="微信">
-          <i class="icon icon-weixin"></i>
-        </a>
-      </li>
-      <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/&title=《深入理解java虚拟机第三版读书笔记03》 — 代码段小站&source=" data-title=" QQ">
-          <i class="icon icon-qq"></i>
-        </a>
-      </li>
-      <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/" data-title=" Facebook">
-          <i class="icon icon-facebook"></i>
-        </a>
-      </li>
-      <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《深入理解java虚拟机第三版读书笔记03》 — 代码段小站&url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/&via=https://www.codetool.top" data-title=" Twitter">
-          <i class="icon icon-twitter"></i>
-        </a>
-      </li>
-      <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/" data-title=" Google+">
-          <i class="icon icon-google-plus"></i>
-        </a>
-      </li>
-    </ul>
- </div>
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
 
 
+<!-- 代码块收缩 -->
 
-    <a id="shareFab" class="page-share-fab waves-effect waves-circle">
-        <i class="icon icon-share-alt icon-lg"></i>
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+<!-- 代码块折行 -->
+
+<style type="text/css">
+code[class*="language-"], pre[class*="language-"] { white-space: pre !important; }
+</style>
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
     </a>
 </div>
 
 
-
-        </div>
-    </div>
-
-    
-<nav class="post-nav flex-row flex-justify-between">
-  
-    <div class="waves-block waves-effect prev">
-      <a href="/article/leetcode154-%E5%AF%BB%E6%89%BE%E6%97%8B%E8%BD%AC%E6%8E%92%E5%BA%8F%E6%95%B0%E7%BB%84%E4%B8%AD%E7%9A%84%E6%9C%80%E5%B0%8F%E5%80%BCII/" id="post-prev" class="post-nav-link">
-        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
-        <h4 class="title">leetcode154-寻找旋转排序数组中的最小值II</h4>
-      </a>
-    </div>
-  
-
-  
-    <div class="waves-block waves-effect next">
-      <a href="/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B002/" id="post-next" class="post-nav-link">
-        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
-        <h4 class="title">深入理解java虚拟机第三版读书笔记02</h4>
-      </a>
-    </div>
-  
-</nav>
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-    <!-- Valine Comments -->
-    <div class="comments vcomment" id="comments"></div>
-    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-    <script src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
-    <!-- Valine Comments script -->
-    <script>
-        var GUEST_INFO = ['nick','mail','link'];
-        var guest_info = 'nick,mail'.split(',').filter(function(item){
-          return GUEST_INFO.indexOf(item) > -1
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h1, h2, h3, h4'
         });
-        new Valine({
-            el: '#comments',
-            notify: 'true' == 'true',
-            verify: 'true' == 'true',
-            appId: "VUmN3m0ICuwaL4jNPnxBRln8-gzGzoHsz",
-            appKey: "QH8FVT32jvi4qBllLg6Cf0dU",
-            avatar: "mm",
-            placeholder: "说点什么吧",
-            guest_info: guest_info.length == 0 ? GUEST_INFO : guest_info,
-            pageSize: "10"
-        })
-    </script>
-    <!-- Valine Comments end -->
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h1, h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+    <footer class="page-footer bg-color">
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            <span id="year">2019</span>
+            <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">63.6k</span>&nbsp;字
+            
+            
+            
+            
+            
+            <br>
+            
+            <br>
+            
+            <span id="icp"><img src="/medias/icp.png" style="vertical-align: text-bottom;" />
+                <a href="http://beian.miit.gov.cn/" target="_blank">赣ICP备19011928号</a>
+            </span>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/codeband-top" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:pctdyx@qq.net" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
 
 
 
@@ -441,128 +1124,94 @@
 
 
 
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=995632825" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 995632825" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
 
 
 
-</article>
+
 
 
 
 </div>
-
-        <footer class="footer">
-    <div class="top">
-        
-
-        <p>
-            
-                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
-            
-            <span>博客内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
-        </p>
-    </div>
-    <div class="bottom">
-        <p><span>Rhett Peng &copy; 2018 - 2020</span>
-            <span>
-                
-                <a href="http://beian.miit.gov.cn/" target="_blank">赣ICP备19011928号</a><br>
-                
-                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
-            </span>
-        </p>
     </div>
 </footer>
 
-    </main>
-    <div class="mask" id="mask"></div>
-<a id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+<div class="progress-bar"></div>
 
 
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
 
-<div class="global-share" id="globalShare">
-    <ul class="reset share-icons">
-      <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/&title=《深入理解java虚拟机第三版读书笔记03》 — 代码段小站&pic=https://www.codetool.top/img/avatar.png" data-title="微博">
-          <i class="icon icon-weibo"></i>
-        </a>
-      </li>
-      <li>
-        <a class="weixin share-sns wxFab" data-title="微信">
-          <i class="icon icon-weixin"></i>
-        </a>
-      </li>
-      <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/&title=《深入理解java虚拟机第三版读书笔记03》 — 代码段小站&source=" data-title=" QQ">
-          <i class="icon icon-qq"></i>
-        </a>
-      </li>
-      <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/" data-title=" Facebook">
-          <i class="icon icon-facebook"></i>
-        </a>
-      </li>
-      <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《深入理解java虚拟机第三版读书笔记03》 — 代码段小站&url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/&via=https://www.codetool.top" data-title=" Twitter">
-          <i class="icon icon-twitter"></i>
-        </a>
-      </li>
-      <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://www.codetool.top/article/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/" data-title=" Google+">
-          <i class="icon icon-google-plus"></i>
-        </a>
-      </li>
-    </ul>
- </div>
-
-
-<div class="page-modal wx-share" id="wxShare">
-    <a class="close"><i class="icon icon-close"></i></a>
-    <p>扫一扫，分享到微信</p>
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAT4AAAE+CAAAAAAxUyPsAAAFT0lEQVR42u3awXLbMAwEUP//T6fXdhLRuwDdHvp86qSKRD5lxsCCr1f8+fr2+f3nT//+fv33K5+uf7rz02/l60z2dfmDDx8+fPjwBUtPmJ620S7x/Nzkf9uX3b6Gx/Xjw4cPHz58I76nm27I8vufr8yJ2/u0d8CHDx8+fPj+LV8eBCQb2NDna7j8XHz48OHDh+9jfJtw4e48YRYfzIYQ+PDhw4cP3yf48lg8D9PbV9KO5M/F02w8/8FZBz58+PDhw1cWCv/Pvy9/8OHDhw8fvjgIyFvuvL1vV5UUIrNyqo1F/rgbPnz48OHDN9LYRPBtu36rFU8ig02ZkqPjw4cPHz58M75ZvD5ry89w+wHA58J9fPjw4cOHb883i+w3oUBbguyPo7VD93ygjg8fPnz48LV8+Y02LfqmOJgVT/lfzaycwocPHz58+Fq+NrxOlphseN+uz9A3JdEPT8GHDx8+fPhKvuQL/vyT9vqkmGhHAm1MsB8evJLaBx8+fPjw4TuGBe2xrfqrfXSALNlYG9bvi5Uf6j58+PDhw4cv7vrbEfJ+vJ1HCck22tXmWNH98eHDhw8fvpjv6/hJFp3coS0+8rZ/Bjcjw4cPHz58+G7xta173mbvo4R9edHeoQj08eHDhw8fvpIvn/a2scKsWEnig30pkxdk0cvAhw8fPnz45t/jxQbyAqUNBepFLwqRNhB5syN8+PDhw4fvyHdeXF5e5FtKcPPhQfKS8lIm/1vDhw8fPnz4Znx5e1+PkMtCp/20pVVeSNV/Ovjw4cOHD1/M1wbfLWtbIuQFx2x83gK9kcGHDx8+fPhGfC3cPjhoy50Woi1T2gKunrHjw4cPHz58a4jVIxdtfFvEzKKB4np8+PDhw4cvvn4/Nt4385vY4tY4YVX34cOHDx8+fCO+TeOdlyzts2bhQlJg5cfmHq/Ehw8fPnz4Rnz5ILxt7/cj9nbInZQ4s/jjB0p8+PDhw4fvKl9bpuTlzpkviRvaVn8zPseHDx8+fPju8iWtdd6E56VPi5sUQ2fu/Lei14MPHz58+PCVfPtypC07XutPXqYkfyKzmAMfPnz48OHb8O0XlG8yH5+3x+DuHpsrChd8+PDhw4fvKl9eysyOuLWBQhsrbKq56Hp8+PDhw4cv5suXOBwkl3DtC9uEDhfiD3z48OHDh2+UnLcN9qZpnx1ZuzXe3owfHteDDx8+fPjwzfv31+wxycG1dhv7KD9/ymwYgA8fPnz48LV8s8Hz7CjbrKVvi542Jkhe22t/U3z48OHDhy9+THvrfaM+a+Dzg2WzaCM6TIAPHz58+PDFfO2xsP33eHuYbFMYzQKFvHTDhw8fPnz4cr7ZwLhd+myM3QYBs2F8VNO1aQQ+fPjw4cM3avvbRbRPmRUx+VZnMX20U3z48OHDh2/ElzfzSXS+GbrPDpblsfvmxbxJWfDhw4cPH77uO3r4Fd6G3e0APimSklc7K1mK8QA+fPjw4cMX8M0C9FnUPjuatimD2hA/HzY8Ji748OHDhw9fwJePqPdN+IWpfnlYrQ07iufiw4cPHz58a768Rc9T62Tps6NmG4IWGh8+fPjw4dvzbW6dt9+b0fXmeNkmOGiLM3z48OHDhy/nm42iZ9fnKMlW20Nv7VGAqFTChw8fPnz4RnzJF/ls2JxH6nk0v3luOyp4cz0+fPjw4cP3Yb78AbMx9mZ77S42/4sPHz58+PD9Hb7NxmYzhBnQ7BBAPc3Ahw8fPnz4RnybsH4TAbSD8E3Qn+yujjzw4cOHDx++SVpeFDfnZW2+69tBeD6Mb4frs+gEHz58+PDhO/L9AlUMTgVO10ijAAAAAElFTkSuQmCC" alt="微信分享二维码">
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+$(function () {
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+});
+</script>
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
 </div>
 
 
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
 <script>
-var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
-
-
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
 </script>
 
-<script src="/js/main.min.js?v=1.7.2"></script>
-
-
-<div class="search-panel" id="search-panel">
-    <ul class="search-result" id="search-result"></ul>
-</div>
-<template id="search-tpl">
-<li class="item">
-    <a href="{path}" class="waves-block waves-effect">
-        <div class="title ellipsis" title="{title}">{title}</div>
-        <div class="flex-row flex-middle">
-            <div class="tags ellipsis">
-                {tags}
-            </div>
-            <time class="flex-col time">{date}</time>
-        </div>
-    </a>
-</li>
-</template>
-
-<script src="/js/search.min.js?v=1.7.2" async></script>
-
-
-
-
-
-
-
-
-
+    
+    
 
     
+
+    
+
+    
+
+    
+
+    
+    
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":200,"height":200,"hOffset":20,"vOffset":100},"mobile":{"show":false},"dialog":{"enable":true,"hitokoto":false},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
 <div id="chat_input"><input id="question" type="text" placeholder="陪我聊聊天吧" onkeypress="return onKeyPress(event)"/></div>
 </html>

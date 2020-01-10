@@ -1,243 +1,432 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
 <head>
-    
-
-    
-
-    
-<!-- Baidu Tongji -->
-<script>var _hmt = _hmt || []</script>
-<script async src="//hm.baidu.com/hm.js?539edd59c73e53f3fe82e2a7f4eb7dc4"></script>
-<!-- End Baidu Tongji -->
-
-
-
-
     <meta charset="utf-8">
-    
-    
-    
-    
-    <title>详解java中的unicode编码（码点） | 代码段小站 | CodeBand CodeTool - 个人计算机类练手小博客</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    
-    <meta name="theme-color" content="#3F51B5">
-    
-    
-    <meta name="keywords" content="java,基础知识,字符编码">
-    <meta name="description" content="致谢： 本文参考网页：Unicode字符集以及UTF-8，UTF-16编码的总结 - vcj1009784814的博客 - CSDN博客 Unicodeunicode的码点从U+0000到U+10FFFF，即共有2^20+2^16-1=1114111个码点。通常来说，常见字符可以用2个字节（16位）来表示。但还有很多其他表意字符、辅助字符需要表示。 Unicode将所有码点分成了17个代码级别，又">
-<meta name="keywords" content="java,基础知识,字符编码">
-<meta property="og:type" content="article">
-<meta property="og:title" content="详解java中的unicode编码（码点）">
-<meta property="og:url" content="https:&#x2F;&#x2F;www.codetool.top&#x2F;article&#x2F;unicode%E7%9F%A5%E8%AF%86&#x2F;index.html">
-<meta property="og:site_name" content="代码段小站">
-<meta property="og:description" content="致谢： 本文参考网页：Unicode字符集以及UTF-8，UTF-16编码的总结 - vcj1009784814的博客 - CSDN博客 Unicodeunicode的码点从U+0000到U+10FFFF，即共有2^20+2^16-1=1114111个码点。通常来说，常见字符可以用2个字节（16位）来表示。但还有很多其他表意字符、辅助字符需要表示。 Unicode将所有码点分成了17个代码级别，又">
-<meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https:&#x2F;&#x2F;www.ibm.com&#x2F;developerworks&#x2F;cn&#x2F;java&#x2F;unicode-programming-language&#x2F;image001.jpg">
-<meta property="og:image" content="https:&#x2F;&#x2F;www.ibm.com&#x2F;developerworks&#x2F;cn&#x2F;java&#x2F;unicode-programming-language&#x2F;image002.jpg">
-<meta property="og:image" content="https:&#x2F;&#x2F;www.ibm.com&#x2F;developerworks&#x2F;cn&#x2F;java&#x2F;unicode-programming-language&#x2F;image003.jpg">
-<meta property="og:image" content="https:&#x2F;&#x2F;s2.ax1x.com&#x2F;2019&#x2F;11&#x2F;26&#x2F;MzutAS.jpg">
-<meta property="og:updated_time" content="2019-12-19T08:16:26.317Z">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https:&#x2F;&#x2F;www.ibm.com&#x2F;developerworks&#x2F;cn&#x2F;java&#x2F;unicode-programming-language&#x2F;image001.jpg">
-    
-        <link rel="alternate" type="application/atom+xml" title="代码段小站" href="/atom.xml">
-    
-    <link rel="shortcut icon" href="/img/favicon.ico">
-    <link rel="stylesheet" href="/css/style.css?v=1.7.2">
-    <script>window.lazyScripts=[]</script>
+    <meta name="keywords" content="详解java中的unicode编码（码点）, 代码段小站">
+    <meta name="description" content="致谢：
+本文参考网页：Unicode字符集以及UTF-8，UTF-16编码的总结 - vcj1009784814的博客 - CSDN博客
+1 Unicodeunicode的码点从U+0000到U+10FFFF，即共有2^20+2^16-1=">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>详解java中的unicode编码（码点） | 代码段小站</title>
+    <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon.ico">
 
-    <!-- custom head -->
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
     
+    <script src="/libs/jquery/jquery.min.js"></script>
+    
+<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
 
-</head>
 
 <body>
-    <div id="loading" class="active"></div>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper head-container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/code.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">代码段小站</span>
+                </a>
+            </div>
+            
 
-    <aside id="menu"  >
-  <div class="inner flex-row-vertical">
-    <a class="header-icon waves-effect waves-circle waves-light" id="menu-off">
-        <i class="icon icon-lg icon-close"></i>
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
     </a>
-    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
-      <div class="brand">
-        <a href="/" class="avatar waves-effect waves-circle waves-light">
-          <img src="/img/avatar.png">
-        </a>
-        <hgroup class="introduce">
-          <h5 class="nickname">Rhett Peng</h5>
-          <a href="mailto:pctdyx@qq.com" target="_blank" rel="noopener" title="pctdyx@qq.com" class="mail">pctdyx@qq.com</a>
-        </hgroup>
-      </div>
-    </div>
-    <div class="scroll-wrap flex-col">
-      <ul class="nav">
-        
-            <li class="waves-block waves-effect">
-              <a href="/"  >
-                <i class="icon icon-lg icon-home"></i>
-                主页
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/archives"  >
-                <i class="icon icon-lg icon-archives"></i>
-                归档
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/tags"  >
-                <i class="icon icon-lg icon-tags"></i>
-                标签
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/categories"  >
-                <i class="icon icon-lg icon-th-list"></i>
-                分类
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/runcode"  >
-                <i class="icon icon-lg icon-code"></i>
-                在线写代码
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/about"  >
-                <i class="icon icon-lg icon-globe"></i>
-                关于
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="http://wpa.qq.com/msgrd?v=3&uin=995632825&site=qq&menu=yes" target="_blank" rel="noopener"  >
-                <i class="icon icon-lg icon-qq"></i>
-                qq
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="https://github.com/codeband-top" target="_blank" >
-                <i class="icon icon-lg icon-github"></i>
-                Github
-              </a>
-            </li>
-        
-      </ul>
-    </div>
-  </div>
-</aside>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/runcode" class="waves-effect waves-light">
+      
+      <i class="fas fa-code" style="zoom: 0.6;"></i>
+      
+      <span>Runcode</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
 
-    <main id="main">
-        <header class="top-header" id="header">
-    <div class="flex-row">
-        <a class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
-          <i class="icon icon-lg icon-navicon"></i>
-        </a>
-        <div class="flex-col header-title ellipsis">详解java中的unicode编码（码点）</div>
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
         
-        <div class="search-wrap" id="search-wrap">
-            <a class="header-icon waves-effect waves-circle waves-light" id="back">
-                <i class="icon icon-lg icon-chevron-left"></i>
-            </a>
-            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
-            <a class="header-icon waves-effect waves-circle waves-light" id="search">
-                <i class="icon icon-lg icon-search"></i>
-            </a>
+        <img src="/medias/code.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">代码段小站</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
         </div>
-        
-        
-        <a class="header-icon waves-effect waves-circle waves-light" id="menuShare">
-            <i class="icon icon-lg icon-share-alt"></i>
-        </a>
-        
-    </div>
-</header>
-<header class="content-header post-header">
-
-    <div class="container fade-scale">
-        <h1 class="title">详解java中的unicode编码（码点）</h1>
-        <h5 class="subtitle">
-            
-                <time datetime="2019-11-25T10:05:23.000Z" itemprop="datePublished" class="page-time">
-  2019-11-25
-</time>
-
-
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/">中间件/软件设计</a></li></ul>
-
-            
-        </h5>
     </div>
 
     
 
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/runcode" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-code"></i>
+			
+			Runcode
+		</a>
+          
+        </li>
+        
+        
+    </ul>
+</div>
+
+        </div>
+
+        
+    </nav>
 
 </header>
 
-
-<div class="container body-wrap">
     
-    <aside class="post-widget">
-        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
-            <h4>目录</h4>
-            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Unicode"><span class="post-toc-number">1.</span> <span class="post-toc-text">Unicode</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#utf-8"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">utf-8</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#utf-16"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">utf-16</span></a></li></ol></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#java中的unicode"><span class="post-toc-number">2.</span> <span class="post-toc-text">java中的unicode</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#char"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">char</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#String"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">String</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#java对码点计算的支持"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">java对码点计算的支持</span></a></li></ol></li></ol>
-        </nav>
-    </aside>
 
 
 
-<article id="post-unicode知识"
-  class="post-article article-type-post fade" itemprop="blogPost">
-
-    <div class="post-card">
-        <h1 class="post-card-title">详解java中的unicode编码（码点）</h1>
-        <div class="post-meta">
-            <time class="post-time" title="2019-11-25 18:05:23" datetime="2019-11-25T10:05:23.000Z"  itemprop="datePublished">2019-11-25</time>
-
-            
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/">中间件/软件设计</a></li></ul>
-
-
-
-            
-
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/13.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">详解java中的unicode编码（码点）</h1>
+                </div>
+            </div>
         </div>
-        <div class="post-content" id="post-content" itemprop="postContent">
-            <p><strong>致谢：</strong></p>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        margin: 35px 0 15px 0;
+        padding-left: 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        height: calc(100vh - 250px);
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #toc-content .is-active-link::before {
+        background-color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/java/">
+                                <span class="chip bg-color">java</span>
+                            </a>
+                        
+                            <a href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">
+                                <span class="chip bg-color">基础知识</span>
+                            </a>
+                        
+                            <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/">
+                                <span class="chip bg-color">字符编码</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/" class="post-category">
+                                中间件/软件设计
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2019-11-25
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    1.5k
+                </div>
+                
+
+                
+				
+                
+            </div>
+            
+        </div>
+        <hr class="clearfix">
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p><strong>致谢：</strong></p>
 <p>本文参考网页：<br><a href="https://blog.csdn.net/vcj1009784814/article/details/93477957" target="_blank" rel="noopener">Unicode字符集以及UTF-8，UTF-16编码的总结 - vcj1009784814的博客 - CSDN博客</a></p>
-<h1 id="Unicode"><a href="#Unicode" class="headerlink" title="Unicode"></a>Unicode</h1><p>unicode的码点从U+0000到U+10FFFF，即共有<code>2^20+2^16-1=1114111</code>个码点。<br>通常来说，常见字符可以用2个字节（16位）来表示。但还有很多其他表意字符、辅助字符需要表示。</p>
+<h1 id="Unicode">1 Unicode</h1><p>unicode的码点从U+0000到U+10FFFF，即共有<code>2^20+2^16-1=1114111</code>个码点。<br>通常来说，常见字符可以用2个字节（16位）来表示。但还有很多其他表意字符、辅助字符需要表示。</p>
 <p>Unicode将所有码点分成了17个代码级别，又称<strong>平面</strong>。</p>
-<figure class="image-bubble">
-                <div class="img-lightbox">
-                    <div class="overlay"></div>
-                    <img src="https://www.ibm.com/developerworks/cn/java/unicode-programming-language/image001.jpg" alt="unicode的17个平面" title="">
-                </div>
-                <div class="image-caption">unicode的17个平面</div>
-            </figure>
-
-
-
+<p><img src="https://www.ibm.com/developerworks/cn/java/unicode-programming-language/image001.jpg" alt="unicode的17个平面"></p>
 <p>其中第一个平面称为基本的多语言级别（basic multilingual plane, <code>BMP</code>），其他的统称为<strong>辅助平面</strong></p>
-<figure class="image-bubble">
-                <div class="img-lightbox">
-                    <div class="overlay"></div>
-                    <img src="https://www.ibm.com/developerworks/cn/java/unicode-programming-language/image002.jpg" alt="unicode的平面划分" title="">
-                </div>
-                <div class="image-caption">unicode的平面划分</div>
-            </figure>
-
-
-
-<h2 id="utf-8"><a href="#utf-8" class="headerlink" title="utf-8"></a>utf-8</h2><p>由于unicode会有1个字节-4个字节不等，如果定长存储每个字符都需要占用四个字节，十分浪费空间，utf-8是一种变长存储方式，具体编码方式如下：</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/unicode-programming-language/image002.jpg" alt="unicode的平面划分"></p>
+<h2 id="utf-8">1.1 utf-8</h2><p>由于unicode会有1个字节-4个字节不等，如果定长存储每个字符都需要占用四个字节，十分浪费空间，utf-8是一种变长存储方式，具体编码方式如下：</p>
 <ul>
 <li><p>第一个字节提示了这个unicode编码由几个字节组成</p>
 <ol>
@@ -251,24 +440,17 @@
 <p><img src="https://www.ibm.com/developerworks/cn/java/unicode-programming-language/image003.jpg" alt="有效位对应的字节数，最后两行应该是用不上的"></p>
 </li>
 </ul>
-<h2 id="utf-16"><a href="#utf-16" class="headerlink" title="utf-16"></a>utf-16</h2><p>UTF-16源于UCS-2，UCS-2将字符码点直接映射为字符编码，中间无特别的编码算法。</p>
+<h2 id="utf-16">1.2 utf-16</h2><p>UTF-16源于UCS-2，UCS-2将字符码点直接映射为字符编码，中间无特别的编码算法。</p>
 <p>UCS-2编码方式固定2字节编码，只覆盖了BMP的码点，对于SMP的码点，2字节的16位二进制数是不足以表示的。</p>
 <p>而UTF-16扩展了原来的UCS-2编码，解决了辅助平面码点的字符无法表示的问题：</p>
 <ul>
 <li>BMP中的有效码点，用固定2字节16位来为其编码，数值等于对应的码点，同UCS-2</li>
 <li>辅助平面中的有效码点，使用<strong>代理对</strong>进行编码。<strong>在BMP中，有一个范围的码点是未定义的</strong>，被称为<strong>代理区</strong>，其码点范围是<code>0xD800~0xDFFF</code>，共211个码点，代理区又被分为<strong>高代理码点</strong>和<strong>低代理码点</strong>，其中高代理码点范围是<code>0xD800~0XDBFF</code>，低代理码点范围是<code>0xDC00~0XDFFF</code>，高代理码点和低代理码点结合在一起，就表示一个辅助平面中的字符。由于辅助平面中的字符共有220个（<code>0x10000~0x10FFFF</code>），高代理码点和低代理码点皆有210个取值，两者结合，恰好有220种不同的组合。</li>
 </ul>
-<figure class="image-bubble">
-                <div class="img-lightbox">
-                    <div class="overlay"></div>
-                    <img src="https://s2.ax1x.com/2019/11/26/MzutAS.jpg" alt="" title="">
-                </div>
-                <div class="image-caption"></div>
-            </figure>
-
+<p><img src="https://s2.ax1x.com/2019/11/26/MzutAS.jpg" alt></p>
 <p>也就是说，UTF-16可以表示完unicode中的字符，BMP中的字符需要一个字节，其他的需要两个字节。</p>
-<h1 id="java中的unicode"><a href="#java中的unicode" class="headerlink" title="java中的unicode"></a>java中的unicode</h1><p>这里使用到一个工具：<br><a href="https://www.qqxiuzi.cn/bianma/Unicode-UTF.php" target="_blank" rel="noopener">Unicode编码转换，UTF编码转换（UTF-8、UTF-16、UTF-32）</a></p>
-<h2 id="char"><a href="#char" class="headerlink" title="char"></a>char</h2><p>java中的char是定长以16位（两个字节存储的），并且内部编码为utf-16。<br>也就是说，一个char只能表示BMP中的字符，若要表示一个辅助平面内的字符，需要两个char。</p>
+<h1 id="java中的unicode">2 java中的unicode</h1><p>这里使用到一个工具：<br><a href="https://www.qqxiuzi.cn/bianma/Unicode-UTF.php" target="_blank" rel="noopener">Unicode编码转换，UTF编码转换（UTF-8、UTF-16、UTF-32）</a></p>
+<h2 id="char">2.1 char</h2><p>java中的char是定长以16位（两个字节存储的），并且内部编码为utf-16。<br>也就是说，一个char只能表示BMP中的字符，若要表示一个辅助平面内的字符，需要两个char。</p>
 <p>来看一个BMP中的字符：”我”</p>
 <blockquote>
 <p>Unicode编码：<code>U+6211</code><br>UTF8编码：<code>E68891</code><br>UTF16BE编码：<code>FEFF6211</code><br>UTF16LE编码：<code>FFFE1162</code></p>
@@ -280,7 +462,7 @@
 <iframe src="https://run.codetool.top/?id=1" frameborder="0" height="500" style="box-sizing: border-box; color: rgb(33, 33, 33); font-family: Roboto, &quot;Helvetica Neue&quot;, Helvetica, Arial, &quot;Microsoft Yahei&quot;, sans-serif; font-size: 15px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial; width: 668px; border: 1px solid rgb(204, 204, 204);"></iframe>
 
 
-<h2 id="String"><a href="#String" class="headerlink" title="String"></a>String</h2><p>对于辅助平面内的字符，一个char可不够用了，需要由两个char来存储，或是用String来表示。</p>
+<h2 id="String">2.2 String</h2><p>对于辅助平面内的字符，一个char可不够用了，需要由两个char来存储，或是用String来表示。</p>
 <p>来看一个emoji字符：”👉”</p>
 <blockquote>
 <p>Unicode编码：<code>U+1F449</code><br>UTF8编码：<code>F09F9189</code><br>UTF16BE编码：<code>FEFFD83DDC49</code><br>UTF16LE编码：<code>FFFE3DD849DC</code></p>
@@ -293,27 +475,41 @@
 
 <p><strong>问题：</strong><br>String.length()会将一个非bmp中的字符算为1还是算为2呢？<br>测试↓</p>
 <iframe src="https://run.codetool.top/?id=17" frameborder="0" height="500" style="box-sizing: border-box; color: rgb(33, 33, 33); font-family: Roboto, &quot;Helvetica Neue&quot;, Helvetica, Arial, &quot;Microsoft Yahei&quot;, sans-serif; font-size: 15px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial; width: 668px; border: 1px solid rgb(204, 204, 204);"></iframe>
- 可见，如果String中存在非bmp中的字符，String会将它算成两个字符长度。看String.length()的源码也可知道这点：
 
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">length</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> value.length;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<p>可见，如果String中存在非bmp中的字符，String会将它算成两个字符长度。看String.length()的源码也可知道这点：</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> value<span class="token punctuation">.</span>length<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
 <p><code>value</code>是String内部的一个字符数组。</p>
-<h2 id="java对码点计算的支持"><a href="#java对码点计算的支持" class="headerlink" title="java对码点计算的支持"></a>java对码点计算的支持</h2><p>其实String中也提供了计算码点的方法：<code>String.codePointCount(int beginIndex, int endIndex)</code></p>
+<h2 id="java对码点计算的支持">2.3 java对码点计算的支持</h2><p>其实String中也提供了计算码点的方法：<code>String.codePointCount(int beginIndex, int endIndex)</code></p>
 <iframe src="https://run.codetool.top/?id=18" frameborder="0" height="500" style="box-sizing: border-box; color: rgb(33, 33, 33); font-family: Roboto, &quot;Helvetica Neue&quot;, Helvetica, Arial, &quot;Microsoft Yahei&quot;, sans-serif; font-size: 15px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial; width: 668px; border: 1px solid rgb(204, 204, 204);"></iframe>
 
 
 <p>利用的是<code>Character</code>类能判断一个码点是否为代理码点：<br><code>Character.isHighSurrogate</code>：是否为高位代理码点</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isHighSurrogate</span><span class="params">(<span class="keyword">char</span> ch)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// Help VM constant-fold; MAX_HIGH_SURROGATE + 1 == MIN_LOW_SURROGATE</span></span><br><span class="line">    <span class="keyword">return</span> ch &gt;= MIN_HIGH_SURROGATE &amp;&amp; ch &lt; (MAX_HIGH_SURROGATE + <span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">boolean</span> <span class="token function">isHighSurrogate</span><span class="token punctuation">(</span><span class="token keyword">char</span> ch<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">// Help VM constant-fold; MAX_HIGH_SURROGATE + 1 == MIN_LOW_SURROGATE</span>
+    <span class="token keyword">return</span> ch <span class="token operator">>=</span> MIN_HIGH_SURROGATE <span class="token operator">&amp;&amp;</span> ch <span class="token operator">&lt;</span> <span class="token punctuation">(</span>MAX_HIGH_SURROGATE <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
 <p>其中<code>MIN_HIGH_SURROGATE=\uD800</code>和<code>MAX_HIGH_SURROGATE=\uDBFF</code>，注明了高位代理码点的值边界。</p>
 <p><code>Character.isLowSurrogate</code>：是否为低位代理码点</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isLowSurrogate</span><span class="params">(<span class="keyword">char</span> ch)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> ch &gt;= MIN_LOW_SURROGATE &amp;&amp; ch &lt; (MAX_LOW_SURROGATE + <span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">boolean</span> <span class="token function">isLowSurrogate</span><span class="token punctuation">(</span><span class="token keyword">char</span> ch<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> ch <span class="token operator">>=</span> MIN_LOW_SURROGATE <span class="token operator">&amp;&amp;</span> ch <span class="token operator">&lt;</span> <span class="token punctuation">(</span>MAX_LOW_SURROGATE <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
 <p>其中<code>MIN_HIGH_SURROGATE=\uDC00</code>和<code>MAX_HIGH_SURROGATE=\uDFFF</code>，注明了高位代理码点的值边界。</p>
 <p>要判断字符串内有没有代理码点，只需确定连续的两个码点一个是高位代理码点一个是低位代理码点就行了。</p>
 <p><code>String.codePointCount</code>依赖的方法<code>Character.codePointCountImpl</code>源码：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">codePointCountImpl</span><span class="params">(<span class="keyword">char</span>[] a, <span class="keyword">int</span> offset, <span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> endIndex = offset + count;</span><br><span class="line">    <span class="keyword">int</span> n = count;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = offset; i &lt; endIndex; ) &#123;</span><br><span class="line">        <span class="keyword">if</span> (isHighSurrogate(a[i++]) &amp;&amp; i &lt; endIndex &amp;&amp;</span><br><span class="line">            isLowSurrogate(a[i])) &#123;</span><br><span class="line">            n--;</span><br><span class="line">            i++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> n;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre class=" language-java"><code class="language-java"><span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">codePointCountImpl</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token punctuation">[</span><span class="token punctuation">]</span> a<span class="token punctuation">,</span> <span class="token keyword">int</span> offset<span class="token punctuation">,</span> <span class="token keyword">int</span> count<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">int</span> endIndex <span class="token operator">=</span> offset <span class="token operator">+</span> count<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> n <span class="token operator">=</span> count<span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> offset<span class="token punctuation">;</span> i <span class="token operator">&lt;</span> endIndex<span class="token punctuation">;</span> <span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">isHighSurrogate</span><span class="token punctuation">(</span>a<span class="token punctuation">[</span>i<span class="token operator">++</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> i <span class="token operator">&lt;</span> endIndex <span class="token operator">&amp;&amp;</span>
+            <span class="token function">isLowSurrogate</span><span class="token punctuation">(</span>a<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            n<span class="token operator">--</span><span class="token punctuation">;</span>
+            i<span class="token operator">++</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> n<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
 <p>如果要遍历一个字符串中的字符，可能需要考虑是否有非kmp中的字符的情况。那么就需要用码点为单位来处理：</p>
 <p><strong>反例：</strong></p>
 <iframe src="https://run.codetool.top/?id=19" frameborder="0" height="500" style="box-sizing: border-box; color: rgb(33, 33, 33); font-family: Roboto, &quot;Helvetica Neue&quot;, Helvetica, Arial, &quot;Microsoft Yahei&quot;, sans-serif; font-size: 15px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial; width: 668px; border: 1px solid rgb(204, 204, 204);"></iframe>
@@ -324,147 +520,654 @@
 <iframe src="https://run.codetool.top/?id=20" frameborder="0" height="500" style="box-sizing: border-box; color: rgb(33, 33, 33); font-family: Roboto, &quot;Helvetica Neue&quot;, Helvetica, Arial, &quot;Microsoft Yahei&quot;, sans-serif; font-size: 15px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial; width: 668px; border: 1px solid rgb(204, 204, 204);"></iframe>
 
 
-        </div>
+            </div>
+            <hr/>
 
-        <blockquote class="post-copyright">
-    
-    <div class="content">
+            
+
+    <div class="reprint" id="reprint-statement">
         
-<span class="post-time">
-    最后更新时间：<time datetime="2019-12-19T08:16:26.317Z" itemprop="dateUpdated">2019-12-19 16:16:26</time>
-</span><br>
-
-
-        
-        感谢您的阅读
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://www.codetool.top" rel="external nofollow noreferrer">Rhett Peng</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+                    !
+                </span>
+            </div>
         
     </div>
-    
-    <footer>
-        <a href="https://www.codetool.top">
-            <img src="/img/avatar.png" alt="Rhett Peng">
-            Rhett Peng
-        </a>
-    </footer>
-</blockquote>
 
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/java/">
+                                    <span class="chip bg-color">java</span>
+                                </a>
+                            
+                                <a href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">
+                                    <span class="chip bg-color">基础知识</span>
+                                </a>
+                            
+                                <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/">
+                                    <span class="chip bg-color">字符编码</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="https://unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'VUmN3m0ICuwaL4jNPnxBRln8-gzGzoHsz',
+        appKey: 'QH8FVT32jvi4qBllLg6Cf0dU',
+        notify: 'false' === 'true',
+        verify: 'true' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: '说点什么吧'
+    });
+</script>
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
         
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/article/AVL%E6%A0%91-%E8%87%AA%E5%B9%B3%E8%A1%A1%E7%9A%84%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/1.jpg" class="responsive-img" alt="AVL树-自平衡的二叉搜索树">
+                        
+                        <span class="card-title">AVL树-自平衡的二叉搜索树</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            本文图片来源：手把手教，手写AVL树 - 不止是编程 - 博客园
+1 AVL树的概念1.1 自平衡当二叉搜索树处于平衡状态的时候，其操作时间复杂度为O(logN)，但当二叉搜索树是单支树的时候，其搜索效率则为O(N)。可见，二叉搜索树的平衡
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2019-11-25
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-category">
+                                    算法/数据结构
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
+                        <span class="chip bg-color">数据结构</span>
+                    </a>
+                    
+                    <a href="/tags/%E6%90%9C%E7%B4%A2%E6%A0%91/">
+                        <span class="chip bg-color">搜索树</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/article/leetcode200-%E5%B2%9B%E5%B1%BF%E6%95%B0%E9%87%8F/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/21.jpg" class="responsive-img" alt="leetcode200-岛屿数量">
+                        
+                        <span class="card-title">leetcode200-岛屿数量</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            1 原题给定一个由 &#39;1&#39;（陆地）和 &#39;0&#39;（水）组成的的二维网格，计算岛屿的数量。一个岛被水包围，并且它是通过水平方向或垂直方向上相邻的陆地连接而成的。你可以假设网格的四个边均被水包围。
+示例1:
+
+输入:
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2019-11-24
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-category">
+                                    算法/数据结构
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/leetcode/">
+                        <span class="chip bg-color">leetcode</span>
+                    </a>
+                    
+                    <a href="/tags/%E7%AE%97%E6%B3%95/">
+                        <span class="chip bg-color">算法</span>
+                    </a>
+                    
+                    <a href="/tags/BFS/">
+                        <span class="chip bg-color">BFS</span>
+                    </a>
+                    
+                    <a href="/tags/DFS/">
+                        <span class="chip bg-color">DFS</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
 
 
-        <div class="post-footer">
-            
-	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/" rel="tag">java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" rel="tag">基础知识</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li></ul>
 
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
 
-            
-<div class="page-share-wrap">
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
     
+<!-- 代码块复制 -->
 
-<div class="page-share" id="pageShare">
-    <ul class="reset share-icons">
-      <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/&title=《详解java中的unicode编码（码点）》 — 代码段小站&pic=https://www.codetool.top/img/avatar.png" data-title="微博">
-          <i class="icon icon-weibo"></i>
-        </a>
-      </li>
-      <li>
-        <a class="weixin share-sns wxFab" data-title="微信">
-          <i class="icon icon-weixin"></i>
-        </a>
-      </li>
-      <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/&title=《详解java中的unicode编码（码点）》 — 代码段小站&source=" data-title=" QQ">
-          <i class="icon icon-qq"></i>
-        </a>
-      </li>
-      <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/" data-title=" Facebook">
-          <i class="icon icon-facebook"></i>
-        </a>
-      </li>
-      <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《详解java中的unicode编码（码点）》 — 代码段小站&url=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/&via=https://www.codetool.top" data-title=" Twitter">
-          <i class="icon icon-twitter"></i>
-        </a>
-      </li>
-      <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/" data-title=" Google+">
-          <i class="icon icon-google-plus"></i>
-        </a>
-      </li>
-    </ul>
- </div>
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
 
 
+<!-- 代码块收缩 -->
 
-    <a id="shareFab" class="page-share-fab waves-effect waves-circle">
-        <i class="icon icon-share-alt icon-lg"></i>
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+<!-- 代码块折行 -->
+
+<style type="text/css">
+code[class*="language-"], pre[class*="language-"] { white-space: pre !important; }
+</style>
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
     </a>
 </div>
 
 
-
-        </div>
-    </div>
-
-    
-<nav class="post-nav flex-row flex-justify-between">
-  
-    <div class="waves-block waves-effect prev">
-      <a href="/article/AVL%E6%A0%91-%E8%87%AA%E5%B9%B3%E8%A1%A1%E7%9A%84%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91/" id="post-prev" class="post-nav-link">
-        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
-        <h4 class="title">AVL树-自平衡的二叉搜索树</h4>
-      </a>
-    </div>
-  
-
-  
-    <div class="waves-block waves-effect next">
-      <a href="/article/leetcode200-%E5%B2%9B%E5%B1%BF%E6%95%B0%E9%87%8F/" id="post-next" class="post-nav-link">
-        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
-        <h4 class="title">leetcode200-岛屿数量</h4>
-      </a>
-    </div>
-  
-</nav>
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-    <!-- Valine Comments -->
-    <div class="comments vcomment" id="comments"></div>
-    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-    <script src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
-    <!-- Valine Comments script -->
-    <script>
-        var GUEST_INFO = ['nick','mail','link'];
-        var guest_info = 'nick,mail'.split(',').filter(function(item){
-          return GUEST_INFO.indexOf(item) > -1
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h1, h2, h3, h4'
         });
-        new Valine({
-            el: '#comments',
-            notify: 'true' == 'true',
-            verify: 'true' == 'true',
-            appId: "VUmN3m0ICuwaL4jNPnxBRln8-gzGzoHsz",
-            appKey: "QH8FVT32jvi4qBllLg6Cf0dU",
-            avatar: "mm",
-            placeholder: "说点什么吧",
-            guest_info: guest_info.length == 0 ? GUEST_INFO : guest_info,
-            pageSize: "10"
-        })
-    </script>
-    <!-- Valine Comments end -->
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h1, h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+    <footer class="page-footer bg-color">
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            <span id="year">2019</span>
+            <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">63.6k</span>&nbsp;字
+            
+            
+            
+            
+            
+            <br>
+            
+            <br>
+            
+            <span id="icp"><img src="/medias/icp.png" style="vertical-align: text-bottom;" />
+                <a href="http://beian.miit.gov.cn/" target="_blank">赣ICP备19011928号</a>
+            </span>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/codeband-top" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:pctdyx@qq.net" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
 
 
 
@@ -472,128 +1175,94 @@
 
 
 
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=995632825" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 995632825" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
 
 
 
-</article>
+
 
 
 
 </div>
-
-        <footer class="footer">
-    <div class="top">
-        
-
-        <p>
-            
-                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
-            
-            <span>博客内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
-        </p>
-    </div>
-    <div class="bottom">
-        <p><span>Rhett Peng &copy; 2018 - 2020</span>
-            <span>
-                
-                <a href="http://beian.miit.gov.cn/" target="_blank">赣ICP备19011928号</a><br>
-                
-                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
-            </span>
-        </p>
     </div>
 </footer>
 
-    </main>
-    <div class="mask" id="mask"></div>
-<a id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+<div class="progress-bar"></div>
 
 
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
 
-<div class="global-share" id="globalShare">
-    <ul class="reset share-icons">
-      <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/&title=《详解java中的unicode编码（码点）》 — 代码段小站&pic=https://www.codetool.top/img/avatar.png" data-title="微博">
-          <i class="icon icon-weibo"></i>
-        </a>
-      </li>
-      <li>
-        <a class="weixin share-sns wxFab" data-title="微信">
-          <i class="icon icon-weixin"></i>
-        </a>
-      </li>
-      <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/&title=《详解java中的unicode编码（码点）》 — 代码段小站&source=" data-title=" QQ">
-          <i class="icon icon-qq"></i>
-        </a>
-      </li>
-      <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/" data-title=" Facebook">
-          <i class="icon icon-facebook"></i>
-        </a>
-      </li>
-      <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《详解java中的unicode编码（码点）》 — 代码段小站&url=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/&via=https://www.codetool.top" data-title=" Twitter">
-          <i class="icon icon-twitter"></i>
-        </a>
-      </li>
-      <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://www.codetool.top/article/unicode%E7%9F%A5%E8%AF%86/" data-title=" Google+">
-          <i class="icon icon-google-plus"></i>
-        </a>
-      </li>
-    </ul>
- </div>
-
-
-<div class="page-modal wx-share" id="wxShare">
-    <a class="close"><i class="icon icon-close"></i></a>
-    <p>扫一扫，分享到微信</p>
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACHklEQVR42u3aO3LDMAwFQN//0kqbmUykB0AuSK4qT6xIXBYw8fl84uv6c91/+/ue5L/u73ztwsDAWJZx3V69e3rI3nsxMDDOYfwXwe7vuX/Ow4uD5yRrw8DAwKg+Og/NCRgDAwNjzkhCajUQY2BgYEyS2KQodhWvJOC+nItjYGAsyJgklt/+/JX+BgYGxlKMXnCsJp+T5kG0KgwMjK0Z1aJ/74CYYHpNCAwMjHMY+WBE8sq8DVANxy8cFjEwMDZlTF5QLatNtgMDA+M0xqTROG9YfqUBgIGBsSwjT0qriWgOKIxTJNMiGBgY2zGqxa/qIa86cNbbXAwMjL0Zk5T13VL+JEnGwMDYm5GExd7IxTwZzteGgYGxNyM/P/bCa5VafUI2eYGBgbEPo9donCeik03BwMA4gVE9ovVKcr0ktrk1GBgY2zGSQtt8VCKf+2geQDEwMLZmTBqT+RbMU9yIioGBsTWjmrjmqe+krJb8AJQHLzAwMJZlTFLWd0NwFfDQicXAwNiOkZfJJkG2OhaWJ7QYGBinMfLSWLW4Vm2ORsMWGBgYWzOu4pUUv3pLrFIxMDDOYfQeXY3oeRM0H91oYjAwMJZlTBLR6vjFJOA+bCsGBsYBjHysobe43mhFofSGgYGB0Wpz9toDo2kRDAwMjDj5TJZVDdAvHw0xMDAWZCRJbP5tfgSs/h0DA+NMRjXk9RbXG8t4tzmKgYGxIOMHHAdqmN1X7jIAAAAASUVORK5CYII=" alt="微信分享二维码">
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+$(function () {
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+});
+</script>
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
 </div>
 
 
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
 <script>
-var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
-
-
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
 </script>
 
-<script src="/js/main.min.js?v=1.7.2"></script>
-
-
-<div class="search-panel" id="search-panel">
-    <ul class="search-result" id="search-result"></ul>
-</div>
-<template id="search-tpl">
-<li class="item">
-    <a href="{path}" class="waves-block waves-effect">
-        <div class="title ellipsis" title="{title}">{title}</div>
-        <div class="flex-row flex-middle">
-            <div class="tags ellipsis">
-                {tags}
-            </div>
-            <time class="flex-col time">{date}</time>
-        </div>
-    </a>
-</li>
-</template>
-
-<script src="/js/search.min.js?v=1.7.2" async></script>
-
-
-
-
-
-
-
-
-
+    
+    
 
     
+
+    
+
+    
+
+    
+
+    
+    
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":200,"height":200,"hOffset":20,"vOffset":100},"mobile":{"show":false},"dialog":{"enable":true,"hitokoto":false},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
 <div id="chat_input"><input id="question" type="text" placeholder="陪我聊聊天吧" onkeypress="return onKeyPress(event)"/></div>
 </html>
