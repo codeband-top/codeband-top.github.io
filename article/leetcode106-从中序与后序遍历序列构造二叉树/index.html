@@ -376,12 +376,12 @@
                                 <span class="chip bg-color">算法</span>
                             </a>
                         
-                            <a href="/tags/%E9%80%92%E5%BD%92/">
-                                <span class="chip bg-color">递归</span>
-                            </a>
-                        
                             <a href="/tags/%E6%A0%91/">
                                 <span class="chip bg-color">树</span>
+                            </a>
+                        
+                            <a href="/tags/%E9%80%92%E5%BD%92/">
+                                <span class="chip bg-color">递归</span>
                             </a>
                         
                     </div>
@@ -414,7 +414,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    261
+                    590
                 </div>
                 
 
@@ -437,8 +437,10 @@
 <blockquote>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;3<br>&nbsp;&nbsp;&nbsp;/ \<br>&nbsp;&nbsp;9&nbsp;&nbsp;20<br>&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;\<br>&nbsp;&nbsp;&nbsp;15&nbsp;&nbsp;&nbsp;7  </p>
 </blockquote>
-<h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>根据后序遍历最后一个元素是根的特点，递归构造左子树和右子树。</p>
-<h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>
+<h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>根据后序遍历最后一个元素是根、中序遍历以根为中心划分左子树和右子树的特点，递归构造左子树和右子树。</p>
+<h2 id="代码">2.2 代码</h2><p>我们逐渐来优化时间复杂度：  </p>
+<p>第一版，较好懂：</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>
     <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">indexOf</span><span class="token punctuation">(</span><span class="token keyword">int</span> target<span class="token punctuation">,</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> order<span class="token punctuation">)</span><span class="token punctuation">{</span>
         <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>order<span class="token punctuation">.</span>length<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
             <span class="token keyword">if</span><span class="token punctuation">(</span>order<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">==</span> target<span class="token punctuation">)</span> <span class="token keyword">return</span> i<span class="token punctuation">;</span>
@@ -461,6 +463,55 @@
         <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> rightpartPostorder <span class="token operator">=</span> Arrays<span class="token punctuation">.</span><span class="token function">copyOfRange</span><span class="token punctuation">(</span>postorder<span class="token punctuation">,</span>leftCount<span class="token punctuation">,</span>postorder<span class="token punctuation">.</span>length<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
         root<span class="token punctuation">.</span>left <span class="token operator">=</span> <span class="token function">getUnit</span><span class="token punctuation">(</span>leftpartInorder<span class="token punctuation">,</span>leftpartPostorder<span class="token punctuation">)</span><span class="token punctuation">;</span>
         root<span class="token punctuation">.</span>right <span class="token operator">=</span> <span class="token function">getUnit</span><span class="token punctuation">(</span>rightpartInorder<span class="token punctuation">,</span>rightpartPostorder<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> root<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>第二版，不用再复制数组，直接在原数组上操作：</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>
+    <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> inorderGlobal<span class="token punctuation">;</span>
+    <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> postorderGlobal<span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">indexOf</span><span class="token punctuation">(</span><span class="token keyword">int</span> target<span class="token punctuation">,</span><span class="token keyword">int</span> start<span class="token punctuation">,</span><span class="token keyword">int</span> end<span class="token punctuation">)</span><span class="token punctuation">{</span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>end<span class="token operator">-</span>start<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>inorderGlobal<span class="token punctuation">[</span>i<span class="token operator">+</span>start<span class="token punctuation">]</span> <span class="token operator">==</span> target<span class="token punctuation">)</span> <span class="token keyword">return</span> i<span class="token operator">+</span>start<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">public</span> TreeNode <span class="token function">buildTree</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> inorder<span class="token punctuation">,</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> postorder<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        inorderGlobal <span class="token operator">=</span> inorder<span class="token punctuation">;</span>
+        postorderGlobal <span class="token operator">=</span> postorder<span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>postorder<span class="token punctuation">.</span>length <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token keyword">return</span> null<span class="token punctuation">;</span>
+        TreeNode root <span class="token operator">=</span> <span class="token function">getUnit</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span>inorder<span class="token punctuation">.</span>length<span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">,</span>postorder<span class="token punctuation">.</span>length<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> root<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">public</span> TreeNode <span class="token function">getUnit</span><span class="token punctuation">(</span><span class="token keyword">int</span> inorderStart<span class="token punctuation">,</span><span class="token keyword">int</span> inorderEnd<span class="token punctuation">,</span><span class="token keyword">int</span> postorderStart<span class="token punctuation">,</span><span class="token keyword">int</span> postorderEnd<span class="token punctuation">)</span><span class="token punctuation">{</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>postorderEnd<span class="token operator">==</span>postorderStart<span class="token punctuation">)</span> <span class="token keyword">return</span> null<span class="token punctuation">;</span>
+        TreeNode root <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">TreeNode</span><span class="token punctuation">(</span>postorderGlobal<span class="token punctuation">[</span>postorderEnd<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> index <span class="token operator">=</span> <span class="token function">indexOf</span><span class="token punctuation">(</span>postorderGlobal<span class="token punctuation">[</span>postorderEnd<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span>inorderStart<span class="token punctuation">,</span>inorderEnd<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> leftCount <span class="token operator">=</span> index<span class="token operator">-</span>inorderStart<span class="token punctuation">;</span>
+        root<span class="token punctuation">.</span>left <span class="token operator">=</span> <span class="token function">getUnit</span><span class="token punctuation">(</span>inorderStart<span class="token punctuation">,</span>index<span class="token punctuation">,</span>postorderStart<span class="token punctuation">,</span>leftCount<span class="token operator">+</span>postorderStart<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        root<span class="token punctuation">.</span>right <span class="token operator">=</span> <span class="token function">getUnit</span><span class="token punctuation">(</span>index<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">,</span>inorderEnd<span class="token punctuation">,</span>postorderStart<span class="token operator">+</span>leftCount<span class="token punctuation">,</span>postorderEnd<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> root<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>第三版，既然经常要用查找元素在中序遍历中的位置，可以不需要使用indexOf函数，而是一开始则将对应关系保存在哈希表中：</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>
+    <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> postorderGlobal<span class="token punctuation">;</span>
+    Map<span class="token operator">&lt;</span>Integer<span class="token punctuation">,</span>Integer<span class="token operator">></span> map<span class="token punctuation">;</span>
+    <span class="token keyword">public</span> TreeNode <span class="token function">buildTree</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> inorder<span class="token punctuation">,</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> postorder<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        postorderGlobal <span class="token operator">=</span> postorder<span class="token punctuation">;</span>
+        map <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i <span class="token operator">&lt;</span> inorder<span class="token punctuation">.</span>length<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> map<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>inorder<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> i<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>postorder<span class="token punctuation">.</span>length <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token keyword">return</span> null<span class="token punctuation">;</span>
+        TreeNode root <span class="token operator">=</span> <span class="token function">getUnit</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span>inorder<span class="token punctuation">.</span>length<span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">,</span>postorder<span class="token punctuation">.</span>length<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> root<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">public</span> TreeNode <span class="token function">getUnit</span><span class="token punctuation">(</span><span class="token keyword">int</span> inorderStart<span class="token punctuation">,</span><span class="token keyword">int</span> inorderEnd<span class="token punctuation">,</span><span class="token keyword">int</span> postorderStart<span class="token punctuation">,</span><span class="token keyword">int</span> postorderEnd<span class="token punctuation">)</span><span class="token punctuation">{</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>postorderEnd<span class="token operator">==</span>postorderStart<span class="token punctuation">)</span> <span class="token keyword">return</span> null<span class="token punctuation">;</span>
+        TreeNode root <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">TreeNode</span><span class="token punctuation">(</span>postorderGlobal<span class="token punctuation">[</span>postorderEnd<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> index <span class="token operator">=</span> map<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>postorderGlobal<span class="token punctuation">[</span>postorderEnd<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> leftCount <span class="token operator">=</span> index<span class="token operator">-</span>inorderStart<span class="token punctuation">;</span>
+        root<span class="token punctuation">.</span>left <span class="token operator">=</span> <span class="token function">getUnit</span><span class="token punctuation">(</span>inorderStart<span class="token punctuation">,</span>index<span class="token punctuation">,</span>postorderStart<span class="token punctuation">,</span>leftCount<span class="token operator">+</span>postorderStart<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        root<span class="token punctuation">.</span>right <span class="token operator">=</span> <span class="token function">getUnit</span><span class="token punctuation">(</span>index<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">,</span>inorderEnd<span class="token punctuation">,</span>postorderStart<span class="token operator">+</span>leftCount<span class="token punctuation">,</span>postorderEnd<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token keyword">return</span> root<span class="token punctuation">;</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span></code></pre>
@@ -525,12 +576,12 @@
                                     <span class="chip bg-color">算法</span>
                                 </a>
                             
-                                <a href="/tags/%E9%80%92%E5%BD%92/">
-                                    <span class="chip bg-color">递归</span>
-                                </a>
-                            
                                 <a href="/tags/%E6%A0%91/">
                                     <span class="chip bg-color">树</span>
+                                </a>
+                            
+                                <a href="/tags/%E9%80%92%E5%BD%92/">
+                                    <span class="chip bg-color">递归</span>
                                 </a>
                             
                         </div>
@@ -886,12 +937,12 @@
                         <span class="chip bg-color">算法</span>
                     </a>
                     
-                    <a href="/tags/%E9%80%92%E5%BD%92/">
-                        <span class="chip bg-color">递归</span>
-                    </a>
-                    
                     <a href="/tags/%E6%A0%91/">
                         <span class="chip bg-color">树</span>
+                    </a>
+                    
+                    <a href="/tags/%E9%80%92%E5%BD%92/">
+                        <span class="chip bg-color">递归</span>
                     </a>
                     
                 </div>
@@ -951,12 +1002,12 @@
                         <span class="chip bg-color">算法</span>
                     </a>
                     
-                    <a href="/tags/%E9%80%92%E5%BD%92/">
-                        <span class="chip bg-color">递归</span>
-                    </a>
-                    
                     <a href="/tags/%E6%A0%91/">
                         <span class="chip bg-color">树</span>
+                    </a>
+                    
+                    <a href="/tags/%E9%80%92%E5%BD%92/">
+                        <span class="chip bg-color">递归</span>
                     </a>
                     
                 </div>
@@ -1106,7 +1157,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">77k</span>&nbsp;字
+                class="white-color">78.4k</span>&nbsp;字
             
             
             
