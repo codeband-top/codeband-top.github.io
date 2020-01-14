@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.codetool.top/"/>
-  <updated>2020-01-14T13:53:02.704Z</updated>
+  <updated>2020-01-14T17:29:55.354Z</updated>
   <id>https://www.codetool.top/</id>
   
   <author>
@@ -15,6 +15,39 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>leetcode236-二叉树的最近公共祖先</title>
+    <link href="https://www.codetool.top/article/leetcode236-%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E6%9C%80%E8%BF%91%E5%85%AC%E5%85%B1%E7%A5%96%E5%85%88/"/>
+    <id>https://www.codetool.top/article/leetcode236-二叉树的最近公共祖先/</id>
+    <published>2020-01-14T16:54:05.000Z</published>
+    <updated>2020-01-14T17:29:55.354Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>给定一个二叉树, 找到该树中两个指定节点的最近公共祖先。</p><p>百度百科中最近公共祖先的定义为：“对于有根树 T 的两个结点 p、q，最近公共祖先表示为一个结点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（<strong>一个节点也可以是它自己的祖先</strong>）。”</p><p>例如，给定如下二叉树:  root = [3,5,1,6,2,0,8,null,null,7,4]</p><p><img src="https://api.codetool.top/img/15790215494425.png" alt></p><p><strong>示例1：</strong></p><blockquote><p><strong>输入:</strong> root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1<br><strong>输出:</strong> 3<br><strong>解释:</strong> 节点 5 和节点 1 的最近公共祖先是节点 3。  </p></blockquote><p><strong>示例2：</strong></p><blockquote><p><strong>输入:</strong> root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 4<br><strong>输出:</strong> 5<br><strong>解释:</strong> 节点 5 和节点 4 的最近公共祖先是节点 5。因为根据定义最近公共祖先节点可以为节点本身。  </p></blockquote><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>我首先的思路就是要有一个reach函数，可以判断一个节点是不是指定节点的祖先，通过dfs实现，返回一个bool值。<br>那么这道题要寻找离p、q最近的祖先节点，就可以再使用一个dfs，我们都知道dfs回溯的时候是从下往上的，那么只要调用函数最早对参数p、q都返回true的节点就是要得到的答案了，然后沿着回溯返回值链传回这个节点。</p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> TreeNode <span class="token function">lowestCommonAncestor</span><span class="token punctuation">(</span>TreeNode root<span class="token punctuation">,</span> TreeNode p<span class="token punctuation">,</span> TreeNode q<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>root <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token keyword">return</span> null<span class="token punctuation">;</span>        TreeNode left <span class="token operator">=</span> <span class="token function">lowestCommonAncestor</span><span class="token punctuation">(</span>root<span class="token punctuation">.</span>left<span class="token punctuation">,</span>p<span class="token punctuation">,</span>q<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>left<span class="token operator">!=</span>null<span class="token punctuation">)</span> <span class="token keyword">return</span> left<span class="token punctuation">;</span>        TreeNode right <span class="token operator">=</span> <span class="token function">lowestCommonAncestor</span><span class="token punctuation">(</span>root<span class="token punctuation">.</span>right<span class="token punctuation">,</span>p<span class="token punctuation">,</span>q<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>right<span class="token operator">!=</span>null<span class="token punctuation">)</span> <span class="token keyword">return</span> right<span class="token punctuation">;</span>        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">reach</span><span class="token punctuation">(</span>root<span class="token punctuation">,</span>p<span class="token punctuation">.</span>val<span class="token punctuation">)</span><span class="token operator">==</span><span class="token boolean">true</span><span class="token operator">&amp;&amp;</span><span class="token function">reach</span><span class="token punctuation">(</span>root<span class="token punctuation">,</span>q<span class="token punctuation">.</span>val<span class="token punctuation">)</span><span class="token operator">==</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token keyword">return</span> root<span class="token punctuation">;</span>        <span class="token keyword">return</span> null<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">reach</span><span class="token punctuation">(</span>TreeNode root<span class="token punctuation">,</span><span class="token keyword">int</span> value<span class="token punctuation">)</span><span class="token punctuation">{</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>root <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>root<span class="token punctuation">.</span>val <span class="token operator">==</span> value<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>        <span class="token keyword">return</span> <span class="token function">reach</span><span class="token punctuation">(</span>root<span class="token punctuation">.</span>left<span class="token punctuation">,</span>value<span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token function">reach</span><span class="token punctuation">(</span>root<span class="token punctuation">.</span>right<span class="token punctuation">,</span>value<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;原题&quot;&gt;1 原题&lt;/h1&gt;&lt;p&gt;给定一个二叉树, 找到该树中两个指定节点的最近公共祖先。&lt;/p&gt;
+&lt;p&gt;百度百科中最近公共祖先的定义为：“对于有根树 T 的两个结点 p、q，最近公共祖先表示为一个结点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（&lt;st
+      
+    
+    </summary>
+    
+    
+      <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
+    
+    
+      <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
+    
+      <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
+    
+      <category term="DFS" scheme="https://www.codetool.top/tags/DFS/"/>
+    
+      <category term="树" scheme="https://www.codetool.top/tags/%E6%A0%91/"/>
+    
+  </entry>
   
   <entry>
     <title>leetcode117-填充每个节点的下一个右侧节点指针II</title>
@@ -639,37 +672,6 @@
       <category term="jvm" scheme="https://www.codetool.top/tags/jvm/"/>
     
       <category term="深入理解java虚拟机" scheme="https://www.codetool.top/tags/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>leetcode744-寻找比目标字母大的最小字母</title>
-    <link href="https://www.codetool.top/article/leetcode744-%E5%AF%BB%E6%89%BE%E6%AF%94%E7%9B%AE%E6%A0%87%E5%AD%97%E6%AF%8D%E5%A4%A7%E7%9A%84%E6%9C%80%E5%B0%8F%E5%AD%97%E6%AF%8D/"/>
-    <id>https://www.codetool.top/article/leetcode744-寻找比目标字母大的最小字母/</id>
-    <published>2020-01-05T09:31:46.000Z</published>
-    <updated>2020-01-05T09:40:41.163Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>给定一个只包含小写字母的有序数组<code>letters</code> 和一个目标字母 <code>target</code>，寻找有序数组里面比目标字母大的最小字母。</p><p>数组里字母的顺序是循环的。举个例子，如果目标字母<code>target = &#39;z&#39;</code> 并且有序数组为 <code>letters = [&#39;a&#39;, &#39;b&#39;]</code>，则答案返回 <code>&#39;a&#39;</code>。</p><p><strong>示例：</strong></p><blockquote><p><strong>输入:</strong><br>letters = [“c”, “f”, “j”]<br>target = “a”<br><strong>输出:</strong> “c”<br><br><br><strong>输入:</strong><br>letters = [“c”, “f”, “j”]<br>target = “c”<br><strong>输出:</strong> “f”<br><br><br><strong>输入:</strong><br>letters = [“c”, “f”, “j”]<br>target = “d”<br><strong>输出:</strong> “f”<br><br><br><strong>输入:</strong><br>letters = [“c”, “f”, “j”]<br>target = “g”<br><strong>输出:</strong> “j”<br><br><br><strong>输入:</strong><br>letters = [“c”, “f”, “j”]<br>target = “j”<br><strong>输出:</strong> “c”<br><br><br><strong>输入:</strong><br>letters = [“c”, “f”, “j”]<br>target = “k”<br><strong>输出:</strong> “c”</p></blockquote><p><strong>注:</strong></p><ol><li><code>letters</code>长度范围在<code>[2, 10000]</code>区间内。</li><li><code>letters</code> 仅由小写字母组成，最少包含两个不同的字母。</li><li>目标字母<code>target</code> 是一个小写字母。</li></ol><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>二分查找。</p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> <span class="token keyword">char</span> <span class="token function">nextGreatestLetter</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token punctuation">[</span><span class="token punctuation">]</span> letters<span class="token punctuation">,</span> <span class="token keyword">char</span> target<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">int</span> start <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> end <span class="token operator">=</span> letters<span class="token punctuation">.</span>length<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>        <span class="token keyword">while</span><span class="token punctuation">(</span>start<span class="token operator">&lt;</span>end<span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">int</span> mid <span class="token operator">=</span> start <span class="token operator">+</span> <span class="token punctuation">(</span>end<span class="token operator">-</span>start<span class="token punctuation">)</span><span class="token operator">/</span><span class="token number">2</span><span class="token punctuation">;</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>letters<span class="token punctuation">[</span>mid<span class="token punctuation">]</span><span class="token operator">&lt;=</span>target<span class="token punctuation">)</span> start <span class="token operator">=</span> mid<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">;</span>            <span class="token keyword">else</span> end <span class="token operator">=</span> mid<span class="token punctuation">;</span>        <span class="token punctuation">}</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>letters<span class="token punctuation">[</span>start<span class="token punctuation">]</span> <span class="token operator">&lt;=</span> target<span class="token punctuation">)</span> <span class="token keyword">return</span> letters<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>        <span class="token keyword">return</span> letters<span class="token punctuation">[</span>start<span class="token punctuation">]</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h1 id=&quot;原题&quot;&gt;1 原题&lt;/h1&gt;&lt;p&gt;给定一个只包含小写字母的有序数组&lt;code&gt;letters&lt;/code&gt; 和一个目标字母 &lt;code&gt;target&lt;/code&gt;，寻找有序数组里面比目标字母大的最小字母。&lt;/p&gt;
-&lt;p&gt;数组里字母的顺序是循环的。举个例子，如果目标字
-      
-    
-    </summary>
-    
-    
-      <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
-    
-    
-      <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
-    
-      <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
-    
-      <category term="二分查找" scheme="https://www.codetool.top/tags/%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE/"/>
     
   </entry>
   
