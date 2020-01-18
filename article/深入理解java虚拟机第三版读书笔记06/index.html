@@ -1,0 +1,1611 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="深入理解java虚拟机第三版读书笔记06, 代码段小站">
+    <meta name="description" content="以下是第六章 类文件结构的内容
+1 Class类文件的结构Class文件是一组以8个字节为基础单位的二进制流，各个数据项都是紧凑排列的，如果有需要占用8个字节以上的数据项时，会按照高位在前的方式分割成多个8字节进行存储。
+Class文件格式">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>深入理解java虚拟机第三版读书笔记06 | 代码段小站</title>
+    <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon.ico">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+    
+    <script src="/libs/jquery/jquery.min.js"></script>
+    
+<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper head-container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/code.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">代码段小站</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/runcode" class="waves-effect waves-light">
+      
+      <i class="fas fa-code" style="zoom: 0.6;"></i>
+      
+      <span>写代码</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/code.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">代码段小站</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/runcode" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-code"></i>
+			
+			写代码
+		</a>
+          
+        </li>
+        
+        
+    </ul>
+</div>
+
+        </div>
+
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/22.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">深入理解java虚拟机第三版读书笔记06</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        margin: 35px 0 15px 0;
+        padding-left: 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        height: calc(100vh - 250px);
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #toc-content .is-active-link::before {
+        background-color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/java/">
+                                <span class="chip bg-color">java</span>
+                            </a>
+                        
+                            <a href="/tags/jvm/">
+                                <span class="chip bg-color">jvm</span>
+                            </a>
+                        
+                            <a href="/tags/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/">
+                                <span class="chip bg-color">深入理解java虚拟机</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/" class="post-category">
+                                编程语言
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2020-01-18
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    2k
+                </div>
+                
+
+                
+				
+                
+            </div>
+            
+        </div>
+        <hr class="clearfix">
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>以下是<strong>第六章 类文件结构</strong>的内容</p>
+<h1 id="Class类文件的结构">1 Class类文件的结构</h1><p>Class文件是一组以8个字节为基础单位的二进制流，各个数据项都是紧凑排列的，如果有需要占用8个字节以上的数据项时，会按照高位在前的方式分割成多个8字节进行存储。</p>
+<p>Class文件格式采用一种类似于C语言结构体的伪结构来存储数据，这种伪结构中只有两种数据类型——“无符号数”和“表”：</p>
+<ul>
+<li>无符号数：基本的数据类型，以u1、u2、u4、u8来分别代表1个字节、2个字节、4个字节和8个字节的无符号数，无符号数可以用来描述数字、索引引用、数量值或者按照UTF-8编码构成字符串值。</li>
+<li>表：由多个无符号数或者其他表作为数据项构成的复合数据类型，为了便于区分，<strong>所有表的命名都习惯性地以“_info”结尾。</strong> </li>
+</ul>
+<p>Class文件由以下这些数据项组成：</p>
+<p><img src="https://api.codetool.top/img/15793652641604.png" alt="Class文件格式"></p>
+<h2 id="魔数与Class文件的版本">1.1 魔数与Class文件的版本</h2><p>每个Class文件的头4个字节被称为魔数（Magic Number），它的唯一作用是确定这个文件是否为一个能被虚拟机接受的Class文件。很多文件格式标准都会用魔数来确认文件格式，使用魔数而不是扩展名来进行识别主要是基于安全考虑，因为文件扩展名可以随意改动。Class文件的魔数值为<code>0xCAFEBABE</code>（咖啡宝贝）。</p>
+<p>紧接着魔数的4个字节存储的是Class文件的版本号：第5和第6个字节是次版本号（Minor Version），第7和第8个字节是主版本号（Major Version）。Java的主版本号是从45开始的，JDK 1.1之后的每个JDK大版本发布主版本号向上加1（JDK 1.0～1.1使用了45.0～45.3的版本号），高版本的JDK能向下兼容以前版本的Class文件，但不能运行以后版本的Class文件。</p>
+<p>Java1：45<br>Java4：48<br>Java5：49<br>Java8：52<br>以此类推  </p>
+<p>关于次版本号，曾经在Java 2出现前被短暂使用过，从JDK 1.2以后，直到JDK 12之前<strong>次版本号均未使用，全部固定为零。</strong>而到了JDK 12时期，由于JDK提供的功能集已经非常庞大，有一些复杂的新特性需要以“公测”的形式放出，所以设计者重新启用了副版本号，将它用于标识“技术预览版”功能特性的支持。如果Class文件中使用了该版本JDK尚未列入正式特性清单中的预览功能，则必须把次版本号标识为65535，以便Java虚拟机在加载类文件时能够区分出来。</p>
+<p><img src="https://api.codetool.top/img/15793686659279.png" alt="Class文件版本号"></p>
+<h1 id="常量池">2 常量池</h1><p>8~9字节是一项u2类型的数据，代表常量池容量计数值（常量池有多少项），这个容量计数是从1而不是0开始的。</p>
+<p>常量池中主要存放两大类常量：字面量（Literal）和符号引用（Symbolic References）。字面量比较接近于Java语言层面的常量概念，如文本字符串、被声明为final的常量值等。而符号引用则属于编译原理方面的概念，主要包括下面几类常量：</p>
+<ul>
+<li>被模块导出或者开放的包（Package）</li>
+<li>类和接口的全限定名（Fully Qualified Name）</li>
+<li>字段的名称和描述符（Descriptor）</li>
+<li>方法的名称和描述符</li>
+<li>方法句柄和方法类型（Method Handle、Method Type、Invoke Dynamic）</li>
+<li>动态调用点和动态常量（Dynamically-Computed Call Site、Dynamically-Computed Constant）</li>
+</ul>
+<p>最初常量表中共有11种结构各不相同的表结构数据，后来为了更好地支持动态语言调用，额外增加了4种动态语言相关的常量，为了支持Java模块化系统（Jigsaw），又加入了CONSTANT_Module_info和CONSTANT_Package_info两个常量，所以截至JDK13，常量表中分别有17种不同类型的常量。</p>
+<p>这17类表都有一个共同的特点，表结构起始的第一位是个u1类型的标志位（tag，取值见下表标志列），代表着当前常量属于哪种常量类型。17种常量类型所代表的具体含义如表所示。</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>标志</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CONSTANT_Utf8_info</td>
+<td>1</td>
+<td>UTF-8编码的字符串</td>
+</tr>
+<tr>
+<td>CONSTANT_Integer_info</td>
+<td>3</td>
+<td>整型字面量</td>
+</tr>
+<tr>
+<td>CONSTANT_Float_info</td>
+<td>4</td>
+<td>浮点型字面量</td>
+</tr>
+<tr>
+<td>CONSTANT_Long_info</td>
+<td>5</td>
+<td>长整型字面量</td>
+</tr>
+<tr>
+<td>CONSTANT_Double_info</td>
+<td>6</td>
+<td>双精度浮点型字面量</td>
+</tr>
+<tr>
+<td>CONSTANT_Class_info</td>
+<td>7</td>
+<td>类或接口的符号引用</td>
+</tr>
+<tr>
+<td>CONSTANT_String_info</td>
+<td>8</td>
+<td>字符串类型字面量</td>
+</tr>
+<tr>
+<td>CONSTANT_Fieldref_info</td>
+<td>9</td>
+<td>字段的符号引用</td>
+</tr>
+<tr>
+<td>CONSTANT_Methodref_info</td>
+<td>10</td>
+<td>类中方法的符号引用</td>
+</tr>
+<tr>
+<td>CONSTANT_InterfaceMethodref_info</td>
+<td>11</td>
+<td>接口中方法的符号引用</td>
+</tr>
+<tr>
+<td>CONSTANT_NameAndType_info</td>
+<td>12</td>
+<td>字段或方法的部分符号引用</td>
+</tr>
+<tr>
+<td>CONSTANT_MethodHandle_info</td>
+<td>15</td>
+<td>表示方法句柄</td>
+</tr>
+<tr>
+<td>CONSTANT_MethodType_info</td>
+<td>16</td>
+<td>表示方法类型</td>
+</tr>
+<tr>
+<td>CONSTANT_Dynamic_info</td>
+<td>17</td>
+<td>表示一个动态计算常量</td>
+</tr>
+<tr>
+<td>CONSTANT_InvokeDynamic_info</td>
+<td>18</td>
+<td>表示一个动态方法调用点</td>
+</tr>
+<tr>
+<td>CONSTANT_Module_info</td>
+<td>19</td>
+<td>表示一个模块</td>
+</tr>
+<tr>
+<td>CONSTANT_Package_info</td>
+<td>20</td>
+<td>表示一个模块中开放或者导出的包。</td>
+</tr>
+</tbody></table>
+<p>常量池中的17种数据类型的结构总表：</p>
+<table>
+ <col class="xl651514" span="4">
+ <thead>
+    <tr height="19">
+    <th height="19" class="xl661514">常量
+    </th><th class="xl661514">项目
+    </th><th class="xl661514">类型
+    </th><th class="xl661514">描述
+    </th></tr>
+ </thead>
+ <tr height="19">
+  <td rowspan="3" height="95" class="xl671514">CONSTANT_Utf8_info</td>
+  <td class="xl661514">tag</td>
+  <td class="xl661514">u1</td>
+  <td class="xl661514">值为1</td>
+ </tr>
+ <tr height="38">
+  <td height="38" class="xl661514">length<span>&nbsp;</span></td>
+  <td class="xl661514">u2</td>
+  <td class="xl661514">UTF-8编码的字符串占用的字节数</td>
+ </tr>
+ <tr height="38">
+  <td height="38" class="xl661514">bytes<span>&nbsp;</span></td>
+  <td class="xl661514">u1</td>
+  <td class="xl661514">长度为length的UTF-8编码的字符串</td>
+ </tr>
+ <tr height="19">
+  <td rowspan="2" height="57" class="xl671514">CONSTANT_Integer_info</td>
+  <td class="xl661514">tag</td>
+  <td class="xl661514">u1</td>
+  <td class="xl661514">值为3</td>
+ </tr>
+ <tr height="38">
+  <td height="38" class="xl661514">bytes<span>&nbsp;</span></td>
+  <td class="xl661514">u4</td>
+  <td class="xl661514">按照高位在前存储的int值</td>
+ </tr>
+ <tr height="19">
+  <td rowspan="2" height="57" class="xl671514">CONSTANT_Float_info</td>
+  <td class="xl661514">tag</td>
+  <td class="xl661514">u1</td>
+  <td class="xl661514">值为4</td>
+ </tr>
+ <tr height="38">
+  <td height="38" class="xl661514">bytes<span>&nbsp;</span></td>
+  <td class="xl661514">u4</td>
+  <td class="xl661514">按照高位在前存储的float值</td>
+ </tr>
+ <tr height="19">
+  <td rowspan="2" height="57" class="xl671514">CONSTANT_Long_info</td>
+  <td class="xl661514">tag</td>
+  <td class="xl661514">u1</td>
+  <td class="xl661514">值为5</td>
+ </tr>
+ <tr height="38">
+  <td height="38" class="xl661514">bytes<span>&nbsp;</span></td>
+  <td class="xl661514">u8</td>
+  <td class="xl661514">按照高位在前存储的long值</td>
+ </tr>
+ <tr height="19">
+  <td rowspan="2" height="57" class="xl671514">CONSTANT_Double_info</td>
+  <td class="xl661514">tag</td>
+  <td class="xl661514">u1</td>
+  <td class="xl661514">值为6</td>
+ </tr>
+ <tr height="38">
+  <td height="38" class="xl661514">bytes<span>&nbsp;</span></td>
+  <td class="xl661514">u8</td>
+  <td class="xl661514">按照高位在前存储的double值</td>
+ </tr>
+ <tr height="19">
+  <td rowspan="2" height="57" class="xl671514">CONSTANT_Class_info</td>
+  <td class="xl661514">tag</td>
+  <td class="xl661514">u1</td>
+  <td class="xl661514">值为7</td>
+ </tr>
+ <tr height="38">
+  <td height="38" class="xl661514">index</td>
+  <td class="xl661514">u2</td>
+  <td class="xl661514">指向全限定名常量项的索引</td>
+ </tr>
+ <tr height="19">
+  <td rowspan="2" height="57" class="xl671514">CONSTANT_String_info</td>
+  <td class="xl661514">tag</td>
+  <td class="xl661514">u1</td>
+  <td class="xl661514">值为8</td>
+ </tr>
+ <tr height="38">
+  <td height="38" class="xl661514">index</td>
+  <td class="xl661514">u2</td>
+  <td class="xl661514">指向字符串字面量的索引</td>
+ </tr>
+ <tr height="19">
+  <td rowspan="3" height="152" class="xl671514">CONSTANT_Fieldref_info</td>
+  <td class="xl661514">tag</td>
+  <td class="xl661514">u1</td>
+  <td class="xl661514">值为9</td>
+ </tr>
+ <tr height="76">
+  <td height="76" class="xl661514">index</td>
+  <td class="xl661514">u2</td>
+  <td class="xl661514">指向声明字段的类或者接口描述符CONSTANT_Class_info的索引项</td>
+ </tr>
+ <tr height="57">
+  <td height="57" class="xl661514">index</td>
+  <td class="xl661514">u2</td>
+  <td class="xl661514">指向字段描述符CONSTANT_NameAndType的索引项</td>
+ </tr>
+ <tr height="19">
+  <td rowspan="3" height="133" class="xl671514">CONSTANT_Methodref_info</td>
+  <td class="xl661514">tag</td>
+  <td class="xl661514">u1</td>
+  <td class="xl661514">值为10</td>
+ </tr>
+ <tr height="57">
+  <td height="57" class="xl661514">index</td>
+  <td class="xl661514">u2</td>
+  <td class="xl661514">指向声明方法的类描述符CONSTANT_Class_info的索引项</td>
+ </tr>
+ <tr height="57">
+  <td height="57" class="xl661514">index</td>
+  <td class="xl661514">u2</td>
+  <td class="xl661514">指向名称及类型描述符CONSTANT_NameAndType的索引项</td>
+ </tr>
+ <tr height="19">
+  <td rowspan="3" height="152" class="xl671514">CONSTANT_InterfaceMethodref_info</td>
+  <td class="xl661514">tag</td>
+  <td class="xl661514">u1</td>
+  <td class="xl661514">值为11</td>
+ </tr>
+ <tr height="76">
+  <td height="76" class="xl661514">index</td>
+  <td class="xl661514">u2</td>
+  <td class="xl661514">指向声明方法的接口描述符CONSTANT_Class_info的索引项</td>
+ </tr>
+ <tr height="57">
+  <td height="57" class="xl661514">index</td>
+  <td class="xl661514">u2</td>
+  <td class="xl661514">指向名称及类型描述符CONSTANT_NameAndType的索引项</td>
+ </tr>
+ <tr height="19">
+  <td rowspan="3" height="95" class="xl671514">CONSTANT_NameAndType_info</td>
+  <td class="xl661514">tag</td>
+  <td class="xl661514">u1</td>
+  <td class="xl661514">值为12</td>
+ </tr>
+ <tr height="38">
+  <td height="38" class="xl661514">index</td>
+  <td class="xl661514">u2</td>
+  <td class="xl661514">指向该字段或方法名称常量项的索引</td>
+ </tr>
+ <tr height="38">
+  <td height="38" class="xl661514">index</td>
+  <td class="xl661514">u2</td>
+  <td class="xl661514">指向该字段或方法描述符常量项的索引</td>
+ </tr>
+ <tr height="19">
+  <td rowspan="3" height="152" class="xl671514">CONSTANT_MethodHandle_info</td>
+  <td class="xl661514">tag</td>
+  <td class="xl661514">u1</td>
+  <td class="xl661514">值为15</td>
+ </tr>
+ <tr height="95">
+  <td height="95" class="xl661514">reference_kind</td>
+  <td class="xl661514">u1</td>
+  <td class="xl661514">值必须在1至9之间（包括1和9），它决定了方法句柄的类型。方法句柄类型的值表示方法句柄的字节码行为</td>
+ </tr>
+ <tr height="38">
+  <td height="38" class="xl661514">reference_index</td>
+  <td class="xl661514">u2</td>
+  <td class="xl661514">值必须是对常量池的有效索引</td>
+ </tr>
+ <tr height="19">
+  <td rowspan="2" height="114" class="xl671514">CONSTANT_MethodType_info</td>
+  <td class="xl661514">tag</td>
+  <td class="xl661514">u1</td>
+  <td class="xl661514">值为16</td>
+ </tr>
+ <tr height="95">
+  <td height="95" class="xl661514">descriptor_index</td>
+  <td class="xl661514">u2</td>
+  <td class="xl661514">值必须是对常量池的有效索引，常量池在该索引处的项必须是CONSTANT_Utf8_info结构，表示方法的描述符</td>
+ </tr>
+ <tr height="19">
+  <td rowspan="3" height="209" class="xl671514">CONSTANT_Dynamic_info</td>
+  <td class="xl661514">tag</td>
+  <td class="xl661514">u1</td>
+  <td class="xl661514">值为17</td>
+ </tr>
+ <tr height="76">
+  <td height="76" class="xl661514">bootstrap_method_attr_ index</td>
+  <td class="xl661514">u2</td>
+  <td class="xl661514">值必须是对当前Class文件中引导方法表的bootstrap_methods[]数组的有效索引</td>
+ </tr>
+ <tr height="114">
+  <td height="114" class="xl661514">name_and_type_index</td>
+  <td class="xl661514">u2</td>
+  <td class="xl661514">值必须是对当前常量池的有效索引，常量池在该索引处的项必须是CONSTANT_NameAndType_info结构，表示方法名和方法描述符。</td>
+ </tr>
+ <tr height="19">
+  <td rowspan="3" height="209" class="xl671514">CONSTANT_InvokeDynamic_info</td>
+  <td class="xl661514">tag</td>
+  <td class="xl661514">u1</td>
+  <td class="xl661514">值为18</td>
+ </tr>
+ <tr height="76">
+  <td height="76" class="xl661514">bootstrap_method_attr_ index</td>
+  <td class="xl661514">u2</td>
+  <td class="xl661514">值必须是对当前Class文件中引导方法表的bootstrap_methods[]数组的有效索引</td>
+ </tr>
+ <tr height="114">
+  <td height="114" class="xl661514">name_and_type_index</td>
+  <td class="xl661514">u2</td>
+  <td class="xl661514">值必须是对当前常量池的有效索引，常量池在该索引处的项必须是CONSTANT_NameAndType_info结构，表示方法名和方法描述符。</td>
+ </tr>
+ <tr height="19">
+  <td rowspan="2" height="114" class="xl671514">CONSTANT_Module_info</td>
+  <td class="xl661514">tag</td>
+  <td class="xl661514">u1</td>
+  <td class="xl661514">值为19</td>
+ </tr>
+ <tr height="95">
+  <td height="95" class="xl661514">name_index</td>
+  <td class="xl661514">u2</td>
+  <td class="xl661514">值必须是对常量池的有效索引，常量池在该索引处的项必须是CONSTANT_Utf8_info结构，表示模块名字</td>
+ </tr>
+ <tr height="19">
+  <td rowspan="2" height="114" class="xl671514">CONSTANT_Package_info</td>
+  <td class="xl661514">tag</td>
+  <td class="xl661514">u1</td>
+  <td class="xl661514">值为20</td>
+ </tr>
+ <tr height="95">
+  <td height="95" class="xl661514">name_index</td>
+  <td class="xl661514">u2</td>
+  <td class="xl661514">值必须是对常量池的有效索引，常量池在该索引处的项必须是CONSTANT_Utf8_info结构，表示包名称</td>
+ </tr>
+</table>
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://www.codetool.top" rel="external nofollow noreferrer">Rhett Peng</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/java/">
+                                    <span class="chip bg-color">java</span>
+                                </a>
+                            
+                                <a href="/tags/jvm/">
+                                    <span class="chip bg-color">jvm</span>
+                                </a>
+                            
+                                <a href="/tags/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/">
+                                    <span class="chip bg-color">深入理解java虚拟机</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'VUmN3m0ICuwaL4jNPnxBRln8-gzGzoHsz',
+        appKey: 'QH8FVT32jvi4qBllLg6Cf0dU',
+        notify: 'false' === 'true',
+        verify: 'true' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: '说点什么吧'
+    });
+</script>
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/article/leetcode589-N%E5%8F%89%E6%A0%91%E7%9A%84%E5%89%8D%E5%BA%8F%E9%81%8D%E5%8E%86/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/5.jpg" class="responsive-img" alt="leetcode589-N叉树的前序遍历">
+                        
+                        <span class="card-title">leetcode589-N叉树的前序遍历</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            1 原题给定一个 N 叉树，返回其节点值的前序遍历。
+例如，给定一个 3叉树 :
+
+返回其前序遍历: [1,3,5,6,2,4]。
+说明: 递归法很简单，你可以使用迭代法完成此题吗?
+2 解法2.1 思想类似二叉树的前序遍历，递归将根节点加
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2020-01-19
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-category">
+                                    算法/数据结构
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/leetcode/">
+                        <span class="chip bg-color">leetcode</span>
+                    </a>
+                    
+                    <a href="/tags/%E7%AE%97%E6%B3%95/">
+                        <span class="chip bg-color">算法</span>
+                    </a>
+                    
+                    <a href="/tags/%E9%80%92%E5%BD%92/">
+                        <span class="chip bg-color">递归</span>
+                    </a>
+                    
+                    <a href="/tags/%E6%A0%91/">
+                        <span class="chip bg-color">树</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/article/leetcode108-%E5%B0%86%E6%9C%89%E5%BA%8F%E6%95%B0%E7%BB%84%E8%BD%AC%E6%8D%A2%E4%B8%BA%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/9.jpg" class="responsive-img" alt="leetcode108-将有序数组转换为二叉搜索树">
+                        
+                        <span class="card-title">leetcode108-将有序数组转换为二叉搜索树</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            1 原题将一个按照升序排列的有序数组，转换为一棵高度平衡二叉搜索树。
+本题中，一个高度平衡二叉树是指一个二叉树每个节点 的左右两个子树的高度差的绝对值不超过 1。
+示例:
+给定有序数组: [-10,-3,0,5,9],
+
+一个可能的答案是：
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-01-18
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-category">
+                                    算法/数据结构
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/leetcode/">
+                        <span class="chip bg-color">leetcode</span>
+                    </a>
+                    
+                    <a href="/tags/%E7%AE%97%E6%B3%95/">
+                        <span class="chip bg-color">算法</span>
+                    </a>
+                    
+                    <a href="/tags/%E9%80%92%E5%BD%92/">
+                        <span class="chip bg-color">递归</span>
+                    </a>
+                    
+                    <a href="/tags/%E6%A0%91/">
+                        <span class="chip bg-color">树</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+    
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+<!-- 代码块折行 -->
+
+<style type="text/css">
+code[class*="language-"], pre[class*="language-"] { white-space: pre !important; }
+</style>
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h1, h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h1, h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+    <footer class="page-footer bg-color">
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            <span id="year">2019</span>
+            <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">88.2k</span>&nbsp;字
+            
+            
+            
+            
+            
+            <br>
+            
+            <br>
+            
+            <span id="icp"><img src="/medias/icp.png" style="vertical-align: text-bottom;" />
+                <a href="http://beian.miit.gov.cn/" target="_blank">赣ICP备19011928号</a>
+            </span>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/codeband-top" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:pctdyx@qq.net" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=995632825" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 995632825" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+$(function () {
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+});
+</script>
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":200,"height":200,"hOffset":20,"vOffset":100},"mobile":{"show":false},"dialog":{"enable":true,"hitokoto":false},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div id="chat_input"><input id="question" type="text" placeholder="陪我聊聊天吧" onkeypress="return onKeyPress(event)"/></div>
+</html>
+
+<!--动态线条背景-->
+<script type="text/javascript"
+color="0,0,0" opacity='0.5' zIndex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+</script>
+
+<script>
+
+//聊天框按回车
+function onKeyPress(e){
+    var keyCode = null;
+    if(e.which)
+        keyCode = e.which;
+    else if(e.keyCode)
+        keyCode = e.keyCode;
+        
+    //如果按下回车
+    if(keyCode == 13) {
+        // 1.获取界面上的元素value
+        var question_box = document.getElementById('question')
+        var question = question_box.value
+        question_box.value = ""
+        question_box.setAttribute("disabled","disabled")
+        var api_key = "78c33a07808c7b9e1905c89c88b3be14"
+        var api_secret = "q707tevnk00f"
+
+        // 2.通过XHR发送一个POST请求
+        var xhr = new XMLHttpRequest()
+        xhr.open('GET','https://api.codetool.top/robottalk?question='+encodeURIComponent(question)+"&api_key="+api_key+"&api_secret="+api_secret)
+		xhr.send(null)
+		xhr.onload = function(){
+            question_box.removeAttribute('disabled');
+            var live2d_dialog = document.getElementsByClassName("live2d-widget-dialog")[0]
+            live2d_dialog.style.opacity=1
+            live2d_dialog.innerHTML = this.responseText
+            window.setTimeout(()=>{
+                live2d_dialog.style.opacity=0
+            }, 5000);
+		}
+    }
+
+}
+
+</script>
+
+<style> 
+#chat_input{
+    width: 200px;
+    height: 40px;
+    position: fixed;
+    right: 0px;
+    bottom: 80px;
+    right: 20px;
+} 
+
+#question{
+    border: none;
+    border-bottom: 1px #aaaaaa solid;
+    background-color: transparent;
+    padding: 5px;
+}
+
+@media screen and (max-width: 480px) {
+    #chat_input{
+        display: none;
+    }
+    #live2d-widget{
+        display: none;
+    }
+}
+</style>
