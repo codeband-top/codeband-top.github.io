@@ -406,7 +406,7 @@ Class文件格式">
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    2k
+                    2.6k
                 </div>
                 
 
@@ -433,7 +433,7 @@ Class文件格式">
 <p>Java1：45<br>Java4：48<br>Java5：49<br>Java8：52<br>以此类推  </p>
 <p>关于次版本号，曾经在Java 2出现前被短暂使用过，从JDK 1.2以后，直到JDK 12之前<strong>次版本号均未使用，全部固定为零。</strong>而到了JDK 12时期，由于JDK提供的功能集已经非常庞大，有一些复杂的新特性需要以“公测”的形式放出，所以设计者重新启用了副版本号，将它用于标识“技术预览版”功能特性的支持。如果Class文件中使用了该版本JDK尚未列入正式特性清单中的预览功能，则必须把次版本号标识为65535，以便Java虚拟机在加载类文件时能够区分出来。</p>
 <p><img src="https://api.codetool.top/img/15793686659279.png" alt="Class文件版本号"></p>
-<h1 id="常量池">2 常量池</h1><p>8~9字节是一项u2类型的数据，代表常量池容量计数值（常量池有多少项），这个容量计数是从1而不是0开始的。</p>
+<h2 id="常量池">1.2 常量池</h2><p>8~9字节是一项u2类型的数据，代表常量池容量计数值（常量池有多少项），这个容量计数是从1而不是0开始的。</p>
 <p>常量池中主要存放两大类常量：字面量（Literal）和符号引用（Symbolic References）。字面量比较接近于Java语言层面的常量概念，如文本字符串、被声明为final的常量值等。而符号引用则属于编译原理方面的概念，主要包括下面几类常量：</p>
 <ul>
 <li>被模块导出或者开放的包（Package）</li>
@@ -778,6 +778,67 @@ Class文件格式">
   <td class="xl661514">值必须是对常量池的有效索引，常量池在该索引处的项必须是CONSTANT_Utf8_info结构，表示包名称</td>
  </tr>
 </table>
+
+<h2 id="访问标志">1.3 访问标志</h2><p>在常量池结束之后，紧接着的2个字节代表访问标志（access_flags），这个标志用于识别一些类或者接口层次的访问信息</p>
+<table>
+<thead>
+<tr>
+<th>标志名称</th>
+<th>标志值</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ACC_PUBLIC</td>
+<td>0x0001</td>
+<td>是否为public类型</td>
+</tr>
+<tr>
+<td>ACC_FINAL</td>
+<td>0x0010</td>
+<td>是否被声明为final，只有类可设置</td>
+</tr>
+<tr>
+<td>ACC_SUPER</td>
+<td>0x0020</td>
+<td>是否允许使用invokespecial字节码指令的新语义，invokespecial指令的语义在JDK1.0.2发生过改变，为了区别这条指令使用哪种语义，JDK1.0.2之后编译出来的类的这个标志都必须为真</td>
+</tr>
+<tr>
+<td>ACC_INTERFACE</td>
+<td>0X0200</td>
+<td>标识这是一个接口</td>
+</tr>
+<tr>
+<td>ACC_ABSTRACT</td>
+<td>0X0400</td>
+<td>是否为abstract类型，对于接口或者抽象类来说，此标志值为真，其他类型值为假</td>
+</tr>
+<tr>
+<td>ACC_SYNTHETIC</td>
+<td>0x1000</td>
+<td>标识这个类并非由用户代码产生的</td>
+</tr>
+<tr>
+<td>ACC_ANNOTATION</td>
+<td>0X2000</td>
+<td>标识这是一个注解</td>
+</tr>
+<tr>
+<td>ACC_ENUM</td>
+<td>0x4000</td>
+<td>标识这是一个枚举</td>
+</tr>
+<tr>
+<td>ACC_MODULE</td>
+<td>0x8000</td>
+<td>标识这是一个模块</td>
+</tr>
+</tbody></table>
+<p>access_flags中一共有16个标志位可以使用，当前只定义了其中9个，没有使用到的标志位要求一律为零。</p>
+<h2 id="类索引、父类索引与接口索引集合">1.4 类索引、父类索引与接口索引集合</h2><p>跟在访问标志后面的，分别是类索引、父类索引和接口索引集合。类索引（this_class）和父类索引（super_class）都是一个u2类型的数据，而接口索引集合（interfaces）是一组u2类型的数据的集合，Class文件中由这三项数据来确定该类型的继承关系。<strong>类索引用于确定这个类的全限定名，父类索引用于确定这个类的父类的全限定名。</strong>除了<code>java.lang.Object</code>外，所有Java类的父类索引都不为0。接口索引集合就用来描述这个类实现了哪些接口，这些被实现的接口将按implements关键字后的接口顺序从左到右排列在接口索引集合中。</p>
+<p>类索引和父类索引用两个u2类型的索引值表示，它们各自指向一个类型为<code>CONSTANT_Class_info</code>的类描述符常量，通过<code>CONSTANT_Class_info</code>类型的常量中的索引值可以找到定义在<code>CONSTANT_Utf8_info</code>类型的常量中的全限定名字符串。</p>
+<p>接口索引集合的入口的第一项u2类型的数据为接口计数器（interfaces_count），表示索引表的容量。</p>
+
             </div>
             <hr/>
 
@@ -1415,7 +1476,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">88.2k</span>&nbsp;字
+                class="white-color">89.3k</span>&nbsp;字
             
             
             
