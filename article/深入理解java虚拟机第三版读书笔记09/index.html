@@ -406,7 +406,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.4k
+                    1.8k
                 </div>
                 
 
@@ -445,7 +445,7 @@
         <span class="token keyword">try</span> <span class="token punctuation">{</span>
             <span class="token keyword">if</span> <span class="token punctuation">(</span>parent <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
                 c <span class="token operator">=</span> parent<span class="token punctuation">.</span><span class="token function">loadClass</span><span class="token punctuation">(</span>name<span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+            <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span><span class="token comment" spellcheck="true">//代表找到了启动类加载器</span>
                 c <span class="token operator">=</span> <span class="token function">findBootstrapClassOrNull</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token punctuation">}</span>
         <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">ClassNotFoundException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -455,7 +455,7 @@
         <span class="token keyword">if</span> <span class="token punctuation">(</span>c <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
             <span class="token comment" spellcheck="true">// 在父类加载器无法加载时</span>
             <span class="token comment" spellcheck="true">// 再调用本身的findClass方法来进行类加载</span>
-            c <span class="token operator">=</span> <span class="token function">findClass</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            c <span class="token operator">=</span> <span class="token function">findClass</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//findClass实现加载过程</span>
         <span class="token punctuation">}</span>
     <span class="token punctuation">}</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span>resolve<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -463,6 +463,49 @@
     <span class="token punctuation">}</span>
     <span class="token keyword">return</span> c<span class="token punctuation">;</span>
 <span class="token punctuation">}</span></code></pre>
+<h2 id="破坏双亲委派模型">1.3 破坏双亲委派模型</h2><p><strong>为什么要破坏双亲委派模型？</strong></p>
+<ol>
+<li><p>如果基础类型要调用回用户的代码。</p>
+<p> 实例：</p>
+<ul>
+<li><p>启动类加载器加载的DriverManager在<code>loadInitialDriver()</code>加载<code>com.mysql.jdbc.Driver</code>应用程序类</p>
+</li>
+<li><p>JNDI服务对资源进行查找和集中管理，可以通过接口名获取所有实现类，需要调用由其他厂商实现并部署在应用程序的ClassPath下的JNDI服务提供者接口（Service Provider Interface，SPI）的代码。</p>
+</li>
+</ul>
+</li>
+<li><p>JDK9的模块化实现热部署。</p>
+</li>
+</ol>
+<p><strong>解决方案：</strong></p>
+<p>线程上下文类加载器（Thread Context ClassLoader）。<br>这个类加载器可以通过<code>java.lang.Thread</code>类的<code>setContextClassLoader()</code>方法进行设置，<br>如果创建线程时还未设置，它将会从父线程中继承一个，<br>如果在应用程序的全局范围内都没有设置过的话，那<strong>这个类加载器默认就是应用程序类加载器。</strong></p>
+<p>使用<code>Class.forName(String name, boolean initialize,ClassLoader loader)</code>方法使用指定的类加载器加载类。</p>
+<h2 id="自定义类加载器">1.4 自定义类加载器</h2><ol>
+<li>继承ClassLoader父类</li>
+<li>要遵从双亲委派模型，重写findClass方法。</li>
+<li>读取类文件的字节码</li>
+<li>调用父类的defineClass方法来加载类</li>
+<li>使用者调用该类加载器的loadClass方法</li>
+</ol>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">MyClassLoader</span> <span class="token keyword">extends</span> <span class="token class-name">ClassLoader</span><span class="token punctuation">{</span>
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">protected</span> Class<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> <span class="token function">findClass</span><span class="token punctuation">(</span>String name<span class="token punctuation">)</span> <span class="token keyword">throws</span> ClassNotFoundException <span class="token punctuation">{</span>
+        String path <span class="token operator">=</span> <span class="token string">"e:\\mypath\\"</span> <span class="token operator">+</span> name <span class="token operator">+</span> <span class="token string">".class"</span><span class="token punctuation">;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">{</span>
+            ByteArrayOutputStream os <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ByteArrayOutputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            Files<span class="token punctuation">.</span><span class="token function">copy</span><span class="token punctuation">(</span>Paths<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">,</span>os<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> bytes <span class="token operator">=</span> os<span class="token punctuation">.</span><span class="token function">toByteArray</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> <span class="token function">defineClass</span><span class="token punctuation">(</span>name<span class="token punctuation">,</span>bytes<span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">,</span>bytes<span class="token punctuation">.</span>length<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span><span class="token punctuation">{</span>
+            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">ClassNotFoundException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<h2 id="补充">1.5 补充</h2><ul>
+<li><code>Class.getClassLoader()</code>可以获取一个类的加载器，启动类加载器是null</li>
+<li><code>-Xbootclasspath/a:&lt;追加路径&gt;</code>可以在<code>JAVA_HOME/lib</code>的基础上追加路径让启动类加载器加载。</li>
+</ul>
 
             </div>
             <hr/>
@@ -1092,7 +1135,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">109.2k</span>&nbsp;字
+                class="white-color">110.1k</span>&nbsp;字
             
             
             
