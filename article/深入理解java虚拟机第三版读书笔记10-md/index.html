@@ -8,9 +8,9 @@
     <meta name="description" content="以下是第十章 前端编译与优化的内容
 Java中的编译可能是指：
 
-前端编译：把.java文件转变成.class文件的过程
+前端编译：把*.java文件转变成*.class文件的过程
 即时编译（JIT）：运行期把字节码转变成本地机器码的过程
-提前编译（AOT）：直接把程序编译成与目标机器指令集相关的二">
+提前编译（AOT）：直接把程序编译成与目标机器指令集相关">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -409,7 +409,7 @@ Java中的编译可能是指：
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    149
+                    1.3k
                 </div>
                 
 
@@ -425,13 +425,48 @@ Java中的编译可能是指：
                 <p>以下是<strong>第十章 前端编译与优化</strong>的内容</p>
 <p>Java中的编译可能是指：</p>
 <ul>
-<li>前端编译：把<em>.java文件转变成</em>.class文件的过程</li>
-<li>即时编译（JIT）：运行期把字节码转变成本地机器码的过程</li>
-<li>提前编译（AOT）：直接把程序编译成与目标机器指令集相关的二进制代码的过程</li>
+<li><strong>前端编译</strong>：把*.java文件转变成*.class文件的过程</li>
+<li><strong>即时编译（JIT）</strong>：运行期把字节码转变成本地机器码的过程</li>
+<li><strong>提前编译（AOT）</strong>：直接把程序编译成与目标机器指令集相关的二进制代码的过程</li>
 </ul>
 <p>这一章讲的是前端编译</p>
 <h1 id="Javac编译器">1 Javac编译器</h1><p>javac是一个由java语言编写的程序</p>
-<h2 id="Javac的源码与调试">1.1 Javac的源码与调试</h2><p>Java6以后，Javac的源码放在了JDK_SRC_HOME/langtools/src/share/classes/com/sun/tools/javac</p>
+<h2 id="Javac的源码与调试">1.1 Javac的源码与调试</h2><p>Java6以后，Javac的源码放在了<code>JDK_SRC_HOME/langtools/src/share/classes/com/sun/tools/javac</code></p>
+<p><strong>Javac的工作流程</strong></p>
+<ol>
+<li>准备过程：初始化插入式注解处理器。</li>
+<li>解析与填充符号表过程，包括：<br>·词法、语法分析。将源代码的字符流转变为标记集合，构造出抽象语法树。<br>·填充符号表。产生符号地址和符号信息。 </li>
+<li>插入式注解处理器的注解处理过程：插入式注解处理器的执行阶段。</li>
+<li>分析与字节码生成过程，包括：<ul>
+<li>标注检查。对语法的静态信息进行检查。</li>
+<li>数据流及控制流分析。对程序动态运行过程进行检查。</li>
+<li>解语法糖。将简化代码编写的语法糖还原为原有的形式。</li>
+<li>字节码生成。将前面各个步骤所生成的信息转化成字节码。</li>
+</ul>
+</li>
+</ol>
+<p>执行插入式注解时又可能会产生新的符号，如果有新的符号产生，就必须转回到之前的解析、填充符号表的过程中重新处理这些新符号。</p>
+<h1 id="Java语法糖的味道">2 Java语法糖的味道</h1><h2 id="泛型">2.1 泛型</h2><h3 id="Java与C-的泛型">2.1.1 Java与C#的泛型</h3><p>Java是 <strong>“类型擦除式泛型”</strong>，C#是 <strong>“具现化式泛型”</strong>。</p>
+<p>Java语言中的泛型只在程序源码中存在，在编译后的字节码文件中，全部泛型都被替换为原来的裸类型，并且在相应的地方插入了强制转型代码。</p>
+<p>Java的类型擦除式泛型无论在使用效果上还是运行效率上，几乎是全面落后于C#的具现化式泛型，而它的唯一优势是在于实现这种泛型的影响范围上。</p>
+<p>Java选择类型擦除主要是因为遗留代码多，向前兼容。</p>
+<h3 id="类型擦除">2.1.2 类型擦除</h3><p>实现：泛型类原地泛型化变成裸类型</p>
+<p>Java是简单粗暴地直接在编译时把<code>ArrayList&lt;Integer&gt;</code>还原回<code>ArrayList</code>，只在元素访问、修改时自动插入一些强制类型转换和检查指令。</p>
+<p><strong>类型擦除的缺陷：</strong></p>
+<ol>
+<li>不支持基本类型，例如<code>ArrayList&lt;int&gt;</code>，因为无法实现int和Object互转，只能自动装箱、拆箱使用Integer，导致执行效率低。</li>
+<li>运行期无法取到泛型类型信息，导致不能出现下列操作：<ul>
+<li><code>if (item instanceof E) {   // 不合法，无法对泛型进行实例判断</code></li>
+<li><code>E newItem = new E();       // 不合法，无法使用泛型创建对象</code></li>
+<li><code>E[] itemArray = new E[10]; // 不合法，无法使用泛型创建数组</code></li>
+</ul>
+</li>
+<li>方法重载即使是不同泛型类型的参数也不能作为不一样的特征签名。但是返回值类型不同实际是可以正常运行的，虽然特征签名还是一致，但class文件支持不同描述符的方法共存，后续JVM有优化。</li>
+</ol>
+<h3 id="值类型和未来的泛型">2.1.3 值类型和未来的泛型</h3><p>在2014年，刚好是Java泛型出现的十年之后，Oracle建立了一个名为Valhalla的语言改进项目，希望改进Java语言留下的各种缺陷（解决泛型的缺陷就是项目主要目标其中之一）。</p>
+<p>在Valhalla项目中规划了几种不同的新泛型实现方案，在这些新的泛型设计中，泛型类型有可能被具现化，也有可能继续维持类型擦除以保持兼容（取决于采用哪种实现方案），即使是继续采用类型擦除的方案，泛型的参数化类型也可以选择不被完全地擦除掉，而是相对完整地记录在Class文件中，能够在运行期被使用，也可以指定编译器默认要擦除哪些类型。相对于使用不同方式实现泛型，<strong>目前比较明确的是未来的Java应该会提供“值类型”（Value Type）的语言层面的支持。</strong></p>
+<p>值类型可以与引用类型一样，具有构造函数、方法或是属性字段，等等，而它与引用类型的区别在于它<strong>在赋值的时候通常是整体复制，而不是像引用类型那样传递引用的。</strong>更为关键的是，值类型的实例很容易实现分配在方法的调用栈上的，这意味着<strong>值类型会随着当前方法的退出而自动释放，不会给垃圾收集子系统带来任何压力。</strong></p>
+<p>在Valhalla项目中，Java的值类型方案被称为“内联类型”，计划通过一个新的关键字inline来定义。</p>
 
             </div>
             <hr/>
@@ -1063,7 +1098,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">110.6k</span>&nbsp;字
+                class="white-color">111.9k</span>&nbsp;字
             
             
             
