@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.codetool.top/"/>
-  <updated>2020-02-04T14:46:54.863Z</updated>
+  <updated>2020-02-04T15:55:45.586Z</updated>
   <id>https://www.codetool.top/</id>
   
   <author>
@@ -15,6 +15,38 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>JavaIO-缓冲流与转换流</title>
+    <link href="https://www.codetool.top/article/JavaIO-%E7%BC%93%E5%86%B2%E6%B5%81%E4%B8%8E%E8%BD%AC%E6%8D%A2%E6%B5%81/"/>
+    <id>https://www.codetool.top/article/JavaIO-缓冲流与转换流/</id>
+    <published>2020-02-04T15:54:20.000Z</published>
+    <updated>2020-02-04T15:55:45.586Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="缓冲流">1 缓冲流</h1><h2 id="概述">1.1 概述</h2><p>缓冲流,也叫高效流，是对4个基本的<code>FileXxx</code> 流的增强，所以也是4个流，按照数据类型分类：</p><ul><li><strong>字节缓冲流</strong>：<code>BufferedInputStream</code>，<code>BufferedOutputStream</code> </li><li><strong>字符缓冲流</strong>：<code>BufferedReader</code>，<code>BufferedWriter</code></li></ul><p>缓冲流的基本原理，是在创建流对象时，会创建一个内置的默认大小的缓冲区数组，通过缓冲区读写，减少系统IO次数，从而提高读写的效率。</p><ul><li><code>public BufferedInputStream(InputStream in)</code> ：创建一个 新的缓冲输入流。 </li><li><code>public BufferedOutputStream(OutputStream out)</code>： 创建一个新的缓冲输出流。</li><li><code>public BufferedReader(Reader in)</code> ：创建一个 新的缓冲输入流。 </li><li><code>public BufferedWriter(Writer out)</code>： 创建一个新的缓冲输出流。</li></ul><h2 id="特有方法">1.2 特有方法</h2><ul><li>BufferedReader：<code>public String readLine()</code>: 读一行文字。 </li><li>BufferedWriter：<code>public void newLine()</code>: 写一行行分隔符,由系统属性定义符号。 </li></ul><h1 id="转换流">2 转换流</h1><h2 id="InputStreamReader类">2.1 InputStreamReader类</h2><p>转换流<code>java.io.InputStreamReader</code>，是Reader的子类，是从字节流到字符流的桥梁。它读取字节，并使用指定的字符集将其解码为字符。它的字符集可以由名称指定，也可以接受平台的默认字符集。 </p><h3 id="构造方法">2.1.1 构造方法</h3><ul><li><code>InputStreamReader(InputStream in)</code>: 创建一个使用默认字符集的字符流。 </li><li><code>InputStreamReader(InputStream in, String charsetName)</code>: 创建一个指定字符集的字符流。</li></ul><h2 id="OutputStreamWriter类">2.2 OutputStreamWriter类</h2><p>转换流<code>java.io.OutputStreamWriter</code> ，是Writer的子类，是从字符流到字节流的桥梁。使用指定的字符集将字符编码为字节。它的字符集可以由名称指定，也可以接受平台的默认字符集。 </p><h3 id="构造方法-1">2.2.1 构造方法</h3><ul><li><code>OutputStreamWriter(OutputStream in)</code>: 创建一个使用默认字符集的字符流。 </li><li><code>OutputStreamWriter(OutputStream in, String charsetName)</code>: 创建一个指定字符集的字符流。</li></ul><h2 id="应用">2.3 应用</h2><p>文件转换编码：</p><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">TransDemo</span> <span class="token punctuation">{</span>   <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>              <span class="token comment" spellcheck="true">// 1.定义文件路径</span>         String srcFile <span class="token operator">=</span> <span class="token string">"file_gbk.txt"</span><span class="token punctuation">;</span>        String destFile <span class="token operator">=</span> <span class="token string">"file_utf8.txt"</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// 2.创建流对象</span>        <span class="token comment" spellcheck="true">// 2.1 转换输入流,指定GBK编码</span>        InputStreamReader isr <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">InputStreamReader</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">FileInputStream</span><span class="token punctuation">(</span>srcFile<span class="token punctuation">)</span> <span class="token punctuation">,</span> <span class="token string">"GBK"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// 2.2 转换输出流,默认utf8编码</span>        OutputStreamWriter osw <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">OutputStreamWriter</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">FileOutputStream</span><span class="token punctuation">(</span>destFile<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// 3.读写数据</span>        <span class="token comment" spellcheck="true">// 3.1 定义数组</span>        <span class="token keyword">char</span><span class="token punctuation">[</span><span class="token punctuation">]</span> cbuf <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">char</span><span class="token punctuation">[</span><span class="token number">1024</span><span class="token punctuation">]</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// 3.2 定义长度</span>        <span class="token keyword">int</span> len<span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// 3.3 循环读取</span>        <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>len <span class="token operator">=</span> isr<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span>cbuf<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token operator">!=</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>            <span class="token comment" spellcheck="true">// 循环写出</span>              osw<span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span>cbuf<span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">,</span>len<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token punctuation">}</span>        <span class="token comment" spellcheck="true">// 4.释放资源</span>        osw<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        isr<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>      <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;缓冲流&quot;&gt;1 缓冲流&lt;/h1&gt;&lt;h2 id=&quot;概述&quot;&gt;1.1 概述&lt;/h2&gt;&lt;p&gt;缓冲流,也叫高效流，是对4个基本的&lt;code&gt;FileXxx&lt;/code&gt; 流的增强，所以也是4个流，按照数据类型分类：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;字节缓冲流&lt;/st
+      
+    
+    </summary>
+    
+    
+      <category term="编程语言" scheme="https://www.codetool.top/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/"/>
+    
+    
+      <category term="java" scheme="https://www.codetool.top/tags/java/"/>
+    
+      <category term="基础知识" scheme="https://www.codetool.top/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/"/>
+    
+      <category term="IO" scheme="https://www.codetool.top/tags/IO/"/>
+    
+  </entry>
   
   <entry>
     <title>AQS及其应用ReentrantLock源码分析</title>
@@ -607,40 +639,6 @@
       <category term="jvm" scheme="https://www.codetool.top/tags/jvm/"/>
     
       <category term="深入理解java虚拟机" scheme="https://www.codetool.top/tags/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>leetcode341-扁平化嵌套列表迭代器</title>
-    <link href="https://www.codetool.top/article/leetcode341-%E6%89%81%E5%B9%B3%E5%8C%96%E5%B5%8C%E5%A5%97%E5%88%97%E8%A1%A8%E8%BF%AD%E4%BB%A3%E5%99%A8/"/>
-    <id>https://www.codetool.top/article/leetcode341-扁平化嵌套列表迭代器/</id>
-    <published>2020-01-26T18:18:33.000Z</published>
-    <updated>2020-01-26T18:36:09.178Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>给定一个嵌套的整型列表。设计一个迭代器，使其能够遍历这个整型列表中的所有整数。</p><p>列表中的项或者为一个整数，或者是另一个列表。</p><p><strong>示例1：</strong></p><blockquote><p><strong>输入:</strong> [[1,1],2,[1,1]]<br><strong>输出:</strong> [1,1,2,1,1]<br><strong>解释:</strong> 通过重复调用 next 直到 hasNext 返回false，next 返回的元素的顺序应该是: [1,1,2,1,1]。</p></blockquote><p><strong>示例2：</strong></p><blockquote><p><strong>输入:</strong> 14<br><strong>输出:</strong> False<br><strong>解释:</strong> 通过重复调用 next 直到 hasNext 返回false，next 返回的元素的顺序应该是: [1,4,6]。</p></blockquote><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>构造通过递归构造，获取元素就是通用迭代器的方法。    </p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">NestedIterator</span> <span class="token keyword">implements</span> <span class="token class-name">Iterator</span><span class="token operator">&lt;</span>Integer<span class="token operator">></span> <span class="token punctuation">{</span>    List<span class="token operator">&lt;</span>Integer<span class="token operator">></span> list <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token keyword">int</span> cur <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>    <span class="token keyword">public</span> <span class="token function">NestedIterator</span><span class="token punctuation">(</span>List<span class="token operator">&lt;</span>NestedInteger<span class="token operator">></span> nestedList<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token function">addViaList</span><span class="token punctuation">(</span>nestedList<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">addViaList</span><span class="token punctuation">(</span>List<span class="token operator">&lt;</span>NestedInteger<span class="token operator">></span> nestedList<span class="token punctuation">)</span><span class="token punctuation">{</span>        <span class="token keyword">for</span><span class="token punctuation">(</span>NestedInteger i<span class="token operator">:</span>nestedList<span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>i<span class="token punctuation">.</span><span class="token function">isInteger</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> list<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>i<span class="token punctuation">.</span><span class="token function">getInteger</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token keyword">else</span> <span class="token function">addViaList</span><span class="token punctuation">(</span>i<span class="token punctuation">.</span><span class="token function">getList</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>         <span class="token punctuation">}</span>    <span class="token punctuation">}</span>    <span class="token annotation punctuation">@Override</span>    <span class="token keyword">public</span> Integer <span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> list<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>cur<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token annotation punctuation">@Override</span>    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">hasNext</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> cur<span class="token operator">&lt;</span>list<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h1 id=&quot;原题&quot;&gt;1 原题&lt;/h1&gt;&lt;p&gt;给定一个嵌套的整型列表。设计一个迭代器，使其能够遍历这个整型列表中的所有整数。&lt;/p&gt;
-&lt;p&gt;列表中的项或者为一个整数，或者是另一个列表。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;示例1：&lt;/strong&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-
-      
-    
-    </summary>
-    
-    
-      <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
-    
-    
-      <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
-    
-      <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
-    
-      <category term="递归" scheme="https://www.codetool.top/tags/%E9%80%92%E5%BD%92/"/>
     
   </entry>
   
