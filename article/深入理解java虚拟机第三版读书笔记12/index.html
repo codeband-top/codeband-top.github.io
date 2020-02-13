@@ -406,7 +406,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    7.1k
+                    7.8k
                 </div>
                 
 
@@ -450,7 +450,7 @@
 </ul>
 <p>最近JSR-133文档中把Java内存模型的操作简化成read、write、lock和unlock四种，但实际设计没有变。</p>
 <h2 id="对于volatile型变量的特殊规则">2.3 对于volatile型变量的特殊规则</h2><p>当一个变量被定义成volatile之后，它将具备两项特性：</p>
-<p>第一项是保证此变量对所有线程的可见性，这里的“可见性”是指当一条线程修改了这个变量的值，新值对于其他线程来说是可以立即得知的。而普通变量并不能做到这一点，普通变量的值在线程间传递时均需要通过主内存来完成。</p>
+<p><strong>第一项是保证此变量对所有线程的可见性</strong>，这里的“可见性”是指当一条线程修改了这个变量的值，新值对于其他线程来说是可以立即得知的。而普通变量并不能做到这一点，普通变量的值在线程间传递时均需要通过主内存来完成。</p>
 <p>Java里面的运算操作符并非原子操作，这导致volatile变量的运算在并发下一样是不安全的，示例：</p>
 <iframe src="https://run.codetool.top/?id=24" frameborder="0" height="600" style="width:100%;border:1px solid #ccc;"></iframe>
 
@@ -471,7 +471,22 @@
 <li>运算结果并不依赖变量的当前值，或者能够确保只有单一的线程修改变量的值。</li>
 <li>变量不需要与其他的状态变量共同参与不变约束。</li>
 </ul>
-<p>第二项是禁止指令重排序优化。</p>
+<p><strong>第二项是禁止指令重排序优化：</strong></p>
+<p>有volatile修饰的变量，赋值后（前面mov%eax，0x150(%esi)这句便是赋值操作）多执行了一个“lock addl$0x0，(%esp)”操作，这个操作的作用相当于一个内存屏障,<strong>指令重排序时不能把后面的指令重排序到内存屏障之前的位置。</strong></p>
+<p>这种操作相当于对缓存中的变量做了一次前面介绍Java内存模式中所说的“store和write”操作。所以通过这样一个空操作，可让前面volatile变量的修改对其他处理器立即可见。</p>
+<p>Java内存模型中对volatile变量定义的特殊规则的定义:</p>
+<p>假定<code>T</code>表示一个线程，<code>V</code>和<code>W</code>分别表示两个volatile型变量，那么在进行read、load、use、assign、store和write操作时需要满足如下规则：</p>
+<ul>
+<li><p>只有当线程<code>T</code>对变量<code>V</code>执行的前一个动作是<code>load</code>的时候，线程<code>T</code>才能对变量<code>V</code>执行<code>use</code>动作；并且，只有当线程T对变量V执行的后一个动作是<code>use</code>的时候，线程<code>T</code>才能对变量<code>V</code>执行<code>load</code>动作。线程<code>T</code>对变量<code>V</code>的<code>use</code>动作可以认为是和线程<code>T</code>对变量<code>V</code>的<code>load</code>、<code>read</code>动作相关联的，必须连续且一起出现。</p>
+<p>  这条规则要求在工作内存中，<strong>每次使用<code>V</code>前都必须先从主内存刷新最新的值，用于保证能看见其他线程对变量<code>V</code>所做的修改。</strong></p>
+</li>
+<li><p>只有当线程<code>T</code>对变量<code>V</code>执行的前一个动作是<code>assign</code>的时候，线程<code>T</code>才能对变量<code>V</code>执行<code>store</code>动作；并且，只有当线程<code>T</code>对变量<code>V</code>执行的后一个动作是<code>store</code>的时候，线程T才能对变量<code>V</code>执行<code>assign</code>动作。线程<code>T</code>对变量<code>V</code>的<code>assign</code>动作可以认为是和线程<code>T</code>对变量<code>V</code>的<code>store</code>、<code>write</code>动作相关联的，必须连续且一起出现。</p>
+<p>  这条规则要求在工作内存中，<strong>每次修改<code>V</code>后都必须立刻同步回主内存中，用于保证其他线程可以看到自己对变量<code>V</code>所做的修改。</strong></p>
+</li>
+<li><p>假定动作<code>A</code>是线程<code>T</code>对变量<code>V</code>实施的<code>use</code>或<code>assign</code>动作，假定动作<code>F</code>是和动作<code>A</code>相关联的<code>load</code>或<code>store</code>动作，假定动作<code>P</code>是和动作<code>F</code>相应的对变量<code>V</code>的<code>read</code>或<code>write</code>动作；与此类似，假定动作<code>B</code>是线程<code>T</code>对变量<code>W</code>实施的<code>use</code>或<code>assign</code>动作，假定动作<code>G</code>是和动作<code>B</code>相关联的<code>load</code>或<code>store</code>动作，假定动作<code>Q</code>是和动作<code>G</code>相应的对变量<code>W</code>的<code>read</code>或<code>write</code>动作。如果<code>A</code>先于<code>B</code>，那么<code>P</code>先于<code>Q</code>。</p>
+<p>  这条规则要求<strong>volatile修饰的变量不会被指令重排序优化，从而保证代码的执行顺序与程序的顺序相同。</strong></p>
+</li>
+</ul>
 <h2 id="针对long和double型变量的特殊规则">2.4 针对long和double型变量的特殊规则</h2><p>对于64位的数据类型（long和double），允许虚拟机将没有被volatile修饰的64位数据的读写操作划分为两次32位的操作来进行，即允许虚拟机实现自行选择是否要保证64位数据类型的load、store、read和write这四个操作的原子性，这就是所谓的“long和double的非原子性协定”。</p>
 <p>但是目前主流平台下商用的64位Java虚拟机中并不会出现非原子性访问行为。并且JDK9开始实验性的虚拟机参数<code>-XX：+AlwaysAtomicAccesses</code>要求对所有数据类型进行原子性的访问。</p>
 <h2 id="原子性、可见性与有序性">2.5 原子性、可见性与有序性</h2><p>Java内存模型是围绕着在并发过程中如何处理原子性、可见性和有序性这三个特征来建立的。</p>
@@ -1015,12 +1030,12 @@ num 不会包含任何前导零。
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
-                        <span class="chip bg-color">数据结构</span>
-                    </a>
-                    
                     <a href="/tags/leetcode/">
                         <span class="chip bg-color">leetcode</span>
+                    </a>
+                    
+                    <a href="/tags/%E7%AE%97%E6%B3%95/">
+                        <span class="chip bg-color">算法</span>
                     </a>
                     
                     <a href="/tags/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/">
@@ -1174,7 +1189,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">177.6k</span>&nbsp;字
+                class="white-color">184.4k</span>&nbsp;字
             
             
             
