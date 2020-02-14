@@ -1,0 +1,1645 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="Java日志框架JUL和Log4j介绍, 代码段小站">
+    <meta name="description" content="日志文件是用于记录系统操作事件的文件集合,可分为事件日志和消息日志。具有处理历史数据、诊断问题的追踪以及理解系统的活动等重要作用。
+日志实现：JUL、logback、log4j、log4j2等
+1 JUL全称java util loggin">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Java日志框架JUL和Log4j介绍 | 代码段小站</title>
+    <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon.ico">
+    
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+    
+    <script src="/libs/jquery/jquery.min.js"></script>
+    
+<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper head-container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/code.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">代码段小站</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/runcode" class="waves-effect waves-light">
+      
+      <i class="fas fa-code" style="zoom: 0.6;"></i>
+      
+      <span>写代码</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/code.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">代码段小站</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/runcode" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-code"></i>
+			
+			写代码
+		</a>
+          
+        </li>
+        
+        
+    </ul>
+</div>
+
+        </div>
+
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/5.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">Java日志框架JUL和Log4j介绍</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        margin: 35px 0 15px 0;
+        padding-left: 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        height: calc(100vh - 250px);
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #toc-content .is-active-link::before {
+        background-color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/java/">
+                                <span class="chip bg-color">java</span>
+                            </a>
+                        
+                            <a href="/tags/%E6%97%A5%E5%BF%97/">
+                                <span class="chip bg-color">日志</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/" class="post-category">
+                                中间件/软件设计
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2020-02-14
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    2.9k
+                </div>
+                
+
+                
+				
+                
+            </div>
+            
+        </div>
+        <hr class="clearfix">
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>日志文件是用于记录系统操作事件的文件集合,可分为事件日志和消息日志。具有处理历史数据、诊断问题的追踪以及理解系统的活动等重要作用。</p>
+<p>日志实现：<br>JUL、logback、log4j、log4j2等</p>
+<h1 id="JUL">1 JUL</h1><p>全称java util logging，是java原生的日志框架，使用时不需要另外引用第三方类库，能够在小型应用中灵活使用</p>
+<h2 id="架构介绍">1.1 架构介绍</h2><p><img src="https://api.codetool.top/img/15816716391655.png" alt></p>
+<ul>
+<li>Loggers:被称为记录器,应用程序通过获取 Logger对象,调用其API来来发布日志信息。Logger通常是应用程序访问日志系统的入口程序。</li>
+<li>Appenders:也被称为<code>Handlers</code>,每个Logger都会关联一组Handlers, Logger会将日志交给关联 Handlers处理,由Handlers负责将日志做记录。Handlers在此是一个抽象,其具体的实现决定了日志记录的位置可以是控制台、文件、网络上的其他日志服务或操作系统日志等。</li>
+<li>Layouts:也被称为<code>Formatters</code>,它负责对日志事件中的数据进行转换和格式化。Layouts决定了数据在一条日志记录中的最终形式。</li>
+<li>Level:每条日志消息都有一个关联的日志级别。该级别粗略指导了日志消息的重要性和紧迫,可以将Level和Loggers, Appenders做关联以便于我们过滤消息。</li>
+<li>Filters:过滤器,根据需要定制哪些信息会被记录,哪些信息会被放过。</li>
+</ul>
+<h2 id="使用">1.2 使用</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">JULTest</span> <span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">// 快速入门</span>
+    <span class="token annotation punctuation">@Test</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">testQuick</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception<span class="token punctuation">{</span>
+        <span class="token comment" spellcheck="true">// 1.获取Logger</span>
+        Logger logger <span class="token operator">=</span> Logger<span class="token punctuation">.</span><span class="token function">getLogger</span><span class="token punctuation">(</span><span class="token string">"com.rhett.JULTest"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">// 2.日志记录输出</span>
+        logger<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"Hello JUL"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">// 通用方法进行日志记录</span>
+        logger<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Level<span class="token punctuation">.</span>INFO<span class="token punctuation">,</span><span class="token string">"info msg"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">// 通过占位符方式输出变量值</span>
+        String name <span class="token operator">=</span> <span class="token string">"rhett"</span><span class="token punctuation">;</span>
+        Integer age <span class="token operator">=</span> <span class="token number">13</span><span class="token punctuation">;</span>
+        logger<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Level<span class="token punctuation">.</span>INFO<span class="token punctuation">,</span><span class="token string">"用户信息：{0},{1}"</span><span class="token punctuation">,</span><span class="token keyword">new</span> <span class="token class-name">Object</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">{</span>name<span class="token punctuation">,</span>age<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>JUL的日志级别：</p>
+<ul>
+<li>OFF -&gt;Integer.MAX_VALUE</li>
+<li>SEVERE</li>
+<li>WARNING</li>
+<li>INFO</li>
+<li>CONFIG</li>
+<li>FINE </li>
+<li>FINER</li>
+<li>FINEST</li>
+<li>ALL -&gt;Integer.MIN_VALUE</li>
+</ul>
+<p>每个级别都有一个value，当设定了过滤级别的值的时候，小于这个值的级别信息都不会输出</p>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">//日志级别</span>
+<span class="token annotation punctuation">@Test</span>
+<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">testLogLevel</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception<span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">// 1.获取logger</span>
+    Logger logger <span class="token operator">=</span> Logger<span class="token punctuation">.</span><span class="token function">getLogger</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment" spellcheck="true">// 2.日志记录输出</span>
+    logger<span class="token punctuation">.</span><span class="token function">severe</span><span class="token punctuation">(</span><span class="token string">"severe"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    logger<span class="token punctuation">.</span><span class="token function">warning</span><span class="token punctuation">(</span><span class="token string">"warning"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    logger<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"info"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// JUL默认的日志级别</span>
+    logger<span class="token punctuation">.</span><span class="token function">config</span><span class="token punctuation">(</span><span class="token string">"config"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    logger<span class="token punctuation">.</span><span class="token function">fine</span><span class="token punctuation">(</span><span class="token string">"fine"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    logger<span class="token punctuation">.</span><span class="token function">finer</span><span class="token punctuation">(</span><span class="token string">"finer"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    logger<span class="token punctuation">.</span><span class="token function">finest</span><span class="token punctuation">(</span><span class="token string">"finest"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment" spellcheck="true">//日志级别</span>
+<span class="token annotation punctuation">@Test</span>
+<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">testLogConfig</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception<span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">// 1.获取logger</span>
+    Logger logger <span class="token operator">=</span> Logger<span class="token punctuation">.</span><span class="token function">getLogger</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">// 关闭系统默认配置</span>
+    logger<span class="token punctuation">.</span><span class="token function">setUseParentHandlers</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">// 自定义配置日志级别</span>
+    <span class="token comment" spellcheck="true">// 创建ConsoleHandler 控制台输出</span>
+    ConsoleHandler consoleHandler <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ConsoleHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">// 创建simpleFormatter</span>
+    SimpleFormatter simpleFormatter <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SimpleFormatter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">// 进行关联</span>
+    consoleHandler<span class="token punctuation">.</span><span class="token function">setFormatter</span><span class="token punctuation">(</span>simpleFormatter<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    logger<span class="token punctuation">.</span><span class="token function">addHandler</span><span class="token punctuation">(</span>consoleHandler<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">// 配置日志具体级别</span>
+    logger<span class="token punctuation">.</span><span class="token function">setLevel</span><span class="token punctuation">(</span>Level<span class="token punctuation">.</span>ALL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    consoleHandler<span class="token punctuation">.</span><span class="token function">setLevel</span><span class="token punctuation">(</span>Level<span class="token punctuation">.</span>ALL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">// 创建FileHandler</span>
+    FileHandler fileHandler <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">FileHandler</span><span class="token punctuation">(</span><span class="token string">"test.log"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">// 进行关联</span>
+    fileHandler<span class="token punctuation">.</span><span class="token function">setFormatter</span><span class="token punctuation">(</span>simpleFormatter<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    logger<span class="token punctuation">.</span><span class="token function">addHandler</span><span class="token punctuation">(</span>fileHandler<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">// 2.日志记录输出</span>
+    logger<span class="token punctuation">.</span><span class="token function">severe</span><span class="token punctuation">(</span><span class="token string">"severe"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    logger<span class="token punctuation">.</span><span class="token function">warning</span><span class="token punctuation">(</span><span class="token string">"warning"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    logger<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"info"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// JUL默认的日志级别</span>
+    logger<span class="token punctuation">.</span><span class="token function">config</span><span class="token punctuation">(</span><span class="token string">"config"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    logger<span class="token punctuation">.</span><span class="token function">fine</span><span class="token punctuation">(</span><span class="token string">"fine"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    logger<span class="token punctuation">.</span><span class="token function">finer</span><span class="token punctuation">(</span><span class="token string">"finer"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    logger<span class="token punctuation">.</span><span class="token function">finest</span><span class="token punctuation">(</span><span class="token string">"finest"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<h2 id="logger的父子关系">1.3 logger的父子关系</h2><pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Test</span>
+<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">testLogParent</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception<span class="token punctuation">{</span>
+    Logger logger1 <span class="token operator">=</span> Logger<span class="token punctuation">.</span><span class="token function">getLogger</span><span class="token punctuation">(</span><span class="token string">"com.rhett"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    Logger logger2 <span class="token operator">=</span> Logger<span class="token punctuation">.</span><span class="token function">getLogger</span><span class="token punctuation">(</span><span class="token string">"com"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">// 测试，logger2是logger1的父对象</span>
+    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>logger1<span class="token punctuation">.</span><span class="token function">getParent</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> logger2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment" spellcheck="true">// 所有日志记录器的顶级父元素 LogManager$RootLogger，名称为空字符串</span>
+    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"logger2 Parent:"</span><span class="token operator">+</span>logger2<span class="token punctuation">.</span><span class="token function">getParent</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">+</span><span class="token string">",name:"</span><span class="token operator">+</span>logger2<span class="token punctuation">.</span><span class="token function">getParent</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">// 关闭默认配置</span>
+    logger2<span class="token punctuation">.</span><span class="token function">setUseParentHandlers</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">// 设置logger2日志级别</span>
+    <span class="token comment" spellcheck="true">// 自定义配置日志级别</span>
+    <span class="token comment" spellcheck="true">// 创建ConsoleHandler 控制台输出</span>
+    ConsoleHandler consoleHandler <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ConsoleHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">// 创建simpleFormatter</span>
+    SimpleFormatter simpleFormatter <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SimpleFormatter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">// 进行关联</span>
+    consoleHandler<span class="token punctuation">.</span><span class="token function">setFormatter</span><span class="token punctuation">(</span>simpleFormatter<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    logger2<span class="token punctuation">.</span><span class="token function">addHandler</span><span class="token punctuation">(</span>consoleHandler<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">// 配置日志具体级别</span>
+    logger2<span class="token punctuation">.</span><span class="token function">setLevel</span><span class="token punctuation">(</span>Level<span class="token punctuation">.</span>ALL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    consoleHandler<span class="token punctuation">.</span><span class="token function">setLevel</span><span class="token punctuation">(</span>Level<span class="token punctuation">.</span>ALL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+    logger1<span class="token punctuation">.</span><span class="token function">severe</span><span class="token punctuation">(</span><span class="token string">"severe"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    logger1<span class="token punctuation">.</span><span class="token function">warning</span><span class="token punctuation">(</span><span class="token string">"warning"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    logger1<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"info"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// JUL默认的日志级别</span>
+    logger1<span class="token punctuation">.</span><span class="token function">config</span><span class="token punctuation">(</span><span class="token string">"config"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    logger1<span class="token punctuation">.</span><span class="token function">fine</span><span class="token punctuation">(</span><span class="token string">"fine"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    logger1<span class="token punctuation">.</span><span class="token function">finer</span><span class="token punctuation">(</span><span class="token string">"finer"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    logger1<span class="token punctuation">.</span><span class="token function">finest</span><span class="token punctuation">(</span><span class="token string">"finest"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<h2 id="自定义配置文件">1.4 自定义配置文件</h2><p>默认配置文件：（<code>logging.properties</code>）</p>
+<pre class=" language-properties"><code class="language-properties"><span class="token comment" spellcheck="true"># root logger 的默认处理器</span>
+<span class="token attr-name">handlers</span><span class="token punctuation">=</span> <span class="token attr-value">java.util.logging.ConsoleHandler</span>
+
+<span class="token comment" spellcheck="true"># 代表的是root logger的日志级别</span>
+<span class="token attr-name">.level</span><span class="token punctuation">=</span> <span class="token attr-value">INFO</span>
+
+<span class="token comment" spellcheck="true"># 默认位置：系统用户目录下</span>
+<span class="token attr-name">java.util.logging.FileHandler.pattern</span> <span class="token punctuation">=</span> <span class="token attr-value">%h/java%u.log</span>
+<span class="token attr-name">java.util.logging.FileHandler.limit</span> <span class="token punctuation">=</span> <span class="token attr-value">50000</span>
+<span class="token attr-name">java.util.logging.FileHandler.count</span> <span class="token punctuation">=</span> <span class="token attr-value">1</span>
+<span class="token attr-name">java.util.logging.FileHandler.formatter</span> <span class="token punctuation">=</span> <span class="token attr-value">java.util.logging.XMLFormatter</span>
+
+<span class="token comment" spellcheck="true"># 向控制台输出的handler对象</span>
+<span class="token comment" spellcheck="true"># 指定handler对象的日志级别</span>
+<span class="token attr-name">java.util.logging.ConsoleHandler.level</span> <span class="token punctuation">=</span> <span class="token attr-value">INFO</span>
+<span class="token comment" spellcheck="true"># 指定handler对象的日志消息格式对象</span>
+<span class="token attr-name">java.util.logging.ConsoleHandler.formatter</span> <span class="token punctuation">=</span> <span class="token attr-value">java.util.logging.SimpleFormatter</span></code></pre>
+<p>自定义配置文件：</p>
+<pre class=" language-properties"><code class="language-properties"><span class="token comment" spellcheck="true"># root logger 的默认处理器</span>
+<span class="token attr-name">handlers</span><span class="token punctuation">=</span> <span class="token attr-value">java.util.logging.ConsoleHandler</span>
+
+<span class="token comment" spellcheck="true"># 代表的是root logger的日志级别</span>
+<span class="token attr-name">.level</span><span class="token punctuation">=</span> <span class="token attr-value">ALL</span>
+
+<span class="token comment" spellcheck="true"># 自定义Logger使用</span>
+<span class="token attr-name">com.rhett.handlers</span> <span class="token punctuation">=</span> <span class="token attr-value">java.util.logging.ConsoleHandler</span>
+<span class="token attr-name">com.rhett.level</span> <span class="token punctuation">=</span> <span class="token attr-value">CONFIG</span>
+
+<span class="token comment" spellcheck="true"># 向文件输出的handler对象</span>
+<span class="token comment" spellcheck="true"># 指定文件路径，默认位置：系统用户目录下</span>
+<span class="token attr-name">java.util.logging.FileHandler.pattern</span> <span class="token punctuation">=</span> <span class="token attr-value">%h/java%u.log</span>
+<span class="token comment" spellcheck="true"># 指定日志文件内容大小最多为50000条</span>
+<span class="token attr-name">java.util.logging.FileHandler.limit</span> <span class="token punctuation">=</span> <span class="token attr-value">50000</span>
+<span class="token comment" spellcheck="true"># 指定日志文件的数量</span>
+<span class="token attr-name">java.util.logging.FileHandler.count</span> <span class="token punctuation">=</span> <span class="token attr-value">1</span>
+<span class="token comment" spellcheck="true"># 指定handler对象的Formatter</span>
+<span class="token attr-name">java.util.logging.FileHandler.formatter</span> <span class="token punctuation">=</span> <span class="token attr-value">java.util.logging.SimpleFormatter</span>
+<span class="token comment" spellcheck="true"># 指定以追加的方式添加日志内容</span>
+<span class="token attr-name">java.util.logging.FileHandler.append</span> <span class="token punctuation">=</span> <span class="token attr-value">true</span>
+
+<span class="token comment" spellcheck="true"># 向控制台输出的handler对象</span>
+<span class="token comment" spellcheck="true"># 指定handler对象的日志级别</span>
+<span class="token attr-name">java.util.logging.ConsoleHandler.level</span> <span class="token punctuation">=</span> <span class="token attr-value">ALL</span>
+<span class="token comment" spellcheck="true"># 指定handler对象的Formatter</span>
+<span class="token attr-name">java.util.logging.ConsoleHandler.formatter</span> <span class="token punctuation">=</span> <span class="token attr-value">java.util.logging.SimpleFormatter</span>
+<span class="token comment" spellcheck="true"># 指定handler对象的字符集</span>
+<span class="token attr-name">java.util.logging.ConsoleHandler.encoding</span> <span class="token punctuation">=</span> <span class="token attr-value">UTF-8</span>
+
+<span class="token comment" spellcheck="true"># 指定formatter的format格式</span>
+<span class="token attr-name">java.util.logging.SimpleFormatter</span> <span class="token punctuation">=</span> <span class="token attr-value">%4$s: %5$s [%1$tc]%n</span></code></pre>
+<h2 id="日志原理解析">1.5 日志原理解析</h2><ol>
+<li>初始化 LogManager<ol>
+<li>LogManager加载logging.properties配置</li>
+<li>添加Logger到LogManager</li>
+</ol>
+</li>
+<li>从单例LogManager获取Logger</li>
+<li>设置级别Level,并指定日志记录LogRecord</li>
+<li>Filter提供了日志级别之外更细粒度的控制</li>
+<li>Handler是用来处理日志输出位置</li>
+<li>Formatter是用来格式化LogRecord的</li>
+</ol>
+<p><img src="https://api.codetool.top/img/15816794739844.png" alt></p>
+<h1 id="Log4j">2 Log4j</h1><h2 id="使用-1">2.1 使用</h2><pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Test</span>
+<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">test01</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token keyword">throws</span> Exception<span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">//初始化配置信息</span>
+    BasicConfigurator<span class="token punctuation">.</span><span class="token function">configure</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">//获取logger</span>
+    Logger logger <span class="token operator">=</span> Logger<span class="token punctuation">.</span><span class="token function">getLogger</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment" spellcheck="true">//日志记录</span>
+    logger<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"hello log4j"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">//日志级别</span>
+    logger<span class="token punctuation">.</span><span class="token function">fatal</span><span class="token punctuation">(</span><span class="token string">"fatal"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// 严重错误，一般会造成系统崩溃并终止运行</span>
+
+    logger<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span><span class="token string">"error"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// 错误信息，一般不会影响系统运行</span>
+    logger<span class="token punctuation">.</span><span class="token function">warn</span><span class="token punctuation">(</span><span class="token string">"warn"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// 警告信息，可能会发生问题</span>
+    logger<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"info"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// 运行信息，数据连接、网络连接、IO操作等等</span>
+    logger<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"debug"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// 调试信息，一般在开发中使用，记录程序变量参数传递信息等等</span>
+
+    logger<span class="token punctuation">.</span><span class="token function">trace</span><span class="token punctuation">(</span><span class="token string">"trace"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// 追踪信息，记录程序所有的流程信息</span>
+<span class="token punctuation">}</span></code></pre>
+<h2 id="log4j组件">2.2 log4j组件</h2><p>Log4j是Apache的一个开源项目。</p>
+<p>Log4J主要由Loggers (日志记录器)、Appenders (输出端)和Layouts(日志格式化器)组成。其中Loggers控制日志的输出级别与日志是否输出; Appenders 指定日志的输出方式(输出到控制台、文件等) ; Layouts控制日志信息的输出格式。</p>
+<h3 id="Loggers">2.2.1 Loggers</h3><p>日志记录器，负责收集处理日志记录，实例的命名就是类”XX”的full quailied name (类的全限定名)，Logger的名字大小写敏感，其命名有继承机制:例如:name为org.apache.commons的logger会继承name为org.apache的logger。</p>
+<p>Log4J中有一个特殊的logger叫做”root”,他是所有logger的根， 也就意味着其他所有的logger都会直接或者间接地继承自root。root logger可以用Logger.getRootLogger(方法获取。</p>
+<p>log4j 1.2之前，Logger 类叫Category类。</p>
+<h3 id="Appenders">2.2.2 Appenders</h3><p>类似于JUL中的handler。</p>
+<p>Appender用来指定日志输出到哪个地方，可以同时指定日志的输出目的地。Log4j 常用的输出目的地有以下几种:</p>
+<table>
+<thead>
+<tr>
+<th>输出端类型</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ConsoleAppender</td>
+<td>将日志输出到控制台</td>
+</tr>
+<tr>
+<td>FileAppender</td>
+<td>将日志输出到文件中</td>
+</tr>
+<tr>
+<td>DailyRollingFileAppender</td>
+<td>将日志输出到一个日志文件，并且每天输出到一个新的文件</td>
+</tr>
+<tr>
+<td>RollingFileAppender</td>
+<td>将日志信息输出到一个日志文件，并且指定文件的尺寸，当文件大小达到指定尺寸时，会自动把文件改名，同时产生一个新的文件</td>
+</tr>
+<tr>
+<td>JDBCAppender</td>
+<td>把日志信息保存到数据库中</td>
+</tr>
+</tbody></table>
+<h3 id="Layouts">2.2.3 Layouts</h3><p>类似于JUL中的Formatter。</p>
+<p>布局器Layouts用于控制日志输出内容的格式，让我们可以使用各种需要的格式输出日志。Log4j常用的Layouts:</p>
+<p>格式化器类型|作用<br>HTMLLayout|格式化日志输出为HTML表格形式<br>SimpleLayout|简单的日志输出格式化，打印的日志格式为(info - message)<br>PatternLayout|最强大的格式化器，可以根据自定义格式输出日志，如果没有指定转换格式，就是用默认的转换格式</p>
+<h2 id="配置文件">2.3 配置文件</h2><p>log4j.properties:</p>
+<pre class=" language-properties"><code class="language-properties"><span class="token comment" spellcheck="true"># 指定Root Logger 默认配置信息</span>
+<span class="token comment" spellcheck="true"># 指定日志级别，使用的appender</span>
+<span class="token attr-name">log4j.rootLogger</span> <span class="token punctuation">=</span> <span class="token attr-value">trace,console</span>
+
+<span class="token comment" spellcheck="true"># 指定日志输出的appender对象</span>
+<span class="token attr-name">log4j.appender.console</span> <span class="token punctuation">=</span> <span class="token attr-value">org.apache.log4j.ConsoleAppender</span>
+<span class="token comment" spellcheck="true"># 指定appender使用的layout</span>
+<span class="token attr-name">log4j.appender.console.layout</span> <span class="token punctuation">=</span> <span class="token attr-value">org.apache.log4j.SimpleLayout</span></code></pre>
+<p>使用PatternLayout：</p>
+<pre class=" language-properties"><code class="language-properties"><span class="token comment" spellcheck="true"># 指定Root Logger 默认配置信息</span>
+<span class="token comment" spellcheck="true"># 指定日志级别，使用的appender</span>
+<span class="token attr-name">log4j.rootLogger</span> <span class="token punctuation">=</span> <span class="token attr-value">trace,console</span>
+
+<span class="token comment" spellcheck="true"># 指定日志输出的appender对象</span>
+<span class="token attr-name">log4j.appender.console</span> <span class="token punctuation">=</span> <span class="token attr-value">org.apache.log4j.ConsoleAppender</span>
+<span class="token comment" spellcheck="true"># 指定appender使用的layout</span>
+<span class="token attr-name">log4j.appender.console.layout</span> <span class="token punctuation">=</span> <span class="token attr-value">org.apache.log4j.PatternLayout</span>
+<span class="token attr-name">log4j.appender.console.layout.conversionPattern</span> <span class="token punctuation">=</span> <span class="token attr-value">%r [%t] %p %c %x - %m%n</span></code></pre>
+<p>conversionPattern的占位符含义如下：</p>
+<table>
+<thead>
+<tr>
+<th>符号</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>%m</td>
+<td>输出代码中指定的日志信息</td>
+</tr>
+<tr>
+<td>%p</td>
+<td>输出优先级，即DEBUG、 INFO等</td>
+</tr>
+<tr>
+<td>%n</td>
+<td>换行符(Windows平台的换行符为 “\r\n”, Unix平台为”\n”)</td>
+</tr>
+<tr>
+<td>%r</td>
+<td>输出自应用启动到输出该log信息耗费的毫秒数</td>
+</tr>
+<tr>
+<td>%c</td>
+<td>输出打印语句所属的类的全名</td>
+</tr>
+<tr>
+<td>%t</td>
+<td>输出产生该日志的线程全名</td>
+</tr>
+<tr>
+<td>%d</td>
+<td>输出服务器当前时间，格式默认为ISO8601, 也可以指定格式，如: %d{yyyy年M月dd日HH:mm:ss}</td>
+</tr>
+<tr>
+<td>%l</td>
+<td>输出日志时间发生的位置，包括类名、线程、在代码中的行数。如: Test.main(Test. java:10)</td>
+</tr>
+<tr>
+<td>%F</td>
+<td>输出日志消息产生时所在的文件名称</td>
+</tr>
+<tr>
+<td>%L</td>
+<td>输出代码中的行号</td>
+</tr>
+<tr>
+<td>%%</td>
+<td>输出一个“%”字符</td>
+</tr>
+</tbody></table>
+<p>使用FileAppender：</p>
+<pre class=" language-properties"><code class="language-properties"><span class="token comment" spellcheck="true"># 指定Root Logger 默认配置信息</span>
+<span class="token comment" spellcheck="true"># 指定日志级别，使用的appender</span>
+<span class="token attr-name">log4j.rootLogger</span> <span class="token punctuation">=</span> <span class="token attr-value">trace,console,file</span>
+
+<span class="token comment" spellcheck="true"># 指定日志输出的appender对象</span>
+<span class="token attr-name">log4j.appender.console</span> <span class="token punctuation">=</span> <span class="token attr-value">org.apache.log4j.ConsoleAppender</span>
+<span class="token comment" spellcheck="true"># 指定appender使用的layout</span>
+<span class="token attr-name">log4j.appender.console.layout</span> <span class="token punctuation">=</span> <span class="token attr-value">org.apache.log4j.PatternLayout</span>
+<span class="token attr-name">log4j.appender.console.layout.conversionPattern</span> <span class="token punctuation">=</span> <span class="token attr-value">%r [%t] %p %c %x - %m%n</span>
+
+<span class="token attr-name">log4j.appender.file</span> <span class="token punctuation">=</span> <span class="token attr-value">org.apache.log4j.FileAppender</span>
+<span class="token attr-name">log4j.appender.file.layout</span> <span class="token punctuation">=</span> <span class="token attr-value">org.apache.log4j.PatternLayout</span>
+<span class="token attr-name">log4j.appender.file.layout.conversionPattern</span> <span class="token punctuation">=</span> <span class="token attr-value">[%-10p]%r %l %d{yyyy-MM-dd HH:mm:ss.SSS} %m%n</span>
+<span class="token comment" spellcheck="true"># 指定日志文件保存路径</span>
+<span class="token attr-name">log4j.appender.file.file</span> <span class="token punctuation">=</span> <span class="token attr-value">logs/log4j.log</span>
+<span class="token comment" spellcheck="true"># 指定日志文件的字符集</span>
+<span class="token attr-name">log4j.appender.file.encoding</span> <span class="token punctuation">=</span> <span class="token attr-value">UTF-8</span></code></pre>
+<p>使用RollingFileAppender和DailyRollingFileAppender：</p>
+<pre class=" language-properties"><code class="language-properties"><span class="token comment" spellcheck="true"># 指定Root Logger 默认配置信息</span>
+<span class="token comment" spellcheck="true"># 指定日志级别，使用的appender</span>
+<span class="token attr-name">log4j.rootLogger</span> <span class="token punctuation">=</span> <span class="token attr-value">trace,console,file,rollingFile,dailyFile</span>
+
+<span class="token comment" spellcheck="true"># 指定日志输出的appender对象</span>
+<span class="token attr-name">log4j.appender.console</span> <span class="token punctuation">=</span> <span class="token attr-value">org.apache.log4j.ConsoleAppender</span>
+<span class="token comment" spellcheck="true"># 指定appender使用的layout</span>
+<span class="token attr-name">log4j.appender.console.layout</span> <span class="token punctuation">=</span> <span class="token attr-value">org.apache.log4j.PatternLayout</span>
+<span class="token attr-name">log4j.appender.console.layout.conversionPattern</span> <span class="token punctuation">=</span> <span class="token attr-value">%r [%t] %p %c %x - %m%n</span>
+
+<span class="token attr-name">log4j.appender.file</span> <span class="token punctuation">=</span> <span class="token attr-value">org.apache.log4j.FileAppender</span>
+<span class="token attr-name">log4j.appender.file.layout</span> <span class="token punctuation">=</span> <span class="token attr-value">org.apache.log4j.PatternLayout</span>
+<span class="token attr-name">log4j.appender.file.layout.conversionPattern</span> <span class="token punctuation">=</span> <span class="token attr-value">[%-10p]%r %l %d{yyyy-MM-dd HH:mm:ss.SSS} %m%n</span>
+<span class="token comment" spellcheck="true"># 指定日志文件保存路径</span>
+<span class="token attr-name">log4j.appender.file.file</span> <span class="token punctuation">=</span> <span class="token attr-value">logs/log4j.log</span>
+<span class="token comment" spellcheck="true"># 指定日志文件的字符集</span>
+<span class="token attr-name">log4j.appender.file.encoding</span> <span class="token punctuation">=</span> <span class="token attr-value">UTF-8</span>
+
+<span class="token attr-name">log4j.appender.rollingFile</span> <span class="token punctuation">=</span> <span class="token attr-value">org.apache.log4j.RollingFileAppender</span>
+<span class="token attr-name">log4j.appender.rollingFile.layout</span> <span class="token punctuation">=</span> <span class="token attr-value">org.apache.log4j.PatternLayout</span>
+<span class="token attr-name">log4j.appender.rollingFile.layout.conversionPattern</span> <span class="token punctuation">=</span> <span class="token attr-value">[%-10p]%r %l %d{yyyy-MM-dd HH:mm:ss.SSS} %m%n</span>
+<span class="token comment" spellcheck="true"># 指定日志文件保存路径</span>
+<span class="token attr-name">log4j.appender.rollingFile.file</span> <span class="token punctuation">=</span> <span class="token attr-value">logs/log4j.log</span>
+<span class="token comment" spellcheck="true"># 指定日志文件的字符集</span>
+<span class="token attr-name">log4j.appender.rollingFile.encoding</span> <span class="token punctuation">=</span> <span class="token attr-value">UTF-8</span>
+<span class="token comment" spellcheck="true"># 指定日志文件内容的大小</span>
+<span class="token attr-name">log4j.appender.rollingFile.maxFileSize</span> <span class="token punctuation">=</span> <span class="token attr-value">1MB</span>
+<span class="token comment" spellcheck="true"># 指定日志文件的数量，超过该数量则从最久远的日志文件开始覆盖</span>
+<span class="token attr-name">log4j.appender.rollingFile.maxBackupIndex</span> <span class="token punctuation">=</span> <span class="token attr-value">10</span>
+
+<span class="token attr-name">log4j.appender.dailyFile</span> <span class="token punctuation">=</span> <span class="token attr-value">org.apache.log4j.DailyRollingFileAppender</span>
+<span class="token attr-name">log4j.appender.dailyFile.layout</span> <span class="token punctuation">=</span> <span class="token attr-value">org.apache.log4j.PatternLayout</span>
+<span class="token attr-name">log4j.appender.dailyFile.layout.conversionPattern</span> <span class="token punctuation">=</span> <span class="token attr-value">[%-10p]%r %l %d{yyyy-MM-dd HH:mm:ss.SSS} %m%n</span>
+<span class="token comment" spellcheck="true"># 指定日志文件保存路径</span>
+<span class="token attr-name">log4j.appender.dailyFile.file</span> <span class="token punctuation">=</span> <span class="token attr-value">logs/log4j.log</span>
+<span class="token comment" spellcheck="true"># 指定日志文件的字符集</span>
+<span class="token attr-name">log4j.appender.dailyFile.encoding</span> <span class="token punctuation">=</span> <span class="token attr-value">UTF-8</span>
+<span class="token comment" spellcheck="true"># 指定日期拆分规则</span>
+<span class="token attr-name">log4j.appender.dailyFile.datePattern</span> <span class="token punctuation">=</span> <span class="token attr-value">'.'yyyy-MM-dd</span></code></pre>
+<p>使用JDBCAppender：</p>
+<pre class=" language-properties"><code class="language-properties"><span class="token comment" spellcheck="true">#mysql</span>
+<span class="token attr-name">log4j.appender.logDB</span><span class="token punctuation">=</span><span class="token attr-value">org.apache.log4j.jdbc.JDBCAppender</span>
+<span class="token attr-name">log4j.appender.logDB.layout</span><span class="token punctuation">=</span><span class="token attr-value">org.apache.log4j.PatternLayout</span>
+<span class="token attr-name">log4j.appender.logDB.Driver</span><span class="token punctuation">=</span><span class="token attr-value">com.mysql.jdbc.Driver</span>
+<span class="token attr-name">log4j.appender.logDB.URL</span><span class="token punctuation">=</span> <span class="token attr-value">jdbc :mysql ://localhost :3306/test</span>
+<span class="token attr-name">log4j.appender.logDB.User</span><span class="token punctuation">=</span><span class="token attr-value">root</span>
+<span class="token attr-name">log4j.appender.logDB.Password</span><span class="token punctuation">=</span><span class="token attr-value">root</span>
+<span class="token attr-name">log4j.appender.logDB.Sql</span><span class="token punctuation">=</span><span class="token attr-value">INSERT INTO \
+log(project_name,create_date,level,category,file_name,thread_name,line,all_category,message) \
+values('rhett','%d{yyyy-MM-dd HH:mm:ss}','%p','%c','%F','%t','%L','%l','%m')</span></code></pre>
+<p>自定义logger设置：</p>
+<pre class=" language-properties"><code class="language-properties"><span class="token comment" spellcheck="true"># 自定义logger对象设置</span>
+<span class="token attr-name">log4j.logger.com.rhett</span> <span class="token punctuation">=</span> <span class="token attr-value">info,file</span></code></pre>
+
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://www.codetool.top" rel="external nofollow noreferrer">Rhett Peng</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。部分转载即网络资源均已注明来源，若有版权问题请联系站长。转载请注明来源
+                    <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/java/">
+                                    <span class="chip bg-color">java</span>
+                                </a>
+                            
+                                <a href="/tags/%E6%97%A5%E5%BF%97/">
+                                    <span class="chip bg-color">日志</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'VUmN3m0ICuwaL4jNPnxBRln8-gzGzoHsz',
+        appKey: 'QH8FVT32jvi4qBllLg6Cf0dU',
+        notify: 'false' === 'true',
+        verify: 'true' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: '说点什么吧'
+    });
+</script>
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
+            <div class="card">
+                <a href="/article/Java%E6%97%A5%E5%BF%97%E6%A1%86%E6%9E%B6JUL%E5%92%8CLog4j%E4%BB%8B%E7%BB%8D/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/5.jpg" class="responsive-img" alt="Java日志框架JUL和Log4j介绍">
+                        
+                        <span class="card-title">Java日志框架JUL和Log4j介绍</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            日志文件是用于记录系统操作事件的文件集合,可分为事件日志和消息日志。具有处理历史数据、诊断问题的追踪以及理解系统的活动等重要作用。
+日志实现：JUL、logback、log4j、log4j2等
+1 JUL全称java util loggin
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-02-14
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/" class="post-category">
+                                    中间件/软件设计
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/java/">
+                        <span class="chip bg-color">java</span>
+                    </a>
+                    
+                    <a href="/tags/%E6%97%A5%E5%BF%97/">
+                        <span class="chip bg-color">日志</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/article/%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97BlockingQueue%E8%AF%A6%E8%A7%A3/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/6.jpg" class="responsive-img" alt="阻塞队列BlockingQueue详解">
+                        
+                        <span class="card-title">阻塞队列BlockingQueue详解</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            阻塞队列是生产者消费者模式的经典体现。
+我们在曾在Java线程池详解中自己实现过一个阻塞队列，这篇文章我们来研究一下JDK中的阻塞队列：
+1 BlockingQueue接口主要方法
+
+
+
+抛出异常
+特殊值
+阻塞
+超时
+
+
+
+插入
+add(e
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-02-14
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/" class="post-category">
+                                    编程语言
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/java/">
+                        <span class="chip bg-color">java</span>
+                    </a>
+                    
+                    <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">
+                        <span class="chip bg-color">多线程</span>
+                    </a>
+                    
+                    <a href="/tags/jdk/">
+                        <span class="chip bg-color">jdk</span>
+                    </a>
+                    
+                    <a href="/tags/%E6%BA%90%E7%A0%81%E7%A0%94%E7%A9%B6/">
+                        <span class="chip bg-color">源码研究</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+    
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+<!-- 代码块折行 -->
+
+<style type="text/css">
+code[class*="language-"], pre[class*="language-"] { white-space: pre !important; }
+</style>
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h1, h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h1, h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+    <footer class="page-footer bg-color">
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            <span id="year">2019-2020</span>
+            <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">190.9k</span>&nbsp;字
+            
+            
+            
+            
+            
+            <br>
+            
+            <br>
+            
+            <span id="icp"><img src="/medias/icp.png" style="vertical-align: text-bottom;" />
+                <a href="http://beian.miit.gov.cn/" target="_blank">赣ICP备19011928号</a>
+            </span>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/codeband-top" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:pctdyx@qq.net" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=995632825" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 995632825" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+$(function () {
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+});
+</script>
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":200,"height":200,"hOffset":20,"vOffset":100},"mobile":{"show":false},"dialog":{"enable":true,"hitokoto":false},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div id="chat_input"><input id="question" type="text" placeholder="陪我聊聊天吧" onkeypress="return onKeyPress(event)"/></div>
+</html>
+
+<!--动态线条背景-->
+<script type="text/javascript"
+color="0,0,0" opacity='0.5' zIndex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+</script>
+
+<script>
+
+//聊天框按回车
+function onKeyPress(e){
+    var keyCode = null;
+    if(e.which)
+        keyCode = e.which;
+    else if(e.keyCode)
+        keyCode = e.keyCode;
+        
+    //如果按下回车
+    if(keyCode == 13) {
+        // 1.获取界面上的元素value
+        var question_box = document.getElementById('question')
+        var question = question_box.value
+        question_box.value = ""
+        question_box.setAttribute("disabled","disabled")
+        var api_key = "78c33a07808c7b9e1905c89c88b3be14"
+        var api_secret = "q707tevnk00f"
+
+        // 2.通过XHR发送一个POST请求
+        var xhr = new XMLHttpRequest()
+        xhr.open('GET','https://api.codetool.top/robottalk?question='+encodeURIComponent(question)+"&api_key="+api_key+"&api_secret="+api_secret)
+		xhr.send(null)
+		xhr.onload = function(){
+            question_box.removeAttribute('disabled');
+            var live2d_dialog = document.getElementsByClassName("live2d-widget-dialog")[0]
+            live2d_dialog.style.opacity=1
+            live2d_dialog.innerHTML = this.responseText
+            window.setTimeout(()=>{
+                live2d_dialog.style.opacity=0
+            }, 5000);
+		}
+    }
+
+}
+
+</script>
+
+<style> 
+#chat_input{
+    width: 200px;
+    height: 40px;
+    position: fixed;
+    right: 0px;
+    bottom: 80px;
+    right: 20px;
+} 
+
+#question{
+    border: none;
+    border-bottom: 1px #aaaaaa solid;
+    background-color: transparent;
+    padding: 5px;
+}
+
+@media screen and (max-width: 480px) {
+    #chat_input{
+        display: none;
+    }
+    #live2d-widget{
+        display: none;
+    }
+}
+</style>
