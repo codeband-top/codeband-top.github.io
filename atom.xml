@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.codetool.top/"/>
-  <updated>2020-02-14T14:25:30.694Z</updated>
+  <updated>2020-02-14T18:02:38.534Z</updated>
   <id>https://www.codetool.top/</id>
   
   <author>
@@ -15,6 +15,39 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>leetcode45-跳跃游戏II</title>
+    <link href="https://www.codetool.top/article/leetcode45-%E8%B7%B3%E8%B7%83%E6%B8%B8%E6%88%8FII/"/>
+    <id>https://www.codetool.top/article/leetcode45-跳跃游戏II/</id>
+    <published>2020-02-14T17:51:44.000Z</published>
+    <updated>2020-02-14T18:02:38.534Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p><strong><em>原题</em></strong></p><p>给定一个非负整数数组，你最初位于数组的第一个位置。</p><p>数组中的每个元素代表你在该位置可以跳跃的最大长度。</p><p>你的目标是使用最少的跳跃次数到达数组的最后一个位置。</p><p><strong>示例:</strong></p><blockquote><p><strong>输入：</strong> [2,3,1,1,4]<br><strong>输出：</strong> 2<br><strong>解释：</strong> 跳到最后一个位置的最小跳跃数是 2。<br>     从下标为 0 跳到下标为 1 的位置，跳 1 步，然后跳 3 步到达数组的最后一个位置。</p></blockquote><p><strong>说明:</strong></p><p>假设你总是可以到达数组的最后一个位置。</p><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><ol><li>动态规划，找到能到达最后一个位置的最靠左的点，然后把这个点设为新的要到达的位置，再找能到达这个点的最靠左的点，直到找到下标0为止。</li><li>贪心算法，每跳一次，在可跳范围内找能跳到的最远的地方，到达这个最远的地方时则步数加一。</li></ol><h2 id="代码">2.2 代码</h2><p>动态规划：</p><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">jump</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> nums<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">int</span> jumpTo <span class="token operator">=</span> nums<span class="token punctuation">.</span>length<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> count <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">while</span><span class="token punctuation">(</span>jumpTo<span class="token operator">!=</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>jumpTo<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>                <span class="token keyword">if</span><span class="token punctuation">(</span>i<span class="token operator">+</span>nums<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">>=</span>jumpTo<span class="token punctuation">)</span> <span class="token punctuation">{</span>                    jumpTo <span class="token operator">=</span> i<span class="token punctuation">;</span>                    count<span class="token operator">++</span><span class="token punctuation">;</span>                    <span class="token keyword">break</span><span class="token punctuation">;</span>                <span class="token punctuation">}</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> count<span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre><p>贪心算法：(来源：windliang)</p><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">jump</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> nums<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">int</span> end <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> maxPosition <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>         <span class="token keyword">int</span> steps <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> nums<span class="token punctuation">.</span>length <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token comment" spellcheck="true">//找能跳的最远的</span>            maxPosition <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span>maxPosition<span class="token punctuation">,</span> nums<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">+</span> i<span class="token punctuation">)</span><span class="token punctuation">;</span>             <span class="token keyword">if</span><span class="token punctuation">(</span> i <span class="token operator">==</span> end<span class="token punctuation">)</span><span class="token punctuation">{</span> <span class="token comment" spellcheck="true">//遇到边界，就更新边界，并且步数加一</span>                end <span class="token operator">=</span> maxPosition<span class="token punctuation">;</span>                steps<span class="token operator">++</span><span class="token punctuation">;</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> steps<span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;原题&quot;&gt;1 原题&lt;/h1&gt;&lt;p&gt;&lt;strong&gt;&lt;em&gt;原题&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;给定一个非负整数数组，你最初位于数组的第一个位置。&lt;/p&gt;
+&lt;p&gt;数组中的每个元素代表你在该位置可以跳跃的最大长度。&lt;/p&gt;
+&lt;p&gt;你的目标是使用最少的跳跃次数
+      
+    
+    </summary>
+    
+    
+      <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
+    
+    
+      <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
+    
+      <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
+    
+      <category term="贪心法" scheme="https://www.codetool.top/tags/%E8%B4%AA%E5%BF%83%E6%B3%95/"/>
+    
+  </entry>
   
   <entry>
     <title>Java日志框架JUL和Log4j介绍</title>
@@ -72,11 +105,11 @@
     
       <category term="java" scheme="https://www.codetool.top/tags/java/"/>
     
-      <category term="多线程" scheme="https://www.codetool.top/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
-    
       <category term="jdk" scheme="https://www.codetool.top/tags/jdk/"/>
     
       <category term="源码研究" scheme="https://www.codetool.top/tags/%E6%BA%90%E7%A0%81%E7%A0%94%E7%A9%B6/"/>
+    
+      <category term="多线程" scheme="https://www.codetool.top/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
     
   </entry>
   
@@ -173,11 +206,11 @@
     
       <category term="java" scheme="https://www.codetool.top/tags/java/"/>
     
-      <category term="多线程" scheme="https://www.codetool.top/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
-    
       <category term="jdk" scheme="https://www.codetool.top/tags/jdk/"/>
     
       <category term="源码研究" scheme="https://www.codetool.top/tags/%E6%BA%90%E7%A0%81%E7%A0%94%E7%A9%B6/"/>
+    
+      <category term="多线程" scheme="https://www.codetool.top/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
     
   </entry>
   
@@ -210,9 +243,9 @@
     
       <category term="jdk" scheme="https://www.codetool.top/tags/jdk/"/>
     
-      <category term="源码研究" scheme="https://www.codetool.top/tags/%E6%BA%90%E7%A0%81%E7%A0%94%E7%A9%B6/"/>
-    
       <category term="集合" scheme="https://www.codetool.top/tags/%E9%9B%86%E5%90%88/"/>
+    
+      <category term="源码研究" scheme="https://www.codetool.top/tags/%E6%BA%90%E7%A0%81%E7%A0%94%E7%A9%B6/"/>
     
       <category term="哈希表" scheme="https://www.codetool.top/tags/%E5%93%88%E5%B8%8C%E8%A1%A8/"/>
     
@@ -372,9 +405,9 @@
     
       <category term="jdk" scheme="https://www.codetool.top/tags/jdk/"/>
     
-      <category term="源码研究" scheme="https://www.codetool.top/tags/%E6%BA%90%E7%A0%81%E7%A0%94%E7%A9%B6/"/>
-    
       <category term="集合" scheme="https://www.codetool.top/tags/%E9%9B%86%E5%90%88/"/>
+    
+      <category term="源码研究" scheme="https://www.codetool.top/tags/%E6%BA%90%E7%A0%81%E7%A0%94%E7%A9%B6/"/>
     
       <category term="哈希表" scheme="https://www.codetool.top/tags/%E5%93%88%E5%B8%8C%E8%A1%A8/"/>
     
@@ -566,9 +599,9 @@
     
       <category term="jdk" scheme="https://www.codetool.top/tags/jdk/"/>
     
-      <category term="源码研究" scheme="https://www.codetool.top/tags/%E6%BA%90%E7%A0%81%E7%A0%94%E7%A9%B6/"/>
-    
       <category term="集合" scheme="https://www.codetool.top/tags/%E9%9B%86%E5%90%88/"/>
+    
+      <category term="源码研究" scheme="https://www.codetool.top/tags/%E6%BA%90%E7%A0%81%E7%A0%94%E7%A9%B6/"/>
     
       <category term="堆" scheme="https://www.codetool.top/tags/%E5%A0%86/"/>
     
@@ -598,9 +631,9 @@
       <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
     
     
-      <category term="树" scheme="https://www.codetool.top/tags/%E6%A0%91/"/>
-    
       <category term="数据结构" scheme="https://www.codetool.top/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
+    
+      <category term="树" scheme="https://www.codetool.top/tags/%E6%A0%91/"/>
     
       <category term="堆" scheme="https://www.codetool.top/tags/%E5%A0%86/"/>
     
@@ -629,44 +662,11 @@
       <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
     
     
-      <category term="树" scheme="https://www.codetool.top/tags/%E6%A0%91/"/>
-    
       <category term="数据结构" scheme="https://www.codetool.top/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
     
       <category term="搜索树" scheme="https://www.codetool.top/tags/%E6%90%9C%E7%B4%A2%E6%A0%91/"/>
     
-  </entry>
-  
-  <entry>
-    <title>leetcode55-跳跃游戏</title>
-    <link href="https://www.codetool.top/article/leetcode55-%E8%B7%B3%E8%B7%83%E6%B8%B8%E6%88%8F/"/>
-    <id>https://www.codetool.top/article/leetcode55-跳跃游戏/</id>
-    <published>2020-02-08T17:31:49.000Z</published>
-    <updated>2020-02-09T12:01:32.315Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p><strong><em>原题</em></strong></p><p>给定一个非负整数数组，你最初位于数组的第一个位置。</p><p>数组中的每个元素代表你在该位置可以跳跃的最大长度。</p><p>判断你是否能够到达最后一个位置。</p><p><strong>示例1:</strong></p><blockquote><p><strong>输入：</strong> [2,3,1,1,4]<br><strong>输出：</strong> true<br><strong>解释：</strong> 我们可以先跳 1 步，从位置 0 到达 位置 1, 然后再从位置 1 跳 3 步到达最后一个位置。  </p></blockquote><p><strong>示例2:</strong></p><blockquote><p><strong>输入：</strong> [3,2,1,0,4]<br><strong>输出：</strong> false<br><strong>解释：</strong> 无论怎样，你总会到达索引为 3 的位置。但该位置的最大跳跃长度是 0 ， 所以你永远不可能到达最后一个位置。  </p></blockquote><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><ol><li>动态规划，看某一个点是否能到达最后一个点，如果能，那是否另外某个点能到达这个点。</li><li>贪心算法，如果能到达点a，那么a之前的点也一定能够到达。从右往左找到一个能到达最后一个点的位置，然后继续往左找到一个能到达当前点的位置，如此循环，如果能找到第一个点则返回true。</li></ol><h2 id="代码">2.2 代码</h2><p>动态规划+记忆：</p><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> numsGlobal<span class="token punctuation">;</span>     Boolean<span class="token punctuation">[</span><span class="token punctuation">]</span> canJump<span class="token punctuation">;</span>    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">canJump</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> nums<span class="token punctuation">)</span> <span class="token punctuation">{</span>        numsGlobal <span class="token operator">=</span> nums<span class="token punctuation">;</span>        canJump <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Boolean</span><span class="token punctuation">[</span>nums<span class="token punctuation">.</span>length<span class="token punctuation">]</span><span class="token punctuation">;</span>        <span class="token keyword">return</span> <span class="token function">canJumpTo</span><span class="token punctuation">(</span>nums<span class="token punctuation">.</span>length<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">canJumpTo</span><span class="token punctuation">(</span><span class="token keyword">int</span> index<span class="token punctuation">)</span><span class="token punctuation">{</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>index <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>canJump<span class="token punctuation">[</span>index<span class="token punctuation">]</span><span class="token operator">!=</span>null<span class="token punctuation">)</span> <span class="token keyword">return</span> canJump<span class="token punctuation">[</span>index<span class="token punctuation">]</span><span class="token punctuation">;</span>        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>index<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>numsGlobal<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">>=</span>index<span class="token operator">-</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>                <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">canJumpTo</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>                    canJump<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>                    <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>                <span class="token punctuation">}</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>        canJump<span class="token punctuation">[</span>index<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>        <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre><p>贪心算法：(来源leetcode官方)</p><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">canJump</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> nums<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">int</span> lastPos <span class="token operator">=</span> nums<span class="token punctuation">.</span>length <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span>        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> nums<span class="token punctuation">.</span>length <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span> i <span class="token operator">>=</span> <span class="token number">0</span><span class="token punctuation">;</span> i<span class="token operator">--</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>            <span class="token keyword">if</span> <span class="token punctuation">(</span>i <span class="token operator">+</span> nums<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">>=</span> lastPos<span class="token punctuation">)</span> <span class="token punctuation">{</span>                lastPos <span class="token operator">=</span> i<span class="token punctuation">;</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> lastPos <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h1 id=&quot;原题&quot;&gt;1 原题&lt;/h1&gt;&lt;p&gt;&lt;strong&gt;&lt;em&gt;原题&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;给定一个非负整数数组，你最初位于数组的第一个位置。&lt;/p&gt;
-&lt;p&gt;数组中的每个元素代表你在该位置可以跳跃的最大长度。&lt;/p&gt;
-&lt;p&gt;判断你是否能够到达最后一个位
-      
-    
-    </summary>
-    
-    
-      <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
-    
-    
-      <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
-    
-      <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
-    
-      <category term="贪心法" scheme="https://www.codetool.top/tags/%E8%B4%AA%E5%BF%83%E6%B3%95/"/>
+      <category term="树" scheme="https://www.codetool.top/tags/%E6%A0%91/"/>
     
   </entry>
   
