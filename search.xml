@@ -4,6 +4,35 @@
   
     
     <entry>
+      <title>Java反射机制和动态代理详解</title>
+      <link href="/article/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6%E5%92%8C%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E8%AF%A6%E8%A7%A3/"/>
+      <url>/article/Java%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6%E5%92%8C%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E8%AF%A6%E8%A7%A3/</url>
+      
+        <content type="html"><![CDATA[<h1 id="反射">1 反射</h1><h2 id="概念">1.1 概念</h2><p>反射机制：</p><ul><li>指的是可以于运行时加载、探知、使用编译期间完全未知的类。</li><li>程序在运行状态中，可以动态加载一个只有名称的类，对于任意一个已加载的类，都能够知道这个类的所有属性和方法；对于任意一个对象，都能够调用它的任意一个方法和属性；  </li></ul><pre class=" language-java"><code class="language-java">Class <span class="token class-name">c</span> <span class="token operator">=</span> Class<span class="token punctuation">.</span><span class="token function">forName</span><span class="token punctuation">(</span><span class="token string">"com.abc.test.User"</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><ul><li>加载完类之后，在堆内存中，就产生了一个Class类型的对象（一个类只有一个Class对象），这个对象就包含了完整的类的结构信息。我们可以通过这个对象看到类的结构。这个对象就像一面镜子，透过这个镜子看到类的结构，所以我们形象地称之为：反射。</li></ul><p>Class.forName 使用的类加载器是调用者的类加载器。</p><h2 id="Class类">1.2 Class类</h2><p>一个类被加载之后，JVM 会创建一个对应该类的 Class 对象，类的整个结构信息会放在相应的 Class 对象中。</p><p>如果多次执行 forName 等加载类的方法，类只会被加载一次；一个类只会形成一个 Class对象，无论执行多少次加载类的方法，获得的 Class 都是一样的。</p><h2 id="使用">1.3 使用</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/* * 获取Class对象的三种方式 */</span>Class <span class="token class-name">clazz1</span> <span class="token operator">=</span> Class<span class="token punctuation">.</span><span class="token function">forName</span><span class="token punctuation">(</span><span class="token string">"className"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>Class <span class="token class-name">clazz2</span> <span class="token operator">=</span> obj<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//obj为某一个类的实例，getClass()获取这个实例</span>Class <span class="token class-name">clazz3</span> <span class="token operator">=</span> Proson<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token comment" spellcheck="true">//Person为可以加载到的类名</span><span class="token comment" spellcheck="true">/* * 使用 */</span>Object obj1<span class="token operator">=</span>c<span class="token punctuation">.</span><span class="token function">newInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//创建一个c的实例</span>Constructor constructor <span class="token operator">=</span> clazz1<span class="token punctuation">.</span><span class="token function">getConstructor</span><span class="token punctuation">(</span>String<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">,</span> Integer<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//通过class对象获取一个参数类型对应的构造器</span>Object obj2 <span class="token operator">=</span> constructor<span class="token punctuation">.</span><span class="token function">newInstance</span><span class="token punctuation">(</span><span class="token string">"name"</span><span class="token punctuation">,</span><span class="token number">22</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//通过构造器对象获取实例对象</span>Method method1 <span class="token operator">=</span> obj2<span class="token punctuation">.</span><span class="token function">getMethod</span><span class="token punctuation">(</span><span class="token string">"foo"</span><span class="token punctuation">,</span>String<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//通过class对象获取一个方法对象</span>method1<span class="token punctuation">.</span><span class="token function">invoke</span><span class="token punctuation">(</span>obj2<span class="token punctuation">,</span><span class="token string">"name"</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//通过方法对象调用</span></code></pre><h2 id="用途">1.4 用途</h2><ul><li>动态加载类、动态获取类的信息（属性、方法、构造器）</li><li>动态构造对象</li><li>动态构造类和对象的任意方法、构造器</li><li>动态调用和处理属性</li><li>获取泛型信息</li><li>处理注解</li></ul><h2 id="性能">1.5 性能</h2><p>反射带来灵活性的同时，也有降低程序执行效率的弊端。</p><p>很多本来可以在编译阶段优化和验证的东西必须要等到运行时才能处理。</p><p>setAccessible 方法不仅可以标记某些私有的属性方法为可访问的属性方法，并且可以提高程序的执行效率。</p><p>实际上是启用和禁用访问安全检查的开关。如果做检查就会降低效率；关闭检查就可以提高效率。</p><p>反射调用方法比直接调用要慢大约 30 倍，如果跳过安全检查的话比直接调用要慢大约 7 倍</p><p>开启和不开启安全检查对于反射而言可能会差 4 倍的执行效率。</p><p>为什么慢?</p><ol><li>验证等防御代码过于繁琐，这一步本来在 link 阶段，现在却在计算时进行验证</li><li>产生很多临时对象，造成 GC 与计算时间消耗</li><li>由于缺少上下文，丢失了很多运行时的优化，比如 JIT(它可以看作 JVM 的重要评测标准之一)</li></ol><p>当然，现代 JVM 也不是非常慢了，它能够对反射代码进行缓存以及通过方法计数器同样实现 JIT 优化，所以反射不一定慢。</p><h1 id="动态代理">2 动态代理</h1><p>代理的定义：给目标对象提供一个代理对象，并由代理对象控制对目标对象的引用</p><p>静态代理：代理类是在编译时就实现好的。也就是说 Java 编译完成后代理类是一个实际的class 文件。代理类和被代理类都实现业务接口，代理类通过组合关系使用被代理对象。</p><p>动态代理：代理类是在运行时生成的。也就是说 Java 编译完之后并没有实际的 class 文件，而是在运行时动态生成的类字节码，并加载到 JVM 中。</p><p>代理的目的：(1) 通过引入代理对象的方式来间接访问目标对象，防止直接访问目标对象给系统带来的不必要复杂性；(2) 通过代理对象对原有的业务增强。</p><h2 id="JDK动态代理">2.1 JDK动态代理</h2><h3 id="概述和使用">2.1.1 概述和使用</h3><p>静态代理的缺陷：业务的拓展，实现接口的增多。开放-封闭原则：对外拓展开放，对修改关闭。</p><p>JDK 动态代理是由 <code>Java 内部的反射机制+动态生成字节码</code> 来实现的，cglib 动态代理底层则是借助 asm 来实现的。总的来说，反射机制在生成类的过程中比较高效，而 asm 在生成类之后的相关执行过程中比较高效（可以通过将 asm 生成的类进行缓存，这样解决 asm 生成类过程低效问题）。还有一点必须注意：<strong>JDK 动态代理的应用前提，必须是目标类基于统一的接口。</strong>如果没有上述前提，JDK 动态代理不能应用。由此可以看出，JDK 动态代理有一定的局限性，cglib 这种第三方类库实现的动态代理应用更加广泛，且在效率上更有优势。</p><p>前者必须基于接口，后者不需要接口，是基于继承的，但是不能代理 final 类和 final 方法；JDK 采用反射机制调用委托类的方法，CGLIB 采用类似索引的方式直接调用委托类方法；前者效率略低于后者效率，CGLIB 效率略高（不是一定的）</p><p>Proxy 类（代理类）的设计用到代理模式的设计思想，<strong>Proxy 类对象实现了代理目标的所有接口，并代替目标对象进行实际的操作。</strong>代理的目的是在目标对象方法的基础上作增强，这种增强的本质通常就是对目标对象的方法进行拦截。所以，Proxy 应该包括一个方法拦截器，来指示当拦截到方法调用时作何种处理。<strong>InvocationHandler 就是拦截器的接口。</strong></p><p>要想创建一个代理对象，需要使用Proxy类的newProxyInstance方法。这个方法有三个参数：</p><ul><li>一个类加载器</li><li>一个Class对象数组，每个元素都是需要实现的接口</li><li>一个调用处理器（InvocationHandler）</li></ul><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">RentInvocationHandler</span> <span class="token keyword">implements</span> <span class="token class-name">InvocationHandler</span> <span class="token punctuation">{</span>    <span class="token keyword">private</span> Object object<span class="token punctuation">;</span><span class="token comment" spellcheck="true">//被代理的对象，实际的方法执行者</span>    <span class="token keyword">public</span>  <span class="token function">RentInvocationHandler</span><span class="token punctuation">(</span>Object object<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">this</span><span class="token punctuation">.</span>object <span class="token operator">=</span> object<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token comment" spellcheck="true">//通过Proxy获取动态代理的对象</span>    <span class="token keyword">public</span> Object <span class="token function">getProxyInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>        <span class="token keyword">return</span> Proxy<span class="token punctuation">.</span><span class="token function">newProxyInstance</span><span class="token punctuation">(</span>object<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getClassLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>object<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getInterfaces</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token keyword">this</span><span class="token punctuation">)</span>    <span class="token punctuation">}</span>    <span class="token comment" spellcheck="true">/**     * @param proxy:代理类     * @param method：代理类调用处理程序的方法对象     * @param args：方法的参数     */</span>    <span class="token annotation punctuation">@Override</span>    <span class="token keyword">public</span> Object <span class="token function">invoke</span><span class="token punctuation">(</span>Object proxy<span class="token punctuation">,</span> Method method<span class="token punctuation">,</span> Object<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> Throwable <span class="token punctuation">{</span>        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"使用动态代理做的一些增强的操作......"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">//第一个参数表示真实对象</span>        <span class="token comment" spellcheck="true">//第二个参数表示参数</span>        Object result <span class="token operator">=</span> method<span class="token punctuation">.</span><span class="token function">invoke</span><span class="token punctuation">(</span>object<span class="token punctuation">,</span> args<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">return</span> result<span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre><p>使用的时候就直接传要代理的对象构造代理对象就行了。</p><h3 id="原理">2.1.2 原理</h3><p>Proxy.newProxyInstance：</p><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> Object <span class="token function">newProxyInstance</span><span class="token punctuation">(</span>ClassLoader loader<span class="token punctuation">,</span>                                        Class<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span> interfaces<span class="token punctuation">,</span>                                        InvocationHandler h<span class="token punctuation">)</span>    <span class="token keyword">throws</span> IllegalArgumentException<span class="token punctuation">{</span>    Objects<span class="token punctuation">.</span><span class="token function">requireNonNull</span><span class="token punctuation">(</span>h<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token keyword">final</span> Class<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span> intfs <span class="token operator">=</span> interfaces<span class="token punctuation">.</span><span class="token function">clone</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token keyword">final</span> SecurityManager sm <span class="token operator">=</span> System<span class="token punctuation">.</span><span class="token function">getSecurityManager</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token keyword">if</span> <span class="token punctuation">(</span>sm <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token function">checkProxyAccess</span><span class="token punctuation">(</span>Reflection<span class="token punctuation">.</span><span class="token function">getCallerClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> loader<span class="token punctuation">,</span> intfs<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token comment" spellcheck="true">/*    * Look up or generate the designated proxy class.    */</span>    <span class="token comment" spellcheck="true">//生成代理类的Class对象</span>    Class<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> cl <span class="token operator">=</span> <span class="token function">getProxyClass0</span><span class="token punctuation">(</span>loader<span class="token punctuation">,</span> intfs<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token comment" spellcheck="true">/*        * Invoke its constructor with the designated invocation handler.        */</span>    <span class="token keyword">try</span> <span class="token punctuation">{</span>        <span class="token keyword">if</span> <span class="token punctuation">(</span>sm <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>            <span class="token function">checkNewProxyPermission</span><span class="token punctuation">(</span>Reflection<span class="token punctuation">.</span><span class="token function">getCallerClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> cl<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token punctuation">}</span>        <span class="token comment" spellcheck="true">// 获取代理对象的构造方法（constructorParams就是InvocationHandler的Class）</span>        <span class="token keyword">final</span> Constructor<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> cons <span class="token operator">=</span> cl<span class="token punctuation">.</span><span class="token function">getConstructor</span><span class="token punctuation">(</span>constructorParams<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">final</span> InvocationHandler ih <span class="token operator">=</span> h<span class="token punctuation">;</span>        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>Modifier<span class="token punctuation">.</span><span class="token function">isPublic</span><span class="token punctuation">(</span>cl<span class="token punctuation">.</span><span class="token function">getModifiers</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>            AccessController<span class="token punctuation">.</span><span class="token function">doPrivileged</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">PrivilegedAction</span><span class="token operator">&lt;</span>Void<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>                <span class="token keyword">public</span> Void <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>                    cons<span class="token punctuation">.</span><span class="token function">setAccessible</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>                    <span class="token keyword">return</span> null<span class="token punctuation">;</span>                <span class="token punctuation">}</span>            <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token punctuation">}</span>        <span class="token comment" spellcheck="true">// 生成代理类的实例并把 InvocationHandlerImpl 的实例传给它的构造方法</span>        <span class="token keyword">return</span> cons<span class="token punctuation">.</span><span class="token function">newInstance</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Object</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">{</span>h<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IllegalAccessException</span><span class="token operator">|</span>InstantiationException e<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">InternalError</span><span class="token punctuation">(</span>e<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> e<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InvocationTargetException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>        Throwable t <span class="token operator">=</span> e<span class="token punctuation">.</span><span class="token function">getCause</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">if</span> <span class="token punctuation">(</span>t <span class="token keyword">instanceof</span> <span class="token class-name">RuntimeException</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>            <span class="token keyword">throw</span> <span class="token punctuation">(</span>RuntimeException<span class="token punctuation">)</span> t<span class="token punctuation">;</span>        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">InternalError</span><span class="token punctuation">(</span>t<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> t<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token punctuation">}</span>    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">NoSuchMethodException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">InternalError</span><span class="token punctuation">(</span>e<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> e<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre><p>可以看出getProxyClass0应该就是生成代理类字节码的关键。</p><pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">static</span> Class<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> <span class="token function">getProxyClass0</span><span class="token punctuation">(</span>ClassLoader loader<span class="token punctuation">,</span>                                        Class<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> interfaces<span class="token punctuation">)</span> <span class="token punctuation">{</span>    <span class="token keyword">if</span> <span class="token punctuation">(</span>interfaces<span class="token punctuation">.</span>length <span class="token operator">></span> <span class="token number">65535</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IllegalArgumentException</span><span class="token punctuation">(</span><span class="token string">"interface limit exceeded"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token comment" spellcheck="true">// If the proxy class defined by the given loader implementing</span>    <span class="token comment" spellcheck="true">// the given interfaces exists, this will simply return the cached copy;</span>    <span class="token comment" spellcheck="true">// otherwise, it will create the proxy class via the ProxyClassFactory</span>    <span class="token keyword">return</span> proxyClassCache<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>loader<span class="token punctuation">,</span> interfaces<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> WeakCache<span class="token operator">&lt;</span>ClassLoader<span class="token punctuation">,</span> Class<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span> Class<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">>></span>    proxyClassCache <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">WeakCache</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">KeyFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">ProxyClassFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> V <span class="token function">get</span><span class="token punctuation">(</span>K key<span class="token punctuation">,</span> P parameter<span class="token punctuation">)</span> <span class="token punctuation">{</span>    Objects<span class="token punctuation">.</span><span class="token function">requireNonNull</span><span class="token punctuation">(</span>parameter<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token function">expungeStaleEntries</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    Object cacheKey <span class="token operator">=</span> CacheKey<span class="token punctuation">.</span><span class="token function">valueOf</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> refQueue<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token comment" spellcheck="true">// lazily install the 2nd level valuesMap for the particular cacheKey</span>    ConcurrentMap<span class="token operator">&lt;</span>Object<span class="token punctuation">,</span> Supplier<span class="token operator">&lt;</span>V<span class="token operator">>></span> valuesMap <span class="token operator">=</span> map<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>cacheKey<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token keyword">if</span> <span class="token punctuation">(</span>valuesMap <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>        ConcurrentMap<span class="token operator">&lt;</span>Object<span class="token punctuation">,</span> Supplier<span class="token operator">&lt;</span>V<span class="token operator">>></span> oldValuesMap            <span class="token operator">=</span> map<span class="token punctuation">.</span><span class="token function">putIfAbsent</span><span class="token punctuation">(</span>cacheKey<span class="token punctuation">,</span>                                valuesMap <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ConcurrentHashMap</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">if</span> <span class="token punctuation">(</span>oldValuesMap <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>            valuesMap <span class="token operator">=</span> oldValuesMap<span class="token punctuation">;</span>        <span class="token punctuation">}</span>    <span class="token punctuation">}</span>    <span class="token comment" spellcheck="true">// create subKey and retrieve the possible Supplier&lt;V> stored by that</span>    <span class="token comment" spellcheck="true">// subKey from valuesMap</span>    Object subKey <span class="token operator">=</span> Objects<span class="token punctuation">.</span><span class="token function">requireNonNull</span><span class="token punctuation">(</span>subKeyFactory<span class="token punctuation">.</span><span class="token function">apply</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> parameter<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    Supplier<span class="token operator">&lt;</span>V<span class="token operator">></span> supplier <span class="token operator">=</span> valuesMap<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>subKey<span class="token punctuation">)</span><span class="token punctuation">;</span>    Factory factory <span class="token operator">=</span> null<span class="token punctuation">;</span>    <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">if</span> <span class="token punctuation">(</span>supplier <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>            <span class="token comment" spellcheck="true">// supplier might be a Factory or a CacheValue&lt;V> instance</span>            V value <span class="token operator">=</span> supplier<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token keyword">if</span> <span class="token punctuation">(</span>value <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>                <span class="token keyword">return</span> value<span class="token punctuation">;</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>        <span class="token comment" spellcheck="true">// else no supplier in cache</span>        <span class="token comment" spellcheck="true">// or a supplier that returned null (could be a cleared CacheValue</span>        <span class="token comment" spellcheck="true">// or a Factory that wasn't successful in installing the CacheValue)</span>        <span class="token comment" spellcheck="true">// lazily construct a Factory</span>        <span class="token keyword">if</span> <span class="token punctuation">(</span>factory <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>            factory <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Factory</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> parameter<span class="token punctuation">,</span> subKey<span class="token punctuation">,</span> valuesMap<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token punctuation">}</span>        <span class="token keyword">if</span> <span class="token punctuation">(</span>supplier <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>            supplier <span class="token operator">=</span> valuesMap<span class="token punctuation">.</span><span class="token function">putIfAbsent</span><span class="token punctuation">(</span>subKey<span class="token punctuation">,</span> factory<span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token keyword">if</span> <span class="token punctuation">(</span>supplier <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>                <span class="token comment" spellcheck="true">// successfully installed Factory</span>                supplier <span class="token operator">=</span> factory<span class="token punctuation">;</span>            <span class="token punctuation">}</span>            <span class="token comment" spellcheck="true">// else retry with winning supplier</span>        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>            <span class="token keyword">if</span> <span class="token punctuation">(</span>valuesMap<span class="token punctuation">.</span><span class="token function">replace</span><span class="token punctuation">(</span>subKey<span class="token punctuation">,</span> supplier<span class="token punctuation">,</span> factory<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>                <span class="token comment" spellcheck="true">// successfully replaced</span>                <span class="token comment" spellcheck="true">// cleared CacheEntry / unsuccessful Factory</span>                <span class="token comment" spellcheck="true">// with our Factory</span>                supplier <span class="token operator">=</span> factory<span class="token punctuation">;</span>            <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>                <span class="token comment" spellcheck="true">// retry with current supplier</span>                supplier <span class="token operator">=</span> valuesMap<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>subKey<span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre><p>最终跟随源码会找到<code>ProxyGenerator.generateClassFile</code>方法，实际上就是根据class文件规则改写字节码流。</p><pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">generateClassFile</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">addProxyMethod</span><span class="token punctuation">(</span>hashCodeMethod<span class="token punctuation">,</span> Object<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">addProxyMethod</span><span class="token punctuation">(</span>equalsMethod<span class="token punctuation">,</span> Object<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">addProxyMethod</span><span class="token punctuation">(</span>toStringMethod<span class="token punctuation">,</span> Object<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    Class<span class="token punctuation">[</span><span class="token punctuation">]</span> var1 <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>interfaces<span class="token punctuation">;</span>    <span class="token keyword">int</span> var2 <span class="token operator">=</span> var1<span class="token punctuation">.</span>length<span class="token punctuation">;</span>    <span class="token keyword">int</span> var3<span class="token punctuation">;</span>    Class <span class="token class-name">var4</span><span class="token punctuation">;</span>    <span class="token keyword">for</span><span class="token punctuation">(</span>var3 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> var3 <span class="token operator">&lt;</span> var2<span class="token punctuation">;</span> <span class="token operator">++</span>var3<span class="token punctuation">)</span> <span class="token punctuation">{</span>        var4 <span class="token operator">=</span> var1<span class="token punctuation">[</span>var3<span class="token punctuation">]</span><span class="token punctuation">;</span>        Method<span class="token punctuation">[</span><span class="token punctuation">]</span> var5 <span class="token operator">=</span> var4<span class="token punctuation">.</span><span class="token function">getMethods</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> var6 <span class="token operator">=</span> var5<span class="token punctuation">.</span>length<span class="token punctuation">;</span>        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> var7 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> var7 <span class="token operator">&lt;</span> var6<span class="token punctuation">;</span> <span class="token operator">++</span>var7<span class="token punctuation">)</span> <span class="token punctuation">{</span>            Method var8 <span class="token operator">=</span> var5<span class="token punctuation">[</span>var7<span class="token punctuation">]</span><span class="token punctuation">;</span>            <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">addProxyMethod</span><span class="token punctuation">(</span>var8<span class="token punctuation">,</span> var4<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token punctuation">}</span>    <span class="token punctuation">}</span>    Iterator var11 <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>proxyMethods<span class="token punctuation">.</span><span class="token function">values</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">iterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    List var12<span class="token punctuation">;</span>    <span class="token keyword">while</span><span class="token punctuation">(</span>var11<span class="token punctuation">.</span><span class="token function">hasNext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        var12 <span class="token operator">=</span> <span class="token punctuation">(</span>List<span class="token punctuation">)</span>var11<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token function">checkReturnTypes</span><span class="token punctuation">(</span>var12<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    Iterator var15<span class="token punctuation">;</span>    <span class="token keyword">try</span> <span class="token punctuation">{</span>        <span class="token keyword">this</span><span class="token punctuation">.</span>methods<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">generateConstructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        var11 <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>proxyMethods<span class="token punctuation">.</span><span class="token function">values</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">iterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">while</span><span class="token punctuation">(</span>var11<span class="token punctuation">.</span><span class="token function">hasNext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>            var12 <span class="token operator">=</span> <span class="token punctuation">(</span>List<span class="token punctuation">)</span>var11<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>            var15 <span class="token operator">=</span> var12<span class="token punctuation">.</span><span class="token function">iterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token keyword">while</span><span class="token punctuation">(</span>var15<span class="token punctuation">.</span><span class="token function">hasNext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>                ProxyGenerator<span class="token punctuation">.</span>ProxyMethod var16 <span class="token operator">=</span> <span class="token punctuation">(</span>ProxyGenerator<span class="token punctuation">.</span>ProxyMethod<span class="token punctuation">)</span>var15<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>                <span class="token keyword">this</span><span class="token punctuation">.</span>fields<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ProxyGenerator<span class="token punctuation">.</span>FieldInfo</span><span class="token punctuation">(</span>var16<span class="token punctuation">.</span>methodFieldName<span class="token punctuation">,</span> <span class="token string">"Ljava/lang/reflect/Method;"</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>                <span class="token keyword">this</span><span class="token punctuation">.</span>methods<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>var16<span class="token punctuation">.</span><span class="token function">generateMethod</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>        <span class="token keyword">this</span><span class="token punctuation">.</span>methods<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">generateStaticInitializer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> var10<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">InternalError</span><span class="token punctuation">(</span><span class="token string">"unexpected I/O Exception"</span><span class="token punctuation">,</span> var10<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>methods<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">></span> <span class="token number">65535</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IllegalArgumentException</span><span class="token punctuation">(</span><span class="token string">"method limit exceeded"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>fields<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">></span> <span class="token number">65535</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IllegalArgumentException</span><span class="token punctuation">(</span><span class="token string">"field limit exceeded"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>        <span class="token keyword">this</span><span class="token punctuation">.</span>cp<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token function">dotToSlash</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>className<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">this</span><span class="token punctuation">.</span>cp<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token string">"java/lang/reflect/Proxy"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        var1 <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>interfaces<span class="token punctuation">;</span>        var2 <span class="token operator">=</span> var1<span class="token punctuation">.</span>length<span class="token punctuation">;</span>        <span class="token keyword">for</span><span class="token punctuation">(</span>var3 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> var3 <span class="token operator">&lt;</span> var2<span class="token punctuation">;</span> <span class="token operator">++</span>var3<span class="token punctuation">)</span> <span class="token punctuation">{</span>            var4 <span class="token operator">=</span> var1<span class="token punctuation">[</span>var3<span class="token punctuation">]</span><span class="token punctuation">;</span>            <span class="token keyword">this</span><span class="token punctuation">.</span>cp<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token function">dotToSlash</span><span class="token punctuation">(</span>var4<span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token punctuation">}</span>        <span class="token keyword">this</span><span class="token punctuation">.</span>cp<span class="token punctuation">.</span><span class="token function">setReadOnly</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        ByteArrayOutputStream var13 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ByteArrayOutputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        DataOutputStream var14 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DataOutputStream</span><span class="token punctuation">(</span>var13<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">try</span> <span class="token punctuation">{</span>            var14<span class="token punctuation">.</span><span class="token function">writeInt</span><span class="token punctuation">(</span><span class="token operator">-</span><span class="token number">889275714</span><span class="token punctuation">)</span><span class="token punctuation">;</span>            var14<span class="token punctuation">.</span><span class="token function">writeShort</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>            var14<span class="token punctuation">.</span><span class="token function">writeShort</span><span class="token punctuation">(</span><span class="token number">49</span><span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token keyword">this</span><span class="token punctuation">.</span>cp<span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span>var14<span class="token punctuation">)</span><span class="token punctuation">;</span>            var14<span class="token punctuation">.</span><span class="token function">writeShort</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>accessFlags<span class="token punctuation">)</span><span class="token punctuation">;</span>            var14<span class="token punctuation">.</span><span class="token function">writeShort</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>cp<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token function">dotToSlash</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>className<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>            var14<span class="token punctuation">.</span><span class="token function">writeShort</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>cp<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token string">"java/lang/reflect/Proxy"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>            var14<span class="token punctuation">.</span><span class="token function">writeShort</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>interfaces<span class="token punctuation">.</span>length<span class="token punctuation">)</span><span class="token punctuation">;</span>            Class<span class="token punctuation">[</span><span class="token punctuation">]</span> var17 <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>interfaces<span class="token punctuation">;</span>            <span class="token keyword">int</span> var18 <span class="token operator">=</span> var17<span class="token punctuation">.</span>length<span class="token punctuation">;</span>            <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> var19 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> var19 <span class="token operator">&lt;</span> var18<span class="token punctuation">;</span> <span class="token operator">++</span>var19<span class="token punctuation">)</span> <span class="token punctuation">{</span>                Class <span class="token class-name">var22</span> <span class="token operator">=</span> var17<span class="token punctuation">[</span>var19<span class="token punctuation">]</span><span class="token punctuation">;</span>                var14<span class="token punctuation">.</span><span class="token function">writeShort</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>cp<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token function">dotToSlash</span><span class="token punctuation">(</span>var22<span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token punctuation">}</span>            var14<span class="token punctuation">.</span><span class="token function">writeShort</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>fields<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>            var15 <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>fields<span class="token punctuation">.</span><span class="token function">iterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token keyword">while</span><span class="token punctuation">(</span>var15<span class="token punctuation">.</span><span class="token function">hasNext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>                ProxyGenerator<span class="token punctuation">.</span>FieldInfo var20 <span class="token operator">=</span> <span class="token punctuation">(</span>ProxyGenerator<span class="token punctuation">.</span>FieldInfo<span class="token punctuation">)</span>var15<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>                var20<span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span>var14<span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token punctuation">}</span>            var14<span class="token punctuation">.</span><span class="token function">writeShort</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>methods<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>            var15 <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>methods<span class="token punctuation">.</span><span class="token function">iterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token keyword">while</span><span class="token punctuation">(</span>var15<span class="token punctuation">.</span><span class="token function">hasNext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>                ProxyGenerator<span class="token punctuation">.</span>MethodInfo var21 <span class="token operator">=</span> <span class="token punctuation">(</span>ProxyGenerator<span class="token punctuation">.</span>MethodInfo<span class="token punctuation">)</span>var15<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>                var21<span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span>var14<span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token punctuation">}</span>            var14<span class="token punctuation">.</span><span class="token function">writeShort</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token keyword">return</span> var13<span class="token punctuation">.</span><span class="token function">toByteArray</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> var9<span class="token punctuation">)</span> <span class="token punctuation">{</span>            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">InternalError</span><span class="token punctuation">(</span><span class="token string">"unexpected I/O Exception"</span><span class="token punctuation">,</span> var9<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token punctuation">}</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre><h2 id="CGLIB动态代理">2.2 CGLIB动态代理</h2><p>CGLIB(Code Generation Library)是一个基于 ASM 的字节码生成库，它允许我们在运行时对<br>字节码进行修改和动态生成。CGLIB 通过继承方式实现代理。</p><p>CGLIB 的核心类：</p><ul><li><code>net.sf.cglib.proxy.Enhancer</code> – 主要的增强类</li><li><code>net.sf.cglib.proxy.MethodInterceptor</code> – 主要的方法拦截类，它是 Callback 接口的子接口，需要用户实现</li><li><code>net.sf.cglib.proxy.MethodProxy</code> – JDK 的 java.lang.reflect.Method 类的代理类，可以方便的实现对源对象方法的调用,如使用：</li></ul><p><code>Object o = methodProxy.invokeSuper(proxy, args);//虽然第一个参数是被代理对象，也不会出现死循环的问题。</code></p><p><code>net.sf.cglib.proxy.MethodInterceptor</code> 接口是最通用的回调（callback）类型，它经常被基于代理的 AOP 用来实现拦截（intercept）方法的调用。这个接口只定义了一个方法 <code>public Object intercept( Object object, java.lang.reflect.Method method,Object[] args, MethodProxy proxy) throws Throwable;</code></p><p>第一个参数是代理对像，第二和第三个参数分别是拦截的方法和方法的参数。原来的方法可能通过使用 <code>java.lang.reflect.Method</code> 对象的一般反射调用，或者使用<code>net.sf.cglib.proxy.MethodProxy</code>对象调用。<code>net.sf.cglib.proxy.MethodProxy</code> 通常被首选使用，因为它更快。</p><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">CglibProxy</span> <span class="token keyword">implements</span> <span class="token class-name">MethodInterceptor</span> <span class="token punctuation">{</span>    <span class="token annotation punctuation">@Override</span>    <span class="token keyword">public</span> Object <span class="token function">intercept</span><span class="token punctuation">(</span>Object o<span class="token punctuation">,</span> Method method<span class="token punctuation">,</span> Object<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">,</span> MethodProxy    methodProxy<span class="token punctuation">)</span> <span class="token keyword">throws</span> Throwable <span class="token punctuation">{</span>        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"++++++before "</span> <span class="token operator">+</span> methodProxy<span class="token punctuation">.</span><span class="token function">getSuperName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span>        <span class="token string">"++++++"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>method<span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        Object o1 <span class="token operator">=</span> methodProxy<span class="token punctuation">.</span><span class="token function">invokeSuper</span><span class="token punctuation">(</span>o<span class="token punctuation">,</span> args<span class="token punctuation">)</span><span class="token punctuation">;</span>        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"++++++before "</span> <span class="token operator">+</span> methodProxy<span class="token punctuation">.</span><span class="token function">getSuperName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span>        <span class="token string">"++++++"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">return</span> o1<span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Main</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>        CglibProxy cglibProxy <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CglibProxy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        Enhancer enhancer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Enhancer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        enhancer<span class="token punctuation">.</span><span class="token function">setSuperclass</span><span class="token punctuation">(</span>UserServiceImpl<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        enhancer<span class="token punctuation">.</span><span class="token function">setCallback</span><span class="token punctuation">(</span>cglibProxy<span class="token punctuation">)</span><span class="token punctuation">;</span>        UserService o <span class="token operator">=</span> <span class="token punctuation">(</span>UserService<span class="token punctuation">)</span>enhancer<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        o<span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        o<span class="token punctuation">.</span><span class="token function">getAge</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre><p>我们<strong>通过 CGLIB 的 Enhancer 来指定要代理的目标对象、实际处理代理逻辑的对象，最终通过调用 create()方法得到代理对象</strong>，对这个对象所有非 final 方法的调用都会转发给MethodInterceptor.intercept()方法，在 intercept()方法里我们可以加入任何逻辑，比如修改方法参数，加入日志功能、安全检查功能等；通过调用 MethodProxy.invokeSuper()方法，我们将调用转发给原始对象，具体到本例，就是 HelloConcrete 的具体方法。CGLIG 中MethodInterceptor 的作用跟 JDK 代理中的 InvocationHandler 很类似，都是方法调用的中转站。</p><p>注意：<strong>对于从 Object 中继承的方法，CGLIB 代理也会进行代理</strong>，如 hashCode()、equals()、toString()等，但是 getClass()、wait()等方法不会，因为它是 final 方法，CGLIB 无法代理。既然是继承就不得不考虑 final 的问题。我们知道 <strong>final 类型不能有子类，所以 CGLIB 不能代理 final 类型。</strong></p><p>final 方法是不能重载的，所以也不能通过 CGLIB 代理，遇到这种情况不会抛异常，而是会<br>跳过 final 方法只代理其他方法。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 编程语言 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 基础知识 </tag>
+            
+            <tag> Java </tag>
+            
+            <tag> 动态代理 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>CopyOnWriteArrayList源码分析</title>
       <link href="/article/CopyOnWriteArrayList%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
       <url>/article/CopyOnWriteArrayList%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</url>
@@ -22,13 +51,13 @@
             
             <tag> java </tag>
             
+            <tag> 多线程 </tag>
+            
             <tag> jdk </tag>
             
             <tag> 源码研究 </tag>
             
             <tag> 集合 </tag>
-            
-            <tag> 多线程 </tag>
             
         </tags>
       
@@ -55,13 +84,13 @@
             
             <tag> java </tag>
             
+            <tag> 多线程 </tag>
+            
             <tag> jdk </tag>
             
             <tag> 源码研究 </tag>
             
             <tag> 集合 </tag>
-            
-            <tag> 多线程 </tag>
             
         </tags>
       
@@ -144,11 +173,11 @@
             
             <tag> java </tag>
             
+            <tag> 多线程 </tag>
+            
             <tag> jdk </tag>
             
             <tag> 源码研究 </tag>
-            
-            <tag> 多线程 </tag>
             
         </tags>
       
@@ -235,11 +264,11 @@
             
             <tag> java </tag>
             
+            <tag> 多线程 </tag>
+            
             <tag> jdk </tag>
             
             <tag> 源码研究 </tag>
-            
-            <tag> 多线程 </tag>
             
         </tags>
       
@@ -618,9 +647,9 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 数据结构 </tag>
             
             <tag> 堆 </tag>
             
@@ -647,11 +676,11 @@
       
         <tags>
             
+            <tag> 树 </tag>
+            
             <tag> 数据结构 </tag>
             
             <tag> 搜索树 </tag>
-            
-            <tag> 树 </tag>
             
         </tags>
       
@@ -736,11 +765,11 @@
       
         <tags>
             
+            <tag> 树 </tag>
+            
             <tag> 数据结构 </tag>
             
             <tag> 搜索树 </tag>
-            
-            <tag> 树 </tag>
             
         </tags>
       
@@ -798,9 +827,9 @@
             
             <tag> IO </tag>
             
-            <tag> socket </tag>
-            
             <tag> NIO </tag>
+            
+            <tag> socket </tag>
             
         </tags>
       
@@ -970,9 +999,9 @@
             
             <tag> java </tag>
             
-            <tag> IO </tag>
-            
             <tag> 多线程 </tag>
+            
+            <tag> IO </tag>
             
             <tag> 线程池 </tag>
             
@@ -1146,11 +1175,11 @@
             
             <tag> java </tag>
             
+            <tag> 多线程 </tag>
+            
             <tag> jdk </tag>
             
             <tag> 源码研究 </tag>
-            
-            <tag> 多线程 </tag>
             
             <tag> AQS </tag>
             
@@ -1374,9 +1403,9 @@
       
         <tags>
             
-            <tag> leetcode </tag>
-            
             <tag> 多线程 </tag>
+            
+            <tag> leetcode </tag>
             
         </tags>
       
@@ -1401,9 +1430,9 @@
       
         <tags>
             
-            <tag> leetcode </tag>
-            
             <tag> 多线程 </tag>
+            
+            <tag> leetcode </tag>
             
         </tags>
       
@@ -1629,11 +1658,11 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 递归 </tag>
+            
+            <tag> 数据结构 </tag>
             
         </tags>
       
@@ -2027,13 +2056,13 @@
       
         <tags>
             
-            <tag> 搜索树 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
             
             <tag> 递归 </tag>
+            
+            <tag> 搜索树 </tag>
             
         </tags>
       
@@ -2058,13 +2087,13 @@
       
         <tags>
             
-            <tag> 搜索树 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
             
             <tag> 递归 </tag>
+            
+            <tag> 搜索树 </tag>
             
         </tags>
       
@@ -2269,9 +2298,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -2300,9 +2329,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -2331,9 +2360,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -2362,9 +2391,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -2422,9 +2451,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -2453,9 +2482,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -2484,9 +2513,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> DFS </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> DFS </tag>
             
         </tags>
       
@@ -2511,13 +2540,13 @@
       
         <tags>
             
-            <tag> 搜索树 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
             
             <tag> 递归 </tag>
+            
+            <tag> 搜索树 </tag>
             
         </tags>
       
@@ -2542,13 +2571,13 @@
       
         <tags>
             
-            <tag> 搜索树 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
             
             <tag> 递归 </tag>
+            
+            <tag> 搜索树 </tag>
             
         </tags>
       
@@ -2573,13 +2602,13 @@
       
         <tags>
             
-            <tag> 搜索树 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
             
             <tag> 递归 </tag>
+            
+            <tag> 搜索树 </tag>
             
         </tags>
       
@@ -2604,13 +2633,13 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
-            <tag> 搜索树 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 递归 </tag>
+            
+            <tag> 数据结构 </tag>
+            
+            <tag> 搜索树 </tag>
             
         </tags>
       
@@ -2664,13 +2693,13 @@
       
         <tags>
             
-            <tag> 搜索树 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
             
             <tag> 递归 </tag>
+            
+            <tag> 搜索树 </tag>
             
         </tags>
       
@@ -2699,9 +2728,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> BFS </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> BFS </tag>
             
         </tags>
       
@@ -2730,9 +2759,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> DFS </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> DFS </tag>
             
         </tags>
       
@@ -2761,9 +2790,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -2792,9 +2821,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -2823,9 +2852,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -2854,9 +2883,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -2885,9 +2914,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -2945,9 +2974,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -2976,9 +3005,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -3007,9 +3036,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> BFS </tag>
-            
             <tag> 队列 </tag>
+            
+            <tag> BFS </tag>
             
         </tags>
       
@@ -3067,9 +3096,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> DFS </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> DFS </tag>
             
         </tags>
       
@@ -3098,9 +3127,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> DFS </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> DFS </tag>
             
         </tags>
       
@@ -3730,9 +3759,9 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> leetcode </tag>
+            
+            <tag> 数据结构 </tag>
             
         </tags>
       
@@ -3819,9 +3848,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 双指针技巧 </tag>
-            
             <tag> 哈希表 </tag>
+            
+            <tag> 双指针技巧 </tag>
             
         </tags>
       
@@ -3879,9 +3908,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 哈希表 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 哈希表 </tag>
             
         </tags>
       
@@ -4084,9 +4113,9 @@
             
             <tag> 基础知识 </tag>
             
-            <tag> 序列化 </tag>
-            
             <tag> IO </tag>
+            
+            <tag> 序列化 </tag>
             
         </tags>
       
@@ -4267,35 +4296,6 @@
     
     
     <entry>
-      <title>leetcode705-设计哈希集合</title>
-      <link href="/article/leetcode705-%E8%AE%BE%E8%AE%A1%E5%93%88%E5%B8%8C%E9%9B%86%E5%90%88/"/>
-      <url>/article/leetcode705-%E8%AE%BE%E8%AE%A1%E5%93%88%E5%B8%8C%E9%9B%86%E5%90%88/</url>
-      
-        <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>不使用任何内建的哈希表库设计一个哈希集合</p><p>具体地说，你的设计应该包含以下的功能</p><ul><li><code>add(value)</code>：向哈希集合中插入一个值。</li><li><code>contains(value)</code> ：返回哈希集合中是否存在这个值。</li><li><code>remove(value)</code>：将给定值从哈希集合中删除。如果哈希集合中没有这个值，什么也不做。</li></ul><p><strong>示例：</strong></p><blockquote><p>MyHashSet hashSet = new MyHashSet();<br>hashSet.add(1);<br>hashSet.add(2);<br>hashSet.contains(1); // 返回 true<br>hashSet.contains(3); // 返回 false (未找到)<br>hashSet.add(2);<br>hashSet.contains(2); // 返回 true<br>hashSet.remove(2);<br>hashSet.contains(2); // 返回 false (已经被删除)</p></blockquote><p><strong>注意:</strong></p><ul><li>所有的值都在 <code>[0, 1000000]</code>的范围内。</li><li>操作的总数目在<code>[1, 10000]</code>范围内。</li><li>不要使用内建的哈希集合库。</li></ul><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>偷懒，已知值的范围，直接将整数值映射为哈希值，有多少个哈希值建多少个桶，用空间换时间。</p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">MyHashSet</span> <span class="token punctuation">{</span>    <span class="token keyword">boolean</span><span class="token punctuation">[</span><span class="token punctuation">]</span> exist<span class="token punctuation">;</span>    <span class="token comment" spellcheck="true">/** Initialize your data structure here. */</span>    <span class="token keyword">public</span> <span class="token function">MyHashSet</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        exist <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">boolean</span><span class="token punctuation">[</span><span class="token number">1000001</span><span class="token punctuation">]</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">int</span> key<span class="token punctuation">)</span> <span class="token punctuation">{</span>        exist<span class="token punctuation">[</span>key<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">remove</span><span class="token punctuation">(</span><span class="token keyword">int</span> key<span class="token punctuation">)</span> <span class="token punctuation">{</span>        exist<span class="token punctuation">[</span>key<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token comment" spellcheck="true">/** Returns true if this set contains the specified element */</span>    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">contains</span><span class="token punctuation">(</span><span class="token keyword">int</span> key<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> exist<span class="token punctuation">[</span>key<span class="token punctuation">]</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token comment" spellcheck="true">/** * Your MyHashSet object will be instantiated and called as such: * MyHashSet obj = new MyHashSet(); * obj.add(key); * obj.remove(key); * boolean param_3 = obj.contains(key); */</span></code></pre>]]></content>
-      
-      
-      <categories>
-          
-          <category> 算法/数据结构 </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> 数据结构 </tag>
-            
-            <tag> leetcode </tag>
-            
-            <tag> 哈希集 </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>leetcode706-设计哈希映射</title>
       <link href="/article/leetcode706-%E8%AE%BE%E8%AE%A1%E5%93%88%E5%B8%8C%E6%98%A0%E5%B0%84/"/>
       <url>/article/leetcode706-%E8%AE%BE%E8%AE%A1%E5%93%88%E5%B8%8C%E6%98%A0%E5%B0%84/</url>
@@ -4312,11 +4312,40 @@
       
         <tags>
             
+            <tag> leetcode </tag>
+            
             <tag> 数据结构 </tag>
+            
+            <tag> 哈希表 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>leetcode705-设计哈希集合</title>
+      <link href="/article/leetcode705-%E8%AE%BE%E8%AE%A1%E5%93%88%E5%B8%8C%E9%9B%86%E5%90%88/"/>
+      <url>/article/leetcode705-%E8%AE%BE%E8%AE%A1%E5%93%88%E5%B8%8C%E9%9B%86%E5%90%88/</url>
+      
+        <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>不使用任何内建的哈希表库设计一个哈希集合</p><p>具体地说，你的设计应该包含以下的功能</p><ul><li><code>add(value)</code>：向哈希集合中插入一个值。</li><li><code>contains(value)</code> ：返回哈希集合中是否存在这个值。</li><li><code>remove(value)</code>：将给定值从哈希集合中删除。如果哈希集合中没有这个值，什么也不做。</li></ul><p><strong>示例：</strong></p><blockquote><p>MyHashSet hashSet = new MyHashSet();<br>hashSet.add(1);<br>hashSet.add(2);<br>hashSet.contains(1); // 返回 true<br>hashSet.contains(3); // 返回 false (未找到)<br>hashSet.add(2);<br>hashSet.contains(2); // 返回 true<br>hashSet.remove(2);<br>hashSet.contains(2); // 返回 false (已经被删除)</p></blockquote><p><strong>注意:</strong></p><ul><li>所有的值都在 <code>[0, 1000000]</code>的范围内。</li><li>操作的总数目在<code>[1, 10000]</code>范围内。</li><li>不要使用内建的哈希集合库。</li></ul><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>偷懒，已知值的范围，直接将整数值映射为哈希值，有多少个哈希值建多少个桶，用空间换时间。</p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">MyHashSet</span> <span class="token punctuation">{</span>    <span class="token keyword">boolean</span><span class="token punctuation">[</span><span class="token punctuation">]</span> exist<span class="token punctuation">;</span>    <span class="token comment" spellcheck="true">/** Initialize your data structure here. */</span>    <span class="token keyword">public</span> <span class="token function">MyHashSet</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        exist <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">boolean</span><span class="token punctuation">[</span><span class="token number">1000001</span><span class="token punctuation">]</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">int</span> key<span class="token punctuation">)</span> <span class="token punctuation">{</span>        exist<span class="token punctuation">[</span>key<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">remove</span><span class="token punctuation">(</span><span class="token keyword">int</span> key<span class="token punctuation">)</span> <span class="token punctuation">{</span>        exist<span class="token punctuation">[</span>key<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token comment" spellcheck="true">/** Returns true if this set contains the specified element */</span>    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">contains</span><span class="token punctuation">(</span><span class="token keyword">int</span> key<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> exist<span class="token punctuation">[</span>key<span class="token punctuation">]</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token comment" spellcheck="true">/** * Your MyHashSet object will be instantiated and called as such: * MyHashSet obj = new MyHashSet(); * obj.add(key); * obj.remove(key); * boolean param_3 = obj.contains(key); */</span></code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> 算法/数据结构 </category>
+          
+      </categories>
+      
+      
+        <tags>
             
             <tag> leetcode </tag>
             
-            <tag> 哈希表 </tag>
+            <tag> 数据结构 </tag>
+            
+            <tag> 哈希集 </tag>
             
         </tags>
       
@@ -4494,9 +4523,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 双指针技巧 </tag>
-            
             <tag> 链表 </tag>
+            
+            <tag> 双指针技巧 </tag>
             
         </tags>
       
@@ -4525,9 +4554,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 双指针技巧 </tag>
-            
             <tag> 链表 </tag>
+            
+            <tag> 双指针技巧 </tag>
             
         </tags>
       
@@ -4556,9 +4585,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 双指针技巧 </tag>
-            
             <tag> 链表 </tag>
+            
+            <tag> 双指针技巧 </tag>
             
         </tags>
       
@@ -4616,40 +4645,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 双指针技巧 </tag>
-            
             <tag> 链表 </tag>
             
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>leetcode142-环形链表II</title>
-      <link href="/article/leetcode142-%E7%8E%AF%E5%BD%A2%E9%93%BE%E8%A1%A8II/"/>
-      <url>/article/leetcode142-%E7%8E%AF%E5%BD%A2%E9%93%BE%E8%A1%A8II/</url>
-      
-        <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>给定一个链表，返回链表开始入环的第一个节点。 如果链表无环，则返回 <code>null</code>。</p><p>为了表示给定链表中的环，我们使用整数 <code>pos</code> 来表示链表尾连接到链表中的位置（索引从 0 开始）。 如果 <code>pos</code> 是 -1，则在该链表中没有环。</p><p><strong>说明：</strong> 不允许修改给定的链表。</p><p><strong>示例1:</strong></p><blockquote><p><strong>输入:</strong> head = [3,2,0,-4], pos = 1<br><strong>输出:</strong> tail connects to node index 1<br><strong>解释:</strong> 链表中有一个环，其尾部连接到第二个节点。</p></blockquote><p><img src="https://api.codetool.top/img/15767434323780.png" alt></p><p><strong>示例2:</strong></p><blockquote><p><strong>输入:</strong> head = [1,2], pos = 0<br><strong>输出:</strong> tail connects to node index 0<br><strong>解释:</strong> 链表中有一个环，其尾部连接到第一个节点。</p></blockquote><p><img src="https://api.codetool.top/img/15767434373485.png" alt></p><p><strong>示例3:</strong></p><blockquote><p><strong>输入:</strong> head = [1], pos = -1<br><strong>输出:</strong> no cycle<br><strong>解释:</strong> 链表中没有环。</p></blockquote><p><img src="https://api.codetool.top/img/15767434407028.png" alt></p><p><strong>进阶：</strong></p><p>你是否可以不用额外空间解决此题？</p><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><ol><li><p>HashSet<br>依次将获取到的链表元素插入一个HashSet中，返回第一个重复的节点。</p></li><li><p>双指针<br>理论上慢指针和快指针在环中相遇的位置是有规律可循的：<br>设第一个节点入环的距离为x，环的长度为y，则快指针每次走两步，慢指针每次走一步，第一次相遇经过的次数为t,则有：<br><code>(t-x)%y = (2t-x)%y</code><br>它等价于：<code>(2t-x)-(t-x) = ny</code>(n为自然数，代表第几次相遇)<br>也就可以得出<code>t = ny</code><br>再通过第一次相遇的环上坐标为<code>(t-x)%y</code>，将<code>t = y</code>代入，得第一次相遇的环上坐标为<code>y-x</code>。<br>此时，相遇点和出发点距入环点的距离都是<code>x</code>。于是让快指针回到出发点，两指针都以速度为1继续行走，直到相遇就是入环点。</p></li></ol><p><img src="https://api.codetool.top/img/15767434475689.png" alt></p><h2 id="代码">2.2 代码</h2><p>HashSet：</p><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/** * Definition for singly-linked list. * class ListNode { *     int val; *     ListNode next; *     ListNode(int x) { *         val = x; *         next = null; *     } * } */</span><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> ListNode <span class="token function">detectCycle</span><span class="token punctuation">(</span>ListNode head<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>head <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token keyword">return</span> null<span class="token punctuation">;</span>        Set<span class="token operator">&lt;</span>ListNode<span class="token operator">></span> set <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashSet</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        ListNode cur <span class="token operator">=</span> head<span class="token punctuation">;</span>        <span class="token keyword">while</span><span class="token punctuation">(</span>cur<span class="token punctuation">.</span>next<span class="token operator">!=</span>null<span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>set<span class="token punctuation">.</span><span class="token function">contains</span><span class="token punctuation">(</span>cur<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> cur<span class="token punctuation">;</span>            set<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>cur<span class="token punctuation">)</span><span class="token punctuation">;</span>            cur <span class="token operator">=</span> cur<span class="token punctuation">.</span>next<span class="token punctuation">;</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> null<span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre><p>双指针：</p><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/** * Definition for singly-linked list. * class ListNode { *     int val; *     ListNode next; *     ListNode(int x) { *         val = x; *         next = null; *     } * } */</span><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> ListNode <span class="token function">detectCycle</span><span class="token punctuation">(</span>ListNode head<span class="token punctuation">)</span><span class="token punctuation">{</span>        ListNode fast <span class="token operator">=</span> head<span class="token punctuation">,</span> slow <span class="token operator">=</span> head<span class="token punctuation">;</span>        <span class="token keyword">boolean</span> flag <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>        <span class="token keyword">while</span> <span class="token punctuation">(</span>fast <span class="token operator">!=</span> null <span class="token operator">&amp;&amp;</span> fast<span class="token punctuation">.</span>next <span class="token operator">!=</span> null<span class="token punctuation">)</span><span class="token punctuation">{</span>            fast <span class="token operator">=</span> fast<span class="token punctuation">.</span>next<span class="token punctuation">.</span>next<span class="token punctuation">;</span>            slow <span class="token operator">=</span> slow<span class="token punctuation">.</span>next<span class="token punctuation">;</span>            <span class="token keyword">if</span> <span class="token punctuation">(</span>fast <span class="token operator">==</span> slow<span class="token punctuation">)</span><span class="token punctuation">{</span>                flag <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>                <span class="token keyword">break</span><span class="token punctuation">;</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>flag<span class="token punctuation">)</span> <span class="token keyword">return</span> null<span class="token punctuation">;</span>        fast <span class="token operator">=</span> head<span class="token punctuation">;</span>        <span class="token keyword">while</span> <span class="token punctuation">(</span>fast <span class="token operator">!=</span> slow<span class="token punctuation">)</span><span class="token punctuation">{</span>            fast <span class="token operator">=</span> fast<span class="token punctuation">.</span>next<span class="token punctuation">;</span>            slow <span class="token operator">=</span> slow<span class="token punctuation">.</span>next<span class="token punctuation">;</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> fast<span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
-      
-      
-      <categories>
-          
-          <category> 算法/数据结构 </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> leetcode </tag>
-            
-            <tag> 算法 </tag>
-            
             <tag> 双指针技巧 </tag>
-            
-            <tag> 链表 </tag>
             
         </tags>
       
@@ -4678,9 +4676,40 @@
             
             <tag> 算法 </tag>
             
+            <tag> 链表 </tag>
+            
             <tag> 双指针技巧 </tag>
             
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>leetcode142-环形链表II</title>
+      <link href="/article/leetcode142-%E7%8E%AF%E5%BD%A2%E9%93%BE%E8%A1%A8II/"/>
+      <url>/article/leetcode142-%E7%8E%AF%E5%BD%A2%E9%93%BE%E8%A1%A8II/</url>
+      
+        <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>给定一个链表，返回链表开始入环的第一个节点。 如果链表无环，则返回 <code>null</code>。</p><p>为了表示给定链表中的环，我们使用整数 <code>pos</code> 来表示链表尾连接到链表中的位置（索引从 0 开始）。 如果 <code>pos</code> 是 -1，则在该链表中没有环。</p><p><strong>说明：</strong> 不允许修改给定的链表。</p><p><strong>示例1:</strong></p><blockquote><p><strong>输入:</strong> head = [3,2,0,-4], pos = 1<br><strong>输出:</strong> tail connects to node index 1<br><strong>解释:</strong> 链表中有一个环，其尾部连接到第二个节点。</p></blockquote><p><img src="https://api.codetool.top/img/15767434323780.png" alt></p><p><strong>示例2:</strong></p><blockquote><p><strong>输入:</strong> head = [1,2], pos = 0<br><strong>输出:</strong> tail connects to node index 0<br><strong>解释:</strong> 链表中有一个环，其尾部连接到第一个节点。</p></blockquote><p><img src="https://api.codetool.top/img/15767434373485.png" alt></p><p><strong>示例3:</strong></p><blockquote><p><strong>输入:</strong> head = [1], pos = -1<br><strong>输出:</strong> no cycle<br><strong>解释:</strong> 链表中没有环。</p></blockquote><p><img src="https://api.codetool.top/img/15767434407028.png" alt></p><p><strong>进阶：</strong></p><p>你是否可以不用额外空间解决此题？</p><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><ol><li><p>HashSet<br>依次将获取到的链表元素插入一个HashSet中，返回第一个重复的节点。</p></li><li><p>双指针<br>理论上慢指针和快指针在环中相遇的位置是有规律可循的：<br>设第一个节点入环的距离为x，环的长度为y，则快指针每次走两步，慢指针每次走一步，第一次相遇经过的次数为t,则有：<br><code>(t-x)%y = (2t-x)%y</code><br>它等价于：<code>(2t-x)-(t-x) = ny</code>(n为自然数，代表第几次相遇)<br>也就可以得出<code>t = ny</code><br>再通过第一次相遇的环上坐标为<code>(t-x)%y</code>，将<code>t = y</code>代入，得第一次相遇的环上坐标为<code>y-x</code>。<br>此时，相遇点和出发点距入环点的距离都是<code>x</code>。于是让快指针回到出发点，两指针都以速度为1继续行走，直到相遇就是入环点。</p></li></ol><p><img src="https://api.codetool.top/img/15767434475689.png" alt></p><h2 id="代码">2.2 代码</h2><p>HashSet：</p><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/** * Definition for singly-linked list. * class ListNode { *     int val; *     ListNode next; *     ListNode(int x) { *         val = x; *         next = null; *     } * } */</span><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> ListNode <span class="token function">detectCycle</span><span class="token punctuation">(</span>ListNode head<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>head <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token keyword">return</span> null<span class="token punctuation">;</span>        Set<span class="token operator">&lt;</span>ListNode<span class="token operator">></span> set <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashSet</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        ListNode cur <span class="token operator">=</span> head<span class="token punctuation">;</span>        <span class="token keyword">while</span><span class="token punctuation">(</span>cur<span class="token punctuation">.</span>next<span class="token operator">!=</span>null<span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>set<span class="token punctuation">.</span><span class="token function">contains</span><span class="token punctuation">(</span>cur<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> cur<span class="token punctuation">;</span>            set<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>cur<span class="token punctuation">)</span><span class="token punctuation">;</span>            cur <span class="token operator">=</span> cur<span class="token punctuation">.</span>next<span class="token punctuation">;</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> null<span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre><p>双指针：</p><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/** * Definition for singly-linked list. * class ListNode { *     int val; *     ListNode next; *     ListNode(int x) { *         val = x; *         next = null; *     } * } */</span><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> ListNode <span class="token function">detectCycle</span><span class="token punctuation">(</span>ListNode head<span class="token punctuation">)</span><span class="token punctuation">{</span>        ListNode fast <span class="token operator">=</span> head<span class="token punctuation">,</span> slow <span class="token operator">=</span> head<span class="token punctuation">;</span>        <span class="token keyword">boolean</span> flag <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>        <span class="token keyword">while</span> <span class="token punctuation">(</span>fast <span class="token operator">!=</span> null <span class="token operator">&amp;&amp;</span> fast<span class="token punctuation">.</span>next <span class="token operator">!=</span> null<span class="token punctuation">)</span><span class="token punctuation">{</span>            fast <span class="token operator">=</span> fast<span class="token punctuation">.</span>next<span class="token punctuation">.</span>next<span class="token punctuation">;</span>            slow <span class="token operator">=</span> slow<span class="token punctuation">.</span>next<span class="token punctuation">;</span>            <span class="token keyword">if</span> <span class="token punctuation">(</span>fast <span class="token operator">==</span> slow<span class="token punctuation">)</span><span class="token punctuation">{</span>                flag <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>                <span class="token keyword">break</span><span class="token punctuation">;</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>flag<span class="token punctuation">)</span> <span class="token keyword">return</span> null<span class="token punctuation">;</span>        fast <span class="token operator">=</span> head<span class="token punctuation">;</span>        <span class="token keyword">while</span> <span class="token punctuation">(</span>fast <span class="token operator">!=</span> slow<span class="token punctuation">)</span><span class="token punctuation">{</span>            fast <span class="token operator">=</span> fast<span class="token punctuation">.</span>next<span class="token punctuation">;</span>            slow <span class="token operator">=</span> slow<span class="token punctuation">.</span>next<span class="token punctuation">;</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> fast<span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> 算法/数据结构 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> leetcode </tag>
+            
+            <tag> 算法 </tag>
+            
             <tag> 链表 </tag>
+            
+            <tag> 双指针技巧 </tag>
             
         </tags>
       
@@ -4709,9 +4738,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 双指针技巧 </tag>
-            
             <tag> 链表 </tag>
+            
+            <tag> 双指针技巧 </tag>
             
         </tags>
       
@@ -4765,9 +4794,9 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> leetcode </tag>
+            
+            <tag> 数据结构 </tag>
             
             <tag> 链表 </tag>
             
@@ -4794,13 +4823,13 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 队列 </tag>
             
             <tag> 栈 </tag>
+            
+            <tag> 数据结构 </tag>
             
         </tags>
       
@@ -4825,13 +4854,13 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 队列 </tag>
             
             <tag> 栈 </tag>
+            
+            <tag> 数据结构 </tag>
             
         </tags>
       
@@ -4860,9 +4889,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> DFS </tag>
-            
             <tag> 递归 </tag>
+            
+            <tag> DFS </tag>
             
         </tags>
       
@@ -5069,9 +5098,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> DFS </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> DFS </tag>
             
         </tags>
       
@@ -5096,11 +5125,11 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 栈 </tag>
+            
+            <tag> 数据结构 </tag>
             
         </tags>
       
@@ -5666,11 +5695,11 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 队列 </tag>
+            
+            <tag> 数据结构 </tag>
             
         </tags>
       
@@ -5815,9 +5844,9 @@
             
             <tag> leetcode </tag>
             
-            <tag> 数组 </tag>
-            
             <tag> 算法 </tag>
+            
+            <tag> 数组 </tag>
             
         </tags>
       
@@ -5873,9 +5902,9 @@
             
             <tag> leetcode </tag>
             
-            <tag> 数组 </tag>
-            
             <tag> 算法 </tag>
+            
+            <tag> 数组 </tag>
             
         </tags>
       
@@ -5913,11 +5942,11 @@
     
     
     <entry>
-      <title>leetcode209-长度最小的子数组</title>
-      <link href="/article/leetcode209-%E9%95%BF%E5%BA%A6%E6%9C%80%E5%B0%8F%E7%9A%84%E5%AD%90%E6%95%B0%E7%BB%84/"/>
-      <url>/article/leetcode209-%E9%95%BF%E5%BA%A6%E6%9C%80%E5%B0%8F%E7%9A%84%E5%AD%90%E6%95%B0%E7%BB%84/</url>
+      <title>leetcode27-移除元素</title>
+      <link href="/article/leetcode27-%E7%A7%BB%E9%99%A4%E5%85%83%E7%B4%A0/"/>
+      <url>/article/leetcode27-%E7%A7%BB%E9%99%A4%E5%85%83%E7%B4%A0/</url>
       
-        <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>给定一个含有 <strong>n</strong> 个正整数的数组和一个正整数 <strong>s</strong> ，找出该数组中满足其和 ≥ <strong>s</strong> 的长度最小的连续子数组。如果不存在符合条件的连续子数组，返回 0。</p><p><strong>示例:</strong></p><blockquote><p><strong>输入:</strong> s = 7, nums = [2,3,1,2,4,3]<br><strong>输出:</strong> 2<br><strong>解释:</strong> 子数组 [4,3] 是该条件下的长度最小的连续子数组。</p></blockquote><p><strong>进阶:</strong></p><p>如果你已经完成了O(<em>n</em>) 时间复杂度的解法, 请尝试 O(<em>n</em> log <em>n</em>) 时间复杂度的解法。</p><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>使用两个指针i、j从下标为0处开始遍历。如果i-j内的总数小于s，将j向后移动，如果i-j内的总数大于s，将i向后移动，直到获取所有子数组的长度，并比较出最短长度。</p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">minSubArrayLen</span><span class="token punctuation">(</span><span class="token keyword">int</span> s<span class="token punctuation">,</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> nums<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> size <span class="token operator">=</span> nums<span class="token punctuation">.</span>length<span class="token punctuation">;</span>        <span class="token keyword">int</span> sum <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> min <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">while</span><span class="token punctuation">(</span>i<span class="token operator">&lt;</span>size<span class="token operator">&amp;&amp;</span>j<span class="token operator">&lt;</span>size<span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>sum<span class="token operator">>=</span>s<span class="token punctuation">)</span><span class="token punctuation">{</span>                <span class="token keyword">if</span><span class="token punctuation">(</span>min<span class="token operator">==</span><span class="token number">0</span><span class="token punctuation">)</span> min <span class="token operator">=</span> j<span class="token operator">-</span>i<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">;</span>                <span class="token keyword">else</span> min <span class="token operator">=</span> j<span class="token operator">-</span>i<span class="token operator">+</span><span class="token number">1</span><span class="token operator">&lt;</span>min<span class="token operator">?</span>j<span class="token operator">-</span>i<span class="token operator">+</span><span class="token number">1</span><span class="token operator">:</span>min<span class="token punctuation">;</span>                sum <span class="token operator">-=</span> nums<span class="token punctuation">[</span>i<span class="token operator">++</span><span class="token punctuation">]</span><span class="token punctuation">;</span>            <span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>                <span class="token keyword">if</span><span class="token punctuation">(</span>j<span class="token operator">==</span>size<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token keyword">return</span> min<span class="token punctuation">;</span>                sum <span class="token operator">+=</span> nums<span class="token punctuation">[</span><span class="token operator">++</span>j<span class="token punctuation">]</span><span class="token punctuation">;</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> min<span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
+        <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>给定一个数组 <em>nums</em> 和一个值 <em>val*，你需要原地移除所有数值等于 *val</em> 的元素，返回移除后数组的新长度。</p><p>不要使用额外的数组空间，你必须在原地<strong>修改输入数组</strong>并在使用 O(1) 额外空间的条件下完成。</p><p>元素的顺序可以改变。你不需要考虑数组中超出新长度后面的元素。</p><p><strong>示例 1:</strong></p><blockquote><p>给定 <em>nums</em> = [3,2,2,3], <em>val</em> = 3,<br>函数应该返回新的长度 2, 并且 <em>nums</em> 中的前两个元素均为 2。<br>你不需要考虑数组中超出新长度后面的元素。</p></blockquote><p><strong>示例 2:</strong></p><blockquote><p>给定 nums = [0,1,2,2,3,0,4,2], val = 2,<br>函数应该返回新的长度 5, 并且 nums 中的前五个元素为 0, 1, 3, 0, 4。<br>注意这五个元素可为任意顺序。<br>你不需要考虑数组中超出新长度后面的元素。</p></blockquote><p><strong>说明:</strong></p><p>为什么返回数值是整数，但输出的答案是数组呢?</p><p>请注意，输入数组是以 <strong>“引用”</strong> 方式传递的，这意味着在函数里修改输入数组对于调用者是可见的。</p><p>你可以想象内部操作如下:</p><blockquote><p>// <strong>nums</strong> 是以“引用”方式传递的。也就是说，不对实参作任何拷贝<br>int len = removeElement(nums, val);</p><p>// 在函数里修改输入数组对于调用者是可见的。<br>// 根据你的函数返回的长度, 它会打印出数组中<strong>该长度范围内</strong>的所有元素。<br>for (int i = 0; i &lt; len; i++) {<br>print(nums[i]);<br>}</p></blockquote><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>我们继续使用两个指针：一个仍然用于迭代，而第二个指针总是指向下一次添加的位置。</p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">removeElement</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> nums<span class="token punctuation">,</span> <span class="token keyword">int</span> val<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">int</span> k <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>nums<span class="token punctuation">.</span>length<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>nums<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">!=</span>val<span class="token punctuation">)</span><span class="token punctuation">{</span>                nums<span class="token punctuation">[</span>k<span class="token punctuation">]</span> <span class="token operator">=</span> nums<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>                k<span class="token operator">++</span><span class="token punctuation">;</span>            <span class="token punctuation">}</span>           <span class="token punctuation">}</span>        <span class="token keyword">return</span> k<span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
       
       
       <categories>
@@ -5942,11 +5971,11 @@
     
     
     <entry>
-      <title>leetcode27-移除元素</title>
-      <link href="/article/leetcode27-%E7%A7%BB%E9%99%A4%E5%85%83%E7%B4%A0/"/>
-      <url>/article/leetcode27-%E7%A7%BB%E9%99%A4%E5%85%83%E7%B4%A0/</url>
+      <title>leetcode209-长度最小的子数组</title>
+      <link href="/article/leetcode209-%E9%95%BF%E5%BA%A6%E6%9C%80%E5%B0%8F%E7%9A%84%E5%AD%90%E6%95%B0%E7%BB%84/"/>
+      <url>/article/leetcode209-%E9%95%BF%E5%BA%A6%E6%9C%80%E5%B0%8F%E7%9A%84%E5%AD%90%E6%95%B0%E7%BB%84/</url>
       
-        <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>给定一个数组 <em>nums</em> 和一个值 <em>val*，你需要原地移除所有数值等于 *val</em> 的元素，返回移除后数组的新长度。</p><p>不要使用额外的数组空间，你必须在原地<strong>修改输入数组</strong>并在使用 O(1) 额外空间的条件下完成。</p><p>元素的顺序可以改变。你不需要考虑数组中超出新长度后面的元素。</p><p><strong>示例 1:</strong></p><blockquote><p>给定 <em>nums</em> = [3,2,2,3], <em>val</em> = 3,<br>函数应该返回新的长度 2, 并且 <em>nums</em> 中的前两个元素均为 2。<br>你不需要考虑数组中超出新长度后面的元素。</p></blockquote><p><strong>示例 2:</strong></p><blockquote><p>给定 nums = [0,1,2,2,3,0,4,2], val = 2,<br>函数应该返回新的长度 5, 并且 nums 中的前五个元素为 0, 1, 3, 0, 4。<br>注意这五个元素可为任意顺序。<br>你不需要考虑数组中超出新长度后面的元素。</p></blockquote><p><strong>说明:</strong></p><p>为什么返回数值是整数，但输出的答案是数组呢?</p><p>请注意，输入数组是以 <strong>“引用”</strong> 方式传递的，这意味着在函数里修改输入数组对于调用者是可见的。</p><p>你可以想象内部操作如下:</p><blockquote><p>// <strong>nums</strong> 是以“引用”方式传递的。也就是说，不对实参作任何拷贝<br>int len = removeElement(nums, val);</p><p>// 在函数里修改输入数组对于调用者是可见的。<br>// 根据你的函数返回的长度, 它会打印出数组中<strong>该长度范围内</strong>的所有元素。<br>for (int i = 0; i &lt; len; i++) {<br>print(nums[i]);<br>}</p></blockquote><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>我们继续使用两个指针：一个仍然用于迭代，而第二个指针总是指向下一次添加的位置。</p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">removeElement</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> nums<span class="token punctuation">,</span> <span class="token keyword">int</span> val<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">int</span> k <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>nums<span class="token punctuation">.</span>length<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>nums<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">!=</span>val<span class="token punctuation">)</span><span class="token punctuation">{</span>                nums<span class="token punctuation">[</span>k<span class="token punctuation">]</span> <span class="token operator">=</span> nums<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>                k<span class="token operator">++</span><span class="token punctuation">;</span>            <span class="token punctuation">}</span>           <span class="token punctuation">}</span>        <span class="token keyword">return</span> k<span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
+        <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>给定一个含有 <strong>n</strong> 个正整数的数组和一个正整数 <strong>s</strong> ，找出该数组中满足其和 ≥ <strong>s</strong> 的长度最小的连续子数组。如果不存在符合条件的连续子数组，返回 0。</p><p><strong>示例:</strong></p><blockquote><p><strong>输入:</strong> s = 7, nums = [2,3,1,2,4,3]<br><strong>输出:</strong> 2<br><strong>解释:</strong> 子数组 [4,3] 是该条件下的长度最小的连续子数组。</p></blockquote><p><strong>进阶:</strong></p><p>如果你已经完成了O(<em>n</em>) 时间复杂度的解法, 请尝试 O(<em>n</em> log <em>n</em>) 时间复杂度的解法。</p><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>使用两个指针i、j从下标为0处开始遍历。如果i-j内的总数小于s，将j向后移动，如果i-j内的总数大于s，将i向后移动，直到获取所有子数组的长度，并比较出最短长度。</p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">minSubArrayLen</span><span class="token punctuation">(</span><span class="token keyword">int</span> s<span class="token punctuation">,</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> nums<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> size <span class="token operator">=</span> nums<span class="token punctuation">.</span>length<span class="token punctuation">;</span>        <span class="token keyword">int</span> sum <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> min <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">while</span><span class="token punctuation">(</span>i<span class="token operator">&lt;</span>size<span class="token operator">&amp;&amp;</span>j<span class="token operator">&lt;</span>size<span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>sum<span class="token operator">>=</span>s<span class="token punctuation">)</span><span class="token punctuation">{</span>                <span class="token keyword">if</span><span class="token punctuation">(</span>min<span class="token operator">==</span><span class="token number">0</span><span class="token punctuation">)</span> min <span class="token operator">=</span> j<span class="token operator">-</span>i<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">;</span>                <span class="token keyword">else</span> min <span class="token operator">=</span> j<span class="token operator">-</span>i<span class="token operator">+</span><span class="token number">1</span><span class="token operator">&lt;</span>min<span class="token operator">?</span>j<span class="token operator">-</span>i<span class="token operator">+</span><span class="token number">1</span><span class="token operator">:</span>min<span class="token punctuation">;</span>                sum <span class="token operator">-=</span> nums<span class="token punctuation">[</span>i<span class="token operator">++</span><span class="token punctuation">]</span><span class="token punctuation">;</span>            <span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>                <span class="token keyword">if</span><span class="token punctuation">(</span>j<span class="token operator">==</span>size<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token keyword">return</span> min<span class="token punctuation">;</span>                sum <span class="token operator">+=</span> nums<span class="token punctuation">[</span><span class="token operator">++</span>j<span class="token punctuation">]</span><span class="token punctuation">;</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> min<span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
       
       
       <categories>
@@ -6136,9 +6165,9 @@
             
             <tag> leetcode </tag>
             
-            <tag> 数组 </tag>
-            
             <tag> 算法 </tag>
+            
+            <tag> 数组 </tag>
             
         </tags>
       
@@ -6165,9 +6194,9 @@
             
             <tag> leetcode </tag>
             
-            <tag> 数组 </tag>
-            
             <tag> 算法 </tag>
+            
+            <tag> 数组 </tag>
             
         </tags>
       
@@ -6194,9 +6223,9 @@
             
             <tag> leetcode </tag>
             
-            <tag> 数组 </tag>
-            
             <tag> 算法 </tag>
+            
+            <tag> 数组 </tag>
             
         </tags>
       
@@ -6252,9 +6281,9 @@
             
             <tag> leetcode </tag>
             
-            <tag> 数组 </tag>
-            
             <tag> 算法 </tag>
+            
+            <tag> 数组 </tag>
             
         </tags>
       
@@ -6281,11 +6310,11 @@
             
             <tag> leetcode </tag>
             
-            <tag> 数组 </tag>
-            
             <tag> 算法 </tag>
             
             <tag> 递归 </tag>
+            
+            <tag> 数组 </tag>
             
         </tags>
       
@@ -6341,9 +6370,9 @@
             
             <tag> leetcode </tag>
             
-            <tag> 数组 </tag>
-            
             <tag> 算法 </tag>
+            
+            <tag> 数组 </tag>
             
         </tags>
       
