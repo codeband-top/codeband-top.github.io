@@ -4,11 +4,38 @@
   
     
     <entry>
+      <title>Mybatis使用与入门案例</title>
+      <link href="/article/Mybatis%E4%BD%BF%E7%94%A8%E4%B8%8E%E5%85%A5%E9%97%A8%E6%A1%88%E4%BE%8B/"/>
+      <url>/article/Mybatis%E4%BD%BF%E7%94%A8%E4%B8%8E%E5%85%A5%E9%97%A8%E6%A1%88%E4%BE%8B/</url>
+      
+        <content type="html"><![CDATA[<h1 id="前置环境">1 前置环境</h1><p>创建数据库表并添加数据：</p><pre class=" language-sql"><code class="language-sql"><span class="token keyword">DROP</span> <span class="token keyword">TABLE</span> <span class="token keyword">IF</span> <span class="token keyword">EXISTS</span> <span class="token punctuation">`</span><span class="token keyword">user</span><span class="token punctuation">`</span><span class="token punctuation">;</span><span class="token keyword">CREATE</span> <span class="token keyword">TABLE</span> <span class="token punctuation">`</span><span class="token keyword">user</span><span class="token punctuation">`</span> <span class="token punctuation">(</span>  <span class="token punctuation">`</span>id<span class="token punctuation">`</span> <span class="token keyword">int</span><span class="token punctuation">(</span><span class="token number">11</span><span class="token punctuation">)</span> <span class="token operator">NOT</span> <span class="token boolean">NULL</span> <span class="token keyword">auto_increment</span><span class="token punctuation">,</span>  <span class="token punctuation">`</span>username<span class="token punctuation">`</span> <span class="token keyword">varchar</span><span class="token punctuation">(</span><span class="token number">32</span><span class="token punctuation">)</span> <span class="token operator">NOT</span> <span class="token boolean">NULL</span> <span class="token keyword">COMMENT</span> <span class="token string">'用户名称'</span><span class="token punctuation">,</span>  <span class="token punctuation">`</span>birthday<span class="token punctuation">`</span> <span class="token keyword">datetime</span> <span class="token keyword">default</span> <span class="token boolean">NULL</span> <span class="token keyword">COMMENT</span> <span class="token string">'生日'</span><span class="token punctuation">,</span>  <span class="token punctuation">`</span>sex<span class="token punctuation">`</span> char<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token keyword">default</span> <span class="token boolean">NULL</span> <span class="token keyword">COMMENT</span> <span class="token string">'性别'</span><span class="token punctuation">,</span>  <span class="token punctuation">`</span>address<span class="token punctuation">`</span> <span class="token keyword">varchar</span><span class="token punctuation">(</span><span class="token number">256</span><span class="token punctuation">)</span> <span class="token keyword">default</span> <span class="token boolean">NULL</span> <span class="token keyword">COMMENT</span> <span class="token string">'地址'</span><span class="token punctuation">,</span>  <span class="token keyword">PRIMARY</span> <span class="token keyword">KEY</span>  <span class="token punctuation">(</span><span class="token punctuation">`</span>id<span class="token punctuation">`</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">ENGINE</span><span class="token operator">=</span><span class="token keyword">InnoDB</span> <span class="token keyword">DEFAULT</span> <span class="token keyword">CHARSET</span><span class="token operator">=</span>utf8<span class="token punctuation">;</span><span class="token keyword">insert</span>  <span class="token keyword">into</span> <span class="token punctuation">`</span><span class="token keyword">user</span><span class="token punctuation">`</span><span class="token punctuation">(</span><span class="token punctuation">`</span>id<span class="token punctuation">`</span><span class="token punctuation">,</span><span class="token punctuation">`</span>username<span class="token punctuation">`</span><span class="token punctuation">,</span><span class="token punctuation">`</span>birthday<span class="token punctuation">`</span><span class="token punctuation">,</span><span class="token punctuation">`</span>sex<span class="token punctuation">`</span><span class="token punctuation">,</span><span class="token punctuation">`</span>address<span class="token punctuation">`</span><span class="token punctuation">)</span> <span class="token keyword">values</span> <span class="token punctuation">(</span><span class="token number">41</span><span class="token punctuation">,</span><span class="token string">'老王'</span><span class="token punctuation">,</span><span class="token string">'2018-02-27 17:47:08'</span><span class="token punctuation">,</span><span class="token string">'男'</span><span class="token punctuation">,</span><span class="token string">'北京'</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token punctuation">(</span><span class="token number">42</span><span class="token punctuation">,</span><span class="token string">'小二王'</span><span class="token punctuation">,</span><span class="token string">'2018-03-02 15:09:37'</span><span class="token punctuation">,</span><span class="token string">'女'</span><span class="token punctuation">,</span><span class="token string">'北京金燕龙'</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token punctuation">(</span><span class="token number">43</span><span class="token punctuation">,</span><span class="token string">'小二王'</span><span class="token punctuation">,</span><span class="token string">'2018-03-04 11:34:34'</span><span class="token punctuation">,</span><span class="token string">'女'</span><span class="token punctuation">,</span><span class="token string">'北京金燕龙'</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token punctuation">(</span><span class="token number">45</span><span class="token punctuation">,</span><span class="token string">'传智播客'</span><span class="token punctuation">,</span><span class="token string">'2018-03-04 12:04:06'</span><span class="token punctuation">,</span><span class="token string">'男'</span><span class="token punctuation">,</span><span class="token string">'北京金燕龙'</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token punctuation">(</span><span class="token number">46</span><span class="token punctuation">,</span><span class="token string">'老王'</span><span class="token punctuation">,</span><span class="token string">'2018-03-07 17:37:26'</span><span class="token punctuation">,</span><span class="token string">'男'</span><span class="token punctuation">,</span><span class="token string">'北京'</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token punctuation">(</span><span class="token number">48</span><span class="token punctuation">,</span><span class="token string">'小马宝莉'</span><span class="token punctuation">,</span><span class="token string">'2018-03-08 11:44:00'</span><span class="token punctuation">,</span><span class="token string">'女'</span><span class="token punctuation">,</span><span class="token string">'北京修正'</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><h1 id="项目结构">2 项目结构</h1><p><img src="https://api.codetool.top/img/15820443706546.png" alt></p><h2 id="配置文件">2.1 配置文件</h2><p>[db.properties]</p><pre class=" language-properties"><code class="language-properties"><span class="token attr-name">driver</span><span class="token punctuation">=</span><span class="token attr-value">com.mysql.cj.jdbc.Driver</span><span class="token attr-name">url</span><span class="token punctuation">=</span><span class="token attr-value">jdbc:mysql://192.168.91.1:3306/test?useUnicode=true&amp;characterEncoding=utf-8&amp;allowMultiQueries=true</span><span class="token attr-name">username</span><span class="token punctuation">=</span><span class="token attr-value">root</span><span class="token attr-name">password</span><span class="token punctuation">=</span><span class="token attr-value">123456</span></code></pre><p>[mybatis.xml]</p><pre class=" language-xml"><code class="language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="utf-8" ?></span><span class="token doctype">&lt;!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>configuration</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>properties</span> <span class="token attr-name">resource</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>db.properties<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>settings</span><span class="token punctuation">></span></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>setting</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>logImpl<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>LOG4J<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>settings</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>typeAliases</span><span class="token punctuation">></span></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>package</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.rhett.domain<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>package</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>typeAliases</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>environments</span> <span class="token attr-name">default</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>development<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>environment</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>development<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>transactionManager</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>JDBC<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dataSource</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>POOLED<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>                <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>driver<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${driver}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>                <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>url<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${url}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>                <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>username<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${username}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>                <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>password<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${password}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dataSource</span><span class="token punctuation">></span></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>environment</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>environments</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mappers</span><span class="token punctuation">></span></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mapper</span> <span class="token attr-name">resource</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com/rhett/dao/IUserDao.xml<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mappers</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>configuration</span><span class="token punctuation">></span></span></code></pre><h2 id="添加JavaBean">2.2 添加JavaBean</h2><p>在domain下编写bean：</p><pre class=" language-java"><code class="language-java"><span class="token keyword">package</span> com<span class="token punctuation">.</span>rhett<span class="token punctuation">.</span>domain<span class="token punctuation">;</span><span class="token keyword">import</span> java<span class="token punctuation">.</span>io<span class="token punctuation">.</span>Serializable<span class="token punctuation">;</span><span class="token keyword">import</span> java<span class="token punctuation">.</span>util<span class="token punctuation">.</span>Date<span class="token punctuation">;</span><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">User</span> <span class="token keyword">implements</span> <span class="token class-name">Serializable</span> <span class="token punctuation">{</span>    <span class="token keyword">private</span> Integer id<span class="token punctuation">;</span>    <span class="token keyword">private</span> String username<span class="token punctuation">;</span>    <span class="token keyword">private</span> Date birthday<span class="token punctuation">;</span>    <span class="token keyword">private</span> String sex<span class="token punctuation">;</span>    <span class="token keyword">private</span> String address<span class="token punctuation">;</span>    <span class="token keyword">public</span> Integer <span class="token function">getId</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> id<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setId</span><span class="token punctuation">(</span>Integer id<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">this</span><span class="token punctuation">.</span>id <span class="token operator">=</span> id<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> String <span class="token function">getUsername</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> username<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setUsername</span><span class="token punctuation">(</span>String username<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">this</span><span class="token punctuation">.</span>username <span class="token operator">=</span> username<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> Date <span class="token function">getBirthday</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> birthday<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setBirthday</span><span class="token punctuation">(</span>Date birthday<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">this</span><span class="token punctuation">.</span>birthday <span class="token operator">=</span> birthday<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> String <span class="token function">getSex</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> sex<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setSex</span><span class="token punctuation">(</span>String sex<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">this</span><span class="token punctuation">.</span>sex <span class="token operator">=</span> sex<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> String <span class="token function">getAddress</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> address<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setAddress</span><span class="token punctuation">(</span>String address<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">this</span><span class="token punctuation">.</span>address <span class="token operator">=</span> address<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token annotation punctuation">@Override</span>    <span class="token keyword">public</span> String <span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> <span class="token string">"User [id="</span> <span class="token operator">+</span> id <span class="token operator">+</span> <span class="token string">", username="</span> <span class="token operator">+</span> username <span class="token operator">+</span> <span class="token string">", birthday="</span> <span class="token operator">+</span> birthday                <span class="token operator">+</span> <span class="token string">", sex="</span> <span class="token operator">+</span> sex <span class="token operator">+</span> <span class="token string">", address="</span>                <span class="token operator">+</span> address <span class="token operator">+</span> <span class="token string">"]"</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre><h2 id="编写Mapper">2.3 编写Mapper</h2><p>首先编写接口类IuserDao：</p><pre class=" language-java"><code class="language-java"><span class="token keyword">package</span> com<span class="token punctuation">.</span>rhett<span class="token punctuation">.</span>dao<span class="token punctuation">;</span><span class="token keyword">import</span> com<span class="token punctuation">.</span>rhett<span class="token punctuation">.</span>domain<span class="token punctuation">.</span>User<span class="token punctuation">;</span><span class="token keyword">import</span> org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>ibatis<span class="token punctuation">.</span>annotations<span class="token punctuation">.</span>Select<span class="token punctuation">;</span><span class="token keyword">import</span> java<span class="token punctuation">.</span>util<span class="token punctuation">.</span>List<span class="token punctuation">;</span><span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">IUserDao</span> <span class="token punctuation">{</span>    <span class="token comment" spellcheck="true">/**     * 查询所有操作     */</span>    List<span class="token operator">&lt;</span>User<span class="token operator">></span> <span class="token function">findAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token punctuation">}</span></code></pre><p>然后在resources和包对应的相同文件夹下编写mapper的xml配置(IUserDao.xml)：</p><pre class=" language-xml"><code class="language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8"?></span><span class="token doctype">&lt;!DOCTYPE mapper        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"        "http://mybatis.org/dtd/mybatis-3-mapper.dtd"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mapper</span> <span class="token attr-name">namespace</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.rhett.dao.IUserDao<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>    <span class="token comment" spellcheck="true">&lt;!-- 配置查询所有操作 --></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>select</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>findAll<span class="token punctuation">"</span></span> <span class="token attr-name">resultType</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>User<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>    select * from user    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>select</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mapper</span><span class="token punctuation">></span></span></code></pre><p>然后在mybatis.xml文件中配置mapper（见上面的配置，我用了包扫描）</p><h2 id="编写测试类">2.4 编写测试类</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">package</span> test<span class="token punctuation">;</span><span class="token keyword">import</span> com<span class="token punctuation">.</span>rhett<span class="token punctuation">.</span>dao<span class="token punctuation">.</span>IUserDao<span class="token punctuation">;</span><span class="token keyword">import</span> com<span class="token punctuation">.</span>rhett<span class="token punctuation">.</span>domain<span class="token punctuation">.</span>User<span class="token punctuation">;</span><span class="token keyword">import</span> org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>ibatis<span class="token punctuation">.</span>io<span class="token punctuation">.</span>Resources<span class="token punctuation">;</span><span class="token keyword">import</span> org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>ibatis<span class="token punctuation">.</span>session<span class="token punctuation">.</span>SqlSession<span class="token punctuation">;</span><span class="token keyword">import</span> org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>ibatis<span class="token punctuation">.</span>session<span class="token punctuation">.</span>SqlSessionFactory<span class="token punctuation">;</span><span class="token keyword">import</span> org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>ibatis<span class="token punctuation">.</span>session<span class="token punctuation">.</span>SqlSessionFactoryBuilder<span class="token punctuation">;</span><span class="token keyword">import</span> java<span class="token punctuation">.</span>io<span class="token punctuation">.</span>IOException<span class="token punctuation">;</span><span class="token keyword">import</span> java<span class="token punctuation">.</span>io<span class="token punctuation">.</span>InputStream<span class="token punctuation">;</span><span class="token keyword">import</span> java<span class="token punctuation">.</span>util<span class="token punctuation">.</span>List<span class="token punctuation">;</span><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">MybatisTest</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>        <span class="token comment" spellcheck="true">// 1.读取配置文件</span>        InputStream in <span class="token operator">=</span> Resources<span class="token punctuation">.</span><span class="token function">getResourceAsStream</span><span class="token punctuation">(</span><span class="token string">"mybatis.xml"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// 2.创建SqlSessionFactory工厂</span>        SqlSessionFactoryBuilder builder <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SqlSessionFactoryBuilder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        SqlSessionFactory factory <span class="token operator">=</span> builder<span class="token punctuation">.</span><span class="token function">build</span><span class="token punctuation">(</span>in<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// 3.使用工厂生成SqlSession对象</span>        SqlSession session <span class="token operator">=</span> factory<span class="token punctuation">.</span><span class="token function">openSession</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// 4.使用SqlSession创建Dao接口的代理</span>        IUserDao userDao <span class="token operator">=</span> session<span class="token punctuation">.</span><span class="token function">getMapper</span><span class="token punctuation">(</span>IUserDao<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// 5.使用代理对象执行方法</span>        List<span class="token operator">&lt;</span>User<span class="token operator">></span> users <span class="token operator">=</span> userDao<span class="token punctuation">.</span><span class="token function">findAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">for</span><span class="token punctuation">(</span>User user<span class="token operator">:</span>users<span class="token punctuation">)</span><span class="token punctuation">{</span>            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token punctuation">}</span>        <span class="token comment" spellcheck="true">// 6.释放资源</span>        session<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        in<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre><p>输出：</p><pre><code>User [id=41, username=老王, birthday=Wed Feb 28 07:47:08 CST 2018, sex=男, address=北京]User [id=42, username=小二王, birthday=Sat Mar 03 05:09:37 CST 2018, sex=女, address=北京金燕龙]User [id=43, username=小二王, birthday=Mon Mar 05 01:34:34 CST 2018, sex=女, address=北京金燕龙]User [id=45, username=传智播客, birthday=Mon Mar 05 02:04:06 CST 2018, sex=男, address=北京金燕龙]User [id=46, username=老王, birthday=Thu Mar 08 07:37:26 CST 2018, sex=男, address=北京]User [id=48, username=小马宝莉, birthday=Fri Mar 09 01:44:00 CST 2018, sex=女, address=北京修正]</code></pre><h1 id="补充：基于注解的修改方法">3 补充：基于注解的修改方法</h1><p>在编写接口的时候加上注解：</p><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">IUserDao</span> <span class="token punctuation">{</span>    <span class="token comment" spellcheck="true">/*    * 查询所有用户    */</span>    <span class="token annotation punctuation">@Select</span><span class="token punctuation">(</span><span class="token string">"select * from user"</span><span class="token punctuation">)</span>    List<span class="token operator">&lt;</span>User<span class="token operator">></span> <span class="token function">findAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token punctuation">}</span></code></pre><p>然后修改mybatis.xml</p><pre class=" language-xml"><code class="language-xml"><span class="token comment" spellcheck="true">&lt;!-- 告知 mybatis 映射配置的位置 --></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mappers</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mapper</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.itheima.dao.IUserDao<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mappers</span><span class="token punctuation">></span></span></code></pre><p>就可以不用IUserDao.xml了。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 中间件/软件设计 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> mybatis </tag>
+            
+            <tag> java主流框架 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Mybatis概述和配置介绍</title>
       <link href="/article/Mybatis%E6%A6%82%E8%BF%B0%E5%92%8C%E9%85%8D%E7%BD%AE%E4%BB%8B%E7%BB%8D/"/>
       <url>/article/Mybatis%E6%A6%82%E8%BF%B0%E5%92%8C%E9%85%8D%E7%BD%AE%E4%BB%8B%E7%BB%8D/</url>
       
-        <content type="html"><![CDATA[<p>本文参考资源：</p><p><a href="https://www.cnblogs.com/liu1459310172/p/9762765.html" target="_blank" rel="noopener">mybatis的配置文件详解(二) - 那一夜 - 博客园</a></p><p><a href="https://blog.csdn.net/LONG_Yi_1994/article/details/100630428" target="_blank" rel="noopener">MyBatis内置常用Java类型对应的别名_Java_小诸葛的博客-CSDN博客</a></p><p><a href="https://www.cnblogs.com/zltao/p/10546288.html" target="_blank" rel="noopener">Mybatis—typeHandlers默认支持的类型处理器 - 水痕灬 - 博客园</a></p><h1 id="概述">1 概述</h1><p>mybatis是一种持久层框架，也属于ORM映射。前身是ibatis。</p><p>相比于hibernate：</p><ul><li>hibernate为全自动化，配置文件书写之后不需要书写sql语句，但是欠缺灵活，很多时候需要优化；</li><li>mybatis为半自动化，需要自己书写sql语句，需要自己定义映射。增加了程序员的一些操作，但是带来了设计上的灵活，并且也是支持hibernate的一些特性，如延迟加载，缓存和映射等；对数据库的兼容性比hibernate差。移植性不好，但是可编写灵活和高性能的sql语句。</li></ul><h2 id="特点">1.1 特点</h2><ol><li>sql语句与代码分离，存放于xml配置文件中</li><li>用逻辑标签控制动态SQL的拼接</li><li>查询的结果集与java对象自动映射</li></ol><h2 id="整体架构">1.2 整体架构</h2><p><img src="https://api.codetool.top/img/15820288383858.png" alt></p><p><img src="https://api.codetool.top/img/15820292517306.png" alt></p><h1 id="配置">2 配置</h1><h2 id="maven配置">2.1 maven配置</h2><p>构建建议从模板maven-archetype-webapp构建</p><p>依赖：</p><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.mybatis<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>mybatis<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>3.5.4<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>mysql<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>mysql-connector-java<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>6.0.6<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span></code></pre><h2 id="全局配置文件mybatis-config-xml">2.2 全局配置文件mybatis-config.xml</h2><p>configuration</p><ul><li>properties（属性）</li><li>settings（全局配置参数）</li><li>typeAliases（类型别名）</li><li>typeHandlers（类型处理器）</li><li>enviroments（环境集合属性对象）<ul><li>enviroment（环境配置）<ul><li>transactionManager（事务管理）</li><li>dataSource（数据源）</li></ul></li></ul></li><li>mappers（映射器）</li><li>objectFactory（对象工厂）</li><li>plugins（插件）</li></ul><p>这个配置文件的目的是为了创建一个SqlSeesionFactory实例对象。</p><h3 id="属性">2.2.1 属性</h3><p>指定一些键值对，作配置用，建议把这部分放在另一个properties文件中，然后使用resource属性指定文件。如：</p><p>[db.properties]</p><pre class=" language-properties"><code class="language-properties"><span class="token attr-name">driver</span><span class="token punctuation">=</span><span class="token attr-value">com.mysql.jdbc.Driver</span><span class="token attr-name">url</span><span class="token punctuation">=</span><span class="token attr-value">jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=utf-8&amp;allowMultiQueries=true</span><span class="token attr-name">username</span><span class="token punctuation">=</span><span class="token attr-value">root</span><span class="token attr-name">password</span><span class="token punctuation">=</span><span class="token attr-value">123456</span></code></pre><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>properties</span> <span class="token attr-name">resource</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>db.properties<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span></code></pre><h3 id="全局配置参数">2.2.2 全局配置参数</h3><p>用于配置一些mybatis的参数，例如使用的日志框架：</p><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>settings</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>setting</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>logImpl<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>LOG4J<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>settings</span><span class="token punctuation">></span></span></code></pre><p>mybatis可以使用的日志框架有：</p><ul><li>SLF4J</li><li>Apache Commons Logging</li><li>Log4J2</li><li>Log4J</li><li>JDK logging</li></ul><p>如果没有配置指定的日志框架，mybatis会按该顺序查找，使用最先查找到的日志框架。</p><h3 id="类型别名">2.2.3 类型别名</h3><p>类型别名即指定java类型的一个别名，可以在后面配置的resultType和ParameterType中使用。</p><p>有三种方式可以配置类型别名：</p><ol><li>单独配置某个类</li></ol><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>typeAliases</span><span class="token punctuation">></span></span>　　<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>typeAlias</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.rhett.po.User<span class="token punctuation">"</span></span> <span class="token attr-name">alise</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>user<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>typeAliases</span><span class="token punctuation">></span></span></code></pre><ol start="2"><li>扫描包</li></ol><p>如下配置，那么com.shsxt.po所有类型在这个配置文件中的别名就是它们的类名</p><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>typeAliases</span><span class="token punctuation">></span></span>　　<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>package</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.rhett.po<span class="token punctuation">"</span></span> <span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>typeAliases</span><span class="token punctuation">></span></span></code></pre><ol start="3"><li>通过注解</li></ol><p>在JavaBean上添加注解<code>@Alias(&quot;别名&quot;)</code></p><p>需要注意的是，Mybatis有一些为Java类型默认配置的别名：</p><table><thead><tr><th>映射别名 Alias</th><th>Java的类型 Mapped Type</th></tr></thead><tbody><tr><td>_byte</td><td>byte</td></tr><tr><td>_longyiyi</td><td>long</td></tr><tr><td>_short</td><td>short</td></tr><tr><td>_int</td><td>int</td></tr><tr><td>_integer</td><td>int</td></tr><tr><td>_double</td><td>double</td></tr><tr><td>_float</td><td>float</td></tr><tr><td>_boolean</td><td>boolean</td></tr><tr><td>string</td><td>String</td></tr><tr><td>byte</td><td>Byte</td></tr><tr><td>long</td><td>Long</td></tr><tr><td>short</td><td>Short</td></tr><tr><td>int</td><td>Integer</td></tr><tr><td>integer</td><td>Integer</td></tr><tr><td>double</td><td>Double</td></tr><tr><td>float</td><td>Float</td></tr><tr><td>boolean</td><td>Boolean</td></tr><tr><td>date</td><td>Date</td></tr><tr><td>decimal</td><td>BigDecimal</td></tr><tr><td>bigdecimal</td><td>BigDecimal</td></tr><tr><td>object</td><td>Object</td></tr><tr><td>map</td><td>Map</td></tr><tr><td>hashmap</td><td>HashMap</td></tr><tr><td>list</td><td>List</td></tr><tr><td>arraylist</td><td>ArrayList</td></tr><tr><td>collection</td><td>Collection</td></tr><tr><td>iterator</td><td>Iterator</td></tr></tbody></table><h3 id="类型处理器">2.2.4 类型处理器</h3><p>类型处理器就是处理数据库数据类型和Java数据类型之间的映射</p><p>下面是Mybatis默认的类型处理器</p><table><thead><tr><th><strong>类型处理器</strong></th><th><strong>Java类型</strong></th><th><strong>JDBC类型</strong></th></tr></thead><tbody><tr><td>BooleanTypeHandler</td><td>java.lang.Boolean,boolean</td><td>数据库兼容的 BOOLEAN</td></tr><tr><td>ByteTypeHandler</td><td>java.lang.Byte, byte</td><td>数据库兼容的 NUMERIC 或 BYTE</td></tr><tr><td>ShortTypeHandler</td><td>java.lang.Short, short</td><td>数据库兼容的 NUMERIC 或 SHORT INTEGER</td></tr><tr><td>IntegerTypeHandler</td><td>java.lang.Integer, int</td><td>数据库兼容的 NUMERIC 或 INTEGER</td></tr><tr><td>LongTypeHandler</td><td>java.lang.Long, long</td><td>数据库兼容的 NUMERIC 或 LONG INTEGER</td></tr><tr><td>FloatTypeHandler</td><td>java.lang.Float, float</td><td>数据库兼容的 NUMERIC 或 FLOAT</td></tr><tr><td>DoubleTypeHandler</td><td>java.lang.Double,double</td><td>数据库兼容的 NUMERIC 或 DOUBLE</td></tr><tr><td>BigDecimalTypeHandler</td><td>java.math.BigDecimal</td><td>数据库兼容的 NUMERIC 或 DECIMAL</td></tr><tr><td>StringTypeHandler</td><td>java.lang.String</td><td>CHAR, VARCHAR</td></tr><tr><td>ClobReaderTypeHandler</td><td>java.io.Reader</td><td>-</td></tr><tr><td>ClobTypeHandler</td><td>java.lang.String</td><td>CLOB, LONGVARCHAR</td></tr><tr><td>NStringTypeHandler</td><td>java.lang.String</td><td>NVARCHAR, NCHAR</td></tr><tr><td>NClobTypeHandler</td><td>java.lang.String</td><td>NCLOB</td></tr><tr><td>BlobInputStreamTypeHandler</td><td>java.io.InputStream</td><td>-</td></tr><tr><td>ByteArrayTypeHandler</td><td>byte[]</td><td>数据库兼容的字节流类型</td></tr><tr><td>BlobTypeHandler</td><td>byte[]</td><td>BLOB, LONGVARBINARY</td></tr><tr><td>DateTypeHandler</td><td>java.util.Date</td><td>TIMESTAMP</td></tr><tr><td>DateOnlyTypeHandler</td><td>java.util.Date</td><td>DATE</td></tr><tr><td>TimeOnlyTypeHandler</td><td>java.util.Date</td><td>TIME</td></tr><tr><td>SqlTimestampTypeHandler</td><td>java.sql.Timestamp</td><td>TIMESTAMP</td></tr><tr><td>SqlDateTypeHandler</td><td>java.sql.Date</td><td>DATE</td></tr><tr><td>SqlTimeTypeHandler</td><td>java.sql.Time</td><td>TIME</td></tr><tr><td>ObjectTypeHandler</td><td>Any</td><td>OTHER 或未指定类型</td></tr><tr><td>EnumTypeHandler</td><td>Enumeration Type</td><td>VARCHAR-任何兼容的字符串类型，存储枚举的名称(而不是索引)</td></tr><tr><td>EnumOrdinalTypeHandler</td><td>Enumeration Type</td><td>任何兼容的 NUMERIC 或 DOUBLE 类型，存储枚举的索引(而不是名称)</td></tr></tbody></table><p>有些类型Mybatis是不支持的，只能用自定义类型处理器来处理相应的类型。</p><p>自定义类型处理器的方法：</p><ol><li><p>实现<code>org.apache.ibatis.type.TypeHandler</code>接口（setParameter,getResult）</p></li><li><p>继承<code>org.apache.ibatis.type.BaseTypeHandler</code></p></li></ol><p>配置自定义处理器：</p><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>typeHandlers</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>typeHandler</span> <span class="token attr-name">handler</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.rhett.mybatis.typehandler.MyTypeHandler<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>typeHandlers</span><span class="token punctuation">></span></span><span class="token comment" spellcheck="true">&lt;!-- 或使用批量注册的方式，类似于扫描包--></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>typeHandlers</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>package</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.rhett.mybatis.typehandler<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>typeHandlers</span><span class="token punctuation">></span></span></code></pre><h3 id="环境集合属性对象">2.2.5 环境集合属性对象</h3><p>这其实就是一些数据库连接方法的配置，不同的场合可以使用不同的环境</p><p>MyBatis 可以配置成适应多种环境，这种机制有助于将 SQL 映射应用于多种数据库之中， 现实情况下有多种理由需要这么做。例如，开发、测试和生产环境需要有不同的配置；或者共享相同 Schema 的多个生产数据库， 想使用相同的 SQL 映射。许多类似的用例。不过要记住：尽管可以配置多个环境，每个 不过要记住：尽管可以配置多个环境，每个SqlSessionFactory 实例只能选 实例只能选择其一。所以，如果你想连接两个数据库，就需要创建两个 SqlSessionFactory 实例，每个数据库对应一个。而如果是三个数据库，就需要三个实例，依此类推，记起来很简单：</p><pre class=" language-xml"><code class="language-xml"><span class="token comment" spellcheck="true">&lt;!-- 配置默认的enviroment --></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>environments</span> <span class="token attr-name">default</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>development<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>environment</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>development<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>        <span class="token comment" spellcheck="true">&lt;!-- type可选JDBC或MANAGED，代表事务由谁管理--></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>transactionManager</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>JDBC<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>        <span class="token comment" spellcheck="true">&lt;!-- 是否使用数据库连接池，有POOLED,UNPOOLED,JNDI --></span>        <span class="token comment" spellcheck="true">&lt;!-- JNDI可以通过配置Tomcat数据库连接池使用 --></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dataSource</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>POOLED<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>driver<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${driver}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>url<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${url}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>username<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${username}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>password<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${password}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dataSource</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>environment</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>environment</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>test<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>transactionManager</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>JDBC<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dataSource</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>POOLED<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>driver<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${driver2}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>url<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${url2}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>username<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${username2}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>password<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${password2}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dataSource</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>environment</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>environments</span><span class="token punctuation">></span></span></code></pre><h3 id="映射器">2.2.6 映射器</h3><p>Mapper，或者说是Dao，就是持久层的接口。</p><p>配置Mappers的四种方式：</p><ol><li>通过类路径的相对位置导入xml方式的映射文件：</li></ol><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mappers</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mapper</span> <span class="token attr-name">resource</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com/rhett/mybatis/mapper/BlogMapper.xml<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mapper</span> <span class="token attr-name">resource</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com/rhett/mybatis/mapper/StudentMapper.xml<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mappers</span><span class="token punctuation">></span></span></code></pre><ol start="2"><li>通过文件系统路径或WEB URL地址导入xml方式的映射文件（不推荐）：</li></ol><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mappers</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mapper</span> <span class="token attr-name">url</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>file:///F:/IDEA/mybatis02/src/main/resources/mybatis.xml<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mappers</span><span class="token punctuation">></span></span></code></pre><ol start="3"><li>通过映射接口类的方式导入映射类：</li></ol><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mappers</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mapper</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.rhett.mybatis.mapper.UserMapper<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mappers</span><span class="token punctuation">></span></span></code></pre><ol start="4"><li>批量注册指定包下面所有接口映射类：</li></ol><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mappers</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>package</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.rhett.mybatis.mapper<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mappers</span><span class="token punctuation">></span></span></code></pre><h3 id="对象工厂">2.2.7 对象工厂</h3><p>objectFactory的作用：使用结果集实例化对象。</p><p>自定义objectFactory的方法：继承DefaultObjectFactory</p>]]></content>
+        <content type="html"><![CDATA[<p>本文参考资源：</p><p><a href="https://www.cnblogs.com/liu1459310172/p/9762765.html" target="_blank" rel="noopener">mybatis的配置文件详解(二) - 那一夜 - 博客园</a></p><p><a href="https://blog.csdn.net/LONG_Yi_1994/article/details/100630428" target="_blank" rel="noopener">MyBatis内置常用Java类型对应的别名_Java_小诸葛的博客-CSDN博客</a></p><p><a href="https://www.cnblogs.com/zltao/p/10546288.html" target="_blank" rel="noopener">Mybatis—typeHandlers默认支持的类型处理器 - 水痕灬 - 博客园</a></p><h1 id="概述">1 概述</h1><p>mybatis是一种持久层框架，也属于ORM映射。前身是ibatis。</p><p>相比于hibernate：</p><ul><li>hibernate为全自动化，配置文件书写之后不需要书写sql语句，但是欠缺灵活，很多时候需要优化；</li><li>mybatis为半自动化，需要自己书写sql语句，需要自己定义映射。增加了程序员的一些操作，但是带来了设计上的灵活，并且也是支持hibernate的一些特性，如延迟加载，缓存和映射等；对数据库的兼容性比hibernate差。移植性不好，但是可编写灵活和高性能的sql语句。</li></ul><h2 id="特点">1.1 特点</h2><ol><li>sql语句与代码分离，存放于xml配置文件中</li><li>用逻辑标签控制动态SQL的拼接</li><li>查询的结果集与java对象自动映射</li></ol><h2 id="整体架构">1.2 整体架构</h2><p><img src="https://api.codetool.top/img/15820288383858.png" alt></p><p><img src="https://api.codetool.top/img/15820292517306.png" alt></p><h1 id="配置">2 配置</h1><h2 id="maven配置">2.1 maven配置</h2><p>构建建议从模板maven-archetype-webapp构建</p><p>依赖：</p><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.mybatis<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>mybatis<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>3.5.4<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>mysql<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>mysql-connector-java<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>6.0.6<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span></code></pre><h2 id="全局配置文件mybatis-config-xml">2.2 全局配置文件mybatis-config.xml</h2><p>configuration</p><ul><li>properties（属性）</li><li>settings（全局配置参数）</li><li>typeAliases（类型别名）</li><li>typeHandlers（类型处理器）</li><li>enviroments（环境集合属性对象）<ul><li>enviroment（环境配置）<ul><li>transactionManager（事务管理）</li><li>dataSource（数据源）</li></ul></li></ul></li><li>mappers（映射器）</li><li>objectFactory（对象工厂）</li><li>plugins（插件）</li></ul><p>这个配置文件的目的是为了创建一个SqlSeesionFactory实例对象。</p><h3 id="属性">2.2.1 属性</h3><p>指定一些键值对，作配置用，建议把这部分放在另一个properties文件中，然后使用resource属性指定文件。如：</p><p>[db.properties]</p><pre class=" language-properties"><code class="language-properties"><span class="token attr-name">driver</span><span class="token punctuation">=</span><span class="token attr-value">com.mysql.jdbc.Driver</span><span class="token attr-name">url</span><span class="token punctuation">=</span><span class="token attr-value">jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=utf-8&amp;allowMultiQueries=true</span><span class="token attr-name">username</span><span class="token punctuation">=</span><span class="token attr-value">root</span><span class="token attr-name">password</span><span class="token punctuation">=</span><span class="token attr-value">123456</span></code></pre><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>properties</span> <span class="token attr-name">resource</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>db.properties<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span></code></pre><h3 id="全局配置参数">2.2.2 全局配置参数</h3><p>用于配置一些mybatis的参数，例如使用的日志框架：</p><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>settings</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>setting</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>logImpl<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>LOG4J<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>settings</span><span class="token punctuation">></span></span></code></pre><p>mybatis可以使用的日志框架有：</p><ul><li>SLF4J</li><li>Apache Commons Logging</li><li>Log4J2</li><li>Log4J</li><li>JDK logging</li></ul><p>如果没有配置指定的日志框架，mybatis会按该顺序查找，使用最先查找到的日志框架。</p><h3 id="类型别名">2.2.3 类型别名</h3><p>类型别名即指定java类型的一个别名，可以在后面配置Mapper的resultType和ParameterType中使用。</p><p>有三种方式可以配置类型别名：</p><ol><li>单独配置某个类</li></ol><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>typeAliases</span><span class="token punctuation">></span></span>　　<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>typeAlias</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.rhett.po.User<span class="token punctuation">"</span></span> <span class="token attr-name">alise</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>user<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>typeAliases</span><span class="token punctuation">></span></span></code></pre><ol start="2"><li>扫描包</li></ol><p>如下配置，那么com.shsxt.po所有类型在这个配置文件中的别名就是它们的类名</p><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>typeAliases</span><span class="token punctuation">></span></span>　　<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>package</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.rhett.po<span class="token punctuation">"</span></span> <span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>typeAliases</span><span class="token punctuation">></span></span></code></pre><ol start="3"><li>通过注解</li></ol><p>在JavaBean上添加注解<code>@Alias(&quot;别名&quot;)</code></p><p>需要注意的是，Mybatis有一些为Java类型默认配置的别名：</p><table><thead><tr><th>映射别名 Alias</th><th>Java的类型 Mapped Type</th></tr></thead><tbody><tr><td>_byte</td><td>byte</td></tr><tr><td>_longyiyi</td><td>long</td></tr><tr><td>_short</td><td>short</td></tr><tr><td>_int</td><td>int</td></tr><tr><td>_integer</td><td>int</td></tr><tr><td>_double</td><td>double</td></tr><tr><td>_float</td><td>float</td></tr><tr><td>_boolean</td><td>boolean</td></tr><tr><td>string</td><td>String</td></tr><tr><td>byte</td><td>Byte</td></tr><tr><td>long</td><td>Long</td></tr><tr><td>short</td><td>Short</td></tr><tr><td>int</td><td>Integer</td></tr><tr><td>integer</td><td>Integer</td></tr><tr><td>double</td><td>Double</td></tr><tr><td>float</td><td>Float</td></tr><tr><td>boolean</td><td>Boolean</td></tr><tr><td>date</td><td>Date</td></tr><tr><td>decimal</td><td>BigDecimal</td></tr><tr><td>bigdecimal</td><td>BigDecimal</td></tr><tr><td>object</td><td>Object</td></tr><tr><td>map</td><td>Map</td></tr><tr><td>hashmap</td><td>HashMap</td></tr><tr><td>list</td><td>List</td></tr><tr><td>arraylist</td><td>ArrayList</td></tr><tr><td>collection</td><td>Collection</td></tr><tr><td>iterator</td><td>Iterator</td></tr></tbody></table><h3 id="类型处理器">2.2.4 类型处理器</h3><p>类型处理器就是处理数据库数据类型和Java数据类型之间的映射</p><p>下面是Mybatis默认的类型处理器</p><table><thead><tr><th><strong>类型处理器</strong></th><th><strong>Java类型</strong></th><th><strong>JDBC类型</strong></th></tr></thead><tbody><tr><td>BooleanTypeHandler</td><td>java.lang.Boolean,boolean</td><td>数据库兼容的 BOOLEAN</td></tr><tr><td>ByteTypeHandler</td><td>java.lang.Byte, byte</td><td>数据库兼容的 NUMERIC 或 BYTE</td></tr><tr><td>ShortTypeHandler</td><td>java.lang.Short, short</td><td>数据库兼容的 NUMERIC 或 SHORT INTEGER</td></tr><tr><td>IntegerTypeHandler</td><td>java.lang.Integer, int</td><td>数据库兼容的 NUMERIC 或 INTEGER</td></tr><tr><td>LongTypeHandler</td><td>java.lang.Long, long</td><td>数据库兼容的 NUMERIC 或 LONG INTEGER</td></tr><tr><td>FloatTypeHandler</td><td>java.lang.Float, float</td><td>数据库兼容的 NUMERIC 或 FLOAT</td></tr><tr><td>DoubleTypeHandler</td><td>java.lang.Double,double</td><td>数据库兼容的 NUMERIC 或 DOUBLE</td></tr><tr><td>BigDecimalTypeHandler</td><td>java.math.BigDecimal</td><td>数据库兼容的 NUMERIC 或 DECIMAL</td></tr><tr><td>StringTypeHandler</td><td>java.lang.String</td><td>CHAR, VARCHAR</td></tr><tr><td>ClobReaderTypeHandler</td><td>java.io.Reader</td><td>-</td></tr><tr><td>ClobTypeHandler</td><td>java.lang.String</td><td>CLOB, LONGVARCHAR</td></tr><tr><td>NStringTypeHandler</td><td>java.lang.String</td><td>NVARCHAR, NCHAR</td></tr><tr><td>NClobTypeHandler</td><td>java.lang.String</td><td>NCLOB</td></tr><tr><td>BlobInputStreamTypeHandler</td><td>java.io.InputStream</td><td>-</td></tr><tr><td>ByteArrayTypeHandler</td><td>byte[]</td><td>数据库兼容的字节流类型</td></tr><tr><td>BlobTypeHandler</td><td>byte[]</td><td>BLOB, LONGVARBINARY</td></tr><tr><td>DateTypeHandler</td><td>java.util.Date</td><td>TIMESTAMP</td></tr><tr><td>DateOnlyTypeHandler</td><td>java.util.Date</td><td>DATE</td></tr><tr><td>TimeOnlyTypeHandler</td><td>java.util.Date</td><td>TIME</td></tr><tr><td>SqlTimestampTypeHandler</td><td>java.sql.Timestamp</td><td>TIMESTAMP</td></tr><tr><td>SqlDateTypeHandler</td><td>java.sql.Date</td><td>DATE</td></tr><tr><td>SqlTimeTypeHandler</td><td>java.sql.Time</td><td>TIME</td></tr><tr><td>ObjectTypeHandler</td><td>Any</td><td>OTHER 或未指定类型</td></tr><tr><td>EnumTypeHandler</td><td>Enumeration Type</td><td>VARCHAR-任何兼容的字符串类型，存储枚举的名称(而不是索引)</td></tr><tr><td>EnumOrdinalTypeHandler</td><td>Enumeration Type</td><td>任何兼容的 NUMERIC 或 DOUBLE 类型，存储枚举的索引(而不是名称)</td></tr></tbody></table><p>有些类型Mybatis是不支持的，只能用自定义类型处理器来处理相应的类型。</p><p>自定义类型处理器的方法：</p><ol><li><p>实现<code>org.apache.ibatis.type.TypeHandler</code>接口（setParameter,getResult）</p></li><li><p>继承<code>org.apache.ibatis.type.BaseTypeHandler</code></p></li></ol><p>配置自定义处理器：</p><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>typeHandlers</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>typeHandler</span> <span class="token attr-name">handler</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.rhett.mybatis.typehandler.MyTypeHandler<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>typeHandlers</span><span class="token punctuation">></span></span><span class="token comment" spellcheck="true">&lt;!-- 或使用批量注册的方式，类似于扫描包--></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>typeHandlers</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>package</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.rhett.mybatis.typehandler<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>typeHandlers</span><span class="token punctuation">></span></span></code></pre><h3 id="环境集合属性对象">2.2.5 环境集合属性对象</h3><p>这其实就是一些数据库连接方法的配置，不同的场合可以使用不同的环境</p><p>MyBatis 可以配置成适应多种环境，这种机制有助于将 SQL 映射应用于多种数据库之中， 现实情况下有多种理由需要这么做。例如，开发、测试和生产环境需要有不同的配置；或者共享相同 Schema 的多个生产数据库， 想使用相同的 SQL 映射。许多类似的用例。不过要记住：尽管可以配置多个环境，每个 不过要记住：尽管可以配置多个环境，每个SqlSessionFactory 实例只能选 实例只能选择其一。所以，如果你想连接两个数据库，就需要创建两个 SqlSessionFactory 实例，每个数据库对应一个。而如果是三个数据库，就需要三个实例，依此类推，记起来很简单：</p><pre class=" language-xml"><code class="language-xml"><span class="token comment" spellcheck="true">&lt;!-- 配置默认的enviroment --></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>environments</span> <span class="token attr-name">default</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>development<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>environment</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>development<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>        <span class="token comment" spellcheck="true">&lt;!-- type可选JDBC或MANAGED，代表事务由谁管理--></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>transactionManager</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>JDBC<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>        <span class="token comment" spellcheck="true">&lt;!-- 是否使用数据库连接池，有POOLED,UNPOOLED,JNDI --></span>        <span class="token comment" spellcheck="true">&lt;!-- JNDI可以通过配置Tomcat数据库连接池使用 --></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dataSource</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>POOLED<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>driver<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${driver}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>url<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${url}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>username<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${username}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>password<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${password}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dataSource</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>environment</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>environment</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>test<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>transactionManager</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>JDBC<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dataSource</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>POOLED<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>driver<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${driver2}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>url<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${url2}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>username<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${username2}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>password<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${password2}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dataSource</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>environment</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>environments</span><span class="token punctuation">></span></span></code></pre><h3 id="映射器">2.2.6 映射器</h3><p>Mapper，或者说是Dao，就是持久层的接口。</p><p>配置Mappers的四种方式：</p><ol><li>通过类路径的相对位置导入xml方式的映射文件：</li></ol><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mappers</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mapper</span> <span class="token attr-name">resource</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com/rhett/mybatis/mapper/BlogMapper.xml<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mapper</span> <span class="token attr-name">resource</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com/rhett/mybatis/mapper/StudentMapper.xml<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mappers</span><span class="token punctuation">></span></span></code></pre><ol start="2"><li>通过文件系统路径或WEB URL地址导入xml方式的映射文件（不推荐）：</li></ol><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mappers</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mapper</span> <span class="token attr-name">url</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>file:///F:/IDEA/mybatis02/src/main/resources/mybatis.xml<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mappers</span><span class="token punctuation">></span></span></code></pre><ol start="3"><li>通过映射接口类的方式导入映射类：</li></ol><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mappers</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mapper</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.rhett.mybatis.mapper.UserMapper<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mappers</span><span class="token punctuation">></span></span></code></pre><ol start="4"><li>批量注册指定包下面所有接口映射类：</li></ol><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mappers</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>package</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.rhett.mybatis.mapper<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mappers</span><span class="token punctuation">></span></span></code></pre><h3 id="对象工厂">2.2.7 对象工厂</h3><p>objectFactory的作用：使用结果集实例化对象。</p><p>自定义objectFactory的方法：继承DefaultObjectFactory</p>]]></content>
       
       
       <categories>
@@ -103,9 +130,9 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> 算法 </tag>
+            
+            <tag> 数据结构 </tag>
             
             <tag> 蓝桥杯 </tag>
             
@@ -132,9 +159,9 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 数据结构 </tag>
             
         </tags>
       
@@ -188,11 +215,11 @@
       
         <tags>
             
+            <tag> 树 </tag>
+            
             <tag> 数据结构 </tag>
             
             <tag> 搜索树 </tag>
-            
-            <tag> 树 </tag>
             
         </tags>
       
@@ -246,13 +273,13 @@
             
             <tag> java </tag>
             
-            <tag> jdk </tag>
-            
-            <tag> 集合 </tag>
-            
             <tag> 搜索树 </tag>
             
+            <tag> jdk </tag>
+            
             <tag> 源码研究 </tag>
+            
+            <tag> 集合 </tag>
             
         </tags>
       
@@ -337,13 +364,13 @@
             
             <tag> java </tag>
             
-            <tag> jdk </tag>
+            <tag> 多线程 </tag>
             
-            <tag> 集合 </tag>
+            <tag> jdk </tag>
             
             <tag> 源码研究 </tag>
             
-            <tag> 多线程 </tag>
+            <tag> 集合 </tag>
             
         </tags>
       
@@ -370,13 +397,13 @@
             
             <tag> java </tag>
             
-            <tag> jdk </tag>
+            <tag> 多线程 </tag>
             
-            <tag> 集合 </tag>
+            <tag> jdk </tag>
             
             <tag> 源码研究 </tag>
             
-            <tag> 多线程 </tag>
+            <tag> 集合 </tag>
             
         </tags>
       
@@ -459,11 +486,11 @@
             
             <tag> java </tag>
             
+            <tag> 多线程 </tag>
+            
             <tag> jdk </tag>
             
             <tag> 源码研究 </tag>
-            
-            <tag> 多线程 </tag>
             
         </tags>
       
@@ -550,11 +577,11 @@
             
             <tag> java </tag>
             
+            <tag> 多线程 </tag>
+            
             <tag> jdk </tag>
             
             <tag> 源码研究 </tag>
-            
-            <tag> 多线程 </tag>
             
         </tags>
       
@@ -583,9 +610,9 @@
             
             <tag> jdk </tag>
             
-            <tag> 集合 </tag>
-            
             <tag> 源码研究 </tag>
+            
+            <tag> 集合 </tag>
             
             <tag> 哈希表 </tag>
             
@@ -730,9 +757,9 @@
             
             <tag> jdk </tag>
             
-            <tag> 集合 </tag>
-            
             <tag> 源码研究 </tag>
+            
+            <tag> 集合 </tag>
             
             <tag> 哈希表 </tag>
             
@@ -904,9 +931,9 @@
             
             <tag> jdk </tag>
             
-            <tag> 集合 </tag>
-            
             <tag> 源码研究 </tag>
+            
+            <tag> 集合 </tag>
             
             <tag> 堆 </tag>
             
@@ -933,9 +960,9 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 数据结构 </tag>
             
             <tag> 堆 </tag>
             
@@ -962,11 +989,11 @@
       
         <tags>
             
+            <tag> 树 </tag>
+            
             <tag> 数据结构 </tag>
             
             <tag> 搜索树 </tag>
-            
-            <tag> 树 </tag>
             
         </tags>
       
@@ -1051,11 +1078,11 @@
       
         <tags>
             
+            <tag> 树 </tag>
+            
             <tag> 数据结构 </tag>
             
             <tag> 搜索树 </tag>
-            
-            <tag> 树 </tag>
             
         </tags>
       
@@ -1285,13 +1312,13 @@
             
             <tag> java </tag>
             
-            <tag> IO </tag>
-            
             <tag> 多线程 </tag>
             
-            <tag> 线程池 </tag>
+            <tag> IO </tag>
             
             <tag> socket </tag>
+            
+            <tag> 线程池 </tag>
             
         </tags>
       
@@ -1461,11 +1488,11 @@
             
             <tag> java </tag>
             
+            <tag> 多线程 </tag>
+            
             <tag> jdk </tag>
             
             <tag> 源码研究 </tag>
-            
-            <tag> 多线程 </tag>
             
             <tag> AQS </tag>
             
@@ -1689,9 +1716,9 @@
       
         <tags>
             
-            <tag> leetcode </tag>
-            
             <tag> 多线程 </tag>
+            
+            <tag> leetcode </tag>
             
         </tags>
       
@@ -1716,9 +1743,9 @@
       
         <tags>
             
-            <tag> leetcode </tag>
-            
             <tag> 多线程 </tag>
+            
+            <tag> leetcode </tag>
             
         </tags>
       
@@ -1944,11 +1971,11 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 递归 </tag>
+            
+            <tag> 数据结构 </tag>
             
         </tags>
       
@@ -2342,13 +2369,13 @@
       
         <tags>
             
-            <tag> 搜索树 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
             
             <tag> 递归 </tag>
+            
+            <tag> 搜索树 </tag>
             
         </tags>
       
@@ -2373,13 +2400,13 @@
       
         <tags>
             
-            <tag> 搜索树 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
             
             <tag> 递归 </tag>
+            
+            <tag> 搜索树 </tag>
             
         </tags>
       
@@ -2584,9 +2611,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -2615,9 +2642,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -2646,9 +2673,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -2677,9 +2704,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -2737,9 +2764,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -2768,9 +2795,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -2799,9 +2826,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> DFS </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> DFS </tag>
             
         </tags>
       
@@ -2826,13 +2853,13 @@
       
         <tags>
             
-            <tag> 搜索树 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
             
             <tag> 递归 </tag>
+            
+            <tag> 搜索树 </tag>
             
         </tags>
       
@@ -2857,13 +2884,13 @@
       
         <tags>
             
-            <tag> 搜索树 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
             
             <tag> 递归 </tag>
+            
+            <tag> 搜索树 </tag>
             
         </tags>
       
@@ -2888,13 +2915,13 @@
       
         <tags>
             
-            <tag> 搜索树 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
             
             <tag> 递归 </tag>
+            
+            <tag> 搜索树 </tag>
             
         </tags>
       
@@ -2919,13 +2946,13 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
-            <tag> 搜索树 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 递归 </tag>
+            
+            <tag> 数据结构 </tag>
+            
+            <tag> 搜索树 </tag>
             
         </tags>
       
@@ -2979,13 +3006,13 @@
       
         <tags>
             
-            <tag> 搜索树 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
             
             <tag> 递归 </tag>
+            
+            <tag> 搜索树 </tag>
             
         </tags>
       
@@ -3045,9 +3072,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> DFS </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> DFS </tag>
             
         </tags>
       
@@ -3076,9 +3103,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -3107,9 +3134,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -3138,9 +3165,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -3169,9 +3196,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -3200,9 +3227,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -3260,9 +3287,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -3291,9 +3318,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 递归 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 递归 </tag>
             
         </tags>
       
@@ -3322,9 +3349,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> BFS </tag>
-            
             <tag> 队列 </tag>
+            
+            <tag> BFS </tag>
             
         </tags>
       
@@ -3382,9 +3409,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> DFS </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> DFS </tag>
             
         </tags>
       
@@ -3413,9 +3440,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> DFS </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> DFS </tag>
             
         </tags>
       
@@ -4045,9 +4072,9 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> leetcode </tag>
+            
+            <tag> 数据结构 </tag>
             
         </tags>
       
@@ -4134,9 +4161,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 双指针技巧 </tag>
-            
             <tag> 哈希表 </tag>
+            
+            <tag> 双指针技巧 </tag>
             
         </tags>
       
@@ -4194,9 +4221,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 哈希表 </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> 哈希表 </tag>
             
         </tags>
       
@@ -4399,9 +4426,9 @@
             
             <tag> 基础知识 </tag>
             
-            <tag> 序列化 </tag>
-            
             <tag> IO </tag>
+            
+            <tag> 序列化 </tag>
             
         </tags>
       
@@ -4598,9 +4625,9 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> leetcode </tag>
+            
+            <tag> 数据结构 </tag>
             
             <tag> 哈希集 </tag>
             
@@ -4627,9 +4654,9 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> leetcode </tag>
+            
+            <tag> 数据结构 </tag>
             
             <tag> 哈希表 </tag>
             
@@ -4809,9 +4836,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 双指针技巧 </tag>
-            
             <tag> 链表 </tag>
+            
+            <tag> 双指针技巧 </tag>
             
         </tags>
       
@@ -4840,9 +4867,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 双指针技巧 </tag>
-            
             <tag> 链表 </tag>
+            
+            <tag> 双指针技巧 </tag>
             
         </tags>
       
@@ -4871,9 +4898,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 双指针技巧 </tag>
-            
             <tag> 链表 </tag>
+            
+            <tag> 双指针技巧 </tag>
             
         </tags>
       
@@ -4931,9 +4958,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 双指针技巧 </tag>
-            
             <tag> 链表 </tag>
+            
+            <tag> 双指针技巧 </tag>
             
         </tags>
       
@@ -4962,9 +4989,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 双指针技巧 </tag>
-            
             <tag> 链表 </tag>
+            
+            <tag> 双指针技巧 </tag>
             
         </tags>
       
@@ -4993,9 +5020,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 双指针技巧 </tag>
-            
             <tag> 链表 </tag>
+            
+            <tag> 双指针技巧 </tag>
             
         </tags>
       
@@ -5024,9 +5051,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 双指针技巧 </tag>
-            
             <tag> 链表 </tag>
+            
+            <tag> 双指针技巧 </tag>
             
         </tags>
       
@@ -5080,9 +5107,9 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> leetcode </tag>
+            
+            <tag> 数据结构 </tag>
             
             <tag> 链表 </tag>
             
@@ -5109,13 +5136,13 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 队列 </tag>
             
             <tag> 栈 </tag>
+            
+            <tag> 数据结构 </tag>
             
         </tags>
       
@@ -5140,13 +5167,13 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 队列 </tag>
             
             <tag> 栈 </tag>
+            
+            <tag> 数据结构 </tag>
             
         </tags>
       
@@ -5175,9 +5202,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> DFS </tag>
-            
             <tag> 递归 </tag>
+            
+            <tag> DFS </tag>
             
         </tags>
       
@@ -5384,9 +5411,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> DFS </tag>
-            
             <tag> 树 </tag>
+            
+            <tag> DFS </tag>
             
         </tags>
       
@@ -5411,11 +5438,11 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 栈 </tag>
+            
+            <tag> 数据结构 </tag>
             
         </tags>
       
@@ -5672,9 +5699,9 @@
             
             <tag> jdk </tag>
             
-            <tag> 集合 </tag>
-            
             <tag> 源码研究 </tag>
+            
+            <tag> 集合 </tag>
             
         </tags>
       
@@ -5703,9 +5730,9 @@
             
             <tag> jdk </tag>
             
-            <tag> 集合 </tag>
-            
             <tag> 源码研究 </tag>
+            
+            <tag> 集合 </tag>
             
         </tags>
       
@@ -5981,11 +6008,11 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> leetcode </tag>
             
             <tag> 队列 </tag>
+            
+            <tag> 数据结构 </tag>
             
         </tags>
       
@@ -6101,9 +6128,9 @@
             
             <tag> jdk </tag>
             
-            <tag> 集合 </tag>
-            
             <tag> 源码研究 </tag>
+            
+            <tag> 集合 </tag>
             
         </tags>
       
@@ -6130,9 +6157,9 @@
             
             <tag> leetcode </tag>
             
-            <tag> 数组 </tag>
-            
             <tag> 算法 </tag>
+            
+            <tag> 数组 </tag>
             
         </tags>
       
@@ -6188,9 +6215,9 @@
             
             <tag> leetcode </tag>
             
-            <tag> 数组 </tag>
-            
             <tag> 算法 </tag>
+            
+            <tag> 数组 </tag>
             
         </tags>
       
@@ -6257,35 +6284,6 @@
     
     
     <entry>
-      <title>leetcode28-实现strStr()</title>
-      <link href="/article/leetcode28-%E5%AE%9E%E7%8E%B0strStr/"/>
-      <url>/article/leetcode28-%E5%AE%9E%E7%8E%B0strStr/</url>
-      
-        <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>实现 <a href="https://baike.baidu.com/item/strstr/811469" target="_blank" rel="noopener">strStr()</a> 函数。</p><p>给定一个 haystack 字符串和一个 needle 字符串，在 haystack 字符串中找出 needle 字符串出现的第一个位置 (从0开始)。如果不存在，则返回 <strong>-1</strong>。</p><p><strong>示例 1:</strong></p><blockquote><p><strong>输入:</strong> haystack = “hello”, needle = “ll”<br><strong>输出:</strong> 2</p></blockquote><p><strong>示例 2:</strong></p><blockquote><p><strong>输入:</strong> haystack = “aaaaa”, needle = “bba”<br><strong>输出:</strong> -1</p></blockquote><p><strong>说明:</strong></p><p>当 <code>needle</code> 是空字符串时，我们应当返回什么值呢？这是一个在面试中很好的问题。</p><p>对于本题而言，当 <code>needle</code> 是空字符串时我们应当返回 0 。这与C语言的 <a href="https://www.codetool.top/article/leetcode28-实现strStr/(https://baike.baidu.com/item/strstr/811469)">strstr()</a> 以及 Java的 <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html#indexOf(java.lang.String)" target="_blank" rel="noopener">indexOf()</a> 定义相符。</p><h1 id="解法">2 解法</h1><h2 id="JDK-API">2.1 JDK API</h2><p>在leetcode上，当然可以投机取巧地使用String.indexof()方法，不用重复造轮子：</p><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">strStr</span><span class="token punctuation">(</span>String haystack<span class="token punctuation">,</span> String needle<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> haystack<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span>needle<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre><p>但这是一个经典的字符串精准<strong>模式匹配</strong>问题，历史上出现过很多解决这个问题的算法，掌握它们的思想还是有必要的：</p><h2 id="BF算法（朴素算法）">2.2 BF算法（朴素算法）</h2><h3 id="思想">2.2.1 思想</h3><p>这是最直观、最简单的算法。从主串的第start个字符起和模式的第1个字符比较，如果相等继续逐个比较后续字符。比较过程中一旦发现不相等的情况，则回溯至主串中的第start+1个字符位置处，重新与模式P的字符进行比较。该算法效率较低。</p><h3 id="代码">2.2.2 代码</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">strStr</span><span class="token punctuation">(</span>String haystack<span class="token punctuation">,</span> String needle<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">int</span> mainLen <span class="token operator">=</span> haystack<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> subLen <span class="token operator">=</span> needle<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>needle<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">""</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//注意模式字符串为空的情况</span>        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>mainLen<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> j <span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>j<span class="token operator">&lt;</span>subLen<span class="token punctuation">;</span>j<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>                <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token punctuation">(</span>i<span class="token operator">+</span>j<span class="token operator">&lt;</span>mainLen<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//主串下标超出</span>                <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token punctuation">(</span>haystack<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token operator">+</span>j<span class="token punctuation">)</span><span class="token operator">==</span>needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>j<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">break</span><span class="token punctuation">;</span>                <span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span>j <span class="token operator">==</span> subLen<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token keyword">return</span> i<span class="token punctuation">;</span><span class="token comment" spellcheck="true">//完全匹配，返回主串下标</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre><p>算法的复杂度为O[(i-j)j]</p><h2 id="MP算法">2.3 MP算法</h2><h3 id="思路">2.3.1 思路</h3><blockquote><p>指针不回溯，利用已得到的“部分匹配”结果，将模式向右“滑动”若干位置后继续比较。</p></blockquote><p>参考下面给出的示例：<br>haystack ：<code>&quot;cdnidnidsm&quot;</code><br>needle：<code>&quot;nidsm&quot;</code><br>按照BF算法的思想，在比较<code>haystack[2]</code>和<code>needle[0]</code>时，两个字符相等，然而比较到<code>haystack[5]</code>和<code>needle[3]</code>的时候两个字符不等，于是回溯继续向后比较<code>haystack[3]</code>和<code>needle[0]</code>。可是既然能确定<code>haystack[2]-haystack[4]</code>与<code>needle[0]-needle[2]</code>是完全对应的。那么比较<code>haystack[3]</code>和<code>needle[0]</code>实际上相当于比较<code>needle[1]</code>和<code>needle[0]</code>。并且我们知道needle中前三个字符都是不同的。所以只需要从<code>haystack[5]</code>处继续跟<code>needle[0]</code>比较就行了。并且needle中字符的这些关系完全是一开始就可以确定的。</p><p>我们称记录模式字符串中各个字符之间关系的函数为<strong>失效函数</strong>。<br>失效函数的定义域是模式字符串在“失配”前匹配的字符串个数。取值j属于<code>0~Len(P)-1</code></p><p><strong>获取失效函数的方法：</strong></p><p>失效函数的取值k满足P0P1…Pk = Pj-kPj-k+1…Pj。如果不存在这个k值，取-1。</p><p>直观的看k就是模式字符串前j个字符是否存在前k+1位等于后k+1位。</p><p>nidsm的失效函数为：</p><table><thead><tr><th>j</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead><tbody><tr><td>p(j)</td><td>n</td><td>i</td><td>d</td><td>s</td><td>m</td></tr><tr><td>k</td><td>-1</td><td>-1</td><td>-1</td><td>-1</td><td>-1</td></tr></tbody></table><p>再举一个例子，caatcat的失效函数为：</p><table><thead><tr><th>j</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr></thead><tbody><tr><td>p(j)</td><td>c</td><td>a</td><td>a</td><td>t</td><td>c</td><td>a</td><td>t</td></tr><tr><td>k</td><td>-1</td><td>-1</td><td>-1</td><td>-1</td><td>0</td><td>1</td><td>-1</td></tr></tbody></table><p>得到了失效函数后，即可使用MP算法进行匹配。假设在某一轮比较中，失配的情况发生在模式P的第j位，如果j=0，进行下一轮比较时，目标指针向后移动一位，模式的起始比较地址回到P0，其他情况进行下一轮比较时，目标指针不发生回溯，而模式P的起始比较地址为<strong>j-1对应的失效函数的值+1</strong>。</p><p>当然也可以把这个值提前算出来便成为了Next()函数：</p><table><thead><tr><th>j</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr></thead><tbody><tr><td>p(j)</td><td>c</td><td>a</td><td>a</td><td>t</td><td>c</td><td>a</td><td>t</td><td></td></tr><tr><td>Next(j)</td><td>-1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>2</td><td>0</td></tr></tbody></table><p>Next(7)可以用于继续匹配（可能要求找出所有匹配的子字符串）。</p><h3 id="代码-1">2.3.2 代码</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token comment" spellcheck="true">//获取next函数</span>    <span class="token keyword">public</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">next</span><span class="token punctuation">(</span>String needle<span class="token punctuation">)</span><span class="token punctuation">{</span>        <span class="token keyword">int</span> len <span class="token operator">=</span> needle<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>        <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> next <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">int</span><span class="token punctuation">[</span>len<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>        next<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>        <span class="token keyword">while</span><span class="token punctuation">(</span>i <span class="token operator">&lt;</span> len<span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">while</span><span class="token punctuation">(</span> j <span class="token operator">></span> <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token operator">!=</span>needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>j<span class="token punctuation">)</span><span class="token punctuation">)</span>                j <span class="token operator">=</span> next<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//j会有一个传递的效果，必须前一个i对应的j是1，下一个i对应的j才能是2。如果遇到不同的字符则j清零</span>            next<span class="token punctuation">[</span><span class="token operator">++</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token operator">++</span>j<span class="token punctuation">;</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> next<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">strStr</span><span class="token punctuation">(</span>String haystack<span class="token punctuation">,</span> String needle<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">int</span> mainLen <span class="token operator">=</span> haystack<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> subLen <span class="token operator">=</span> needle<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>needle<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">""</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//注意模式字符串为空的情况</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>mainLen<span class="token operator">&lt;</span>subLen<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>        <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> next <span class="token operator">=</span> <span class="token function">next</span><span class="token punctuation">(</span>needle<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">while</span><span class="token punctuation">(</span>j <span class="token operator">&lt;</span> mainLen<span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">while</span><span class="token punctuation">(</span>i<span class="token operator">></span><span class="token operator">-</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span> <span class="token operator">!=</span> haystack<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>j<span class="token punctuation">)</span><span class="token punctuation">)</span>                i <span class="token operator">=</span> next<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>            i<span class="token operator">++</span><span class="token punctuation">;</span>            j<span class="token operator">++</span><span class="token punctuation">;</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>i <span class="token operator">>=</span> subLen<span class="token punctuation">)</span><span class="token punctuation">{</span>                <span class="token keyword">return</span> j<span class="token operator">-</span>i<span class="token punctuation">;</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre><h2 id="KMP算法">2.4 KMP算法</h2><h3 id="思路-1">2.4.1 思路</h3><p>在MP算法的基础上，还要避免最长前缀之后的那个字符不等于原来失配的那个字符。<br>下面在已知mpNext表的情况下，给出建立kmpNext表的规则。这个规则分为四种情况：</p><ol><li>如果mpNext[j] = 0且Pj = P0，则令kmpNext[j] = -1。</li><li>如果mpNext[j] = 0且Pj ≠ P0，则令kmpNext[j] = 0。</li><li>如果mpNext[j] ≠ 0且Pj ≠ PmpNext[j]，则令kmpNext[j] = mpNext[j]。</li><li>如果mpNext[j] ≠ 0且Pj = PmpNext[j]，则用mpNext[j]的值替换原来mpNext[j]中的j值，直到情况转换为前3种情况的一种，进而递归地求解kmpNext[j]。</li></ol><table><thead><tr><th>j</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr></thead><tbody><tr><td>p(j)</td><td>c</td><td>a</td><td>a</td><td>t</td><td>c</td><td>a</td><td>t</td><td></td></tr><tr><td>mpNext(j)</td><td>-1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>2</td><td>0</td></tr><tr><td>kmpNext(j)</td><td>-1</td><td>0</td><td>0</td><td>0</td><td>-1</td><td>0</td><td>2</td><td>0</td></tr></tbody></table><h3 id="代码-2">2.4.2 代码</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token comment" spellcheck="true">//获取kmpNext数组</span>    <span class="token keyword">public</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">next</span><span class="token punctuation">(</span>String needle<span class="token punctuation">)</span><span class="token punctuation">{</span>        <span class="token keyword">int</span> len <span class="token operator">=</span> needle<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>        <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> next <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">int</span><span class="token punctuation">[</span>len<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>        next<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>        <span class="token keyword">while</span><span class="token punctuation">(</span>i <span class="token operator">&lt;</span> len<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">while</span><span class="token punctuation">(</span> j <span class="token operator">></span> <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token operator">!=</span>needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>j<span class="token punctuation">)</span><span class="token punctuation">)</span>                j <span class="token operator">=</span> next<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">;</span>            i<span class="token operator">++</span><span class="token punctuation">;</span>            j<span class="token operator">++</span><span class="token punctuation">;</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span> <span class="token operator">==</span> needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>j<span class="token punctuation">)</span><span class="token punctuation">)</span>                next<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> next<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">;</span>            <span class="token keyword">else</span>                next<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> j<span class="token punctuation">;</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> next<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">strStr</span><span class="token punctuation">(</span>String haystack<span class="token punctuation">,</span> String needle<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">int</span> mainLen <span class="token operator">=</span> haystack<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> subLen <span class="token operator">=</span> needle<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>needle<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">""</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//注意模式字符串为空的情况</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>mainLen<span class="token operator">&lt;</span>subLen<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>        <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> next <span class="token operator">=</span> <span class="token function">next</span><span class="token punctuation">(</span>needle<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">while</span><span class="token punctuation">(</span>j <span class="token operator">&lt;</span> mainLen<span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">while</span><span class="token punctuation">(</span>i<span class="token operator">></span><span class="token operator">-</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span> <span class="token operator">!=</span> haystack<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>j<span class="token punctuation">)</span><span class="token punctuation">)</span>                i <span class="token operator">=</span> next<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>            i<span class="token operator">++</span><span class="token punctuation">;</span>            j<span class="token operator">++</span><span class="token punctuation">;</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>i <span class="token operator">>=</span> subLen<span class="token punctuation">)</span><span class="token punctuation">{</span>                <span class="token keyword">return</span> j<span class="token operator">-</span>i<span class="token punctuation">;</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
-      
-      
-      <categories>
-          
-          <category> 算法/数据结构 </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> leetcode </tag>
-            
-            <tag> 算法 </tag>
-            
-            <tag> 字符串 </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>leetcode27-移除元素</title>
       <link href="/article/leetcode27-%E7%A7%BB%E9%99%A4%E5%85%83%E7%B4%A0/"/>
       <url>/article/leetcode27-%E7%A7%BB%E9%99%A4%E5%85%83%E7%B4%A0/</url>
@@ -6307,6 +6305,35 @@
             <tag> 算法 </tag>
             
             <tag> 双指针技巧 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>leetcode28-实现strStr()</title>
+      <link href="/article/leetcode28-%E5%AE%9E%E7%8E%B0strStr/"/>
+      <url>/article/leetcode28-%E5%AE%9E%E7%8E%B0strStr/</url>
+      
+        <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>实现 <a href="https://baike.baidu.com/item/strstr/811469" target="_blank" rel="noopener">strStr()</a> 函数。</p><p>给定一个 haystack 字符串和一个 needle 字符串，在 haystack 字符串中找出 needle 字符串出现的第一个位置 (从0开始)。如果不存在，则返回 <strong>-1</strong>。</p><p><strong>示例 1:</strong></p><blockquote><p><strong>输入:</strong> haystack = “hello”, needle = “ll”<br><strong>输出:</strong> 2</p></blockquote><p><strong>示例 2:</strong></p><blockquote><p><strong>输入:</strong> haystack = “aaaaa”, needle = “bba”<br><strong>输出:</strong> -1</p></blockquote><p><strong>说明:</strong></p><p>当 <code>needle</code> 是空字符串时，我们应当返回什么值呢？这是一个在面试中很好的问题。</p><p>对于本题而言，当 <code>needle</code> 是空字符串时我们应当返回 0 。这与C语言的 <a href="https://www.codetool.top/article/leetcode28-实现strStr/(https://baike.baidu.com/item/strstr/811469)">strstr()</a> 以及 Java的 <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html#indexOf(java.lang.String)" target="_blank" rel="noopener">indexOf()</a> 定义相符。</p><h1 id="解法">2 解法</h1><h2 id="JDK-API">2.1 JDK API</h2><p>在leetcode上，当然可以投机取巧地使用String.indexof()方法，不用重复造轮子：</p><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">strStr</span><span class="token punctuation">(</span>String haystack<span class="token punctuation">,</span> String needle<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> haystack<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span>needle<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre><p>但这是一个经典的字符串精准<strong>模式匹配</strong>问题，历史上出现过很多解决这个问题的算法，掌握它们的思想还是有必要的：</p><h2 id="BF算法（朴素算法）">2.2 BF算法（朴素算法）</h2><h3 id="思想">2.2.1 思想</h3><p>这是最直观、最简单的算法。从主串的第start个字符起和模式的第1个字符比较，如果相等继续逐个比较后续字符。比较过程中一旦发现不相等的情况，则回溯至主串中的第start+1个字符位置处，重新与模式P的字符进行比较。该算法效率较低。</p><h3 id="代码">2.2.2 代码</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">strStr</span><span class="token punctuation">(</span>String haystack<span class="token punctuation">,</span> String needle<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">int</span> mainLen <span class="token operator">=</span> haystack<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> subLen <span class="token operator">=</span> needle<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>needle<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">""</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//注意模式字符串为空的情况</span>        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>mainLen<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> j <span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>j<span class="token operator">&lt;</span>subLen<span class="token punctuation">;</span>j<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>                <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token punctuation">(</span>i<span class="token operator">+</span>j<span class="token operator">&lt;</span>mainLen<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//主串下标超出</span>                <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token punctuation">(</span>haystack<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token operator">+</span>j<span class="token punctuation">)</span><span class="token operator">==</span>needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>j<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">break</span><span class="token punctuation">;</span>                <span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span>j <span class="token operator">==</span> subLen<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token keyword">return</span> i<span class="token punctuation">;</span><span class="token comment" spellcheck="true">//完全匹配，返回主串下标</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre><p>算法的复杂度为O[(i-j)j]</p><h2 id="MP算法">2.3 MP算法</h2><h3 id="思路">2.3.1 思路</h3><blockquote><p>指针不回溯，利用已得到的“部分匹配”结果，将模式向右“滑动”若干位置后继续比较。</p></blockquote><p>参考下面给出的示例：<br>haystack ：<code>&quot;cdnidnidsm&quot;</code><br>needle：<code>&quot;nidsm&quot;</code><br>按照BF算法的思想，在比较<code>haystack[2]</code>和<code>needle[0]</code>时，两个字符相等，然而比较到<code>haystack[5]</code>和<code>needle[3]</code>的时候两个字符不等，于是回溯继续向后比较<code>haystack[3]</code>和<code>needle[0]</code>。可是既然能确定<code>haystack[2]-haystack[4]</code>与<code>needle[0]-needle[2]</code>是完全对应的。那么比较<code>haystack[3]</code>和<code>needle[0]</code>实际上相当于比较<code>needle[1]</code>和<code>needle[0]</code>。并且我们知道needle中前三个字符都是不同的。所以只需要从<code>haystack[5]</code>处继续跟<code>needle[0]</code>比较就行了。并且needle中字符的这些关系完全是一开始就可以确定的。</p><p>我们称记录模式字符串中各个字符之间关系的函数为<strong>失效函数</strong>。<br>失效函数的定义域是模式字符串在“失配”前匹配的字符串个数。取值j属于<code>0~Len(P)-1</code></p><p><strong>获取失效函数的方法：</strong></p><p>失效函数的取值k满足P0P1…Pk = Pj-kPj-k+1…Pj。如果不存在这个k值，取-1。</p><p>直观的看k就是模式字符串前j个字符是否存在前k+1位等于后k+1位。</p><p>nidsm的失效函数为：</p><table><thead><tr><th>j</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead><tbody><tr><td>p(j)</td><td>n</td><td>i</td><td>d</td><td>s</td><td>m</td></tr><tr><td>k</td><td>-1</td><td>-1</td><td>-1</td><td>-1</td><td>-1</td></tr></tbody></table><p>再举一个例子，caatcat的失效函数为：</p><table><thead><tr><th>j</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr></thead><tbody><tr><td>p(j)</td><td>c</td><td>a</td><td>a</td><td>t</td><td>c</td><td>a</td><td>t</td></tr><tr><td>k</td><td>-1</td><td>-1</td><td>-1</td><td>-1</td><td>0</td><td>1</td><td>-1</td></tr></tbody></table><p>得到了失效函数后，即可使用MP算法进行匹配。假设在某一轮比较中，失配的情况发生在模式P的第j位，如果j=0，进行下一轮比较时，目标指针向后移动一位，模式的起始比较地址回到P0，其他情况进行下一轮比较时，目标指针不发生回溯，而模式P的起始比较地址为<strong>j-1对应的失效函数的值+1</strong>。</p><p>当然也可以把这个值提前算出来便成为了Next()函数：</p><table><thead><tr><th>j</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr></thead><tbody><tr><td>p(j)</td><td>c</td><td>a</td><td>a</td><td>t</td><td>c</td><td>a</td><td>t</td><td></td></tr><tr><td>Next(j)</td><td>-1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>2</td><td>0</td></tr></tbody></table><p>Next(7)可以用于继续匹配（可能要求找出所有匹配的子字符串）。</p><h3 id="代码-1">2.3.2 代码</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token comment" spellcheck="true">//获取next函数</span>    <span class="token keyword">public</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">next</span><span class="token punctuation">(</span>String needle<span class="token punctuation">)</span><span class="token punctuation">{</span>        <span class="token keyword">int</span> len <span class="token operator">=</span> needle<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>        <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> next <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">int</span><span class="token punctuation">[</span>len<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>        next<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>        <span class="token keyword">while</span><span class="token punctuation">(</span>i <span class="token operator">&lt;</span> len<span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">while</span><span class="token punctuation">(</span> j <span class="token operator">></span> <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token operator">!=</span>needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>j<span class="token punctuation">)</span><span class="token punctuation">)</span>                j <span class="token operator">=</span> next<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//j会有一个传递的效果，必须前一个i对应的j是1，下一个i对应的j才能是2。如果遇到不同的字符则j清零</span>            next<span class="token punctuation">[</span><span class="token operator">++</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token operator">++</span>j<span class="token punctuation">;</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> next<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">strStr</span><span class="token punctuation">(</span>String haystack<span class="token punctuation">,</span> String needle<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">int</span> mainLen <span class="token operator">=</span> haystack<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> subLen <span class="token operator">=</span> needle<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>needle<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">""</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//注意模式字符串为空的情况</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>mainLen<span class="token operator">&lt;</span>subLen<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>        <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> next <span class="token operator">=</span> <span class="token function">next</span><span class="token punctuation">(</span>needle<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">while</span><span class="token punctuation">(</span>j <span class="token operator">&lt;</span> mainLen<span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">while</span><span class="token punctuation">(</span>i<span class="token operator">></span><span class="token operator">-</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span> <span class="token operator">!=</span> haystack<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>j<span class="token punctuation">)</span><span class="token punctuation">)</span>                i <span class="token operator">=</span> next<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>            i<span class="token operator">++</span><span class="token punctuation">;</span>            j<span class="token operator">++</span><span class="token punctuation">;</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>i <span class="token operator">>=</span> subLen<span class="token punctuation">)</span><span class="token punctuation">{</span>                <span class="token keyword">return</span> j<span class="token operator">-</span>i<span class="token punctuation">;</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre><h2 id="KMP算法">2.4 KMP算法</h2><h3 id="思路-1">2.4.1 思路</h3><p>在MP算法的基础上，还要避免最长前缀之后的那个字符不等于原来失配的那个字符。<br>下面在已知mpNext表的情况下，给出建立kmpNext表的规则。这个规则分为四种情况：</p><ol><li>如果mpNext[j] = 0且Pj = P0，则令kmpNext[j] = -1。</li><li>如果mpNext[j] = 0且Pj ≠ P0，则令kmpNext[j] = 0。</li><li>如果mpNext[j] ≠ 0且Pj ≠ PmpNext[j]，则令kmpNext[j] = mpNext[j]。</li><li>如果mpNext[j] ≠ 0且Pj = PmpNext[j]，则用mpNext[j]的值替换原来mpNext[j]中的j值，直到情况转换为前3种情况的一种，进而递归地求解kmpNext[j]。</li></ol><table><thead><tr><th>j</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr></thead><tbody><tr><td>p(j)</td><td>c</td><td>a</td><td>a</td><td>t</td><td>c</td><td>a</td><td>t</td><td></td></tr><tr><td>mpNext(j)</td><td>-1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>2</td><td>0</td></tr><tr><td>kmpNext(j)</td><td>-1</td><td>0</td><td>0</td><td>0</td><td>-1</td><td>0</td><td>2</td><td>0</td></tr></tbody></table><h3 id="代码-2">2.4.2 代码</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token comment" spellcheck="true">//获取kmpNext数组</span>    <span class="token keyword">public</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">next</span><span class="token punctuation">(</span>String needle<span class="token punctuation">)</span><span class="token punctuation">{</span>        <span class="token keyword">int</span> len <span class="token operator">=</span> needle<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>        <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> next <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">int</span><span class="token punctuation">[</span>len<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>        next<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>        <span class="token keyword">while</span><span class="token punctuation">(</span>i <span class="token operator">&lt;</span> len<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">while</span><span class="token punctuation">(</span> j <span class="token operator">></span> <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token operator">!=</span>needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>j<span class="token punctuation">)</span><span class="token punctuation">)</span>                j <span class="token operator">=</span> next<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">;</span>            i<span class="token operator">++</span><span class="token punctuation">;</span>            j<span class="token operator">++</span><span class="token punctuation">;</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span> <span class="token operator">==</span> needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>j<span class="token punctuation">)</span><span class="token punctuation">)</span>                next<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> next<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">;</span>            <span class="token keyword">else</span>                next<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> j<span class="token punctuation">;</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> next<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">strStr</span><span class="token punctuation">(</span>String haystack<span class="token punctuation">,</span> String needle<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">int</span> mainLen <span class="token operator">=</span> haystack<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> subLen <span class="token operator">=</span> needle<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>needle<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">""</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//注意模式字符串为空的情况</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>mainLen<span class="token operator">&lt;</span>subLen<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>        <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> next <span class="token operator">=</span> <span class="token function">next</span><span class="token punctuation">(</span>needle<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">while</span><span class="token punctuation">(</span>j <span class="token operator">&lt;</span> mainLen<span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">while</span><span class="token punctuation">(</span>i<span class="token operator">></span><span class="token operator">-</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span> <span class="token operator">!=</span> haystack<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>j<span class="token punctuation">)</span><span class="token punctuation">)</span>                i <span class="token operator">=</span> next<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>            i<span class="token operator">++</span><span class="token punctuation">;</span>            j<span class="token operator">++</span><span class="token punctuation">;</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>i <span class="token operator">>=</span> subLen<span class="token punctuation">)</span><span class="token punctuation">{</span>                <span class="token keyword">return</span> j<span class="token operator">-</span>i<span class="token punctuation">;</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> 算法/数据结构 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> leetcode </tag>
+            
+            <tag> 算法 </tag>
+            
+            <tag> 字符串 </tag>
             
         </tags>
       
@@ -6451,9 +6478,9 @@
             
             <tag> leetcode </tag>
             
-            <tag> 数组 </tag>
-            
             <tag> 算法 </tag>
+            
+            <tag> 数组 </tag>
             
         </tags>
       
@@ -6480,9 +6507,9 @@
             
             <tag> leetcode </tag>
             
-            <tag> 数组 </tag>
-            
             <tag> 算法 </tag>
+            
+            <tag> 数组 </tag>
             
         </tags>
       
@@ -6509,9 +6536,9 @@
             
             <tag> leetcode </tag>
             
-            <tag> 数组 </tag>
-            
             <tag> 算法 </tag>
+            
+            <tag> 数组 </tag>
             
         </tags>
       
@@ -6567,9 +6594,9 @@
             
             <tag> leetcode </tag>
             
-            <tag> 数组 </tag>
-            
             <tag> 算法 </tag>
+            
+            <tag> 数组 </tag>
             
         </tags>
       
@@ -6596,11 +6623,11 @@
             
             <tag> leetcode </tag>
             
-            <tag> 数组 </tag>
-            
             <tag> 算法 </tag>
             
             <tag> 递归 </tag>
+            
+            <tag> 数组 </tag>
             
         </tags>
       
@@ -6656,9 +6683,9 @@
             
             <tag> leetcode </tag>
             
-            <tag> 数组 </tag>
-            
             <tag> 算法 </tag>
+            
+            <tag> 数组 </tag>
             
         </tags>
       
