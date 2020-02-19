@@ -418,7 +418,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    4.8k
+                    5.1k
                 </div>
                 
 
@@ -439,7 +439,7 @@
 <p>该文基于JDK1.8</p>
 <h1 id="总结">1 总结</h1><p>总结放前面防止太长不看</p>
 <ol>
-<li>HashMap通过数组+链表+红黑树实现</li>
+<li>HashMap通过数组+链表+红黑树实现，遍历规则是在数组上按槽的顺序，在槽内按节点next的顺序。</li>
 <li>桶的下标和哈希值的对应关系为：<code>index = (n - 1) &amp; hash</code>，n为数组的大小，出于平衡性考虑n必须是2的整数次幂</li>
 <li>如果一个桶中元素的数量大于8的时候，链表转红黑树（但是实际如果此时数组大小小于64，则扩容重建Hash表而不是树化）</li>
 <li>一些指标含义：</li>
@@ -781,6 +781,59 @@
         <span class="token punctuation">}</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span></code></pre>
+<p>迭代器通过<code>EntryIterator</code>获得：</p>
+<h3 id="EntryIterator">2.5.1 EntryIterator</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">final</span> <span class="token keyword">class</span> <span class="token class-name">EntryIterator</span> <span class="token keyword">extends</span> <span class="token class-name">HashIterator</span>
+    <span class="token keyword">implements</span> <span class="token class-name">Iterator</span><span class="token operator">&lt;</span>Map<span class="token punctuation">.</span>Entry<span class="token operator">&lt;</span>K<span class="token punctuation">,</span>V<span class="token operator">>></span> <span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">final</span> Map<span class="token punctuation">.</span>Entry<span class="token operator">&lt;</span>K<span class="token punctuation">,</span>V<span class="token operator">></span> <span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token function">nextNode</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>它又继承了HashIterator：</p>
+<h3 id="HashIterator">2.5.2 HashIterator</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">abstract</span> <span class="token keyword">class</span> <span class="token class-name">HashIterator</span> <span class="token punctuation">{</span>
+    Node<span class="token operator">&lt;</span>K<span class="token punctuation">,</span>V<span class="token operator">></span> next<span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// next entry to return</span>
+    Node<span class="token operator">&lt;</span>K<span class="token punctuation">,</span>V<span class="token operator">></span> current<span class="token punctuation">;</span>     <span class="token comment" spellcheck="true">// current entry</span>
+    <span class="token keyword">int</span> expectedModCount<span class="token punctuation">;</span>  <span class="token comment" spellcheck="true">// for fast-fail</span>
+    <span class="token keyword">int</span> index<span class="token punctuation">;</span>             <span class="token comment" spellcheck="true">// 当前slot</span>
+
+    <span class="token function">HashIterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        expectedModCount <span class="token operator">=</span> modCount<span class="token punctuation">;</span>
+        Node<span class="token operator">&lt;</span>K<span class="token punctuation">,</span>V<span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span> t <span class="token operator">=</span> table<span class="token punctuation">;</span>
+        current <span class="token operator">=</span> next <span class="token operator">=</span> null<span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">//从slot为0处开始遍历</span>
+        index <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>t <span class="token operator">!=</span> null <span class="token operator">&amp;&amp;</span> size <span class="token operator">></span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment" spellcheck="true">// 找到第一个有节点的slot，并把next赋值为第一个节点</span>
+            <span class="token keyword">do</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token keyword">while</span> <span class="token punctuation">(</span>index <span class="token operator">&lt;</span> t<span class="token punctuation">.</span>length <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span>next <span class="token operator">=</span> t<span class="token punctuation">[</span>index<span class="token operator">++</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">==</span> null<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">final</span> <span class="token keyword">boolean</span> <span class="token function">hasNext</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> next <span class="token operator">!=</span> null<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">final</span> Node<span class="token operator">&lt;</span>K<span class="token punctuation">,</span>V<span class="token operator">></span> <span class="token function">nextNode</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        Node<span class="token operator">&lt;</span>K<span class="token punctuation">,</span>V<span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span> t<span class="token punctuation">;</span>
+        Node<span class="token operator">&lt;</span>K<span class="token punctuation">,</span>V<span class="token operator">></span> e <span class="token operator">=</span> next<span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>modCount <span class="token operator">!=</span> expectedModCount<span class="token punctuation">)</span>
+            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">ConcurrentModificationException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>e <span class="token operator">==</span> null<span class="token punctuation">)</span>
+            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">NoSuchElementException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">// 在当前槽中寻找下一个节点，如果当前槽已经找完了继续向后寻找有节点的slot</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>next <span class="token operator">=</span> <span class="token punctuation">(</span>current <span class="token operator">=</span> e<span class="token punctuation">)</span><span class="token punctuation">.</span>next<span class="token punctuation">)</span> <span class="token operator">==</span> null <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span>t <span class="token operator">=</span> table<span class="token punctuation">)</span> <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">do</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token keyword">while</span> <span class="token punctuation">(</span>index <span class="token operator">&lt;</span> t<span class="token punctuation">.</span>length <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span>next <span class="token operator">=</span> t<span class="token punctuation">[</span>index<span class="token operator">++</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">==</span> null<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">return</span> e<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">final</span> <span class="token keyword">void</span> <span class="token function">remove</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        Node<span class="token operator">&lt;</span>K<span class="token punctuation">,</span>V<span class="token operator">></span> p <span class="token operator">=</span> current<span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>p <span class="token operator">==</span> null<span class="token punctuation">)</span>
+            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IllegalStateException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>modCount <span class="token operator">!=</span> expectedModCount<span class="token punctuation">)</span>
+            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">ConcurrentModificationException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        current <span class="token operator">=</span> null<span class="token punctuation">;</span>
+        K key <span class="token operator">=</span> p<span class="token punctuation">.</span>key<span class="token punctuation">;</span>
+        <span class="token function">removeNode</span><span class="token punctuation">(</span><span class="token function">hash</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">,</span> key<span class="token punctuation">,</span> null<span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        expectedModCount <span class="token operator">=</span> modCount<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
 <h2 id="keySet">2.6 keySet</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> Set<span class="token operator">&lt;</span>K<span class="token operator">></span> <span class="token function">keySet</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     Set<span class="token operator">&lt;</span>K<span class="token operator">></span> ks <span class="token operator">=</span> keySet<span class="token punctuation">;</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span>ks <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -793,6 +846,7 @@
 <pre class=" language-java"><code class="language-java"><span class="token keyword">final</span> <span class="token keyword">class</span> <span class="token class-name">KeySet</span> <span class="token keyword">extends</span> <span class="token class-name">AbstractSet</span><span class="token operator">&lt;</span>K<span class="token operator">></span> <span class="token punctuation">{</span>
     <span class="token keyword">public</span> <span class="token keyword">final</span> <span class="token keyword">int</span> <span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span>                 <span class="token punctuation">{</span> <span class="token keyword">return</span> size<span class="token punctuation">;</span> <span class="token punctuation">}</span>
     <span class="token keyword">public</span> <span class="token keyword">final</span> <span class="token keyword">void</span> <span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span>               <span class="token punctuation">{</span> HashMap<span class="token punctuation">.</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token comment" spellcheck="true">//KeyIterator也是继承自HashIterator，但返回的只是节点中的键</span>
     <span class="token keyword">public</span> <span class="token keyword">final</span> Iterator<span class="token operator">&lt;</span>K<span class="token operator">></span> <span class="token function">iterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span>     <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">KeyIterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
     <span class="token keyword">public</span> <span class="token keyword">final</span> <span class="token keyword">boolean</span> <span class="token function">contains</span><span class="token punctuation">(</span>Object o<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token function">containsKey</span><span class="token punctuation">(</span>o<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
     <span class="token keyword">public</span> <span class="token keyword">final</span> <span class="token keyword">boolean</span> <span class="token function">remove</span><span class="token punctuation">(</span>Object key<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -1595,7 +1649,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">208k</span>&nbsp;字
+                class="white-color">210.8k</span>&nbsp;字
             
             
             
