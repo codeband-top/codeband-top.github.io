@@ -4,9 +4,13 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="数据库理论之OLTP与OLAP, 代码段小站">
-    <meta name="description" content="1 OLTPOLTP 即联机事务处理，就是我们经常说的关系数据库，意即记录即时的增、删、改、查，就是我们经常应用的东西，主要供基层人员使用，进行一线业务操作，这是数据库的基础。
-对于各种数据库系统环境中大家最常见的 OLTP 系统，其特点是">
+    <meta name="keywords" content="模仿Mybatis入门案例实现一个ORM框架, 代码段小站">
+    <meta name="description" content="入门案例参见：
+Mybatis使用与入门案例
+1 设计分析main函数里都在干什么？
+// 1.读取配置文件
+// 这是相对类的路径，读取配置文件时通常使用两个方法：
+// a. 类加载器 b.使用ServletContext对象的getR">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -15,7 +19,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>数据库理论之OLTP与OLAP | 代码段小站</title>
+    <title>模仿Mybatis入门案例实现一个ORM框架 | 代码段小站</title>
     <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon.ico">
     
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
@@ -242,12 +246,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/17.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/19.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <h1 class="description center-align post-title">数据库理论之OLTP与OLAP</h1>
+                    <h1 class="description center-align post-title">模仿Mybatis入门案例实现一个ORM框架</h1>
                 </div>
             </div>
         </div>
@@ -364,12 +368,12 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">
-                                <span class="chip bg-color">基础知识</span>
+                            <a href="/tags/mybatis/">
+                                <span class="chip bg-color">mybatis</span>
                             </a>
                         
-                            <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">
-                                <span class="chip bg-color">数据库</span>
+                            <a href="/tags/java%E4%B8%BB%E6%B5%81%E6%A1%86%E6%9E%B6/">
+                                <span class="chip bg-color">java主流框架</span>
                             </a>
                         
                     </div>
@@ -393,7 +397,7 @@
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2020-02-16
+                    2020-02-19
                 </div>
                 
 
@@ -402,7 +406,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    980
+                    954
                 </div>
                 
 
@@ -415,21 +419,211 @@
         <hr class="clearfix">
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h1 id="OLTP">1 OLTP</h1><p>OLTP 即<strong>联机事务处理</strong>，就是我们经常说的关系数据库，意即记录即时的增、删、改、查，就是我们经常应用的东西，主要供基层人员使用，进行一线业务操作，这是数据库的基础。</p>
-<p>对于各种数据库系统环境中大家最常见的 OLTP 系统，其特点是并发量大，整体数据量比较多，但每次访问的数据比较少，且访问的数据比较离散，活跃数据占总体数据的比例不是太大。对于这类系统的数据库实际上是最难维护，最难以优化的，对主机整体性能要求也是最高的。因为不仅访问量很高，数据量也不小。</p>
-<p>针对上面的这些特点和分析，我们可以对 OLTP 的得出一个大致的方向。</p>
-<p><strong>虽然系统总体数据量较大，但是系统活跃数据在数据总量中所占的比例不大，那么我们可以通过扩大内存容量来尽可能多的将活跃数据 cache 到内存中；虽然 IO 访问非常频繁，但是每次访问的数据量较少且很离散，那么我们对磁盘存储的要求是 IOPS(Input/Output Operations Per Second，即每秒进行读写操作的次数)表现要很好，吞吐量是次要因素；</strong></p>
-<p>并发量很高，<strong>CPU 每秒所要处理的请求自然也就很多，所以 CPU 处理能力需要比较强劲</strong>；虽然与客户端的每次交互的数据量并不是特别大，但是<strong>网络交互非常频繁，所以主机与客户端交互的网络设备对流量能力也要求不能太弱。</strong></p>
-<h1 id="OLAP">2 OLAP</h1><p>用于数据分析的 OLAP 系统的主要特点就是<strong>数据量非常大，并发访问不多，但每次访问所需要检索的数据量都比较多，而且数据访问相对较为集中，没有太明显的活跃数据概念。</strong></p>
-<p>OLAP 即<strong>联机分析处理</strong>，是数据仓库的核心部心，所谓数据仓库是对于大量已经由 OLTP 形成的数据的一种分析型的数据库，用于处理商业智能、决策支持等重要的决策信息；数据仓库是在数据库应用到一定程序之后而对历史数据的加工与分析。数据分析的目标是探索并挖掘数据的价值，作为企业高层进行决策的参考。</p>
-<p>基于 OLAP 系统的各种特点和相应的分析，针对 OLAP 系统硬件优化的大致策略如下：</p>
-<ul>
-<li>数据量非常大，所以<strong>磁盘存储系统的单位容量需要尽量大一些；</strong></li>
-<li>单次访问数据量较大，而且访问数据比较集中，那么对 IO 系统的性能要求是需要<strong>有尽可能大的每秒 IO 吞吐量，所以应该选用每秒吞吐量尽可能大的磁盘；</strong></li>
-<li>虽然 IO 性能要求也比较高，但是并发请求较少，所以 CPU 处理能力较难成为性能瓶颈，所以 <strong>CPU 处理能力没有太苛刻的要求；</strong></li>
-<li>虽然每次请求的访问量很大，但是执行过程中的数据大都不会返回给客户端，最终返回给客户端的数据量都较小，所以<strong>和客户端交互的网络设备要求并不是太高；</strong></li>
-</ul>
-<p>此外，由于 OLAP 系统由于其每次运算过程较长，可以很好的并行化，所以一般的 OLAP系统都是由多台主机构成的一个集群，而集群中主机与主机之间的数据交互量一般来说都是非常大的，所以在集群中主机之间的网络设备要求很高。</p>
+                <p>入门案例参见：</p>
+<p><a href="../Mybatis使用与入门案例">Mybatis使用与入门案例</a></p>
+<h1 id="设计分析">1 设计分析</h1><p>main函数里都在干什么？</p>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// 1.读取配置文件</span>
+<span class="token comment" spellcheck="true">// 这是相对类的路径，读取配置文件时通常使用两个方法：</span>
+<span class="token comment" spellcheck="true">// a. 类加载器 b.使用ServletContext对象的getRealPath()</span>
+InputStream in <span class="token operator">=</span> Resources<span class="token punctuation">.</span><span class="token function">getResourceAsStream</span><span class="token punctuation">(</span><span class="token string">"mybatis.xml"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment" spellcheck="true">// 2.创建SqlSessionFactory工厂，构建者模式</span>
+SqlSessionFactoryBuilder builder <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SqlSessionFactoryBuilder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+SqlSessionFactory factory <span class="token operator">=</span> builder<span class="token punctuation">.</span><span class="token function">build</span><span class="token punctuation">(</span>in<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment" spellcheck="true">// 3.使用工厂生成SqlSession对象，工厂模式</span>
+SqlSession session <span class="token operator">=</span> factory<span class="token punctuation">.</span><span class="token function">openSession</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment" spellcheck="true">// 4.使用SqlSession创建Dao接口的代理，代理模式</span>
+IUserDao userDao <span class="token operator">=</span> session<span class="token punctuation">.</span><span class="token function">getMapper</span><span class="token punctuation">(</span>IUserDao<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment" spellcheck="true">// 5.使用代理对象执行方法</span>
+List<span class="token operator">&lt;</span>User<span class="token operator">></span> users <span class="token operator">=</span> userDao<span class="token punctuation">.</span><span class="token function">findAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">for</span><span class="token punctuation">(</span>User user<span class="token operator">:</span>users<span class="token punctuation">)</span><span class="token punctuation">{</span>
+    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment" spellcheck="true">// 6.释放资源</span>
+session<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+in<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>自定义ORM框架的思路：</p>
+<ol>
+<li>根据配置文件的信息创建Connection对象<br> 注册驱动，获取连接</li>
+<li>获取预处理对象PreparedStatement<br> 此时需要SQL语句<br> conn.prepareStatement(sql)</li>
+<li>执行查询<br> ResultSet set = psm.executeQuery()</li>
+<li>遍历结果集用于封装<br> List<e> list = new ArrayList();<br> while(resultSet.next()){<pre><code> E element = xxxx;（通过反射）
+ //进行封装
+ list.add(element);</code></pre> }</e></li>
+<li>返回list<br> return list;</li>
+</ol>
+<p><img src="https://api.codetool.top/img/15821118083407.png" alt></p>
+<h1 id="实现">2 实现</h1><p>仓库地址：</p>
+<p><a href="http://git.codetool.top/RhettPeng/mybatis_design/src/master" target="_blank" rel="noopener">http://git.codetool.top/RhettPeng/mybatis_design/src/master</a></p>
+<h2 id="使用类加载器读取配置文件">2.1 使用类加载器读取配置文件</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Resources</span> <span class="token punctuation">{</span>
+
+    <span class="token comment" spellcheck="true">/**
+     * 根据传入的参数，获取一个字节输入流
+     */</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> InputStream <span class="token function">getResourceAsStream</span><span class="token punctuation">(</span>String filePath<span class="token punctuation">)</span><span class="token punctuation">{</span>
+        <span class="token keyword">return</span> Resources<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">.</span><span class="token function">getClassLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getResourceAsStream</span><span class="token punctuation">(</span>filePath<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<h2 id="使用输入流构建工厂">2.2 使用输入流构建工厂</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">SqlSessionFactoryBuilder</span> <span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">/**
+     * 根据参数的字节输入流来构建一个SqlSessionFactory工厂
+     * @param config
+     * @return
+     */</span>
+    <span class="token keyword">public</span> SqlSessionFactory <span class="token function">build</span><span class="token punctuation">(</span>InputStream config<span class="token punctuation">)</span><span class="token punctuation">{</span>
+        <span class="token comment" spellcheck="true">//XMLConfigBuilder用于解析xml配置文件并生成Configuration对象</span>
+        Configuration cfg <span class="token operator">=</span> XMLConfigBuilder<span class="token punctuation">.</span><span class="token function">loadConfiguration</span><span class="token punctuation">(</span>config<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">DefaultSqlSessionFactory</span><span class="token punctuation">(</span>cfg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>Configuration：</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Configuration</span> <span class="token punctuation">{</span>
+    <span class="token keyword">private</span> String driver<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> String url<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> String username<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> String password<span class="token punctuation">;</span>
+
+    <span class="token keyword">private</span> Map<span class="token operator">&lt;</span>String<span class="token punctuation">,</span>Mapper<span class="token operator">></span> mappers <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment" spellcheck="true">//getter &amp; setter...</span>
+<span class="token punctuation">}</span></code></pre>
+<p>Configuration里面包含了所有读出来的mapper映射，key为<code>全限定类名.方法名</code>，value为Mapper对象，Mapper类：</p>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
+ * 用于封装执行的SQL语句和结果类型的全限定类名
+ */</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Mapper</span> <span class="token punctuation">{</span>
+    <span class="token keyword">private</span> String queryString<span class="token punctuation">;</span><span class="token comment" spellcheck="true">//SQL</span>
+    <span class="token keyword">private</span> String resultType<span class="token punctuation">;</span><span class="token comment" spellcheck="true">//返回类型</span>
+
+    <span class="token comment" spellcheck="true">//getter &amp; setter...</span>
+<span class="token punctuation">}</span></code></pre>
+<p>工厂接口：</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">SqlSessionFactory</span> <span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">/**
+     * 用于创建一个SqlSession对象
+     * @return
+     */</span>
+    SqlSession <span class="token function">openSession</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<h2 id="使用工厂获取session对象">2.3 使用工厂获取session对象</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
+ * SqlSessionFactory接口的实现类
+ */</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">DefaultSqlSessionFactory</span> <span class="token keyword">implements</span> <span class="token class-name">SqlSessionFactory</span> <span class="token punctuation">{</span>
+    <span class="token keyword">private</span> Configuration cfg<span class="token punctuation">;</span>
+
+    <span class="token keyword">public</span> <span class="token function">DefaultSqlSessionFactory</span><span class="token punctuation">(</span>Configuration cfg<span class="token punctuation">)</span><span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>cfg <span class="token operator">=</span> cfg<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment" spellcheck="true">/**
+     * 用于创建一个新的操作数据库对象
+     * @return
+     */</span>
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> SqlSession <span class="token function">openSession</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">DefaultSqlSession</span><span class="token punctuation">(</span>cfg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>SqlSession接口：</p>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
+ * 自定义Mybatis和数据库交互的核心类
+ * 它里面可以创建dao接口的代理对象
+ */</span>
+<span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">SqlSession</span> <span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">/**
+     * 根据参数创建一个代理对象
+     * @param daoInterfaceClass dao的字节码
+     * @param &lt;T>
+     * @return
+     */</span>
+    <span class="token operator">&lt;</span>T<span class="token operator">></span> T <span class="token function">getMapper</span><span class="token punctuation">(</span>Class<span class="token operator">&lt;</span>T<span class="token operator">></span> daoInterfaceClass<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">/**
+     * 释放资源
+     */</span>
+    <span class="token keyword">void</span> <span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<h2 id="使用Session获取一个mapper对象">2.4 使用Session获取一个mapper对象</h2><p>这里使用了动态代理，默认SqlSession实现：</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">DefaultSqlSession</span> <span class="token keyword">implements</span> <span class="token class-name">SqlSession</span> <span class="token punctuation">{</span>
+    <span class="token keyword">private</span> Configuration cfg<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> Connection connection<span class="token punctuation">;</span>
+
+    <span class="token keyword">public</span> <span class="token function">DefaultSqlSession</span><span class="token punctuation">(</span>Configuration cfg<span class="token punctuation">)</span><span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>cfg <span class="token operator">=</span> cfg<span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>connection <span class="token operator">=</span> DataSourceUtil<span class="token punctuation">.</span><span class="token function">getConnection</span><span class="token punctuation">(</span>cfg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token comment" spellcheck="true">/**
+     * 用于创建代理对象
+     * @param daoInterfaceClass dao的字节码
+     * @param &lt;T>
+     * @return
+     */</span>
+
+    <span class="token comment" spellcheck="true">//通过传过来的接口找到Mapper映射中对应的Mapper对象，然后使用InvocationHandler构建动态代理对象</span>
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> <span class="token operator">&lt;</span>T<span class="token operator">></span> T <span class="token function">getMapper</span><span class="token punctuation">(</span>Class<span class="token operator">&lt;</span>T<span class="token operator">></span> daoInterfaceClass<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        T mapper <span class="token operator">=</span> <span class="token punctuation">(</span>T<span class="token punctuation">)</span>Proxy<span class="token punctuation">.</span><span class="token function">newProxyInstance</span><span class="token punctuation">(</span>daoInterfaceClass<span class="token punctuation">.</span><span class="token function">getClassLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">Class</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">{</span>daoInterfaceClass<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">MapperProxy</span><span class="token punctuation">(</span>cfg<span class="token punctuation">.</span><span class="token function">getMappers</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> connection<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> mapper<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment" spellcheck="true">/**
+     * 用于释放资源
+     */</span>
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>connection<span class="token operator">!=</span>null<span class="token punctuation">)</span><span class="token punctuation">{</span>
+            <span class="token keyword">try</span> <span class="token punctuation">{</span>
+                connection<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">SQLException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>MapperProxy：</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">MapperProxy</span> <span class="token keyword">implements</span> <span class="token class-name">InvocationHandler</span> <span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">//key:全限定类名+方法名</span>
+    <span class="token keyword">private</span> Map<span class="token operator">&lt;</span>String<span class="token punctuation">,</span> Mapper<span class="token operator">></span> mappers<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> Connection conn<span class="token punctuation">;</span>
+
+    <span class="token keyword">public</span> <span class="token function">MapperProxy</span><span class="token punctuation">(</span>Map mappers<span class="token punctuation">,</span>Connection conn<span class="token punctuation">)</span><span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>mappers <span class="token operator">=</span> mappers<span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>conn <span class="token operator">=</span> conn<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment" spellcheck="true">/**
+     * 用于对方法进行增强，这里就是调用selectList方法
+     * @param proxy
+     * @param method
+     * @param args
+     * @return
+     * @throws Throwable
+     */</span>
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> Object <span class="token function">invoke</span><span class="token punctuation">(</span>Object proxy<span class="token punctuation">,</span> Method method<span class="token punctuation">,</span> Object<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> Throwable <span class="token punctuation">{</span>
+        <span class="token comment" spellcheck="true">//1. 获取方法名</span>
+        String methodName <span class="token operator">=</span> method<span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">//2. 获取方法所在类的名称</span>
+        String className <span class="token operator">=</span> method<span class="token punctuation">.</span><span class="token function">getDeclaringClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">//3. 组合key</span>
+        String key <span class="token operator">=</span> className<span class="token operator">+</span><span class="token string">"."</span><span class="token operator">+</span>methodName<span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">//4. 获取mappers中的mapper对象</span>
+        Mapper mapper <span class="token operator">=</span> mappers<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">//5. 判断是否有mapper</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>mapper<span class="token operator">==</span>null<span class="token punctuation">)</span><span class="token punctuation">{</span>
+            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IllegalArgumentException</span><span class="token punctuation">(</span><span class="token string">"传入的参数有误"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token comment" spellcheck="true">//6. 调用工具类执行查询所有</span>
+        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Executor</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">selectList</span><span class="token punctuation">(</span>mapper<span class="token punctuation">,</span>conn<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>用户定义的Mapper：</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">IUserDao</span> <span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">/**
+     * 查询所有操作
+     */</span>
+    List<span class="token operator">&lt;</span>User<span class="token operator">></span> <span class="token function">findAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
 
             </div>
             <hr/>
@@ -483,12 +677,12 @@
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">
-                                    <span class="chip bg-color">基础知识</span>
+                                <a href="/tags/mybatis/">
+                                    <span class="chip bg-color">mybatis</span>
                                 </a>
                             
-                                <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">
-                                    <span class="chip bg-color">数据库</span>
+                                <a href="/tags/java%E4%B8%BB%E6%B5%81%E6%A1%86%E6%9E%B6/">
+                                    <span class="chip bg-color">java主流框架</span>
                                 </a>
                             
                         </div>
@@ -789,57 +983,57 @@
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
             <div class="card">
-                <a href="/article/%E9%AB%98%E6%95%88%E6%9F%A5%E6%89%BE%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-HashTree%EF%BC%88%E5%93%88%E5%B8%8C%E6%A0%91%EF%BC%89/">
+                <a href="/article/%E6%A8%A1%E4%BB%BFMybatis%E5%85%A5%E9%97%A8%E6%A1%88%E4%BE%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAORM%E6%A1%86%E6%9E%B6/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/21.jpg" class="responsive-img" alt="高效查找的数据结构-HashTree（哈希树）">
+                        <img src="/medias/featureimages/19.jpg" class="responsive-img" alt="模仿Mybatis入门案例实现一个ORM框架">
                         
-                        <span class="card-title">高效查找的数据结构-HashTree（哈希树）</span>
+                        <span class="card-title">模仿Mybatis入门案例实现一个ORM框架</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            本文参考资源：
-痴人说Hash - 哈希树 (HashTree)_Java_PinusLee阳光灿烂的生活-CSDN博客
-查找——图文翔解HashTree（哈希树）_Java_菜鸟的自留地-mooyang-CSDN博客
-该数据结构的设计者编
+                            入门案例参见：
+Mybatis使用与入门案例
+1 设计分析main函数里都在干什么？
+// 1.读取配置文件
+// 这是相对类的路径，读取配置文件时通常使用两个方法：
+// a. 类加载器 b.使用ServletContext对象的getR
                         
                     </div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2020-02-17
-                        </span>
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-02-19
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-category">
-                                    算法/数据结构
+                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/" class="post-category">
+                                    中间件/软件设计
                                 </a>
                             
                             
                         </span>
                     </div>
                 </div>
+
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
-                        <span class="chip bg-color">数据结构</span>
+                    <a href="/tags/mybatis/">
+                        <span class="chip bg-color">mybatis</span>
                     </a>
                     
-                    <a href="/tags/%E6%90%9C%E7%B4%A2%E6%A0%91/">
-                        <span class="chip bg-color">搜索树</span>
-                    </a>
-                    
-                    <a href="/tags/%E6%A0%91/">
-                        <span class="chip bg-color">树</span>
+                    <a href="/tags/java%E4%B8%BB%E6%B5%81%E6%A1%86%E6%9E%B6/">
+                        <span class="chip bg-color">java主流框架</span>
                     </a>
                     
                 </div>
@@ -853,34 +1047,36 @@
                 下一篇&nbsp;<i class="fas fa-chevron-right"></i>
             </div>
             <div class="card">
-                <a href="/article/%E6%8C%89%E9%94%AE%E6%8E%92%E5%BA%8F%E7%9A%84Map-TreeMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
+                <a href="/article/Mybatis%E4%BD%BF%E7%94%A8%E4%B8%8E%E5%85%A5%E9%97%A8%E6%A1%88%E4%BE%8B/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/10.jpg" class="responsive-img" alt="按键排序的Map-TreeMap源码分析">
+                        <img src="/medias/featureimages/0.jpg" class="responsive-img" alt="Mybatis使用与入门案例">
                         
-                        <span class="card-title">按键排序的Map-TreeMap源码分析</span>
+                        <span class="card-title">Mybatis使用与入门案例</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 总结总结放前面（这篇挺短的）
+                            1 前置环境创建数据库表并添加数据：
+DROP TABLE IF EXISTS `user`;
 
-TreeMap基于红黑树实现，可以对Map中的key排序
-它的排序和定位需要依赖比较器或实现 Comparable 接口，也因此不需要key重写hashCode方法和equals方法，就可以排除掉重复的k
+CREATE TABLE `user` (
+  `id` int(11) NOT NULL auto_increment,
+  `userna
                         
                     </div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2020-02-16
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-02-19
                             </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/" class="post-category">
-                                    编程语言
+                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/" class="post-category">
+                                    中间件/软件设计
                                 </a>
                             
                             
@@ -890,24 +1086,12 @@ TreeMap基于红黑树实现，可以对Map中的key排序
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/%E6%90%9C%E7%B4%A2%E6%A0%91/">
-                        <span class="chip bg-color">搜索树</span>
+                    <a href="/tags/mybatis/">
+                        <span class="chip bg-color">mybatis</span>
                     </a>
                     
-                    <a href="/tags/java/">
-                        <span class="chip bg-color">java</span>
-                    </a>
-                    
-                    <a href="/tags/jdk/">
-                        <span class="chip bg-color">jdk</span>
-                    </a>
-                    
-                    <a href="/tags/%E9%9B%86%E5%90%88/">
-                        <span class="chip bg-color">集合</span>
-                    </a>
-                    
-                    <a href="/tags/%E6%BA%90%E7%A0%81%E7%A0%94%E7%A9%B6/">
-                        <span class="chip bg-color">源码研究</span>
+                    <a href="/tags/java%E4%B8%BB%E6%B5%81%E6%A1%86%E6%9E%B6/">
+                        <span class="chip bg-color">java主流框架</span>
                     </a>
                     
                 </div>
