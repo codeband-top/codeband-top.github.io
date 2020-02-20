@@ -4,6 +4,60 @@
   
     
     <entry>
+      <title>使用Mybatis完成CRUD</title>
+      <link href="/article/%E4%BD%BF%E7%94%A8Mybatis%E5%AE%8C%E6%88%90CRUD/"/>
+      <url>/article/%E4%BD%BF%E7%94%A8Mybatis%E5%AE%8C%E6%88%90CRUD/</url>
+      
+        <content type="html"><![CDATA[<h1 id="实例">1 实例</h1><h2 id="POJO-User">1.1 POJO: User</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">package</span> com<span class="token punctuation">.</span>rhett<span class="token punctuation">.</span>domain<span class="token punctuation">;</span><span class="token keyword">import</span> java<span class="token punctuation">.</span>io<span class="token punctuation">.</span>Serializable<span class="token punctuation">;</span><span class="token keyword">import</span> java<span class="token punctuation">.</span>util<span class="token punctuation">.</span>Date<span class="token punctuation">;</span><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">User</span> <span class="token keyword">implements</span> <span class="token class-name">Serializable</span> <span class="token punctuation">{</span>    <span class="token keyword">private</span> Integer id<span class="token punctuation">;</span>    <span class="token keyword">private</span> String username<span class="token punctuation">;</span>    <span class="token keyword">private</span> String address<span class="token punctuation">;</span>    <span class="token keyword">private</span> String sex<span class="token punctuation">;</span>    <span class="token keyword">private</span> Date birthday<span class="token punctuation">;</span>    <span class="token keyword">public</span> Integer <span class="token function">getId</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> id<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setId</span><span class="token punctuation">(</span>Integer id<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">this</span><span class="token punctuation">.</span>id <span class="token operator">=</span> id<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> String <span class="token function">getUsername</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> username<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setUsername</span><span class="token punctuation">(</span>String username<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">this</span><span class="token punctuation">.</span>username <span class="token operator">=</span> username<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> String <span class="token function">getAddress</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> address<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setAddress</span><span class="token punctuation">(</span>String address<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">this</span><span class="token punctuation">.</span>address <span class="token operator">=</span> address<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> String <span class="token function">getSex</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> sex<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setSex</span><span class="token punctuation">(</span>String sex<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">this</span><span class="token punctuation">.</span>sex <span class="token operator">=</span> sex<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> Date <span class="token function">getBirthday</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> birthday<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setBirthday</span><span class="token punctuation">(</span>Date birthday<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">this</span><span class="token punctuation">.</span>birthday <span class="token operator">=</span> birthday<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token annotation punctuation">@Override</span>    <span class="token keyword">public</span> String <span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> <span class="token string">"User [id="</span> <span class="token operator">+</span> id <span class="token operator">+</span> <span class="token string">", username="</span> <span class="token operator">+</span> username <span class="token operator">+</span> <span class="token string">", birthday="</span> <span class="token operator">+</span> birthday                <span class="token operator">+</span> <span class="token string">", sex="</span> <span class="token operator">+</span> sex <span class="token operator">+</span> <span class="token string">", address="</span>                <span class="token operator">+</span> address <span class="token operator">+</span> <span class="token string">"]"</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre><h2 id="DAO接口">1.2 DAO接口</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">package</span> com<span class="token punctuation">.</span>rhett<span class="token punctuation">.</span>dao<span class="token punctuation">;</span><span class="token keyword">import</span> com<span class="token punctuation">.</span>rhett<span class="token punctuation">.</span>domain<span class="token punctuation">.</span>User<span class="token punctuation">;</span><span class="token keyword">import</span> java<span class="token punctuation">.</span>util<span class="token punctuation">.</span>List<span class="token punctuation">;</span><span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">IUserDao</span> <span class="token punctuation">{</span>    <span class="token comment" spellcheck="true">/**     * 查询所有操作     */</span>    List<span class="token operator">&lt;</span>User<span class="token operator">></span> <span class="token function">findAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token comment" spellcheck="true">/**     * 保存用户     * @param user     */</span>    <span class="token keyword">void</span> <span class="token function">saveUser</span><span class="token punctuation">(</span>User user<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token comment" spellcheck="true">/**     * 更新用户信息     * @param user     */</span>    <span class="token keyword">void</span> <span class="token function">updateUser</span><span class="token punctuation">(</span>User user<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token comment" spellcheck="true">/**     * 删除用户     * @param userId     */</span>    <span class="token keyword">void</span> <span class="token function">deleteUser</span><span class="token punctuation">(</span>Integer userId<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token comment" spellcheck="true">/**     * 根据id查找用户     * @param userId     * @return     */</span>    User <span class="token function">findById</span><span class="token punctuation">(</span>Integer userId<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token comment" spellcheck="true">/**     * 模糊查询用户信息     * @param username     * @return     */</span>    List<span class="token operator">&lt;</span>User<span class="token operator">></span> <span class="token function">findByName</span><span class="token punctuation">(</span>String username<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token comment" spellcheck="true">/**     * 查询总用户数     * @return     */</span>    <span class="token keyword">int</span> <span class="token function">findTotal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token punctuation">}</span></code></pre><h2 id="mapper配置">1.3 mapper配置</h2><pre class=" language-xml"><code class="language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8"?></span><span class="token doctype">&lt;!DOCTYPE mapper        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"        "http://mybatis.org/dtd/mybatis-3-mapper.dtd"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mapper</span> <span class="token attr-name">namespace</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.rhett.dao.IUserDao<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>    <span class="token comment" spellcheck="true">&lt;!-- 配置查询所有操作 --></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>select</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>findAll<span class="token punctuation">"</span></span> <span class="token attr-name">resultType</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>User<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>        select * from user    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>select</span><span class="token punctuation">></span></span>    <span class="token comment" spellcheck="true">&lt;!-- 保存用户 --></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>insert</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>saveUser<span class="token punctuation">"</span></span> <span class="token attr-name">parameterType</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>User<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>        <span class="token comment" spellcheck="true">&lt;!-- 插入数据后，获取数据的id --></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>selectKey</span> <span class="token attr-name">keyProperty</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>id<span class="token punctuation">"</span></span> <span class="token attr-name">keyColumn</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>id<span class="token punctuation">"</span></span> <span class="token attr-name">resultType</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>int<span class="token punctuation">"</span></span> <span class="token attr-name">order</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>AFTER<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>            select last_insert_id();        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>selectKey</span><span class="token punctuation">></span></span>        insert into user(username,address,sex,birthday) values (#{username},#{address},#{sex},#{birthday});    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>insert</span><span class="token punctuation">></span></span>    <span class="token comment" spellcheck="true">&lt;!-- 保存用户 --></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>update</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>updateUser<span class="token punctuation">"</span></span> <span class="token attr-name">parameterType</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>User<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>        update user set username=#{username},address=#{address},sex=#{sex},birthday=#{birthday} where id=#{id};    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>update</span><span class="token punctuation">></span></span>    <span class="token comment" spellcheck="true">&lt;!-- 删除用户 --></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>delete</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>deleteUser<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>        delete from user where id = #{uid};    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>delete</span><span class="token punctuation">></span></span>    <span class="token comment" spellcheck="true">&lt;!-- 根据id查询用户 --></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>select</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>findById<span class="token punctuation">"</span></span> <span class="token attr-name">resultType</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>User<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>        select * from user where id = #{uid};    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>select</span><span class="token punctuation">></span></span>    <span class="token comment" spellcheck="true">&lt;!-- 根据名称模糊查询用户 --></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>select</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>findByName<span class="token punctuation">"</span></span> <span class="token attr-name">resultType</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>User<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>        select * from user where username like #{username};    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>select</span><span class="token punctuation">></span></span>    <span class="token comment" spellcheck="true">&lt;!-- 获取用户的总记录条数 --></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>select</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>findTotal<span class="token punctuation">"</span></span> <span class="token attr-name">resultType</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>int<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>        select count(id) from user;    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>select</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mapper</span><span class="token punctuation">></span></span></code></pre><h2 id="mybatis配置">1.4 mybatis配置</h2><pre class=" language-xml"><code class="language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="utf-8" ?></span><span class="token doctype">&lt;!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>configuration</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>properties</span> <span class="token attr-name">resource</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>db.properties<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>settings</span><span class="token punctuation">></span></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>setting</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>logImpl<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>LOG4J<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>settings</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>typeAliases</span><span class="token punctuation">></span></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>package</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.rhett.domain<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>package</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>typeAliases</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>environments</span> <span class="token attr-name">default</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>development<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>environment</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>development<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>transactionManager</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>JDBC<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dataSource</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>POOLED<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>                <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>driver<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${driver}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>                <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>url<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${url}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>                <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>username<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${username}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>                <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>password<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>${password}<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dataSource</span><span class="token punctuation">></span></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>environment</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>environments</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mappers</span><span class="token punctuation">></span></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mapper</span> <span class="token attr-name">resource</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com/rhett/dao/IUserDao.xml<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mappers</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>configuration</span><span class="token punctuation">></span></span></code></pre><h2 id="测试类">1.5 测试类</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">package</span> test<span class="token punctuation">;</span><span class="token keyword">import</span> com<span class="token punctuation">.</span>rhett<span class="token punctuation">.</span>dao<span class="token punctuation">.</span>IUserDao<span class="token punctuation">;</span><span class="token keyword">import</span> com<span class="token punctuation">.</span>rhett<span class="token punctuation">.</span>domain<span class="token punctuation">.</span>User<span class="token punctuation">;</span><span class="token keyword">import</span> org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>ibatis<span class="token punctuation">.</span>io<span class="token punctuation">.</span>Resources<span class="token punctuation">;</span><span class="token keyword">import</span> org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>ibatis<span class="token punctuation">.</span>session<span class="token punctuation">.</span>*<span class="token punctuation">;</span><span class="token keyword">import</span> org<span class="token punctuation">.</span>junit<span class="token punctuation">.</span>*<span class="token punctuation">;</span><span class="token keyword">import</span> java<span class="token punctuation">.</span>io<span class="token punctuation">.</span>IOException<span class="token punctuation">;</span><span class="token keyword">import</span> java<span class="token punctuation">.</span>io<span class="token punctuation">.</span>InputStream<span class="token punctuation">;</span><span class="token keyword">import</span> java<span class="token punctuation">.</span>util<span class="token punctuation">.</span>Date<span class="token punctuation">;</span><span class="token keyword">import</span> java<span class="token punctuation">.</span>util<span class="token punctuation">.</span>List<span class="token punctuation">;</span><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">MybatisTest</span> <span class="token punctuation">{</span>    InputStream in<span class="token punctuation">;</span>    SqlSession session<span class="token punctuation">;</span>    <span class="token keyword">private</span> IUserDao userDao<span class="token punctuation">;</span>    <span class="token annotation punctuation">@Before</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>        <span class="token comment" spellcheck="true">// 1.读取配置文件</span>        in <span class="token operator">=</span> Resources<span class="token punctuation">.</span><span class="token function">getResourceAsStream</span><span class="token punctuation">(</span><span class="token string">"mybatis.xml"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// 2.创建SqlSessionFactory工厂</span>        SqlSessionFactoryBuilder builder <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SqlSessionFactoryBuilder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        SqlSessionFactory factory <span class="token operator">=</span> builder<span class="token punctuation">.</span><span class="token function">build</span><span class="token punctuation">(</span>in<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// 3.使用工厂生成SqlSession对象</span>        session <span class="token operator">=</span> factory<span class="token punctuation">.</span><span class="token function">openSession</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// 4.使用SqlSession创建Dao接口的代理</span>        userDao <span class="token operator">=</span> session<span class="token punctuation">.</span><span class="token function">getMapper</span><span class="token punctuation">(</span>IUserDao<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token annotation punctuation">@After</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">destroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>        session<span class="token punctuation">.</span><span class="token function">commit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// 6.释放资源</span>        session<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        in<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token annotation punctuation">@Test</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">testFindAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>        <span class="token comment" spellcheck="true">// 5.使用代理对象执行方法</span>        List<span class="token operator">&lt;</span>User<span class="token operator">></span> users <span class="token operator">=</span> userDao<span class="token punctuation">.</span><span class="token function">findAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">for</span><span class="token punctuation">(</span>User user<span class="token operator">:</span>users<span class="token punctuation">)</span><span class="token punctuation">{</span>            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token punctuation">}</span>    <span class="token punctuation">}</span>    <span class="token comment" spellcheck="true">/**     * 测试保存操作     */</span>    <span class="token annotation punctuation">@Test</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">testSave</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>        User user <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">User</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        user<span class="token punctuation">.</span><span class="token function">setUsername</span><span class="token punctuation">(</span><span class="token string">"mybatis save user get insertedId"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        user<span class="token punctuation">.</span><span class="token function">setAddress</span><span class="token punctuation">(</span><span class="token string">"北京市顺义区"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        user<span class="token punctuation">.</span><span class="token function">setSex</span><span class="token punctuation">(</span><span class="token string">"男"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        user<span class="token punctuation">.</span><span class="token function">setBirthday</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"保存操作之前："</span><span class="token operator">+</span>user<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// 5.使用代理对象执行方法</span>        userDao<span class="token punctuation">.</span><span class="token function">saveUser</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">;</span>        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"保存操作之后："</span><span class="token operator">+</span>user<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token comment" spellcheck="true">/**     * 测试更新操作     */</span>    <span class="token annotation punctuation">@Test</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">testUpdate</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>        User user <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">User</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        user<span class="token punctuation">.</span><span class="token function">setId</span><span class="token punctuation">(</span><span class="token number">50</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        user<span class="token punctuation">.</span><span class="token function">setUsername</span><span class="token punctuation">(</span><span class="token string">"mybatis update user"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        user<span class="token punctuation">.</span><span class="token function">setAddress</span><span class="token punctuation">(</span><span class="token string">"北京市顺义区"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        user<span class="token punctuation">.</span><span class="token function">setSex</span><span class="token punctuation">(</span><span class="token string">"女"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        user<span class="token punctuation">.</span><span class="token function">setBirthday</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// 5.使用代理对象执行方法</span>        userDao<span class="token punctuation">.</span><span class="token function">updateUser</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token comment" spellcheck="true">/**     * 测试更新操作     */</span>    <span class="token annotation punctuation">@Test</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">testDelete</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>        <span class="token comment" spellcheck="true">// 5.使用代理对象执行方法</span>        userDao<span class="token punctuation">.</span><span class="token function">deleteUser</span><span class="token punctuation">(</span><span class="token number">48</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token comment" spellcheck="true">/**     * 测试更新操作     */</span>    <span class="token annotation punctuation">@Test</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">testFindOne</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>        <span class="token comment" spellcheck="true">// 5.执行查询一个方法</span>        User user <span class="token operator">=</span> userDao<span class="token punctuation">.</span><span class="token function">findById</span><span class="token punctuation">(</span><span class="token number">50</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token comment" spellcheck="true">/**     * 测试模糊查询     */</span>    <span class="token annotation punctuation">@Test</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">testFindByName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>        <span class="token comment" spellcheck="true">// 5.使用代理对象执行方法</span>        List<span class="token operator">&lt;</span>User<span class="token operator">></span> users <span class="token operator">=</span> userDao<span class="token punctuation">.</span><span class="token function">findByName</span><span class="token punctuation">(</span><span class="token string">"%王%"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">for</span><span class="token punctuation">(</span>User user<span class="token operator">:</span>users<span class="token punctuation">)</span><span class="token punctuation">{</span>            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token punctuation">}</span>    <span class="token punctuation">}</span>    <span class="token comment" spellcheck="true">/**     * 测试查询总记录条数     */</span>    <span class="token annotation punctuation">@Test</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">testFindTotal</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>        <span class="token comment" spellcheck="true">// 5.使用代理对象执行方法</span>        <span class="token keyword">int</span> count <span class="token operator">=</span> userDao<span class="token punctuation">.</span><span class="token function">findTotal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>count<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre><h1 id="知识点">2 知识点</h1><h2 id="SQL参数绑定">2.1 SQL参数绑定</h2><h3 id="和">2.1.1 #{}和${}</h3><ul><li>#{}表示一个占位符，可以防止sql注入</li><li>${}表示一个拼接符，将直接显示在sql中</li></ul><h3 id="OGNL表达式">2.1.2 OGNL表达式</h3><p>#{}中使用OGNL表达式：</p><p>它是 apache 提供的一种表达式语言，全称是：<br><code>Object Graphic Navigation Language</code> 对象图导航语言<br>它是按照一定的语法格式来获取数据的。<br>语法格式就是使用 <code>#{对象.对象}</code> 的方式  </p><p>根据参数类型的不同可以填的也不同：</p><ul><li>基本数据类型<ul><li>使用<code>#{0},#{1}...</code>的格式</li><li>使用<code>#{param1},{param2}...</code>的格式</li><li>调用时使用自定义参数注解<code>@Param(&quot;xx&quot;)</code>，则可以使用<code>#{xx}</code></li></ul></li><li>对象的属性<br>  使用<code>#{属性名}</code></li><li>Map的值<br>  使用<code>#{Map的键}</code></li></ul><h3 id="注意">2.1.3 注意</h3><ul><li>当只有一个参数的时候且数据类型是基本类型，<code>#{}</code>内的内容可以随意填写</li><li>除非参数是Map类型，否则配置中的<code>ParameterType</code>不是必填</li></ul><h2 id="事务管理">2.2 事务管理</h2><p>实现增删改时一定要去控制事务的提交，否则会默认回滚事务，使用<code>SqlSession.commit()</code>来实现事务提交。</p><h2 id="插入数据之后获取id">2.3 插入数据之后获取id</h2><p>配置selectKey标签，id会自动封装到参数对象中：</p><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>insert</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>saveUser<span class="token punctuation">"</span></span> <span class="token attr-name">parameterType</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>USER<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>    <span class="token comment" spellcheck="true">&lt;!-- 配置保存时获取插入的 id --></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>selectKey</span> <span class="token attr-name">keyColumn</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>id<span class="token punctuation">"</span></span> <span class="token attr-name">keyProperty</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>id<span class="token punctuation">"</span></span> <span class="token attr-name">resultType</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>int<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>        select last_insert_id();    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>selectKey</span><span class="token punctuation">></span></span>    insert into user(username,birthday,sex,address) values        (#{username},#{birthday},#{sex},#{address})<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>insert</span><span class="token punctuation">></span></span></code></pre><h2 id="自动封装出现实体类属性和数据库字段名称不一致">2.4 自动封装出现实体类属性和数据库字段名称不一致</h2><p>解决方案：</p><ul><li>在SQL查询的时候给返回的字段用<code>as</code>起别名</li><li>用实体类中用注解给属性起别名</li><li>在Mapper xml配置文件中使用<code>resultMap</code>配置对应关系</li></ul><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>resultMap</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>userMap<span class="token punctuation">"</span></span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.rhett.domain.User<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>    <span class="token comment" spellcheck="true">&lt;!--主键字段的对应--></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>id</span> <span class="token attr-name">property</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span><span class="token punctuation">"</span></span> <span class="token attr-name">column</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span><span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>result</span> <span class="token attr-name">property</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span><span class="token punctuation">"</span></span> <span class="token attr-name">column</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span><span class="token punctuation">"</span></span><span class="token punctuation">/></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>resultMap</span><span class="token punctuation">></span></span></code></pre><p>然后在select标签中使用resultMap=”userMap”代替parameterType</p><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>select</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>findAll<span class="token punctuation">"</span></span> <span class="token attr-name">resultMap</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>userMap<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> 中间件/软件设计 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> mybatis </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>leetcode53-最大子序和</title>
+      <link href="/article/leetcode53-%E6%9C%80%E5%A4%A7%E5%AD%90%E5%BA%8F%E5%92%8C/"/>
+      <url>/article/leetcode53-%E6%9C%80%E5%A4%A7%E5%AD%90%E5%BA%8F%E5%92%8C/</url>
+      
+        <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p><strong><em>原题</em></strong></p><p>给定一个整数数组 <code>nums</code> ，找到一个具有最大和的连续子数组（子数组最少包含一个元素），返回其最大和。</p><p><strong>示例:</strong></p><blockquote><p><strong>输入：</strong> [-2,1,-3,4,-1,2,1,-5,4],<br><strong>输出：</strong> 6<br><strong>解释：</strong> 连续子数组 [4,-1,2,1] 的和最大，为 6。   </p></blockquote><p><strong>进阶:</strong></p><p>如果你已经实现复杂度为 O(n) 的解法，尝试使用更为精妙的分治法求解。</p><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>动态规划：以下标0为开始的位置，从左往右遍历数组，获得一个累加的sum，如果遇到在某个位置sum小于0（即前面元素和为负数），而且当前位置元素值大于sum，就可以把起始位置调整至当前位置。</p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">maxSubArray</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> nums<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">int</span> sum <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> max <span class="token operator">=</span> Integer<span class="token punctuation">.</span>MIN_VALUE<span class="token punctuation">;</span>        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>nums<span class="token punctuation">.</span>length<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>nums<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">>=</span>sum<span class="token operator">&amp;&amp;</span>sum<span class="token operator">&lt;</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>                 sum <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>            <span class="token punctuation">}</span>            sum <span class="token operator">+=</span> nums<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>sum<span class="token operator">></span>max<span class="token punctuation">)</span> max <span class="token operator">=</span> sum<span class="token punctuation">;</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> max<span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> 算法/数据结构 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> leetcode </tag>
+            
+            <tag> 算法 </tag>
+            
+            <tag> 动态规划 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>leetcode5-最长回文子串</title>
       <link href="/article/leetcode5-%E6%9C%80%E9%95%BF%E5%9B%9E%E6%96%87%E5%AD%90%E4%B8%B2/"/>
       <url>/article/leetcode5-%E6%9C%80%E9%95%BF%E5%9B%9E%E6%96%87%E5%AD%90%E4%B8%B2/</url>
@@ -55,8 +109,6 @@
             
             <tag> 源码研究 </tag>
             
-            <tag> 哈希表 </tag>
-            
         </tags>
       
     </entry>
@@ -81,8 +133,6 @@
         <tags>
             
             <tag> mybatis </tag>
-            
-            <tag> java主流框架 </tag>
             
         </tags>
       
@@ -109,8 +159,6 @@
             
             <tag> mybatis </tag>
             
-            <tag> java主流框架 </tag>
-            
         </tags>
       
     </entry>
@@ -135,8 +183,6 @@
         <tags>
             
             <tag> mybatis </tag>
-            
-            <tag> java主流框架 </tag>
             
         </tags>
       
@@ -248,7 +294,7 @@
             
             <tag> 数据结构 </tag>
             
-            <tag> 树 </tag>
+            <tag> 搜索树 </tag>
             
         </tags>
       
@@ -305,8 +351,6 @@
             <tag> 数据结构 </tag>
             
             <tag> 搜索树 </tag>
-            
-            <tag> 树 </tag>
             
         </tags>
       
@@ -420,9 +464,9 @@
       
         <tags>
             
-            <tag> 基础知识 </tag>
+            <tag> java </tag>
             
-            <tag> Java </tag>
+            <tag> 基础知识 </tag>
             
             <tag> 动态代理 </tag>
             
@@ -606,8 +650,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 栈 </tag>
-            
         </tags>
       
     </entry>
@@ -700,8 +742,6 @@
             <tag> 集合 </tag>
             
             <tag> 源码研究 </tag>
-            
-            <tag> 哈希表 </tag>
             
         </tags>
       
@@ -848,8 +888,6 @@
             
             <tag> 源码研究 </tag>
             
-            <tag> 哈希表 </tag>
-            
         </tags>
       
     </entry>
@@ -875,7 +913,7 @@
             
             <tag> java </tag>
             
-            <tag> 流 </tag>
+            <tag> 基础知识 </tag>
             
         </tags>
       
@@ -1049,8 +1087,6 @@
             
             <tag> 数据结构 </tag>
             
-            <tag> 树 </tag>
-            
             <tag> 堆 </tag>
             
         </tags>
@@ -1079,8 +1115,6 @@
             <tag> 数据结构 </tag>
             
             <tag> 搜索树 </tag>
-            
-            <tag> 树 </tag>
             
         </tags>
       
@@ -1169,8 +1203,6 @@
             
             <tag> 搜索树 </tag>
             
-            <tag> 树 </tag>
-            
         </tags>
       
     </entry>
@@ -1198,8 +1230,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 栈 </tag>
-            
         </tags>
       
     </entry>
@@ -1226,8 +1256,6 @@
             <tag> java </tag>
             
             <tag> IO </tag>
-            
-            <tag> socket </tag>
             
             <tag> NIO </tag>
             
@@ -1401,11 +1429,7 @@
             
             <tag> IO </tag>
             
-            <tag> 多线程 </tag>
-            
-            <tag> 线程池 </tag>
-            
-            <tag> socket </tag>
+            <tag> 网络编程 </tag>
             
         </tags>
       
@@ -1490,8 +1514,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 哈希表 </tag>
-            
         </tags>
       
     </entry>
@@ -1518,8 +1540,6 @@
             <tag> java </tag>
             
             <tag> 网络编程 </tag>
-            
-            <tag> socket </tag>
             
         </tags>
       
@@ -1609,8 +1629,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 链表 </tag>
             
         </tags>
       
@@ -1751,8 +1769,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 栈 </tag>
-            
         </tags>
       
     </entry>
@@ -1861,8 +1877,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 栈 </tag>
-            
         </tags>
       
     </entry>
@@ -1916,8 +1930,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 栈 </tag>
             
         </tags>
       
@@ -1974,8 +1986,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 栈 </tag>
             
         </tags>
       
@@ -2176,8 +2186,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 栈 </tag>
-            
         </tags>
       
     </entry>
@@ -2233,8 +2241,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 栈 </tag>
             
         </tags>
       
@@ -2401,8 +2407,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 栈 </tag>
             
         </tags>
       
@@ -2669,8 +2673,6 @@
             
             <tag> 递归 </tag>
             
-            <tag> 链表 </tag>
-            
         </tags>
       
     </entry>
@@ -2699,8 +2701,6 @@
             <tag> 算法 </tag>
             
             <tag> 递归 </tag>
-            
-            <tag> 树 </tag>
             
         </tags>
       
@@ -2731,8 +2731,6 @@
             
             <tag> 递归 </tag>
             
-            <tag> 树 </tag>
-            
         </tags>
       
     </entry>
@@ -2762,8 +2760,6 @@
             
             <tag> 递归 </tag>
             
-            <tag> 树 </tag>
-            
         </tags>
       
     </entry>
@@ -2792,8 +2788,6 @@
             <tag> 算法 </tag>
             
             <tag> 递归 </tag>
-            
-            <tag> 树 </tag>
             
         </tags>
       
@@ -2853,8 +2847,6 @@
             
             <tag> 递归 </tag>
             
-            <tag> 树 </tag>
-            
         </tags>
       
     </entry>
@@ -2884,8 +2876,6 @@
             
             <tag> 递归 </tag>
             
-            <tag> 树 </tag>
-            
         </tags>
       
     </entry>
@@ -2914,8 +2904,6 @@
             <tag> 算法 </tag>
             
             <tag> DFS </tag>
-            
-            <tag> 树 </tag>
             
         </tags>
       
@@ -3130,8 +3118,6 @@
             
             <tag> BFS </tag>
             
-            <tag> 树 </tag>
-            
         </tags>
       
     </entry>
@@ -3160,8 +3146,6 @@
             <tag> 算法 </tag>
             
             <tag> DFS </tag>
-            
-            <tag> 树 </tag>
             
         </tags>
       
@@ -3192,8 +3176,6 @@
             
             <tag> 递归 </tag>
             
-            <tag> 树 </tag>
-            
         </tags>
       
     </entry>
@@ -3222,8 +3204,6 @@
             <tag> 算法 </tag>
             
             <tag> 递归 </tag>
-            
-            <tag> 树 </tag>
             
         </tags>
       
@@ -3254,8 +3234,6 @@
             
             <tag> 递归 </tag>
             
-            <tag> 树 </tag>
-            
         </tags>
       
     </entry>
@@ -3285,8 +3263,6 @@
             
             <tag> 递归 </tag>
             
-            <tag> 树 </tag>
-            
         </tags>
       
     </entry>
@@ -3315,8 +3291,6 @@
             <tag> 算法 </tag>
             
             <tag> 递归 </tag>
-            
-            <tag> 树 </tag>
             
         </tags>
       
@@ -3376,8 +3350,6 @@
             
             <tag> 递归 </tag>
             
-            <tag> 树 </tag>
-            
         </tags>
       
     </entry>
@@ -3406,8 +3378,6 @@
             <tag> 算法 </tag>
             
             <tag> 递归 </tag>
-            
-            <tag> 树 </tag>
             
         </tags>
       
@@ -3438,8 +3408,6 @@
             
             <tag> BFS </tag>
             
-            <tag> 队列 </tag>
-            
         </tags>
       
     </entry>
@@ -3466,8 +3434,6 @@
             <tag> jvm </tag>
             
             <tag> 优化 </tag>
-            
-            <tag> 字符串常量池 </tag>
             
         </tags>
       
@@ -3498,8 +3464,6 @@
             
             <tag> DFS </tag>
             
-            <tag> 树 </tag>
-            
         </tags>
       
     </entry>
@@ -3528,8 +3492,6 @@
             <tag> 算法 </tag>
             
             <tag> DFS </tag>
-            
-            <tag> 树 </tag>
             
         </tags>
       
@@ -3644,8 +3606,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 哈希集 </tag>
             
         </tags>
       
@@ -4190,8 +4150,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 哈希表 </tag>
-            
         </tags>
       
     </entry>
@@ -4218,8 +4176,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 哈希表 </tag>
             
         </tags>
       
@@ -4250,8 +4206,6 @@
             
             <tag> 双指针技巧 </tag>
             
-            <tag> 哈希表 </tag>
-            
         </tags>
       
     </entry>
@@ -4278,8 +4232,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 哈希集 </tag>
             
         </tags>
       
@@ -4308,10 +4260,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 哈希表 </tag>
-            
-            <tag> 树 </tag>
-            
         </tags>
       
     </entry>
@@ -4338,8 +4286,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 哈希集 </tag>
             
         </tags>
       
@@ -4368,8 +4314,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 哈希表 </tag>
-            
         </tags>
       
     </entry>
@@ -4396,8 +4340,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 哈希集 </tag>
             
         </tags>
       
@@ -4426,8 +4368,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 哈希集 </tag>
-            
         </tags>
       
     </entry>
@@ -4455,8 +4395,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 哈希集 </tag>
-            
         </tags>
       
     </entry>
@@ -4483,8 +4421,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 哈希表 </tag>
             
         </tags>
       
@@ -4544,8 +4480,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 字符串 </tag>
-            
         </tags>
       
     </entry>
@@ -4572,8 +4506,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 哈希表 </tag>
             
         </tags>
       
@@ -4627,8 +4559,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 哈希集 </tag>
-            
         </tags>
       
     </entry>
@@ -4658,8 +4588,6 @@
             
             <tag> 递归 </tag>
             
-            <tag> 哈希集 </tag>
-            
         </tags>
       
     </entry>
@@ -4686,37 +4614,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 哈希集 </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>leetcode705-设计哈希集合</title>
-      <link href="/article/leetcode705-%E8%AE%BE%E8%AE%A1%E5%93%88%E5%B8%8C%E9%9B%86%E5%90%88/"/>
-      <url>/article/leetcode705-%E8%AE%BE%E8%AE%A1%E5%93%88%E5%B8%8C%E9%9B%86%E5%90%88/</url>
-      
-        <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>不使用任何内建的哈希表库设计一个哈希集合</p><p>具体地说，你的设计应该包含以下的功能</p><ul><li><code>add(value)</code>：向哈希集合中插入一个值。</li><li><code>contains(value)</code> ：返回哈希集合中是否存在这个值。</li><li><code>remove(value)</code>：将给定值从哈希集合中删除。如果哈希集合中没有这个值，什么也不做。</li></ul><p><strong>示例：</strong></p><blockquote><p>MyHashSet hashSet = new MyHashSet();<br>hashSet.add(1);<br>hashSet.add(2);<br>hashSet.contains(1); // 返回 true<br>hashSet.contains(3); // 返回 false (未找到)<br>hashSet.add(2);<br>hashSet.contains(2); // 返回 true<br>hashSet.remove(2);<br>hashSet.contains(2); // 返回 false (已经被删除)</p></blockquote><p><strong>注意:</strong></p><ul><li>所有的值都在 <code>[0, 1000000]</code>的范围内。</li><li>操作的总数目在<code>[1, 10000]</code>范围内。</li><li>不要使用内建的哈希集合库。</li></ul><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>偷懒，已知值的范围，直接将整数值映射为哈希值，有多少个哈希值建多少个桶，用空间换时间。</p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">MyHashSet</span> <span class="token punctuation">{</span>    <span class="token keyword">boolean</span><span class="token punctuation">[</span><span class="token punctuation">]</span> exist<span class="token punctuation">;</span>    <span class="token comment" spellcheck="true">/** Initialize your data structure here. */</span>    <span class="token keyword">public</span> <span class="token function">MyHashSet</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        exist <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">boolean</span><span class="token punctuation">[</span><span class="token number">1000001</span><span class="token punctuation">]</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">int</span> key<span class="token punctuation">)</span> <span class="token punctuation">{</span>        exist<span class="token punctuation">[</span>key<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">remove</span><span class="token punctuation">(</span><span class="token keyword">int</span> key<span class="token punctuation">)</span> <span class="token punctuation">{</span>        exist<span class="token punctuation">[</span>key<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token comment" spellcheck="true">/** Returns true if this set contains the specified element */</span>    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">contains</span><span class="token punctuation">(</span><span class="token keyword">int</span> key<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> exist<span class="token punctuation">[</span>key<span class="token punctuation">]</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token comment" spellcheck="true">/** * Your MyHashSet object will be instantiated and called as such: * MyHashSet obj = new MyHashSet(); * obj.add(key); * obj.remove(key); * boolean param_3 = obj.contains(key); */</span></code></pre>]]></content>
-      
-      
-      <categories>
-          
-          <category> 算法/数据结构 </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> 数据结构 </tag>
-            
-            <tag> leetcode </tag>
-            
-            <tag> 哈希集 </tag>
             
         </tags>
       
@@ -4745,7 +4642,32 @@
             
             <tag> leetcode </tag>
             
-            <tag> 哈希表 </tag>
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>leetcode705-设计哈希集合</title>
+      <link href="/article/leetcode705-%E8%AE%BE%E8%AE%A1%E5%93%88%E5%B8%8C%E9%9B%86%E5%90%88/"/>
+      <url>/article/leetcode705-%E8%AE%BE%E8%AE%A1%E5%93%88%E5%B8%8C%E9%9B%86%E5%90%88/</url>
+      
+        <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>不使用任何内建的哈希表库设计一个哈希集合</p><p>具体地说，你的设计应该包含以下的功能</p><ul><li><code>add(value)</code>：向哈希集合中插入一个值。</li><li><code>contains(value)</code> ：返回哈希集合中是否存在这个值。</li><li><code>remove(value)</code>：将给定值从哈希集合中删除。如果哈希集合中没有这个值，什么也不做。</li></ul><p><strong>示例：</strong></p><blockquote><p>MyHashSet hashSet = new MyHashSet();<br>hashSet.add(1);<br>hashSet.add(2);<br>hashSet.contains(1); // 返回 true<br>hashSet.contains(3); // 返回 false (未找到)<br>hashSet.add(2);<br>hashSet.contains(2); // 返回 true<br>hashSet.remove(2);<br>hashSet.contains(2); // 返回 false (已经被删除)</p></blockquote><p><strong>注意:</strong></p><ul><li>所有的值都在 <code>[0, 1000000]</code>的范围内。</li><li>操作的总数目在<code>[1, 10000]</code>范围内。</li><li>不要使用内建的哈希集合库。</li></ul><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>偷懒，已知值的范围，直接将整数值映射为哈希值，有多少个哈希值建多少个桶，用空间换时间。</p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">MyHashSet</span> <span class="token punctuation">{</span>    <span class="token keyword">boolean</span><span class="token punctuation">[</span><span class="token punctuation">]</span> exist<span class="token punctuation">;</span>    <span class="token comment" spellcheck="true">/** Initialize your data structure here. */</span>    <span class="token keyword">public</span> <span class="token function">MyHashSet</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>        exist <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">boolean</span><span class="token punctuation">[</span><span class="token number">1000001</span><span class="token punctuation">]</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">int</span> key<span class="token punctuation">)</span> <span class="token punctuation">{</span>        exist<span class="token punctuation">[</span>key<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">remove</span><span class="token punctuation">(</span><span class="token keyword">int</span> key<span class="token punctuation">)</span> <span class="token punctuation">{</span>        exist<span class="token punctuation">[</span>key<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token comment" spellcheck="true">/** Returns true if this set contains the specified element */</span>    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">contains</span><span class="token punctuation">(</span><span class="token keyword">int</span> key<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> exist<span class="token punctuation">[</span>key<span class="token punctuation">]</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token comment" spellcheck="true">/** * Your MyHashSet object will be instantiated and called as such: * MyHashSet obj = new MyHashSet(); * obj.add(key); * obj.remove(key); * boolean param_3 = obj.contains(key); */</span></code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> 算法/数据结构 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 数据结构 </tag>
+            
+            <tag> leetcode </tag>
             
         </tags>
       
@@ -4776,8 +4698,6 @@
             
             <tag> DFS </tag>
             
-            <tag> 链表 </tag>
-            
         </tags>
       
     </entry>
@@ -4805,8 +4725,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 链表 </tag>
-            
         </tags>
       
     </entry>
@@ -4833,8 +4751,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 链表 </tag>
             
         </tags>
       
@@ -4865,8 +4781,6 @@
             
             <tag> DFS </tag>
             
-            <tag> 链表 </tag>
-            
         </tags>
       
     </entry>
@@ -4893,8 +4807,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 链表 </tag>
             
         </tags>
       
@@ -4925,7 +4837,61 @@
             
             <tag> 双指针技巧 </tag>
             
-            <tag> 链表 </tag>
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>leetcode234-回文链表</title>
+      <link href="/article/leetcode234-%E5%9B%9E%E6%96%87%E9%93%BE%E8%A1%A8/"/>
+      <url>/article/leetcode234-%E5%9B%9E%E6%96%87%E9%93%BE%E8%A1%A8/</url>
+      
+        <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>请判断一个链表是否为回文链表。</p><p><strong>示例1：</strong></p><blockquote><p><strong>输入：</strong> 1-&gt;2<br><strong>输出：</strong> false</p></blockquote><p><strong>示例2：</strong></p><blockquote><p><strong>输入：</strong> 1-&gt;2-&gt;2-&gt;1<br><strong>输出：</strong> true</p></blockquote><p><strong>进阶:</strong></p><p>你能否用 O(n) 时间复杂度和 O(1) 空间复杂度解决此题？</p><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>双指针解法：<br>一个快指针一个慢指针，快指针每次移两步，慢指针每次移一步，这样快指针的落点有两种情况：</p><ol><li>落在最后一个节点上，此时链表节点为奇数个，慢指针落在中间节点上。</li><li>落在最后一个节点指向的null上，此时链表节点为偶数个，慢指针落在中间靠右第一个节点上。</li></ol><p>慢指针将链表分成了两半，将前半部分反转，再与后半部分比较，即可获取结果</p><p><img src="https://api.codetool.top/img/15765003798458.png" alt></p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/** * Definition for singly-linked list. * public class ListNode { *     int val; *     ListNode next; *     ListNode(int x) { val = x; } * } */</span><span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">isPalindrome</span><span class="token punctuation">(</span>ListNode head<span class="token punctuation">)</span> <span class="token punctuation">{</span>    <span class="token keyword">if</span><span class="token punctuation">(</span>head <span class="token operator">==</span> null <span class="token operator">||</span> head<span class="token punctuation">.</span>next <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    ListNode slow <span class="token operator">=</span> head<span class="token punctuation">,</span> fast <span class="token operator">=</span> head<span class="token punctuation">;</span>    ListNode pre <span class="token operator">=</span> head<span class="token punctuation">,</span> prepre <span class="token operator">=</span> null<span class="token punctuation">;</span>    <span class="token keyword">while</span><span class="token punctuation">(</span>fast <span class="token operator">!=</span> null <span class="token operator">&amp;&amp;</span> fast<span class="token punctuation">.</span>next <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>        pre <span class="token operator">=</span> slow<span class="token punctuation">;</span>        slow <span class="token operator">=</span> slow<span class="token punctuation">.</span>next<span class="token punctuation">;</span>        fast <span class="token operator">=</span> fast<span class="token punctuation">.</span>next<span class="token punctuation">.</span>next<span class="token punctuation">;</span>        pre<span class="token punctuation">.</span>next <span class="token operator">=</span> prepre<span class="token punctuation">;</span>        prepre <span class="token operator">=</span> pre<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token comment" spellcheck="true">//链表节点个数为奇数</span>    <span class="token keyword">if</span><span class="token punctuation">(</span>fast <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>        slow <span class="token operator">=</span> slow<span class="token punctuation">.</span>next<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">while</span><span class="token punctuation">(</span>pre <span class="token operator">!=</span> null <span class="token operator">&amp;&amp;</span> slow <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>pre<span class="token punctuation">.</span>val <span class="token operator">!=</span> slow<span class="token punctuation">.</span>val<span class="token punctuation">)</span> <span class="token punctuation">{</span>            <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>        <span class="token punctuation">}</span>        pre <span class="token operator">=</span> pre<span class="token punctuation">.</span>next<span class="token punctuation">;</span>        slow <span class="token operator">=</span> slow<span class="token punctuation">.</span>next<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span><span class="token punctuation">}</span></code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> 算法/数据结构 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> leetcode </tag>
+            
+            <tag> 算法 </tag>
+            
+            <tag> 双指针技巧 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>leetcode328-奇偶链表</title>
+      <link href="/article/leetcode328-%E5%A5%87%E5%81%B6%E9%93%BE%E8%A1%A8/"/>
+      <url>/article/leetcode328-%E5%A5%87%E5%81%B6%E9%93%BE%E8%A1%A8/</url>
+      
+        <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>给定一个单链表，把所有的奇数节点和偶数节点分别排在一起。请注意，这里的奇数节点和偶数节点指的是节点编号的奇偶性，而不是节点的值的奇偶性。</p><p>请尝试使用原地算法完成。你的算法的空间复杂度应为 O(1)，时间复杂度应为 O(nodes)，nodes 为节点总数。</p><p><strong>示例1：</strong></p><blockquote><p><strong>输入：</strong> 1-&gt;2-&gt;3-&gt;4-&gt;5-&gt;NULL<br><strong>输出：</strong> 1-&gt;3-&gt;5-&gt;2-&gt;4-&gt;NULL</p></blockquote><p><strong>示例2：</strong></p><blockquote><p><strong>输入：</strong> 2-&gt;1-&gt;3-&gt;5-&gt;6-&gt;4-&gt;7-&gt;NULL<br><strong>输出：</strong> 2-&gt;3-&gt;6-&gt;7-&gt;1-&gt;5-&gt;4-&gt;NULL</p></blockquote><p><strong>说明:</strong></p><ul><li>应当保持奇数节点和偶数节点的相对顺序。</li><li>链表的第一个节点视为奇数节点，第二个节点视为偶数节点，以此类推。</li></ul><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>1后面只连接奇数，2后面只连接偶数，最后合二为一。</p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/** * Definition for singly-linked list. * public class ListNode { *     int val; *     ListNode next; *     ListNode(int x) { val = x; } * } */</span><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> ListNode <span class="token function">oddEvenList</span><span class="token punctuation">(</span>ListNode head<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>head <span class="token operator">==</span> null <span class="token operator">||</span> head<span class="token punctuation">.</span>next <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token keyword">return</span> head<span class="token punctuation">;</span>        ListNode oddCur<span class="token operator">=</span>head<span class="token punctuation">;</span>        ListNode evenCur<span class="token operator">=</span>head<span class="token punctuation">.</span>next<span class="token punctuation">;</span>        ListNode evenHead <span class="token operator">=</span> head<span class="token punctuation">.</span>next<span class="token punctuation">;</span>        ListNode cur<span class="token operator">=</span>evenCur<span class="token punctuation">.</span>next<span class="token punctuation">;</span>        <span class="token keyword">while</span><span class="token punctuation">(</span>cur<span class="token operator">!=</span>null<span class="token punctuation">)</span><span class="token punctuation">{</span>            oddCur<span class="token punctuation">.</span>next <span class="token operator">=</span> cur<span class="token punctuation">;</span>            oddCur <span class="token operator">=</span> cur<span class="token punctuation">;</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>cur<span class="token punctuation">.</span>next<span class="token operator">!=</span>null<span class="token punctuation">)</span><span class="token punctuation">{</span>                evenCur<span class="token punctuation">.</span>next <span class="token operator">=</span> cur<span class="token punctuation">.</span>next<span class="token punctuation">;</span>                evenCur <span class="token operator">=</span> cur<span class="token punctuation">.</span>next<span class="token punctuation">;</span>                cur <span class="token operator">=</span> cur<span class="token punctuation">.</span>next<span class="token punctuation">.</span>next<span class="token punctuation">;</span>            <span class="token punctuation">}</span><span class="token keyword">else</span> <span class="token keyword">break</span><span class="token punctuation">;</span>        <span class="token punctuation">}</span>        evenCur<span class="token punctuation">.</span>next <span class="token operator">=</span> null<span class="token punctuation">;</span>        oddCur<span class="token punctuation">.</span>next <span class="token operator">=</span> evenHead<span class="token punctuation">;</span>        <span class="token keyword">return</span> head<span class="token punctuation">;</span>     <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> 算法/数据结构 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> leetcode </tag>
+            
+            <tag> 算法 </tag>
             
         </tags>
       
@@ -4956,68 +4922,6 @@
             
             <tag> 双指针技巧 </tag>
             
-            <tag> 链表 </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>leetcode234-回文链表</title>
-      <link href="/article/leetcode234-%E5%9B%9E%E6%96%87%E9%93%BE%E8%A1%A8/"/>
-      <url>/article/leetcode234-%E5%9B%9E%E6%96%87%E9%93%BE%E8%A1%A8/</url>
-      
-        <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>请判断一个链表是否为回文链表。</p><p><strong>示例1：</strong></p><blockquote><p><strong>输入：</strong> 1-&gt;2<br><strong>输出：</strong> false</p></blockquote><p><strong>示例2：</strong></p><blockquote><p><strong>输入：</strong> 1-&gt;2-&gt;2-&gt;1<br><strong>输出：</strong> true</p></blockquote><p><strong>进阶:</strong></p><p>你能否用 O(n) 时间复杂度和 O(1) 空间复杂度解决此题？</p><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>双指针解法：<br>一个快指针一个慢指针，快指针每次移两步，慢指针每次移一步，这样快指针的落点有两种情况：</p><ol><li>落在最后一个节点上，此时链表节点为奇数个，慢指针落在中间节点上。</li><li>落在最后一个节点指向的null上，此时链表节点为偶数个，慢指针落在中间靠右第一个节点上。</li></ol><p>慢指针将链表分成了两半，将前半部分反转，再与后半部分比较，即可获取结果</p><p><img src="https://api.codetool.top/img/15765003798458.png" alt></p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/** * Definition for singly-linked list. * public class ListNode { *     int val; *     ListNode next; *     ListNode(int x) { val = x; } * } */</span><span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">isPalindrome</span><span class="token punctuation">(</span>ListNode head<span class="token punctuation">)</span> <span class="token punctuation">{</span>    <span class="token keyword">if</span><span class="token punctuation">(</span>head <span class="token operator">==</span> null <span class="token operator">||</span> head<span class="token punctuation">.</span>next <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    ListNode slow <span class="token operator">=</span> head<span class="token punctuation">,</span> fast <span class="token operator">=</span> head<span class="token punctuation">;</span>    ListNode pre <span class="token operator">=</span> head<span class="token punctuation">,</span> prepre <span class="token operator">=</span> null<span class="token punctuation">;</span>    <span class="token keyword">while</span><span class="token punctuation">(</span>fast <span class="token operator">!=</span> null <span class="token operator">&amp;&amp;</span> fast<span class="token punctuation">.</span>next <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>        pre <span class="token operator">=</span> slow<span class="token punctuation">;</span>        slow <span class="token operator">=</span> slow<span class="token punctuation">.</span>next<span class="token punctuation">;</span>        fast <span class="token operator">=</span> fast<span class="token punctuation">.</span>next<span class="token punctuation">.</span>next<span class="token punctuation">;</span>        pre<span class="token punctuation">.</span>next <span class="token operator">=</span> prepre<span class="token punctuation">;</span>        prepre <span class="token operator">=</span> pre<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token comment" spellcheck="true">//链表节点个数为奇数</span>    <span class="token keyword">if</span><span class="token punctuation">(</span>fast <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>        slow <span class="token operator">=</span> slow<span class="token punctuation">.</span>next<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">while</span><span class="token punctuation">(</span>pre <span class="token operator">!=</span> null <span class="token operator">&amp;&amp;</span> slow <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>pre<span class="token punctuation">.</span>val <span class="token operator">!=</span> slow<span class="token punctuation">.</span>val<span class="token punctuation">)</span> <span class="token punctuation">{</span>            <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>        <span class="token punctuation">}</span>        pre <span class="token operator">=</span> pre<span class="token punctuation">.</span>next<span class="token punctuation">;</span>        slow <span class="token operator">=</span> slow<span class="token punctuation">.</span>next<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span><span class="token punctuation">}</span></code></pre>]]></content>
-      
-      
-      <categories>
-          
-          <category> 算法/数据结构 </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> leetcode </tag>
-            
-            <tag> 算法 </tag>
-            
-            <tag> 双指针技巧 </tag>
-            
-            <tag> 链表 </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>leetcode328-奇偶链表</title>
-      <link href="/article/leetcode328-%E5%A5%87%E5%81%B6%E9%93%BE%E8%A1%A8/"/>
-      <url>/article/leetcode328-%E5%A5%87%E5%81%B6%E9%93%BE%E8%A1%A8/</url>
-      
-        <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>给定一个单链表，把所有的奇数节点和偶数节点分别排在一起。请注意，这里的奇数节点和偶数节点指的是节点编号的奇偶性，而不是节点的值的奇偶性。</p><p>请尝试使用原地算法完成。你的算法的空间复杂度应为 O(1)，时间复杂度应为 O(nodes)，nodes 为节点总数。</p><p><strong>示例1：</strong></p><blockquote><p><strong>输入：</strong> 1-&gt;2-&gt;3-&gt;4-&gt;5-&gt;NULL<br><strong>输出：</strong> 1-&gt;3-&gt;5-&gt;2-&gt;4-&gt;NULL</p></blockquote><p><strong>示例2：</strong></p><blockquote><p><strong>输入：</strong> 2-&gt;1-&gt;3-&gt;5-&gt;6-&gt;4-&gt;7-&gt;NULL<br><strong>输出：</strong> 2-&gt;3-&gt;6-&gt;7-&gt;1-&gt;5-&gt;4-&gt;NULL</p></blockquote><p><strong>说明:</strong></p><ul><li>应当保持奇数节点和偶数节点的相对顺序。</li><li>链表的第一个节点视为奇数节点，第二个节点视为偶数节点，以此类推。</li></ul><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>1后面只连接奇数，2后面只连接偶数，最后合二为一。</p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/** * Definition for singly-linked list. * public class ListNode { *     int val; *     ListNode next; *     ListNode(int x) { val = x; } * } */</span><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> ListNode <span class="token function">oddEvenList</span><span class="token punctuation">(</span>ListNode head<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>head <span class="token operator">==</span> null <span class="token operator">||</span> head<span class="token punctuation">.</span>next <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token keyword">return</span> head<span class="token punctuation">;</span>        ListNode oddCur<span class="token operator">=</span>head<span class="token punctuation">;</span>        ListNode evenCur<span class="token operator">=</span>head<span class="token punctuation">.</span>next<span class="token punctuation">;</span>        ListNode evenHead <span class="token operator">=</span> head<span class="token punctuation">.</span>next<span class="token punctuation">;</span>        ListNode cur<span class="token operator">=</span>evenCur<span class="token punctuation">.</span>next<span class="token punctuation">;</span>        <span class="token keyword">while</span><span class="token punctuation">(</span>cur<span class="token operator">!=</span>null<span class="token punctuation">)</span><span class="token punctuation">{</span>            oddCur<span class="token punctuation">.</span>next <span class="token operator">=</span> cur<span class="token punctuation">;</span>            oddCur <span class="token operator">=</span> cur<span class="token punctuation">;</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>cur<span class="token punctuation">.</span>next<span class="token operator">!=</span>null<span class="token punctuation">)</span><span class="token punctuation">{</span>                evenCur<span class="token punctuation">.</span>next <span class="token operator">=</span> cur<span class="token punctuation">.</span>next<span class="token punctuation">;</span>                evenCur <span class="token operator">=</span> cur<span class="token punctuation">.</span>next<span class="token punctuation">;</span>                cur <span class="token operator">=</span> cur<span class="token punctuation">.</span>next<span class="token punctuation">.</span>next<span class="token punctuation">;</span>            <span class="token punctuation">}</span><span class="token keyword">else</span> <span class="token keyword">break</span><span class="token punctuation">;</span>        <span class="token punctuation">}</span>        evenCur<span class="token punctuation">.</span>next <span class="token operator">=</span> null<span class="token punctuation">;</span>        oddCur<span class="token punctuation">.</span>next <span class="token operator">=</span> evenHead<span class="token punctuation">;</span>        <span class="token keyword">return</span> head<span class="token punctuation">;</span>     <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
-      
-      
-      <categories>
-          
-          <category> 算法/数据结构 </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> leetcode </tag>
-            
-            <tag> 算法 </tag>
-            
-            <tag> 链表 </tag>
-            
         </tags>
       
     </entry>
@@ -5046,8 +4950,6 @@
             <tag> 算法 </tag>
             
             <tag> 双指针技巧 </tag>
-            
-            <tag> 链表 </tag>
             
         </tags>
       
@@ -5078,8 +4980,6 @@
             
             <tag> 双指针技巧 </tag>
             
-            <tag> 链表 </tag>
-            
         </tags>
       
     </entry>
@@ -5108,8 +5008,6 @@
             <tag> 算法 </tag>
             
             <tag> 双指针技巧 </tag>
-            
-            <tag> 链表 </tag>
             
         </tags>
       
@@ -5140,8 +5038,6 @@
             
             <tag> 双指针技巧 </tag>
             
-            <tag> 链表 </tag>
-            
         </tags>
       
     </entry>
@@ -5168,8 +5064,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 哈希集 </tag>
             
         </tags>
       
@@ -5198,8 +5092,6 @@
             
             <tag> leetcode </tag>
             
-            <tag> 链表 </tag>
-            
         </tags>
       
     </entry>
@@ -5227,10 +5119,6 @@
             
             <tag> leetcode </tag>
             
-            <tag> 队列 </tag>
-            
-            <tag> 栈 </tag>
-            
         </tags>
       
     </entry>
@@ -5257,10 +5145,6 @@
             <tag> 数据结构 </tag>
             
             <tag> leetcode </tag>
-            
-            <tag> 队列 </tag>
-            
-            <tag> 栈 </tag>
             
         </tags>
       
@@ -5320,8 +5204,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 图 </tag>
-            
         </tags>
       
     </entry>
@@ -5350,8 +5232,6 @@
             <tag> 算法 </tag>
             
             <tag> BFS </tag>
-            
-            <tag> 图 </tag>
             
         </tags>
       
@@ -5411,8 +5291,6 @@
             
             <tag> DFS </tag>
             
-            <tag> 图 </tag>
-            
         </tags>
       
     </entry>
@@ -5439,8 +5317,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 栈 </tag>
             
         </tags>
       
@@ -5500,8 +5376,6 @@
             
             <tag> DFS </tag>
             
-            <tag> 树 </tag>
-            
         </tags>
       
     </entry>
@@ -5529,8 +5403,6 @@
             
             <tag> leetcode </tag>
             
-            <tag> 栈 </tag>
-            
         </tags>
       
     </entry>
@@ -5557,8 +5429,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 栈 </tag>
             
         </tags>
       
@@ -5615,8 +5485,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 栈 </tag>
             
         </tags>
       
@@ -5703,8 +5571,6 @@
             
             <tag> 基础知识 </tag>
             
-            <tag> 迭代器 </tag>
-            
         </tags>
       
     </entry>
@@ -5755,7 +5621,7 @@
       
         <tags>
             
-            <tag> .net </tag>
+            <tag> C# </tag>
             
             <tag> 项目 </tag>
             
@@ -5844,8 +5710,6 @@
       
         <tags>
             
-            <tag> javaEE </tag>
-            
             <tag> tomcat </tag>
             
         </tags>
@@ -5872,8 +5736,6 @@
         <tags>
             
             <tag> tomcat </tag>
-            
-            <tag> idea </tag>
             
             <tag> maven </tag>
             
@@ -5902,9 +5764,7 @@
             
             <tag> java </tag>
             
-            <tag> javaEE </tag>
-            
-            <tag> servlet </tag>
+            <tag> javaweb </tag>
             
         </tags>
       
@@ -6039,8 +5899,6 @@
             
             <tag> 基础知识 </tag>
             
-            <tag> 字符编码 </tag>
-            
         </tags>
       
     </entry>
@@ -6098,8 +5956,6 @@
             <tag> 数据结构 </tag>
             
             <tag> leetcode </tag>
-            
-            <tag> 队列 </tag>
             
         </tags>
       
@@ -6186,8 +6042,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 字符串 </tag>
-            
         </tags>
       
     </entry>
@@ -6244,8 +6098,6 @@
             
             <tag> leetcode </tag>
             
-            <tag> 数组 </tag>
-            
             <tag> 算法 </tag>
             
         </tags>
@@ -6275,8 +6127,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 字符串 </tag>
-            
         </tags>
       
     </entry>
@@ -6301,8 +6151,6 @@
         <tags>
             
             <tag> leetcode </tag>
-            
-            <tag> 数组 </tag>
             
             <tag> 算法 </tag>
             
@@ -6420,8 +6268,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 字符串 </tag>
-            
         </tags>
       
     </entry>
@@ -6507,8 +6353,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 字符串 </tag>
-            
         </tags>
       
     </entry>
@@ -6535,8 +6379,6 @@
             <tag> leetcode </tag>
             
             <tag> 算法 </tag>
-            
-            <tag> 字符串 </tag>
             
             <tag> 双指针技巧 </tag>
             
@@ -6565,8 +6407,6 @@
             
             <tag> leetcode </tag>
             
-            <tag> 数组 </tag>
-            
             <tag> 算法 </tag>
             
         </tags>
@@ -6594,8 +6434,6 @@
             
             <tag> leetcode </tag>
             
-            <tag> 数组 </tag>
-            
             <tag> 算法 </tag>
             
         </tags>
@@ -6622,8 +6460,6 @@
         <tags>
             
             <tag> leetcode </tag>
-            
-            <tag> 数组 </tag>
             
             <tag> 算法 </tag>
             
@@ -6654,8 +6490,6 @@
             
             <tag> 算法 </tag>
             
-            <tag> 字符串 </tag>
-            
         </tags>
       
     </entry>
@@ -6680,8 +6514,6 @@
         <tags>
             
             <tag> leetcode </tag>
-            
-            <tag> 数组 </tag>
             
             <tag> 算法 </tag>
             
@@ -6709,8 +6541,6 @@
         <tags>
             
             <tag> leetcode </tag>
-            
-            <tag> 数组 </tag>
             
             <tag> 算法 </tag>
             
@@ -6769,8 +6599,6 @@
         <tags>
             
             <tag> leetcode </tag>
-            
-            <tag> 数组 </tag>
             
             <tag> 算法 </tag>
             
