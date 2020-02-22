@@ -1,0 +1,1426 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="数据库理论之事务与恢复技术, 代码段小站">
+    <meta name="description" content="本文参考资源：
+什么是事务？事务的四个特性、不考虑隔离会导致的三个问题以及四种隔离级别_数据库_cd546566850的博客-CSDN博客
+1 基本概念事务：是用户定义的一个数据库操作序列 ，这些操作要么全做，要么全不做，是一个不可分割的工">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>数据库理论之事务与恢复技术 | 代码段小站</title>
+    <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon.ico">
+    
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+    
+    <script src="/libs/jquery/jquery.min.js"></script>
+    
+<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper head-container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/code.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">代码段小站</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/runcode" class="waves-effect waves-light">
+      
+      <i class="fas fa-code" style="zoom: 0.6;"></i>
+      
+      <span>写代码</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/code.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">代码段小站</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/runcode" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-code"></i>
+			
+			写代码
+		</a>
+          
+        </li>
+        
+        
+    </ul>
+</div>
+
+        </div>
+
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/8.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">数据库理论之事务与恢复技术</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        margin: 35px 0 15px 0;
+        padding-left: 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        height: calc(100vh - 250px);
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #toc-content .is-active-link::before {
+        background-color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">
+                                <span class="chip bg-color">数据库</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/" class="post-category">
+                                中间件/工具/框架
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2020-02-22
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    3.5k
+                </div>
+                
+
+                
+				
+                
+            </div>
+            
+        </div>
+        <hr class="clearfix">
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>本文参考资源：</p>
+<p><a href="https://blog.csdn.net/cd546566850/article/details/103988719/" target="_blank" rel="noopener">什么是事务？事务的四个特性、不考虑隔离会导致的三个问题以及四种隔离级别_数据库_cd546566850的博客-CSDN博客</a></p>
+<h1 id="基本概念">1 基本概念</h1><p>事务：是用户定义的一个数据库操作序列 ，这些操作要么全做，要么全不做，是一个不可分割的工作单位。</p>
+<p>在关系数据库中，一个事务可以是一条或多条 SQL 语句, 也可以包含一个或多个程序。<br>一个程序通常包含多个事务</p>
+<p>显式定义方式：</p>
+<pre class=" language-sql"><code class="language-sql"><span class="token keyword">begin</span> <span class="token keyword">transaction</span>
+<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token keyword">commit</span><span class="token operator">/</span><span class="token keyword">rollback</span></code></pre>
+<p>隐式方式：</p>
+<p>当用户没有显式地定义事务时，DBMS 按缺省规定自动划分事务（一句SQL语句一个事务）</p>
+<p>AutoCommit 事务是 SQL Server 默认事务方式,</p>
+<h1 id="事务的特性ACID">2 事务的特性ACID</h1><ol>
+<li>原子性（atomicity）： <strong>一个事务是一个不可分割的工作单位</strong>，事务中包括的诸操作要<br>么都做，要么都不做；</li>
+<li>一致性（consistency）： <strong>事务必须使数据库从一个一致性状态变成另一个一致性状态。</strong></li>
+<li>隔离性（isolation）：<strong>一个事务的执行不能被其他事务干扰。</strong></li>
+<li>持续性（durability）： 也称永久性，指<strong>一个事务一旦提交，它对数据库中数据的改变就应该是永久性的。</strong></li>
+</ol>
+<h2 id="不考虑隔离性会导致的三个问题">2.1 不考虑隔离性会导致的三个问题</h2><ol>
+<li><p>脏读：脏读是指在一个事务处理过程里读取了另一个未提交的事务中的数据。</p>
+</li>
+<li><p>不可重复读：<strong>一个事务两次读取同一行的数据，结果得到不同状态的结果，中间正好另一个事务更新了该数据，两次结果相异，不可被信任。</strong>通俗来讲就是：事务T1在读取某一数据，而事务T2立马修改了这个数据并且提交事务给数据库，事务T1再次读取该数据就得到了不同的结果，发送了不可重复读。</p>
+</li>
+<li><p>幻读（虚读）：<strong>一个事务执行两次查询，第二次结果集包含第一次中没有或某些行已经被删除的数据，造成两次结果不一致，只是另一个事务在这两次查询中间插入或删除了数据造成的。</strong>通俗来讲就是：例如事务T1对一个表中所有的行的某个数据项做了从“1”修改为“2”的操作，这时事务T2又对这个表中插入了一行数据项，而这个数据项的数值还是为“1”并且提交给数据库。而操作事务T1的用户如果再查看刚刚修改的数据，会发现还有一行没有修改，其实这行是从事务T2中添加的，就好像产生幻觉一样，这就是发生了幻读</p>
+</li>
+</ol>
+<h2 id="解决办法（四种隔离级别）">2.2 解决办法（四种隔离级别）</h2><ol>
+<li>Read Uncommited（读取未提交内容）</li>
+</ol>
+<p>读未提交，顾名思义，就是<strong>一个事务可以读取另一个未提交事务的数据。但是，读未提交产生了脏读，采用读提交可以解决脏读问题。</strong></p>
+<ol start="2">
+<li>Read Commited（读取提交内容）</li>
+</ol>
+<p>读提交，顾名思义，就是<strong>一个事务要等另一个事务提交后才能读取数据。</strong> 读提交，若有事务对数据进行更新（UPDATE）操作时，读操作事务要等待这个更新操作事务提交后才能读取数据，可以解决脏读问题。但是，读提交两次查询会产生不同的查询结果，就会造成不可重复读问题，采用重复读可以解决此问题。</p>
+<ol start="3">
+<li>Repeatable Read（重复读）</li>
+</ol>
+<p>重复读，就是<strong>在开始读取数据（事务开启）时，不再允许修改操作。</strong>重复读可以解决不可重复读问题。应该明白的一点就是，不可重复读对应的是修改，即UPDATE操作。但是可能还会有幻读问题。因为幻读问题对应的是插入INSERT操作，而不是UPDATE操作。采用Serializable可以解决幻读问题</p>
+<ol start="4">
+<li>Serializable（可串行化）</li>
+</ol>
+<p>Serializable 是最高的事务隔离级别，<strong>在该级别下，事务串行化顺序执行</strong>，可以避免脏读、不可重复读与幻读。但是这种事务隔离级别效率低下，比较耗数据库性能，一般不使用。</p>
+<p><strong>注意</strong></p>
+<ol>
+<li><p>大多数数据库默认的事务隔离级别是<code>Read committed</code>，比如Sql Server, Oracle。Mysql的默认隔离级别是<code>Repeatable read</code>，只会出现幻读。</p>
+</li>
+<li><p>隔离级别的设置只对当前链接有效。对于使用MySQL命令窗口而言，一个窗口就相当于一个链接，当前窗口设置的隔离级别只对当前窗口中的事务有效；对于JDBC操作数据库来说，一个Connection对象相当于一个链接，而对于Connection对象设置的隔离级别只对该Connection对象有效，与其他链接Connection对象无关。</p>
+</li>
+<li><p>设置数据库的隔离级别一定要是在开启事务之前。</p>
+</li>
+</ol>
+<h1 id="数据库恢复技术">3 数据库恢复技术</h1><p>故障是不可避免的： </p>
+<ul>
+<li>系统故障：计算机软、硬件故障</li>
+<li>人为故障：操作员的失误、恶意的破坏等。</li>
+</ul>
+<p>数据库的恢复：</p>
+<ul>
+<li>把数据库从错误状态恢复到某一已知的正确状态（亦称为一致状态或完整状态）</li>
+</ul>
+<h2 id="故障的种类">3.1 故障的种类</h2><p><strong>事务内部的故障 ：</strong></p>
+<ol>
+<li>有的是可以通过事务程序本身发现的</li>
+<li>有的 是非预期的，不能由应用程序处理（如运算溢出、死锁等）</li>
+</ol>
+<p>后面，事务故障仅指非预期的故障</p>
+<p>事务故障的恢复：UNDO 撤销</p>
+<p><strong>系统故障：</strong></p>
+<p>造成系统停止运转的任何事件，使得系统要重新启动。（硬件错误、断电等）</p>
+<p>影响正在运行的所有事务，但不破坏数据库。此时内存，尤其是数据库缓冲区中的内容全部丢失，所有运行事务非正常终止。</p>
+<p>恢复：</p>
+<ol>
+<li>未提交的事务：UNDO 撤销所有未完成的事务</li>
+<li>已提交的事务，但缓冲区内容未完全写入磁盘：REDO 重做所有已提交的事务</li>
+</ol>
+<p><strong>介质故障：</strong></p>
+<p>系统故障称为软故障，介质故障称为硬故障（外存故障，如磁盘损坏）</p>
+<p>恢复：装入数据库发生介质故障前某个时刻的数据副本，REDO 自此时开始的所有成功事务，将这些事务已提交的结果重新写入</p>
+<p><strong>计算机病毒：</strong></p>
+<p>计算机病毒是一种人为的故障或破坏，是一些恶作剧者研制的一种计算机程序。可以繁殖和传播，并造成对计算机系统包括数据库的危害。</p>
+<p>总之： 各类故障，对数据库的影响有两种可能性</p>
+<ul>
+<li>一是数据库本身被破坏</li>
+<li>二是数据库没有被破坏，但数据可能不正确，这是由于事务的运行被非正常终止造成的。</li>
+</ul>
+<h2 id="恢复的实现技术">3.2 恢复的实现技术</h2><p>恢复操作的基本原理：冗余</p>
+<p>恢复机制涉及的两个关键问题：</p>
+<ol>
+<li>如何建立冗余数据<ul>
+<li>数据转储 (backup)</li>
+<li>日志文件 (logging)</li>
+</ul>
+</li>
+<li>如何利用这些冗余数据实施数据库恢复</li>
+</ol>
+<h3 id="数据转储">3.2.1 数据转储</h3><p>转储是指 DBA 将整个数据库复制到其他存储介质上保存起来的过程，备用的数据称为后备副本或后援副本</p>
+<ul>
+<li>数据库遭到破坏后可以将后备副本重新装入</li>
+<li>重装后备副本只能将数据库恢复到转储时的状态</li>
+</ul>
+<p><strong>转储方式：</strong></p>
+<p>按不同的划分方法可以划分为静态/动态转储或海量/增量转储</p>
+<h4 id="静态转储：">3.2.1.1 静态转储：</h4><ol>
+<li>定义：在系统中无事务运行时进行的转储操作。 转储开始的时刻数据库处于一致性状态，而转储不允许对数据库的任何存取、修改活动。静态转储得到的一定是一个数据一致性的副本。</li>
+<li>优点：实现简单</li>
+<li>缺点：降低了数据库的可用性</li>
+</ol>
+<p>转储必须等待正运行的用户事务结束才能进行；新的事务必须等待转储结束才能执行</p>
+<h4 id="动态转储：">3.2.1.2 动态转储：</h4><ol>
+<li>定义：转储期间允许对数据库进行存取或修改。转储和用户事务可以并发执行 。</li>
+<li>优点：不用等待正在运行的用户事务结束；不会影响新事务的运行。</li>
+<li>实现：必须把转储期间各事务对数据库的修改活动登记下来，建立日志文件<br>后备副本加上日志文件就能把数据库恢复到某一时刻的正确状态 。</li>
+</ol>
+<h4 id="海量转储：">3.2.1.3 海量转储：</h4><ol>
+<li>定义：每次转储全部数据库</li>
+<li>特点：从恢复角度，使用海量转储得到的后备副本进行恢复更方便一些。</li>
+</ol>
+<h4 id="增量转储：">3.2.1.4 增量转储：</h4><ol>
+<li>定义：每次只转储上一次转储后更新过的数据</li>
+<li>特点：如果数据库很大，事务处理又十分频繁，则增量转储方式更实用更有效 </li>
+</ol>
+<h3 id="日志文件">3.2.2 日志文件</h3><p>日志文件(log)是用来记录事务对数据库的更新操作的文件。</p>
+<p><strong>日志文件的格式：</strong></p>
+<ol>
+<li><p>以记录为单位：<br> 日志文件中需要登记的内容包括：</p>
+<ol>
+<li><p>各个事务的开始标记(BEGIN TRANSACTION)</p>
+</li>
+<li><p>各个事务的结束标记(COMMIT 或 或 ROLLBACK)</p>
+</li>
+<li><p>各个事务的所有更新操作<br>以上均作为日志文件中的一个日志记录  </p>
+<p>每个日志记录的内容：  </p>
+</li>
+<li><p>事务标识（标明是哪个事务）</p>
+</li>
+<li><p>操作类型（插入、删除或修改）</p>
+</li>
+<li><p>操作对象（记录内部标识）</p>
+</li>
+<li><p>更新前数据的旧值（对插入操作而言，此项为空值）</p>
+</li>
+<li><p>更新后数据的新值（对删除操作而言, 此项为空值）</p>
+</li>
+</ol>
+</li>
+<li><p>以数据块为单位<br> 日志记录内容包括：</p>
+<ol>
+<li>事务标识（标明是哪个事务）</li>
+<li>被更新的数据块</li>
+</ol>
+</li>
+</ol>
+<p><strong>日志文件的作用：</strong></p>
+<ul>
+<li>进行事务故障恢复</li>
+<li>进行系统故障恢复</li>
+<li>协助后备副本进行介质故障恢复<ol>
+<li>事务故障恢复和系统故障恢复必须用日志文件</li>
+<li>在动态转储方式中必须建立日志文件，后备副本和日志文件结合起来才能有效地恢复数据库</li>
+<li>静态转储方式中也可以建立日志文件（重新装入后备副本，然后利用日志文件把已完成的事务进行重做，对未完成事务进行撤销）</li>
+</ol>
+</li>
+</ul>
+<p><strong>登记日志文件的基本原则：</strong></p>
+<ul>
+<li>登记的次序严格按并行事务执行的时间次序</li>
+<li>必须先写日志文件，后写数据库</li>
+</ul>
+<p>(只要没有记录事务的结束标记，就算多记录了一条实际没有执行的语句，恢复之后也会回滚)</p>
+<h2 id="恢复策略">3.3 恢复策略</h2><h3 id="事务故障的恢复">3.3.1 事务故障的恢复</h3><p>事务故障：事务在运行至正常终止点前被终止</p>
+<p>恢复方法：由恢复子系统应利用日志文件撤消（UNDO）此事务已对数据库进行的修改</p>
+<p>事务故障的恢复由系统自动完成，对用户是透明的，不需要用户干预</p>
+<p>事务故障的恢复步骤：</p>
+<ol>
+<li>反向扫描文件日志，查找该事务的更新操作。</li>
+<li>对该事务的更新操作执行逆操作。即将日志记录中 “ 更新前的值” ” 写入数据库 。<ul>
+<li>插入操作，“更新前的值” 为空，则相当于做删除操作</li>
+<li>删除操作，“更新后的值” 为空，则相当于做插入操作</li>
+<li>若是修改操作，则相当于用修改前值代替修改后值</li>
+</ul>
+</li>
+<li>继续反向扫描日志文件，查找该事务的其他更新操作，并做同样处理。</li>
+<li>如此处理下去，直至读到此事务的开始标记，事务故障恢复就完成了。</li>
+</ol>
+<h3 id="系统故障的恢复">3.3.2 系统故障的恢复</h3><p>系统故障可能导致未完成事务对数据库的更新已写入数据库，或已提交事务对数据库的更新还留在缓冲区没来得及写入数据库，只需要做对应的UNDO或REDO操作。</p>
+<h3 id="介质故障的恢复">3.3.3 介质故障的恢复</h3><ol>
+<li>重装数据库<ul>
+<li>装入最新的后备副本，使数据库恢复到最近一次转储时的一致性状态（分为静态转储的副本和动态转储的副本，动态转储的副本还需配合日志文件做恢复）</li>
+</ul>
+</li>
+<li>装入有关的日志文件副本，重做已完成的事务</li>
+</ol>
+<p>介质故障的恢复需要 DBA 介入</p>
+<h3 id="具有检查点的数据恢复">3.3.4 具有检查点的数据恢复</h3><p>利用日志技术进行数据库恢复存在两个问题：</p>
+<ul>
+<li>搜索整个日志将耗费大量的时间</li>
+<li>REDO 处理：事务实际上已经执行，又重新执行，浪费了大量时间</li>
+</ul>
+<p>具有检查点的数据恢复技术在正常工作时周期性地执行如下操作：建立检查点，保存数据库状态。<br>具体步骤是：</p>
+<ol>
+<li>将当前日志缓冲区中的所有日志记录写入磁盘的日志文件上</li>
+<li>在日志文件中写入一个检查点记录</li>
+<li>将当前数据缓冲区的所有数据记录写入磁盘的数据库中</li>
+<li>把检查点记录在日志文件中的地址写入一个重新开始文件</li>
+</ol>
+<p><img src="https://api.codetool.top/img/15823824813433.png" alt></p>
+<p>当事务 T 在一个检查点之前提交，T 对数据库所做的修改一定都已写入数据库</p>
+
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://www.codetool.top" rel="external nofollow noreferrer">Rhett Peng</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。部分转载即网络资源均已注明来源，若有版权问题请联系站长。转载请注明来源
+                    <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">
+                                    <span class="chip bg-color">数据库</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'VUmN3m0ICuwaL4jNPnxBRln8-gzGzoHsz',
+        appKey: 'QH8FVT32jvi4qBllLg6Cf0dU',
+        notify: 'false' === 'true',
+        verify: 'true' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: '说点什么吧'
+    });
+</script>
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/article/leetcode63-%E4%B8%8D%E5%90%8C%E8%B7%AF%E5%BE%84II/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/7.jpg" class="responsive-img" alt="leetcode63-不同路径II">
+                        
+                        <span class="card-title">leetcode63-不同路径II</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            1 原题一个机器人位于一个 m x n 网格的左上角 （起始点在下图中标记为“Start” ）。
+机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为“Finish”）。
+现在考虑网格中有障碍物。那么从左上角到右下
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2020-02-22
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-category">
+                                    算法/数据结构
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/leetcode/">
+                        <span class="chip bg-color">leetcode</span>
+                    </a>
+                    
+                    <a href="/tags/%E7%AE%97%E6%B3%95/">
+                        <span class="chip bg-color">算法</span>
+                    </a>
+                    
+                    <a href="/tags/%E9%80%92%E5%BD%92/">
+                        <span class="chip bg-color">递归</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/article/Mybatis%E4%B8%80%E7%BA%A7%E7%BC%93%E5%AD%98%E4%B8%8E%E4%BA%8C%E7%BA%A7%E7%BC%93%E5%AD%98/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/7.jpg" class="responsive-img" alt="Mybatis一级缓存与二级缓存">
+                        
+                        <span class="card-title">Mybatis一级缓存与二级缓存</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            本文参考资源：
+MyBatis 二级缓存全详解 - cxuan - 博客园
+1 缓存存在于内存中的临时数据
+减少和数据库的交互次数，提高执行效率
+适用于缓存的数据：
+
+经常查询并且不经常改变。
+数据的正确与否对最终结果影响不大
+
+2 一级缓
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-02-22
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/" class="post-category">
+                                    中间件/工具/框架
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/mybatis/">
+                        <span class="chip bg-color">mybatis</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+    
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+<!-- 代码块折行 -->
+
+<style type="text/css">
+code[class*="language-"], pre[class*="language-"] { white-space: pre !important; }
+</style>
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h1, h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h1, h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+    <footer class="page-footer bg-color">
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            <span id="year">2019-2020</span>
+            <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">224.6k</span>&nbsp;字
+            
+            
+            
+            
+            
+            <br>
+            
+            <br>
+            
+            <span id="icp"><img src="/medias/icp.png" style="vertical-align: text-bottom;" />
+                <a href="http://beian.miit.gov.cn/" target="_blank">赣ICP备19011928号</a>
+            </span>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/codeband-top" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:pctdyx@qq.net" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=995632825" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 995632825" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+$(function () {
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+});
+</script>
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":200,"height":200,"hOffset":20,"vOffset":100},"mobile":{"show":false},"dialog":{"enable":true,"hitokoto":false},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div id="chat_input"><input id="question" type="text" placeholder="陪我聊聊天吧" onkeypress="return onKeyPress(event)"/></div>
+</html>
+
+<!--动态线条背景-->
+<script type="text/javascript"
+color="0,0,0" opacity='0.5' zIndex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+</script>
+
+<script>
+
+//聊天框按回车
+function onKeyPress(e){
+    var keyCode = null;
+    if(e.which)
+        keyCode = e.which;
+    else if(e.keyCode)
+        keyCode = e.keyCode;
+        
+    //如果按下回车
+    if(keyCode == 13) {
+        // 1.获取界面上的元素value
+        var question_box = document.getElementById('question')
+        var question = question_box.value
+        question_box.value = ""
+        question_box.setAttribute("disabled","disabled")
+        var api_key = "78c33a07808c7b9e1905c89c88b3be14"
+        var api_secret = "q707tevnk00f"
+
+        // 2.通过XHR发送一个POST请求
+        var xhr = new XMLHttpRequest()
+        xhr.open('GET','https://api.codetool.top/robottalk?question='+encodeURIComponent(question)+"&api_key="+api_key+"&api_secret="+api_secret)
+		xhr.send(null)
+		xhr.onload = function(){
+            question_box.removeAttribute('disabled');
+            var live2d_dialog = document.getElementsByClassName("live2d-widget-dialog")[0]
+            live2d_dialog.style.opacity=1
+            live2d_dialog.innerHTML = this.responseText
+            window.setTimeout(()=>{
+                live2d_dialog.style.opacity=0
+            }, 5000);
+		}
+    }
+
+}
+
+</script>
+
+<style> 
+#chat_input{
+    width: 200px;
+    height: 40px;
+    position: fixed;
+    right: 0px;
+    bottom: 80px;
+    right: 20px;
+} 
+
+#question{
+    border: none;
+    border-bottom: 1px #aaaaaa solid;
+    background-color: transparent;
+    padding: 5px;
+}
+
+@media screen and (max-width: 480px) {
+    #chat_input{
+        display: none;
+    }
+    #live2d-widget{
+        display: none;
+    }
+}
+</style>
