@@ -6,17 +6,10 @@
     <meta charset="utf-8">
     <meta name="keywords" content="MySQL学习笔记之InnoDB引擎概述, 代码段小站">
     <meta name="description" content="该笔记为《MySQL技术内幕:InnoDB存储引擎》的读书笔记，多图预警。
-
-1 InnoDB引擎与MyISAM引擎介绍1.1 InnoDB
-
-支持事务
-行锁设计
-支持外键
-使用MVCC
-面向OLTP
-
-1.2 MyISAM
-2 InnoD">
+1 MySQL体系结构
+1.1 连接层（管理客户端的连接，维护线程池）
+最上层是一些客户端和连接服务，引入了线程池的概念；实现基于 SSL 的安全连接。
+每个客户端">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -412,7 +405,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    165
+                    795
                 </div>
                 
 
@@ -426,8 +419,28 @@
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <p>该笔记为《MySQL技术内幕:InnoDB存储引擎》的读书笔记，多图预警。</p>
-<p><img src="https://api.codetool.top/img/158270212626.png" alt="MySQL体系结构"></p>
-<h1 id="InnoDB引擎与MyISAM引擎介绍">1 InnoDB引擎与MyISAM引擎介绍</h1><h2 id="InnoDB">1.1 InnoDB</h2><p><img src="https://api.codetool.top/img/15827022478639.png" alt></p>
+<h1 id="MySQL体系结构">1 MySQL体系结构</h1><p><img src="https://api.codetool.top/img/158270212626.png" alt="MySQL体系结构"></p>
+<h2 id="连接层">1.1 连接层</h2><p>（管理客户端的连接，维护线程池）</p>
+<p>最上层是一些客户端和连接服务，引入了线程池的概念；实现基于 SSL 的安全连接。</p>
+<p>每个客户端都会在服务器进程中拥有一个线程，这个连接的查询只会在这个单独的线程中执行。</p>
+<p>当客户端连接到 MySQL 服务器时，服务器需要对其进行认证。如果使用了 SSL 安全套接字的方式连接，还会使用 X.509 证书认证。一旦客户端连接成功，服务器会继续验证该客户端是否具有执行某个特定查询的权限。</p>
+<h2 id="服务器">1.2 服务器</h2><p>（与具体存储引擎解耦，服务器通过 API 与存储引擎进行通信）</p>
+<ul>
+<li>SQL 接口</li>
+<li>SQL 分析与优化</li>
+<li>存储过程</li>
+<li>触发器</li>
+<li>视图</li>
+</ul>
+<p>MySQL 会解析查询，并创建内部数据结构（解析树），然后对其进行各种优化，包括重写查询、决定表的读取顺序，以及选择合适的索引等。</p>
+<p>优化器并不关心表使用的是什么存储引擎，但存储引擎对优化查询是有影响的。优化器会请求存储引擎提供容量或某个具体操作的开销信息，以及表数据的统计信息等。</p>
+<p>对于 SELECT 语句，在解析查询前，服务器会先检查查询缓存，如果能够在其中找到对应的查询，服务器就不再执行查询解析、优化和执行的整个过程，而是直接返回查询缓存中的结果集。</p>
+<h2 id="存储引擎层">1.3 存储引擎层</h2><p>（负责数据的存储和存取）</p>
+<p>存储引擎层，存储引擎真正的负责了 MySQL 中数据的存储和提取。</p>
+<p>存储引擎 API 包含了几十个底层函数，用于执行诸如“开启一个事务”或者“根据主键提取一行记录”等操作。但存储引擎不会去解析 SQL（InnoDB 是一个例外，它会解析外键定义，因为服务器没有实现该功能），不同存储引擎之间也不会相互通信，而只是简单地响应上层服务器的请求。</p>
+<h2 id="存储层">1.4 存储层</h2><p>（将数据存储到文件系统上）</p>
+<p>数据存储层，主要是将数据存储在运行于裸设备的文件系统之上，并完成与存储引擎的交互。</p>
+<h1 id="InnoDB引擎与MyISAM引擎介绍">2 InnoDB引擎与MyISAM引擎介绍</h1><h2 id="InnoDB">2.1 InnoDB</h2><p><img src="https://api.codetool.top/img/15827022478639.png" alt></p>
 <ul>
 <li>支持事务</li>
 <li>行锁设计</li>
@@ -435,13 +448,13 @@
 <li>使用MVCC</li>
 <li>面向OLTP</li>
 </ul>
-<h2 id="MyISAM">1.2 MyISAM</h2><p><img src="https://api.codetool.top/img/15827023196505.png" alt></p>
-<h1 id="InnoDB引擎介绍">2 InnoDB引擎介绍</h1><h2 id="概述">2.1 概述</h2><p><img src="https://api.codetool.top/img/15827023602779.png" alt></p>
-<h2 id="InnoDB体系架构">2.2 InnoDB体系架构</h2><p><img src="https://api.codetool.top/img/15827024007427.png" alt></p>
-<h2 id="后台线程">2.3 后台线程</h2><p><img src="https://api.codetool.top/img/15827024565750.png" alt></p>
+<h2 id="MyISAM">2.2 MyISAM</h2><p><img src="https://api.codetool.top/img/15827023196505.png" alt></p>
+<h1 id="InnoDB引擎介绍">3 InnoDB引擎介绍</h1><h2 id="概述">3.1 概述</h2><p><img src="https://api.codetool.top/img/15827023602779.png" alt></p>
+<h2 id="InnoDB体系架构">3.2 InnoDB体系架构</h2><p><img src="https://api.codetool.top/img/15827024007427.png" alt></p>
+<h2 id="后台线程">3.3 后台线程</h2><p><img src="https://api.codetool.top/img/15827024565750.png" alt></p>
 <p><img src="https://api.codetool.top/img/15827024727244.png" alt></p>
 <p><code>innodb_purge_threads</code></p>
-<h2 id="内存">2.4 内存</h2><p><img src="https://api.codetool.top/img/15827024924511.png" alt></p>
+<h2 id="内存">3.4 内存</h2><p><img src="https://api.codetool.top/img/15827024924511.png" alt></p>
 <p><code>innodb_buffer_pool_size</code></p>
 <p><img src="https://api.codetool.top/img/15827025173436.png" alt></p>
 <p><code>innodb_buffer_pool_instances</code></p>
@@ -450,7 +463,7 @@
 <p><code>innodb_old_blocks_time</code></p>
 <p><img src="https://api.codetool.top/img/15827025648526.png" alt></p>
 <p><code>innodb_log_buffer_size</code></p>
-<h2 id="CheckPoint技术">2.5 CheckPoint技术</h2><p>CheckPoint技术即检查点技术，我在<a href="../数据库理论之事务与恢复技术/#toc-heading-18">数据库理论之事务与恢复技术</a>中有提及。不过当时对检查点相关的阐述是记录了提交的事务，然而InnoDB并不会立即写回磁盘，所以这里谈的是脏页的刷新。</p>
+<h2 id="CheckPoint技术">3.5 CheckPoint技术</h2><p>CheckPoint技术即检查点技术，我在<a href="../数据库理论之事务与恢复技术/#toc-heading-18">数据库理论之事务与恢复技术</a>中有提及。不过当时对检查点相关的阐述是记录了提交的事务，然而InnoDB并不会立即写回磁盘，所以这里谈的是脏页的刷新。</p>
 <p><img src="https://api.codetool.top/img/15827025937028.png" alt></p>
 
             </div>
@@ -1071,7 +1084,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">255.9k</span>&nbsp;字
+                class="white-color">263.7k</span>&nbsp;字
             
             
             

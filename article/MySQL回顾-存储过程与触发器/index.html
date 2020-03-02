@@ -1,0 +1,1385 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="MySQL回顾-存储过程与触发器, 代码段小站">
+    <meta name="description" content="1 存储过程1.1 概述存储过程是一组为了完成特定功能的 SQL 语句集合。使用存储过程的目的是将常用或复杂的工作预先用 SQL 语句写好并用一个指定名称存储起来，这个过程经编译和优化后存储在数据库服务器中，因此称为存储过程。当以后需要数据">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>MySQL回顾-存储过程与触发器 | 代码段小站</title>
+    <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon.ico">
+    
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+    
+    <script src="/libs/jquery/jquery.min.js"></script>
+    
+<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper head-container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/code.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">代码段小站</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/runcode" class="waves-effect waves-light">
+      
+      <i class="fas fa-code" style="zoom: 0.6;"></i>
+      
+      <span>写代码</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/code.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">代码段小站</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/runcode" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-code"></i>
+			
+			写代码
+		</a>
+          
+        </li>
+        
+        
+    </ul>
+</div>
+
+        </div>
+
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/10.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">MySQL回顾-存储过程与触发器</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        margin: 35px 0 15px 0;
+        padding-left: 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        height: calc(100vh - 250px);
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #toc-content .is-active-link::before {
+        background-color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">
+                                <span class="chip bg-color">数据库</span>
+                            </a>
+                        
+                            <a href="/tags/MySQL/">
+                                <span class="chip bg-color">MySQL</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/" class="post-category">
+                                中间件/工具/框架
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2020-03-02
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    3.4k
+                </div>
+                
+
+                
+				
+                
+            </div>
+            
+        </div>
+        <hr class="clearfix">
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h1 id="存储过程">1 存储过程</h1><h2 id="概述">1.1 概述</h2><p>存储过程是一组为了完成特定功能的 SQL 语句集合。使用存储过程的目的是将常用或复杂的工作预先用 SQL 语句写好并用一个指定名称存储起来，这个过程经编译和优化后存储在数据库服务器中，因此称为存储过程。当以后需要数据库提供与已定义好的存储过程的功能相同的服务时，只需调用“CALL存储过程名字”即可自动完成。</p>
+<p>一个存储过程是一个可编程的函数，它在数据库中创建并保存，一般由 SQL 语句和一些特殊的控制结构组成。当希望在不同的应用程序或平台上执行相同的特定功能时，存储过程尤为合适。</p>
+<h2 id="优点">1.2 优点</h2><p>存储过程通常有如下优点：</p>
+<ol>
+<li>封装性<br>存储过程被创建后，可以在程序中被多次调用，而不必重新编写该存储过程的 SQL 语句，并且数据库专业人员可以随时对存储过程进行修改，而不会影响到调用它的应用程序源代码。</li>
+<li>可增强 SQL 语句的功能和灵活性<br>存储过程可以用流程控制语句编写，有很强的灵活性，可以完成复杂的判断和较复杂的运算。</li>
+<li>可减少网络流量<br>由于存储过程是在服务器端运行的，且执行速度快，因此当客户计算机上调用该存储过程时，网络中传送的只是该调用语句，从而可降低网络负载。</li>
+<li>高性能<br>存储过程执行一次后，产生的二进制代码就驻留在缓冲区，在以后的调用中，只需要从缓冲区中执行二进制代码即可，从而提高了系统的效率和性能。</li>
+<li>提高数据库的安全性和数据的完整性<br>使用存储过程可以完成所有数据库操作，并且可以通过编程的方式控制数据库信息访问的权限。</li>
+</ol>
+<h2 id="编写">1.3 编写</h2><h3 id="基本的存储过程">1.3.1 基本的存储过程</h3><pre class=" language-sql"><code class="language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">PROCEDURE</span> productpricing<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">BEGIN</span>
+        <span class="token keyword">SELECT</span> <span class="token function">AVG</span><span class="token punctuation">(</span>prod_price<span class="token punctuation">)</span> <span class="token keyword">as</span> priceaverage <span class="token keyword">FROM</span> products<span class="token punctuation">;</span>
+    <span class="token keyword">END</span><span class="token punctuation">;</span></code></pre>
+<p>创建名为 productpricing 的储存过程。如果存储过程中需要传递参数，则将他们在括号中列举出来即可。括号必须有。<strong>BEGIN 和 END 关键字用来限制存储过程体。</strong>上述存储过程体本身是一个简单的 select 语句。注意这里只是创建存储过程并没有进行调用。</p>
+<p>储存过程的使用：<br><code>Call productpring();</code></p>
+<h3 id="使用参数的存储过程">1.3.2 使用参数的存储过程</h3><p>一般存储过程并不显示结果，而是把结果返回给你指定的变量上。</p>
+<p>变量：内存中一个特定的位置，用来临时存储数据。</p>
+<pre class=" language-sql"><code class="language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">PROCEDURE</span> prod<span class="token punctuation">(</span>
+    <span class="token keyword">OUT</span> pl <span class="token keyword">DECIMAL</span><span class="token punctuation">(</span><span class="token number">8</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token keyword">OUT</span> ph <span class="token keyword">DECIMAL</span><span class="token punctuation">(</span><span class="token number">8</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token keyword">OUT</span> pa <span class="token keyword">DECIMAL</span><span class="token punctuation">(</span><span class="token number">8</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span>
+    <span class="token keyword">BEGIN</span>
+        <span class="token keyword">SELECT</span> <span class="token function">MIN</span><span class="token punctuation">(</span>prod_price<span class="token punctuation">)</span> <span class="token keyword">INTO</span> pl <span class="token keyword">FROM</span> products<span class="token punctuation">;</span>
+        <span class="token keyword">SELECT</span> <span class="token function">MAX</span><span class="token punctuation">(</span>prod_price<span class="token punctuation">)</span> <span class="token keyword">INTO</span> ph <span class="token keyword">FROM</span> products<span class="token punctuation">;</span>
+        <span class="token keyword">SELECT</span> <span class="token function">AVG</span><span class="token punctuation">(</span>prod_price<span class="token punctuation">)</span> <span class="token keyword">INTO</span> pa <span class="token keyword">FROM</span> products<span class="token punctuation">;</span>
+    <span class="token keyword">END</span><span class="token punctuation">;</span></code></pre>
+<p>关键字 OUT 指出相应的参数用来从存储过程传出一个值(返回给调用者)。</p>
+<p>MySQL 支持 <strong>in(传递给存储过程)、out(从存储过程传出，这里所用)和 inout(对存储过程传入和传出)</strong>类型的参数。存储过程的代码位于 begin 和 end 语句内。他们是一系列 select 语句，用来检索值。然后<strong>保存到相对应的变量(通过 INTO 关键字)。</strong>存储过程的参数允许的数据类型与表中使用的类型相同。注意记录集是不被允许的类型，因此，不能通过一个参数返回多个行和列，这也是上面为什么要使用 3 个参数和 3 条 select语句的原因。</p>
+<p>使用：</p>
+<pre class=" language-sql"><code class="language-sql"><span class="token keyword">call</span> <span class="token keyword">PROCEDURE</span><span class="token punctuation">(</span><span class="token variable">@pricelow</span><span class="token punctuation">,</span><span class="token variable">@pricehigh</span><span class="token punctuation">,</span><span class="token variable">@priceaverage</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">select</span> <span class="token variable">@pricelow</span><span class="token punctuation">;</span>
+<span class="token keyword">select</span> <span class="token variable">@pricehigh</span><span class="token punctuation">;</span>
+<span class="token keyword">select</span> <span class="token variable">@pricelow</span><span class="token punctuation">,</span><span class="token variable">@pricehigh</span><span class="token punctuation">,</span><span class="token variable">@priceaverage</span><span class="token punctuation">;</span></code></pre>
+<p>为调用此存储过程，必须指定 3 个变量名。如上所示。3 个参数是存储过程保存结果的 3 个变量的名字。调用时，语句并不显示任何数据，它返回以后可以显示的变量(或在其他处理中使用)。</p>
+<p>注意：所有的 MySQL 变量都是以@开头。</p>
+<p>使用IN的示例：</p>
+<pre class=" language-sql"><code class="language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">PROCEDURE</span> ordertotal<span class="token punctuation">(</span>
+    <span class="token operator">IN</span> innumber <span class="token keyword">int</span><span class="token punctuation">,</span>
+    <span class="token keyword">OUT</span> outtotal <span class="token keyword">decimal</span><span class="token punctuation">(</span><span class="token number">8</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span>
+    <span class="token keyword">BEGIN</span>
+        <span class="token keyword">SELECT</span> <span class="token function">Sum</span><span class="token punctuation">(</span>item_price <span class="token operator">*</span> quantity<span class="token punctuation">)</span> <span class="token keyword">FROM</span> orderitems <span class="token keyword">WHERE</span> order_num <span class="token operator">=</span>
+        innumber <span class="token keyword">INTO</span> outtotal<span class="token punctuation">;</span>
+    <span class="token keyword">END</span><span class="token punctuation">;</span> 
+
+
+<span class="token keyword">CALL</span> ordertotal<span class="token punctuation">(</span><span class="token number">20005</span><span class="token punctuation">,</span><span class="token variable">@total</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">select</span> <span class="token variable">@total</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// 得到 20005 订单的合计</span>
+
+<span class="token keyword">CALL</span> ordertotal<span class="token punctuation">(</span><span class="token number">20009</span><span class="token punctuation">,</span><span class="token variable">@total</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">select</span> <span class="token variable">@total</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//得到 20009 订单的合计</span></code></pre>
+<h3 id="带有控制语句的存储过程">1.3.3 带有控制语句的存储过程</h3><pre class=" language-sql"><code class="language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">PROCEDURE</span> ordertotal<span class="token punctuation">(</span>
+    <span class="token operator">IN</span> onumber <span class="token keyword">INT</span><span class="token punctuation">,</span>
+    <span class="token operator">IN</span> taxable <span class="token keyword">BOOLEAN</span><span class="token punctuation">,</span>
+    <span class="token keyword">OUT</span> ototal <span class="token keyword">DECIMAL</span><span class="token punctuation">(</span><span class="token number">8</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span> <span class="token keyword">COMMENT</span> <span class="token string">'Obtain order total, optionally adding tax'</span>
+    <span class="token keyword">BEGIN</span>
+        <span class="token comment" spellcheck="true">-- declear variable for total</span>
+        <span class="token keyword">DECLARE</span> total <span class="token keyword">DECIMAL</span><span class="token punctuation">(</span><span class="token number">8</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">-- declear tax percentage</span>
+        <span class="token keyword">DECLARE</span> taxrate <span class="token keyword">INT</span> <span class="token keyword">DEFAULT</span> <span class="token number">6</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">-- get the order total</span>
+        <span class="token keyword">SELECT</span> <span class="token function">Sum</span><span class="token punctuation">(</span>item_price <span class="token operator">*</span> quantity<span class="token punctuation">)</span> <span class="token keyword">FROM</span> orderitems <span class="token keyword">WHERE</span> order_num <span class="token operator">=</span>
+        onumber <span class="token keyword">INTO</span> total<span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">-- IS this taxable?</span>
+        <span class="token keyword">IF</span> taxable <span class="token keyword">THEN</span>
+            <span class="token comment" spellcheck="true">-- yes ,so add taxrate to the total</span>
+            <span class="token keyword">SELECT</span> total<span class="token operator">+</span><span class="token punctuation">(</span>total<span class="token operator">/</span><span class="token number">100</span><span class="token operator">*</span>taxrate<span class="token punctuation">)</span><span class="token keyword">INTO</span> total<span class="token punctuation">;</span>
+        <span class="token keyword">END</span> <span class="token keyword">IF</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">-- finally ,save to out variable</span>
+        <span class="token keyword">SELECT</span> total <span class="token keyword">INTO</span> ototal<span class="token punctuation">;</span>
+    <span class="token keyword">END</span><span class="token punctuation">;</span></code></pre>
+<p>在存储过程中我们使用了 DECLARE 语句，他们表示定义两个局部变量，DECLARE 要求指定变量名和数据类型。它也支持可选的默认值(taxrate 默认 6%)，因为后期我们还要判断要不要增加税，所以，我们把 SELECT 查询的结果存储到局部变量 total 中，然后在 IF 和 THEN 的配合下，检查 taxable 是否为真，然后在真的情况下，我们利用另一条 SELECT 语句增加营业税到局部变量 total 中，然后我们再利用 SELECT 语句将 total(增加税或者不增加税的结果)保存到总的 ototal 中。</p>
+<p>上面的 COMMENT 关键字可以给出或者不给出，如果给出，将在 <code>SHOW PROCEDURE STATUS</code> 的结果中显示。</p>
+<h2 id="修改存储过程">1.4 修改存储过程</h2><p>MySQL 中修改存储过程的语法格式如下：</p>
+<p><code>ALTER PROCEDURE 存储过程名 [ 特征 ... ]</code></p>
+<p>特征指定了存储过程的特性，可能的取值有：</p>
+<ul>
+<li><code>CONTAINS SQL</code> 表示子程序包含 SQL 语句，但不包含读或写数据的语句。</li>
+<li><code>NO SQL</code> 表示子程序中不包含 SQL 语句。</li>
+<li><code>READS SQL DATA</code> 表示子程序中包含读数据的语句。</li>
+<li><code>MODIFIES SQL DATA</code> 表示子程序中包含写数据的语句。</li>
+<li><code>SQL SECURITY { DEFINER |INVOKER }</code> 指明谁有权限来执行。<ul>
+<li><code>DEFINER</code> 表示只有定义者自己才能够执行。</li>
+<li><code>INVOKER</code> 表示调用者可以执行。</li>
+</ul>
+</li>
+<li><code>COMMENT &#39;string&#39;</code> 表示注释信息。</li>
+</ul>
+<pre class=" language-sql"><code class="language-sql"><span class="token keyword">ALTER</span> <span class="token keyword">PROCEDURE</span> showstuscore <span class="token keyword">MODIFIES SQL DATA</span> SQL SECURITY <span class="token keyword">INVOKER</span><span class="token punctuation">;</span></code></pre>
+<p>提示：<code>ALTER PROCEDURE</code> 语句用于修改存储过程的某些特征。如果要修改存储过程的内容，可以先删除原存储过程，再以相同的命名创建新的存储过程；如果要修改存储过程的名称，可以先删除原存储过程，再以不同的命名创建新的存储过程。</p>
+<h2 id="删除存储过程">1.5 删除存储过程</h2><p>MySQL 中使用 <code>DROP PROCEDURE</code> 语句来删除数据库中已经存在的存储过程。语法格式如下：</p>
+<p><code>DROP { PROCEDURE | FUNCTION } [ IF EXISTS ] &lt;过程名&gt;</code></p>
+<p>IF EXISTS：指定这个关键字用于防止因删除不存在的存储过程而引发的错误。</p>
+<h1 id="触发器">2 触发器</h1><h2 id="概述-1">2.1 概述</h2><p>MySQL 数据库中触发器是一个特殊的存储过程，不同的是执行存储过程要使用 CALL 语句来调用，而触发器的执行不需要使用 CALL 语句来调用，也不需要手工启动，只要一个预定义的事件发生就会被 MySQL自动调用。</p>
+<p>触发程序的优点如下：</p>
+<ul>
+<li>触发程序的执行是自动的，当对触发程序相关表的数据做出相应的修改后立即执行。</li>
+<li>触发程序可以通过数据库中相关的表层叠修改另外的表。</li>
+<li>触发程序可以实施比 <code>FOREIGN KEY</code> 约束、<code>CHECK</code> 约束更为复杂的检查和操作。</li>
+</ul>
+<p>在 MySQL 中，只有执行 <code>INSERT</code>、<code>UPDATE</code> 和 <code>DELETE</code> 操作时才能激活触发器。</p>
+<h2 id="创建触发器">2.2 创建触发器</h2><p>在创建触发器时，需要给出 4 条语句（规则）：</p>
+<ol>
+<li>唯一的触发器名；</li>
+<li>触发器关联的表；</li>
+<li>触发器应该响应的活动；</li>
+<li>触发器何时执行(处理之前或者之后)</li>
+</ol>
+<pre class=" language-sql"><code class="language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">TRIGGER</span> newproduct <span class="token keyword">AFTER</span> <span class="token keyword">INSERT</span> <span class="token keyword">ON</span> products <span class="token keyword">FOR EACH ROW</span> <span class="token keyword">SELECT</span>
+<span class="token string">'Product added'</span> <span class="token keyword">INTO</span> <span class="token variable">@info</span><span class="token punctuation">;</span></code></pre>
+<p>CREATE TRIGGER 用来创建名为 newproduct 的新触发器。触发器可以在一个操作发生前或<br>者发生后执行，这里 AFTER INSERT 是指此触发器在 INSERT 语句成功执行后执行。这个触<br>发器还指定 FOR EACH ROW ， 因此代码对每个插入行都会执行。文本 Product added 将<br>对每个插入的行显示一次</p>
+<h2 id="INSERT-触发器">2.3 INSERT 触发器</h2><p>是在 insert 语句执行之前或者执行之后被执行的触发器。</p>
+<ol>
+<li>在 insert 触发器代码中，可引入一个名为 new 的虚拟表，访问被插入的行（普通插入语句之后也存在这个表）</li>
+<li><strong>在 before insert 触发器中，new 中的值也可以被更新(允许更改被插入的值)</strong></li>
+<li>对于 auto_increment 列，new 在 insert 执行之前包含 0，在 insert 执行之后包含新的自动生成值</li>
+</ol>
+<pre class=" language-sql"><code class="language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">TRIGGER</span> neworder <span class="token keyword">AFTER</span> <span class="token keyword">INSERT</span> <span class="token keyword">ON</span> orders <span class="token keyword">FOR EACH ROW</span> <span class="token keyword">SELECT</span>
+NEW<span class="token punctuation">.</span>order_num<span class="token punctuation">;</span></code></pre>
+<p>该语句创建一个名为 neworder 的触发器，按照 <code>AFTER INSERT ON orders</code> 执行。在插入一个新订单到 orders 表时，MySQL 生成一个新的订单号并保存到 order_num 中。触发器从NEW.order_num 取得这个值并返回它。此触发器必须按照 AFTER INSERT 执行，<strong>因为在BEFORE INSERT 语句执行之前，新 order_num 还没有生成。</strong> 对于 orders 的每次插入使用这个触发器总是返回新的订单号。</p>
+<h2 id="DELETE-触发器">2.4 DELETE 触发器</h2><p>Delete 触发器在 delete 语句执行之前或者之后执行。</p>
+<ol>
+<li>在 delete 触发器的代码内,可以引用一个名为 OLD 的虚拟表，用来访问被删除的行。</li>
+<li>OLD 中的值全为只读，不能更新。</li>
+</ol>
+<pre class=" language-sql"><code class="language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">TRIGGER</span> deleteorder BEFORE <span class="token keyword">DELETE</span> <span class="token keyword">ON</span> orders <span class="token keyword">FOR EACH ROW</span>
+<span class="token keyword">BEGIN</span>
+    <span class="token keyword">INSERT</span> <span class="token keyword">INTO</span> archive_orders<span class="token punctuation">(</span>order_num<span class="token punctuation">,</span>order_date<span class="token punctuation">,</span>cust_id<span class="token punctuation">)</span> <span class="token keyword">values</span>
+    <span class="token punctuation">(</span>OLD<span class="token punctuation">.</span>order_num<span class="token punctuation">,</span>OLD<span class="token punctuation">.</span>order_date<span class="token punctuation">,</span>OLD<span class="token punctuation">.</span>cust_id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">END</span><span class="token punctuation">;</span></code></pre>
+<p>在任意订单被删除前将执行此触发器，它使用一条 INSERT 语句将 OLD 中的值(要被删除的订单) 保存到一个名为 archive_orders 的存档表中(为实际使用这个例子，我们需要用与orders 相同的列创建一个名为 archive_orders 的表)</p>
+<p><strong>使用 BEFORE DELETE 触发器的优点(相对于 AFTER DELETE 触发器来说)为，如果由于某种原因，订单不能存档，delete 本身将被放弃。</strong></p>
+<p>我们在这个触发器使用了 BEGIN 和 END 语句标记触发器体。这在此例子中并不是必须的，只是为了说明使用BEGIN END 块的好处是触发器能够容纳多条SQL 语句(在BEGIN END块中一条挨着一条)。</p>
+<h2 id="UPDATE-触发器">2.5 UPDATE 触发器</h2><p>在 update 语句执行之前或者之后执行</p>
+<ol>
+<li>在 update 触发器的代码内,可以引用一个名为 OLD 的虚拟表，用来访问以前(UPDATE 语句之前)的值，引用一个名为 NEW 的虚拟表访问新更新的值。</li>
+<li>在 BEFORE UPDATE 触发器中，NEW 中的值可能也被用于更新(允许更改将要用于 UPDATE语句中的值)</li>
+<li>OLD 中的值全为只读，不能更新。</li>
+</ol>
+<pre class=" language-sql"><code class="language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">TRIGGER</span> updatevendor BEFORE <span class="token keyword">UPDATE</span> <span class="token keyword">ON</span> vendors <span class="token keyword">FOR EACH ROW</span> <span class="token keyword">SET</span>
+NEW<span class="token punctuation">.</span>vend_state <span class="token operator">=</span> Upper<span class="token punctuation">(</span>NEW<span class="token punctuation">.</span>vemd_state<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>保证州名缩写总是大写(不管 UPFATE 语句中是否给出了大写)，每次更新一行时，NEW.vend_state 中的值(将用来更新表行的值)都用 Upper(NEW.vend_state)替换。</p>
+<h2 id="总结">2.6 总结</h2><ol>
+<li>与其他 DBMS 相比，MySQL 5 中支持的触发器相当初级，未来的 MySQL 版本中估计会存在一些改进和增强触发器的支持。</li>
+<li>通常 before 用于数据的验证和净化(为了保证插入表中的数据确实是需要的数据) 也适用于 update 触发器。</li>
+<li>创建触发器可能需要特殊的安全访问权限，但是触发器的执行时自动的，如果 insert，update，或者 delete 语句能够执行，则相关的触发器也能执行。</li>
+<li>用触发器来保证数据的一致性(大小写，格式等)。在触发器中执行这种类型的处理的优点就是它总是进行这种处理，而且透明的进行，与客户机应用无关。</li>
+<li>触发器的一种非常有意义的使用就是创建审计跟踪。使用触发器，把更改(如果需要，甚至还有之前和之后的状态)记录到另外一个表是非常容易的。</li>
+<li>MySQL 触发器不支持 call 语句，无法从触发器内调用存储过程。</li>
+</ol>
+<p>总体来说，触发器使用的过程中，MySQL 会按照以下方式来处理错误。</p>
+<p>若对于事务性表，如果触发程序失败，以及由此导致的整个语句失败，那么该语句所执行的所有更改将回滚；对于非事务性表，则不能执行此类回滚，即使语句失败，失败之前所做的任何更改依然有效。</p>
+<p>若 BEFORE 触发程序失败，则 MySQL 将不执行相应行上的操作。</p>
+<p>若在 BEFORE 或 AFTER 触发程序的执行过程中出现错误，则将导致调用触发程序的整个语句失败。</p>
+<p>仅当 BEFORE 触发程序和行操作均已被成功执行，MySQL 才会执行AFTER触发程序。</p>
+
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://www.codetool.top" rel="external nofollow noreferrer">Rhett Peng</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。部分转载即网络资源均已注明来源，若有版权问题请联系站长。转载请注明来源
+                    <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">
+                                    <span class="chip bg-color">数据库</span>
+                                </a>
+                            
+                                <a href="/tags/MySQL/">
+                                    <span class="chip bg-color">MySQL</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'VUmN3m0ICuwaL4jNPnxBRln8-gzGzoHsz',
+        appKey: 'QH8FVT32jvi4qBllLg6Cf0dU',
+        notify: 'false' === 'true',
+        verify: 'true' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: '说点什么吧'
+    });
+</script>
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/article/Redis%E6%8C%81%E4%B9%85%E5%8C%96%E6%96%B9%E5%BC%8FRDB%E5%92%8CAOF%E4%BB%8B%E7%BB%8D/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/1.jpg" class="responsive-img" alt="Redis持久化方式RDB和AOF介绍">
+                        
+                        <span class="card-title">Redis持久化方式RDB和AOF介绍</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            1 持久化简介将内存中的数据隔段时间在硬盘中做备份，防止数据突然丢失
+
+快照方法 RDB
+日志方法 AOF
+
+2 RDB2.1 启动方式2.1.1 指令：save
+谁：redis操作者（用户）
+什么时间：即时（随时进行）
+干什么事情：保存数
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2020-03-02
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/" class="post-category">
+                                    中间件/工具/框架
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Redis/">
+                        <span class="chip bg-color">Redis</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/article/MySQL%E5%9B%9E%E9%A1%BE-%E7%BA%A6%E6%9D%9F%E3%80%81%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E8%A7%86%E5%9B%BE/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/20.jpg" class="responsive-img" alt="MySQL回顾-约束、常用函数和视图">
+                        
+                        <span class="card-title">MySQL回顾-约束、常用函数和视图</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            1 约束
+主键约束：不允许重复记录，避免数据冗余
+外键约束：保证本事务所关联的其他事务是存在的（主键表中的这个字段）
+实际开发中通常不使用外键约束，影响效率。
+
+
+check约束：限制值在某一个范围之内
+default约束： 确定默认值( 
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-03-02
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/" class="post-category">
+                                    中间件/工具/框架
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">
+                        <span class="chip bg-color">数据库</span>
+                    </a>
+                    
+                    <a href="/tags/MySQL/">
+                        <span class="chip bg-color">MySQL</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+    
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+<!-- 代码块折行 -->
+
+<style type="text/css">
+code[class*="language-"], pre[class*="language-"] { white-space: pre !important; }
+</style>
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h1, h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h1, h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+    <footer class="page-footer bg-color">
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            <span id="year">2019-2020</span>
+            <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">263.7k</span>&nbsp;字
+            
+            
+            
+            
+            
+            <br>
+            
+            <br>
+            
+            <span id="icp"><img src="/medias/icp.png" style="vertical-align: text-bottom;" />
+                <a href="http://beian.miit.gov.cn/" target="_blank">赣ICP备19011928号</a>
+            </span>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/codeband-top" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:pctdyx@qq.net" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=995632825" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 995632825" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+$(function () {
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+});
+</script>
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":200,"height":200,"hOffset":20,"vOffset":100},"mobile":{"show":false},"dialog":{"enable":true,"hitokoto":false},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div id="chat_input"><input id="question" type="text" placeholder="陪我聊聊天吧" onkeypress="return onKeyPress(event)"/></div>
+</html>
+
+<!--动态线条背景-->
+<script type="text/javascript"
+color="0,0,0" opacity='0.5' zIndex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+</script>
+
+<script>
+
+//聊天框按回车
+function onKeyPress(e){
+    var keyCode = null;
+    if(e.which)
+        keyCode = e.which;
+    else if(e.keyCode)
+        keyCode = e.keyCode;
+        
+    //如果按下回车
+    if(keyCode == 13) {
+        // 1.获取界面上的元素value
+        var question_box = document.getElementById('question')
+        var question = question_box.value
+        question_box.value = ""
+        question_box.setAttribute("disabled","disabled")
+        var api_key = "78c33a07808c7b9e1905c89c88b3be14"
+        var api_secret = "q707tevnk00f"
+
+        // 2.通过XHR发送一个POST请求
+        var xhr = new XMLHttpRequest()
+        xhr.open('GET','https://api.codetool.top/robottalk?question='+encodeURIComponent(question)+"&api_key="+api_key+"&api_secret="+api_secret)
+		xhr.send(null)
+		xhr.onload = function(){
+            question_box.removeAttribute('disabled');
+            var live2d_dialog = document.getElementsByClassName("live2d-widget-dialog")[0]
+            live2d_dialog.style.opacity=1
+            live2d_dialog.innerHTML = this.responseText
+            window.setTimeout(()=>{
+                live2d_dialog.style.opacity=0
+            }, 5000);
+		}
+    }
+
+}
+
+</script>
+
+<style> 
+#chat_input{
+    width: 200px;
+    height: 40px;
+    position: fixed;
+    right: 0px;
+    bottom: 80px;
+    right: 20px;
+} 
+
+#question{
+    border: none;
+    border-bottom: 1px #aaaaaa solid;
+    background-color: transparent;
+    padding: 5px;
+}
+
+@media screen and (max-width: 480px) {
+    #chat_input{
+        display: none;
+    }
+    #live2d-widget{
+        display: none;
+    }
+}
+</style>
