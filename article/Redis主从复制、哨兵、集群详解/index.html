@@ -1,0 +1,1505 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="Redis主从复制、哨兵、集群详解, 代码段小站">
+    <meta name="description" content="【补充】高可用：（总时间-宕机时间）/总时间，目标是99.999%
+1 主从复制为了避免单点Redis服务器故障，准备多台服务器，互相连通。将数据复制多个副本保存在不同的服务器上，连接在一起，并保证数据是同步的。即使有其中一台服务器宕机，其">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Redis主从复制、哨兵、集群详解 | 代码段小站</title>
+    <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon.ico">
+    
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+    
+    <script src="/libs/jquery/jquery.min.js"></script>
+    
+<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper head-container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/code.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">代码段小站</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/runcode" class="waves-effect waves-light">
+      
+      <i class="fas fa-code" style="zoom: 0.6;"></i>
+      
+      <span>写代码</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/code.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">代码段小站</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/runcode" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-code"></i>
+			
+			写代码
+		</a>
+          
+        </li>
+        
+        
+    </ul>
+</div>
+
+        </div>
+
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/21.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">Redis主从复制、哨兵、集群详解</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        margin: 35px 0 15px 0;
+        padding-left: 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        height: calc(100vh - 250px);
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #toc-content .is-active-link::before {
+        background-color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/Redis/">
+                                <span class="chip bg-color">Redis</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/" class="post-category">
+                                中间件/工具/框架
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2020-03-03
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    3.9k
+                </div>
+                
+
+                
+				
+                
+            </div>
+            
+        </div>
+        <hr class="clearfix">
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>【补充】<br>高可用：（总时间-宕机时间）/总时间，目标是99.999%</p>
+<h1 id="主从复制">1 主从复制</h1><p>为了避免单点Redis服务器故障，准备多台服务器，互相连通。将数据复制多个副本保存在不同的服<br>务器上，连接在一起，并保证数据是同步的。即使有其中一台服务器宕机，其他服务器依然可以继续<br>提供服务，实现Redis的高可用，同时实现数据冗余备份。</p>
+<p>提供数据方：master<br>接收数据方：slave</p>
+<p>从机通常不允许写，当主机宕机，需要临时推选出一个从机代替主机工作。</p>
+<h2 id="作用">1.1 作用</h2><ul>
+<li>读写分离：master写、slave读，提高服务器的负载能力。</li>
+<li>负载均衡：基于主从结构，配合读写分离，由slave分担master负载，并根据需求的变化，改变slave的数<br>量，通过多个从节点分担数据读取负载，大大提高Redis服务器并发量与数据吞吐量</li>
+<li>故障恢复：当master出现问题时，由slave提供服务，实现快速的故障恢复</li>
+<li>数据冗余：实现数据热备份，是持久化之外的一种数据冗余方式</li>
+<li>高可用基石：基于主从复制，构建哨兵模式与集群，实现Redis的高可用方案</li>
+</ul>
+<h2 id="工作流程">1.2 工作流程</h2><p>主从复制过程大体可以分为3个阶段</p>
+<ul>
+<li>建立连接阶段（即准备阶段）</li>
+<li>数据同步阶段</li>
+<li>命令传播阶段</li>
+</ul>
+<h3 id="建立连接">1.2.1 建立连接</h3><p>建立slave到master的连接，使master能够识别slave，并保存slave端口号</p>
+<p>步骤1：设置master的地址和端口，保存master信息</p>
+<p>步骤2：建立socket连接</p>
+<p>步骤3：发送ping命令（定时器任务）（断开重连）</p>
+<p>步骤4：身份验证</p>
+<p>步骤5：发送slave端口信息</p>
+<p><strong>具体实现：</strong></p>
+<p>设置master信息：</p>
+<ul>
+<li>方式一：客户端发送命令<code>slaveof &lt;masterip&gt; &lt;masterport&gt;</code></li>
+<li>方式二：启动服务器参数<code>redis-server -slaveof &lt;masterip&gt; &lt;masterport&gt;</code></li>
+<li>方式三：服务器配置<code>slaveof &lt;masterip&gt; &lt;masterport&gt;</code></li>
+</ul>
+<p>断开方式：<code>slaveof no one</code></p>
+<p><strong>配置授权认证：</strong></p>
+<p>master设置密码的方法：</p>
+<ul>
+<li>配置文件：<code>requirepass &lt;password&gt;</code> </li>
+<li>指令设置密码：<code>config set requirepass &lt;password&gt;</code></li>
+</ul>
+<p>slave密码认证方法：</p>
+<ul>
+<li>指令：<code>auth &lt;password&gt;</code></li>
+<li>启动客户端参数：<code>redis-cli -a &lt;password&gt;</code></li>
+<li>配置文件：<code>masterauth &lt;password&gt;</code></li>
+</ul>
+<h3 id="数据同步">1.2.2 数据同步</h3><ul>
+<li>在slave初次连接master后，复制master中的所有数据到slave</li>
+<li>将slave的数据库状态更新成master当前的数据库状态</li>
+</ul>
+<p>连接后的第一次同步是<strong>全量复制</strong>：</p>
+<ul>
+<li>slave发送指令：psync2</li>
+<li>master执行bgsave，产生rdb文件，这段时间内执行的指令放在命令缓冲区中</li>
+<li>master将rdb文件发给slave</li>
+<li>slave从rdb文件中恢复数据</li>
+</ul>
+<p>然后是<strong>部分（增量）复制</strong>：</p>
+<ul>
+<li>master将命令缓冲区中指令以aof的格式发送给slave</li>
+<li>slave执行指令以同步</li>
+</ul>
+<p><strong>数据同步阶段master说明：</strong></p>
+<ol>
+<li>如果master数据量巨大，数据同步阶段应避开流量高峰期，避免造成master阻塞，影响业务正常执行</li>
+<li>复制缓冲区大小设定不合理，会导致数据溢出。如进行全量复制周期太长，进行部分复制时发现数据已经存在丢失的情况，必须进行第二次全量复制，致使slave陷入死循环状态。<br>相关配置：<code>repl-backlog-size 1mb</code></li>
+<li>master单机内存占用主机内存的比例不应过大，建议使用50%-70%的内存，留下30%-50%的内存用于执行bgsave命令和创建复制缓冲区</li>
+</ol>
+<p><strong>数据同步阶段slave说明：</strong></p>
+<ol>
+<li>为避免slave进行全量复制、部分复制时服务器响应阻塞或数据不同步，建议关闭此期间的对外服务<br>相关配置：<code>slave-serve-stale-data yes|no</code></li>
+<li>数据同步阶段，master发送给slave信息可以理解master是slave的一个客户端，主动向slave发送命令</li>
+<li>多个slave同时对master请求数据同步，master发送的RDB文件增多，会对带宽造成巨大冲击，如果master带宽不足，因此数据同步需要根据业务需求，适量错峰</li>
+<li>slave过多时，建议调整拓扑结构，由一主多从结构变为树状结构，中间的节点既是master，也是slave。注意使用树状结构时，由于层级深度，导致深度越高的slave与最顶层master间数据同步延迟较大，数据一致性变差，应谨慎选择</li>
+</ol>
+<h3 id="命令传播">1.2.3 命令传播</h3><ul>
+<li>当master数据库状态被修改后，导致主从服务器数据库状态不一致，此时需要让主从数据同步到一致的状态，同步的动作称为命令传播</li>
+<li>master将接收到的数据变更命令发送给slave，slave接收命令后执行命令</li>
+</ul>
+<p><strong>命令传播阶段的部分复制：</strong></p>
+<p>如果命令传播阶段出现了断网现象：</p>
+<ul>
+<li>网络闪断闪连 ——忽略</li>
+<li>短时间网络中断 ——部分复制</li>
+<li>长时间网络中断 ——全量复制</li>
+</ul>
+<p><strong>部分复制的三个核心要素：</strong></p>
+<ol>
+<li>服务器的运行ID</li>
+</ol>
+<p>服务器运行ID是每一台服务器每次运行的身份识别码，一台服务器多次运行可以生成多个运行id。</p>
+<p>组成：运行id由40位字符组成，是一个随机的十六进制字符<br>例如：fdc9ff13b9bbaab28db42b3d50f852bb5e3fcdce。</p>
+<p>作用：运行id被用于在服务器间进行传输，识别身份。<br>如果想两次操作均对同一台服务器进行，必须每次操作携带对应的运行id，用于对方识别。</p>
+<p>实现方式：运行id在每台服务器启动时自动生成的，master在首次连接slave时，会将自己的运行ID发送给slave，slave保存此ID，通过info Server命令，可以查看节点的runid。</p>
+<ol start="2">
+<li>主服务器的复制积压缓冲区</li>
+</ol>
+<p>复制缓冲区，又名复制积压缓冲区，是一个先进先出（FIFO）的队列，用于存储服务器执行过的命令，每次传播命令，master都会将传播的命令记录下来，并存储在复制缓冲区</p>
+<p>内容就是AOF文件的格式，每个字节值还有一个偏移量。</p>
+<ol start="3">
+<li>主从服务器的复制偏移量</li>
+</ol>
+<p>一个数字，描述复制缓冲区中的指令字节位置</p>
+<p><strong>分类：</strong></p>
+<ul>
+<li>master复制偏移量：记录发送给所有slave的指令字节对应的位置（多个）</li>
+<li>slave复制偏移量：记录slave接收master发送过来的指令字节对应的位置（一个）</li>
+</ul>
+<p><strong>作用：</strong>同步信息，比对master与slave的差异，当slave断线后，恢复数据使用</p>
+<h3 id="工作流程总结">1.2.4 工作流程总结</h3><p><img src="https://api.codetool.top/img/15832485134650.png" alt></p>
+<h2 id="心跳机制">1.3 心跳机制</h2><p>进入命令传播阶段候，master与slave间需要进行信息交换，使用心跳机制进行维护，实现双方连接保持在线。</p>
+<p>master心跳：</p>
+<ul>
+<li>指令：PING</li>
+<li>周期：由repl-ping-slave-period决定，默认10秒</li>
+<li>作用：判断slave是否在线</li>
+<li>查询：INFO replication 获取slave最后一次连接时间间隔，lag项维持在0或1视为正常</li>
+</ul>
+<p>slave心跳任务</p>
+<ul>
+<li>指令：REPLCONF ACK {offset}</li>
+<li>周期：1秒</li>
+<li>作用1：汇报slave自己的复制偏移量，获取最新的数据变更指令</li>
+<li>作用2：判断master是否在线</li>
+</ul>
+<p><strong>注意:</strong></p>
+<ul>
+<li>当slave多数掉线，或延迟过高时，master为保障数据稳定性，将拒绝所有信息同步操作  </li>
+</ul>
+<p>相关配置：</p>
+<pre><code>min-slaves-to-write 2
+min-slaves-max-lag 8</code></pre><p>slave数量少于2个，或者所有slave的延迟都大于等于10秒时，强制关闭master写功能，停止数据同步</p>
+<ul>
+<li>slave数量由slave发送REPLCONF ACK命令做确认</li>
+<li>slave延迟由slave发送REPLCONF ACK命令做确认</li>
+</ul>
+<h2 id="主从复制常见问题">1.4 主从复制常见问题</h2><h3 id="频繁的全量复制（1）">1.4.1 频繁的全量复制（1）</h3><p>伴随着系统的运行，master的数据量会越来越大，一旦master重启，runid将发生变化，会导致全部slave的全量复制操作</p>
+<p>内部优化调整方案：</p>
+<ol>
+<li>master内部创建<code>master_replid</code>变量，使用<code>runid</code>相同的策略生成，长度41位，并发送给所有slave</li>
+<li>在master关闭时执行命令<code>shutdown save</code>，进行RDB持久化,<strong>将runid与offset保存到RDB文件中</strong><ul>
+<li>repl-id repl-offset</li>
+<li>通过redis-check-rdb命令可以查看该信息</li>
+</ul>
+</li>
+<li>master重启后加载RDB文件，恢复数据重启后，将RDB文件中保存的repl-id与repl-offset加载到内存中<ul>
+<li>master_repl_id = repl master_repl_offset = repl-offset</li>
+<li>通过info命令可以查看该信息</li>
+</ul>
+</li>
+</ol>
+<p><strong>作用：</strong><br>本机保存上次runid，重启后恢复该值，使所有slave认为还是之前的master</p>
+<h3 id="频繁的全量复制（2）">1.4.2 频繁的全量复制（2）</h3><p><strong>问题现象:</strong></p>
+<p>网络环境不佳，出现网络中断，slave不提供服务</p>
+<p><strong>问题原因:</strong></p>
+<p>复制缓冲区过小，断网后slave的offset越界，触发全量复制</p>
+<p><strong>最终结果:</strong></p>
+<p>slave反复进行全量复制</p>
+<p><strong>解决方案:</strong></p>
+<ul>
+<li>修改复制缓冲区大小</li>
+<li>建议设置如下：<ol>
+<li>测算从master到slave的重连平均时长<code>second</code></li>
+<li>获取master平均每秒产生写命令数据总量<code>write_size_per_second</code></li>
+<li>最优复制缓冲区空间 = <code>2 * second * write_size_per_second</code></li>
+</ol>
+</li>
+</ul>
+<h3 id="频繁的网络中断（1）">1.4.3 频繁的网络中断（1）</h3><p><strong>问题现象:</strong></p>
+<p>master的CPU占用过高 或 slave频繁断开连接</p>
+<p><strong>问题原因：</strong></p>
+<ul>
+<li>slave每1秒发送REPLCONF ACK命令到master</li>
+<li>当slave接到了慢查询时（keys * ，hgetall等），会大量占用CPU性能</li>
+<li>master每1秒调用复制定时函数replicationCron()，比对slave发现长时间没有进行响应</li>
+</ul>
+<p><strong>最终结果：</strong></p>
+<p>master各种资源（输出缓冲区、带宽、连接等）被严重占用</p>
+<p><strong>解决方案：</strong></p>
+<p>通过设置合理的超时时间<code>repl-timeout</code>，确认是否释放slave。该参数定义了超时时间的阈值（默认60秒），超过该值，释放slave</p>
+<h3 id="频繁的网络中断（2）">1.4.4 频繁的网络中断（2）</h3><p><strong>问题现象：</strong></p>
+<p>slave与master连接断开</p>
+<p><strong>问题原因：</strong></p>
+<ul>
+<li>master发送ping指令频度较低</li>
+<li>master设定超时时间较短</li>
+<li>ping指令在网络中存在丢包</li>
+</ul>
+<p><strong>解决方案：</strong></p>
+<p>提高ping指令发送的频度</p>
+<p><code>repl-ping-slave-period</code></p>
+<p>超时时间repl-time的时间至少是ping指令频度的5到10倍，否则slave很容易判定超时</p>
+<h3 id="数据不一致">1.4.5 数据不一致</h3><p><strong>问题现象：</strong></p>
+<p>多个slave获取相同数据不同步</p>
+<p><strong>问题原因：</strong></p>
+<p>网络信息不同步，数据发送有延迟</p>
+<p><strong>解决方案：</strong></p>
+<ul>
+<li>优化主从间的网络环境，通常放置在同一个机房部署，如使用阿里云等云服务器时要注意此现象</li>
+<li>监控主从节点延迟（通过offset）判断，如果slave延迟过大，暂时屏蔽程序对该slave的数据访问</li>
+</ul>
+<p><code>slave-serve-stale-data yes|no</code></p>
+<p>开启后仅响应info、slaveof等少数命令（慎用，除非对数据一致性要求很高）</p>
+<h1 id="哨兵模式">2 哨兵模式</h1><p>上面提到如果主机宕机，需要临时推选出一个从机代替主机工作。</p>
+<h2 id="作用-1">2.1 作用</h2><p>哨兵(sentinel) 是一个分布式系统，用于对主从结构中的每台服务器进行监控，当出现故障时通过投票机制选择新的master并将所有slave连接到新的master。</p>
+<p><strong>监控：</strong></p>
+<p>不断的检查master和slave是否正常运行。</p>
+<p>master存活检测、master与slave运行情况检测</p>
+<p><strong>通知（提醒）：</strong></p>
+<p>当被监控的服务器出现问题时，向其他（哨兵间，客户端）发送通知。</p>
+<p><strong>自动故障转移：</strong></p>
+<p>断开master与slave连接，选取一个slave作为master，将其他slave连接到新的master，并告知客户端新的服务器地址</p>
+<p><strong>注意：</strong></p>
+<ul>
+<li>哨兵也是一台redis服务器，只是不提供数据服务</li>
+<li>通常哨兵配置数量为单数</li>
+</ul>
+<h2 id="启用哨兵">2.2 启用哨兵</h2><p>启用哨兵命令：</p>
+<pre class=" language-shell"><code class="language-shell">redis-sentinel sentinel-配置.conf</code></pre>
+<p>配置文件：</p>
+<pre><code>sentinel monitor mymaster 127.0.0.1 6379 2  
+# 配置监控的主节点
+# 这个配置项格式为sentinel monitor &lt;master-group-name&gt; &lt;ip&gt; &lt;port&gt; &lt;quorum&gt;
+# 意义为监视一个名为mymaster的主节点（这里的mymaster可以自定义，主要是为了标识这个集群）
+# 主节点ip地址是127.0.0.1，端口为6379
+# 法定票数为2票。表示至少需要2个哨兵认为节点down了，才算down了。
+
+sentinel down-after-milliseconds mymaster 30000
+# 监控到指定的集群的主节点异常状态持续多久方才将标记为“故障”；
+
+sentinel parallel-syncs mymaster 1
+# 指在failover过程中，能够被sentinel并行配置的从节点的数量；数值越大，要求网络资源越高，要求越小，同步时间约长
+
+sentinel failover-timeout 180000
+# sentinel必须在此指定的时长内完成故障转移操作，否则，将视为故障转移操作失败</code></pre><h2 id="哨兵工作原理">2.3 哨兵工作原理</h2><p>哨兵在进行主从切换过程中经历三个阶段</p>
+<ul>
+<li>监控</li>
+<li>通知</li>
+<li>故障转移</li>
+</ul>
+<h3 id="监控阶段">2.3.1 监控阶段</h3><p>用于同步各个节点的状态信息</p>
+<ul>
+<li>获取各个sentinel的状态（是否在线）</li>
+<li>获取master的状态<ul>
+<li>master属性<ul>
+<li>runid</li>
+<li>role：master</li>
+</ul>
+</li>
+<li>各个slave的详细信息</li>
+</ul>
+</li>
+<li>获取所有slave的状态（根据master中的slave信息）<ul>
+<li>slave属性<ul>
+<li>runid</li>
+<li>role：slave</li>
+<li>master_host、master_port</li>
+<li>offset</li>
+<li>……</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="通知阶段">2.3.2 通知阶段</h3><p>sentinel之间也会组建连接网共享master和slave的状态。</p>
+<p>每个sentinel收集到了信息都会共享给其他的sentinel。</p>
+<h3 id="故障转移阶段">2.3.3 故障转移阶段</h3><p>如果某一sentinel某时刻联系不上主机并且超过<code>failover-timeout</code>时间，就对其他sentinel发起通知<code>SENTINEL is-master-down-by-addr ……</code>，此时该sentinel对主机的判定为<code>SRI_S_DOWN</code>，即主观下线。</p>
+<p>其他sentinel收到通知后也对主机做出评判，如果有超半数(法定票数)的sentinel认为主机宕机了，就判定该主机为<code>SRI_O_DOWN</code>，即客观下线。</p>
+<p>然后sentinel内部开始发送竞选指令争选作为处理该故障的哨兵。所有哨兵根据收到竞选指令的先后和一些评判标准投票，获得投票数最多的哨兵处理该故障。</p>
+<p><strong>哨兵的任务：</strong></p>
+<p>在服务器列表中挑选备选master：</p>
+<ul>
+<li>筛选在线的</li>
+<li>剔除响应慢的</li>
+<li>剔除与原master断开时间久的</li>
+<li>按照优先原则<ul>
+<li>优先级</li>
+<li>offset</li>
+<li>runid</li>
+</ul>
+</li>
+</ul>
+<p>根据以上方法挑选出一个备选master后，开始替换master：</p>
+<ul>
+<li>发送指令（sentinel）</li>
+<li>向新的master发送slaveof no one</li>
+<li>向其他slave发送slaveof 新masterIP端口</li>
+</ul>
+<h1 id="集群">3 集群</h1><p>集群就是使用网络将若干台计算机联通起来，并提供统一的管理方式，使其对外呈现单机的服务效果</p>
+<p><strong>集群的作用</strong></p>
+<ul>
+<li>分散单台服务器的访问压力，实现负载均衡</li>
+<li>分散单台服务器的存储压力，实现可扩展性</li>
+<li>降低单台服务器宕机带来的业务灾难</li>
+</ul>
+<h2 id="设计">3.1 设计</h2><ul>
+<li>通过算法设计，计算出key应该保存的位置</li>
+<li>将所有的存储空间计划切割成16384份槽，每台主机保存一部分<br>每份代表的是一个存储空间，不是一个key的保存空间</li>
+<li>将key按照计算出的结果放到对应的存储空间</li>
+</ul>
+<p>集群内部也有通信，每台机器都知道一个指定的槽放在哪个机器上，如果槽未命中，则会通知用户正确位置。</p>
+<h2 id="cluster集群搭建">3.2 cluster集群搭建</h2><p>参考<a href="https://www.cnblogs.com/toutou/p/redis_cluster.html" target="_blank" rel="noopener">详解Redis Cluster集群 - 请叫我头头哥 - 博客园</a></p>
+
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://www.codetool.top" rel="external nofollow noreferrer">Rhett Peng</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。部分转载即网络资源均已注明来源，若有版权问题请联系站长。转载请注明来源
+                    <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/Redis/">
+                                    <span class="chip bg-color">Redis</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'VUmN3m0ICuwaL4jNPnxBRln8-gzGzoHsz',
+        appKey: 'QH8FVT32jvi4qBllLg6Cf0dU',
+        notify: 'false' === 'true',
+        verify: 'true' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: '说点什么吧'
+    });
+</script>
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
+            <div class="card">
+                <a href="/article/Redis%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E3%80%81%E5%93%A8%E5%85%B5%E3%80%81%E9%9B%86%E7%BE%A4%E8%AF%A6%E8%A7%A3/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/21.jpg" class="responsive-img" alt="Redis主从复制、哨兵、集群详解">
+                        
+                        <span class="card-title">Redis主从复制、哨兵、集群详解</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            【补充】高可用：（总时间-宕机时间）/总时间，目标是99.999%
+1 主从复制为了避免单点Redis服务器故障，准备多台服务器，互相连通。将数据复制多个副本保存在不同的服务器上，连接在一起，并保证数据是同步的。即使有其中一台服务器宕机，其
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-03-03
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/" class="post-category">
+                                    中间件/工具/框架
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Redis/">
+                        <span class="chip bg-color">Redis</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/article/Redis%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E4%BB%8B%E7%BB%8D/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/2.jpg" class="responsive-img" alt="Redis高级数据类型介绍">
+                        
+                        <span class="card-title">Redis高级数据类型介绍</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            1 Bitmaps之前的博客有提到过海量数据算法-BitMap介绍和实现
+实际上Redis也有这样的数据结构——就是一个一个的字节（实际上也就是String类型），相关指令：
+
+setbit key index 1|0：将对应的位设置为1/
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-03-03
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/" class="post-category">
+                                    中间件/工具/框架
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Redis/">
+                        <span class="chip bg-color">Redis</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+    
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+<!-- 代码块折行 -->
+
+<style type="text/css">
+code[class*="language-"], pre[class*="language-"] { white-space: pre !important; }
+</style>
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h1, h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h1, h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+    <footer class="page-footer bg-color">
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            <span id="year">2019-2020</span>
+            <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">270.1k</span>&nbsp;字
+            
+            
+            
+            
+            
+            <br>
+            
+            <br>
+            
+            <span id="icp"><img src="/medias/icp.png" style="vertical-align: text-bottom;" />
+                <a href="http://beian.miit.gov.cn/" target="_blank">赣ICP备19011928号</a>
+            </span>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/codeband-top" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:pctdyx@qq.net" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=995632825" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 995632825" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+$(function () {
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+});
+</script>
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":200,"height":200,"hOffset":20,"vOffset":100},"mobile":{"show":false},"dialog":{"enable":true,"hitokoto":false},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div id="chat_input"><input id="question" type="text" placeholder="陪我聊聊天吧" onkeypress="return onKeyPress(event)"/></div>
+</html>
+
+<!--动态线条背景-->
+<script type="text/javascript"
+color="0,0,0" opacity='0.5' zIndex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+</script>
+
+<script>
+
+//聊天框按回车
+function onKeyPress(e){
+    var keyCode = null;
+    if(e.which)
+        keyCode = e.which;
+    else if(e.keyCode)
+        keyCode = e.keyCode;
+        
+    //如果按下回车
+    if(keyCode == 13) {
+        // 1.获取界面上的元素value
+        var question_box = document.getElementById('question')
+        var question = question_box.value
+        question_box.value = ""
+        question_box.setAttribute("disabled","disabled")
+        var api_key = "78c33a07808c7b9e1905c89c88b3be14"
+        var api_secret = "q707tevnk00f"
+
+        // 2.通过XHR发送一个POST请求
+        var xhr = new XMLHttpRequest()
+        xhr.open('GET','https://api.codetool.top/robottalk?question='+encodeURIComponent(question)+"&api_key="+api_key+"&api_secret="+api_secret)
+		xhr.send(null)
+		xhr.onload = function(){
+            question_box.removeAttribute('disabled');
+            var live2d_dialog = document.getElementsByClassName("live2d-widget-dialog")[0]
+            live2d_dialog.style.opacity=1
+            live2d_dialog.innerHTML = this.responseText
+            window.setTimeout(()=>{
+                live2d_dialog.style.opacity=0
+            }, 5000);
+		}
+    }
+
+}
+
+</script>
+
+<style> 
+#chat_input{
+    width: 200px;
+    height: 40px;
+    position: fixed;
+    right: 0px;
+    bottom: 80px;
+    right: 20px;
+} 
+
+#question{
+    border: none;
+    border-bottom: 1px #aaaaaa solid;
+    background-color: transparent;
+    padding: 5px;
+}
+
+@media screen and (max-width: 480px) {
+    #chat_input{
+        display: none;
+    }
+    #live2d-widget{
+        display: none;
+    }
+}
+</style>
