@@ -401,7 +401,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    3.4k
+                    3.8k
                 </div>
                 
 
@@ -489,8 +489,113 @@
         <span class="token comment" spellcheck="true">-- finally ,save to out variable</span>
         <span class="token keyword">SELECT</span> total <span class="token keyword">INTO</span> ototal<span class="token punctuation">;</span>
     <span class="token keyword">END</span><span class="token punctuation">;</span></code></pre>
-<p>在存储过程中我们使用了 DECLARE 语句，他们表示定义两个局部变量，DECLARE 要求指定变量名和数据类型。它也支持可选的默认值(taxrate 默认 6%)，因为后期我们还要判断要不要增加税，所以，我们把 SELECT 查询的结果存储到局部变量 total 中，然后在 IF 和 THEN 的配合下，检查 taxable 是否为真，然后在真的情况下，我们利用另一条 SELECT 语句增加营业税到局部变量 total 中，然后我们再利用 SELECT 语句将 total(增加税或者不增加税的结果)保存到总的 ototal 中。</p>
+<p>在存储过程中我们使用了 <code>DECLARE</code> 语句，他们表示定义两个局部变量，DECLARE 要求指定变量名和数据类型。它也支持可选的默认值(taxrate 默认 6%)，因为后期我们还要判断要不要增加税，所以，我们把 SELECT 查询的结果存储到局部变量 total 中，然后在 IF 和 THEN 的配合下，检查 taxable 是否为真，然后在真的情况下，我们利用另一条 SELECT 语句增加营业税到局部变量 total 中，然后我们再利用 SELECT 语句将 total(增加税或者不增加税的结果)保存到总的 ototal 中。</p>
 <p>上面的 COMMENT 关键字可以给出或者不给出，如果给出，将在 <code>SHOW PROCEDURE STATUS</code> 的结果中显示。</p>
+<p>所有语法：</p>
+<p>变量相关：</p>
+<ul>
+<li><code>DECLARE var_name[,...] type [DEFAULT value]</code>：声明变量</li>
+<li><code>SET var_name = expr [, var_name = expr] ...</code>：变量赋值</li>
+<li><code>select ... into var_name</code>：将查询的结果赋值给变量</li>
+</ul>
+<p>分支循环：</p>
+<p><strong>if_then elseif_then else_then</strong></p>
+<pre class=" language-sql"><code class="language-sql"><span class="token keyword">if</span> search_condition <span class="token keyword">then</span> statement_list
+
+    <span class="token punctuation">[</span>elseif search_condition <span class="token keyword">then</span> statement_list<span class="token punctuation">]</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+
+    <span class="token punctuation">[</span><span class="token keyword">else</span> statement_list<span class="token punctuation">]</span>
+
+<span class="token keyword">end</span> <span class="token keyword">if</span><span class="token punctuation">;</span></code></pre>
+<p><strong>case</strong></p>
+<pre class=" language-sql"><code class="language-sql"><span class="token keyword">CASE</span> case_value
+
+  <span class="token keyword">WHEN</span> when_value <span class="token keyword">THEN</span> statement_list
+
+  <span class="token punctuation">[</span><span class="token keyword">WHEN</span> when_value <span class="token keyword">THEN</span> statement_list<span class="token punctuation">]</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+
+  <span class="token punctuation">[</span><span class="token keyword">ELSE</span> statement_list<span class="token punctuation">]</span>
+
+<span class="token keyword">END</span> <span class="token keyword">CASE</span><span class="token punctuation">;</span></code></pre>
+<p><strong>while</strong></p>
+<pre class=" language-sql"><code class="language-sql"><span class="token keyword">while</span> search_condition <span class="token keyword">do</span>
+
+    statement_list
+
+<span class="token keyword">end</span> <span class="token keyword">while</span><span class="token punctuation">;</span></code></pre>
+<p><strong>repeat</strong></p>
+<p>while 是满足条件才执行，repeat 是满足条件就退出循环。</p>
+<pre class=" language-sql"><code class="language-sql">REPEAT
+
+  statement_list
+
+  UNTIL search_condition
+
+<span class="token keyword">END</span> REPEAT<span class="token punctuation">;</span></code></pre>
+<p><strong>loop</strong></p>
+<p>通常配合leave语句退出循环，也可以死循环</p>
+<pre class=" language-sql"><code class="language-sql"><span class="token punctuation">[</span>begin_label:<span class="token punctuation">]</span> LOOP
+
+  statement_list
+
+<span class="token keyword">END</span> LOOP <span class="token punctuation">[</span>end_label<span class="token punctuation">]</span></code></pre>
+<p><strong>leave</strong></p>
+<p>退出循环</p>
+<pre class=" language-sql"><code class="language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">PROCEDURE</span> pro_test11<span class="token punctuation">(</span>n <span class="token keyword">int</span><span class="token punctuation">)</span>
+<span class="token keyword">BEGIN</span>
+  <span class="token keyword">declare</span> total <span class="token keyword">int</span> <span class="token keyword">default</span> <span class="token number">0</span><span class="token punctuation">;</span>
+
+  ins: LOOP
+
+    <span class="token keyword">IF</span> n <span class="token operator">&lt;=</span> <span class="token number">0</span> <span class="token keyword">then</span>
+      leave ins<span class="token punctuation">;</span>
+    <span class="token keyword">END</span> <span class="token keyword">IF</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">set</span> total <span class="token operator">=</span> total <span class="token operator">+</span> n<span class="token punctuation">;</span>
+    <span class="token keyword">set</span> n <span class="token operator">=</span> n <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">END</span> LOOP ins<span class="token punctuation">;</span>
+
+  <span class="token keyword">select</span> total<span class="token punctuation">;</span>
+<span class="token keyword">END</span>$</code></pre>
+<h3 id="使用游标的存储过程">1.3.4 使用游标的存储过程</h3><p>游标是用来存储查询结果集的数据类型 , 在存储过程和函数中可以使用光标对结果集进行循环的处理。光标的使用包括光标的声明、OPEN、FETCH 和 CLOSE，其语法分别如下。</p>
+<p>声明光标：</p>
+<pre class=" language-sql"><code class="language-sql"><span class="token keyword">DECLARE</span> cursor_name <span class="token keyword">CURSOR</span> <span class="token keyword">FOR</span> select_statement <span class="token punctuation">;</span></code></pre>
+<p>代表这个变量是一个cursor类型，对应的是select_statement语句的结果集。</p>
+<p>OPEN 光标：</p>
+<pre class=" language-sql"><code class="language-sql"><span class="token keyword">OPEN</span> cursor_name <span class="token punctuation">;</span></code></pre>
+<p>FETCH 光标：</p>
+<pre class=" language-sql"><code class="language-sql"><span class="token keyword">FETCH</span> cursor_name <span class="token keyword">INTO</span> var_name <span class="token punctuation">[</span><span class="token punctuation">,</span> var_name<span class="token punctuation">]</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span></code></pre>
+<p>CLOSE 光标：</p>
+<pre class=" language-sql"><code class="language-sql"><span class="token keyword">CLOSE</span> cursor_name <span class="token punctuation">;</span></code></pre>
+<p>实例：</p>
+<pre class=" language-sql"><code class="language-sql"><span class="token comment" spellcheck="true">-- 查询emp表中数据, 并逐行获取进行展示</span>
+<span class="token keyword">DELIMITER</span> $
+
+<span class="token keyword">create</span> <span class="token keyword">procedure</span> pro_test12<span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">begin</span>
+  <span class="token keyword">DECLARE</span> id <span class="token keyword">int</span><span class="token punctuation">(</span><span class="token number">11</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">DECLARE</span> name <span class="token keyword">varchar</span><span class="token punctuation">(</span><span class="token number">50</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">DECLARE</span> age <span class="token keyword">int</span><span class="token punctuation">(</span><span class="token number">11</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">DECLARE</span> salary <span class="token keyword">int</span><span class="token punctuation">(</span><span class="token number">11</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">DECLARE</span> has_data <span class="token keyword">int</span> <span class="token keyword">default</span> <span class="token number">1</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">DECLARE</span> emp_result <span class="token keyword">CURSOR</span> <span class="token keyword">FOR</span> <span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> emp<span class="token punctuation">;</span>
+  <span class="token keyword">DECLARE</span> <span class="token keyword">EXIT</span> <span class="token keyword">HANDLER</span> <span class="token keyword">FOR</span> <span class="token operator">NOT</span> FOUND <span class="token keyword">set</span> has_data <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">open</span> emp_result<span class="token punctuation">;</span>
+
+  repeat
+    <span class="token keyword">fetch</span> emp_result <span class="token keyword">into</span> id <span class="token punctuation">,</span> name <span class="token punctuation">,</span> age <span class="token punctuation">,</span> salary<span class="token punctuation">;</span>
+    <span class="token keyword">select</span> concat<span class="token punctuation">(</span><span class="token string">'id为'</span><span class="token punctuation">,</span>id<span class="token punctuation">,</span> <span class="token string">', name 为'</span> <span class="token punctuation">,</span>name <span class="token punctuation">,</span> <span class="token string">', age为 '</span> <span class="token punctuation">,</span>age <span class="token punctuation">,</span> <span class="token string">', 薪水为: '</span><span class="token punctuation">,</span> salary<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    until has_data <span class="token operator">=</span> <span class="token number">0</span>
+  <span class="token keyword">end</span> repeat<span class="token punctuation">;</span>
+
+  <span class="token keyword">close</span> emp_result<span class="token punctuation">;</span>
+<span class="token keyword">end</span>$
+
+<span class="token keyword">DELIMITER</span> <span class="token punctuation">;</span> </code></pre>
+<p>通过<code>DECLARE EXIT HANDLER FOR NOT FOUND set has_data = 0;</code>相当于在光标获取不到下一行的时候给has_data赋值为0。</p>
 <h2 id="修改存储过程">1.4 修改存储过程</h2><p>MySQL 中修改存储过程的语法格式如下：</p>
 <p><code>ALTER PROCEDURE 存储过程名 [ 特征 ... ]</code></p>
 <p>特征指定了存储过程的特性，可能的取值有：</p>
@@ -1189,7 +1294,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">273.3k</span>&nbsp;字
+                class="white-color">278.4k</span>&nbsp;字
             
             
             
