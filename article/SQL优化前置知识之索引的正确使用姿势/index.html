@@ -1,0 +1,1373 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="SQL优化前置知识之索引的正确使用姿势, 代码段小站">
+    <meta name="description" content="该文的前置知识：SQL优化前置知识之优化前分析
+1 索引失效有的sql语句会不使用索引？在编写sql语句的时候应避免这些情况，一起来看看这些情况吧：
+1.1 不遵从最左前缀规则如果索引了多列，要遵守最左前缀法则。指的是查询从索引的最左前列开">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>SQL优化前置知识之索引的正确使用姿势 | 代码段小站</title>
+    <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon.ico">
+    
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+    
+    <script src="/libs/jquery/jquery.min.js"></script>
+    
+<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper head-container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/code.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">代码段小站</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/runcode" class="waves-effect waves-light">
+      
+      <i class="fas fa-code" style="zoom: 0.6;"></i>
+      
+      <span>写代码</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/code.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">代码段小站</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/runcode" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-code"></i>
+			
+			写代码
+		</a>
+          
+        </li>
+        
+        
+    </ul>
+</div>
+
+        </div>
+
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/0.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">SQL优化前置知识之索引的正确使用姿势</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        margin: 35px 0 15px 0;
+        padding-left: 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        height: calc(100vh - 250px);
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #toc-content .is-active-link::before {
+        background-color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/%E4%BC%98%E5%8C%96/">
+                                <span class="chip bg-color">优化</span>
+                            </a>
+                        
+                            <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">
+                                <span class="chip bg-color">数据库</span>
+                            </a>
+                        
+                            <a href="/tags/MySQL/">
+                                <span class="chip bg-color">MySQL</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/" class="post-category">
+                                中间件/工具/框架
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2020-03-05
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    4.3k
+                </div>
+                
+
+                
+				
+                
+            </div>
+            
+        </div>
+        <hr class="clearfix">
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>该文的前置知识：<a href="../SQL优化前置知识之优化前分析">SQL优化前置知识之优化前分析</a></p>
+<h1 id="索引失效">1 索引失效</h1><p>有的sql语句会不使用索引？在编写sql语句的时候应避免这些情况，一起来看看这些情况吧：</p>
+<h2 id="不遵从最左前缀规则">1.1 不遵从最左前缀规则</h2><p>如果索引了多列，要遵守最左前缀法则。指的是查询从索引的最左前列开始，并且不跳过索引中的列。</p>
+<p>最左前缀的原理来自于B+树对节点的排序规则：</p>
+<p>摘自<a href="../MySQL索引概述及索引的分类/">MySQL索引概述及索引的分类</a></p>
+<ul>
+<li>如果不是按照索引的最左列开始查找，则无法使用索引</li>
+<li>不能跳过索引中的列</li>
+<li>如果查询中有某个列的范围查询，则其右边所有列都无法使用索引优化查找</li>
+</ul>
+<p>验证最左前缀规则：</p>
+<ol>
+<li>建立索引</li>
+</ol>
+<pre><code>create index idx_uname_pw_name on t_user(username,password,name);
+Query OK, 0 rows affected (0.05 sec)
+Records: 0  Duplicates: 0  Warnings: 0</code></pre><ol start="2">
+<li>以最左前缀规则查询</li>
+</ol>
+<pre><code>mysql&gt; explain select * from t_user where username = &#39;super&#39;;
++----+-------------+--------+------------+------+-------------------+-------------------+---------+-------+------+----------+-------------+
+| id | select_type | table  | partitions | type | possible_keys     | key               | key_len | ref   | rows | filtered | Extra       |
++----+-------------+--------+------------+------+-------------------+-------------------+---------+-------+------+----------+-------------+
+|  1 | SIMPLE      | t_user | NULL       | ref  | idx_uname_pw_name | idx_uname_pw_name | 137     | const |    1 |   100.00 | Using index |
++----+-------------+--------+------------+------+-------------------+-------------------+---------+-------+------+----------+-------------+
+1 row in set, 1 warning (0.00 sec)</code></pre><p>可见使用了索引</p>
+<ol start="3">
+<li>不以最左前缀规则查询</li>
+</ol>
+<pre><code>mysql&gt; explain select * from t_user where name = &#39;学生1&#39;;
++----+-------------+--------+------------+-------+---------------+-------------------+---------+------+------+----------+--------------------------+
+| id | select_type | table  | partitions | type  | possible_keys | key               | key_len | ref  | rows | filtered | Extra                    |
++----+-------------+--------+------------+-------+---------------+-------------------+---------+------+------+----------+--------------------------+
+|  1 | SIMPLE      | t_user | NULL       | index | NULL          | idx_uname_pw_name | 564     | NULL |    6 |    16.67 | Using where; Using index |
++----+-------------+--------+------------+-------+---------------+-------------------+---------+------+------+----------+--------------------------+
+1 row in set, 1 warning (0.00 sec)</code></pre><p>可见此时type变为了”index”，扫描索引树。</p>
+<h2 id="在索引上使用表达式">1.2 在索引上使用表达式</h2><p>索引列上使用了表达式，如 where substr(a, 1, 3) = ‘hhh’，where a = a + 1，表达式是一大忌讳，再简单 MySQL 也不认。</p>
+<p>有时数据量不是大到严重影响速度时，一般可以先查出来，比如先查所有有订单记录的数据，再在程序中去筛选</p>
+<p>哪怕是该字段没有建立索引，但不能保证以后不在这个字段上建立索引，所以可以这么说：不要在任何字段上进行操作。</p>
+<pre><code>mysql&gt; explain select * from t_user where left(username,2) = &#39;ad&#39;;
++----+-------------+--------+------------+-------+---------------+-------------------+---------+------+------+----------+--------------------------+
+| id | select_type | table  | partitions | type  | possible_keys | key               | key_len | ref  | rows | filtered | Extra                    |
++----+-------------+--------+------------+-------+---------------+-------------------+---------+------+------+----------+--------------------------+
+|  1 | SIMPLE      | t_user | NULL       | index | NULL          | idx_uname_pw_name | 564     | NULL |    6 |   100.00 | Using where; Using index |
++----+-------------+--------+------------+-------+---------------+-------------------+---------+------+------+----------+--------------------------+
+1 row in set, 1 warning (0.00 sec)
+
+Note (Code 1003): /* select#1 */ select `test`.`t_user`.`id` AS `id`,`test`.`t_user`.`username` AS `username`,`test`.`t_user`.`password` AS `password`,`test`.`t_user`.`name` AS `name` from `test`.`t_user` where (left(`test`.`t_user`.`username`,2) = &#39;ad&#39;)</code></pre><h2 id="range-类型查询字段后面的索引无效">1.3 range 类型查询字段后面的索引无效</h2><p><img src="https://api.codetool.top/img/15834021284440.png" alt></p>
+<p>最后一次只用到了两个索引<br>此时可以建一个只含前两个字段的索引<br>对<code>in()</code>无效，in仍可以使用索引。</p>
+<h2 id="varchar类型不加单引号，造成索引失效">1.4 varchar类型不加单引号，造成索引失效</h2><p><img src="https://api.codetool.top/img/15834024132813.png" alt></p>
+<p>由于在查询时，没有对字符串加单引号，MySQL的查询优化器，会自动的进行类型转换，造成索引失效。</p>
+<h2 id="尽量使用覆盖索引，避免select">1.5 尽量使用覆盖索引，避免select *</h2><p>覆盖索引的概念，往下翻，<code>索引的特殊应用-&gt;覆盖索引</code></p>
+<p><img src="https://api.codetool.top/img/15834026032099.png" alt></p>
+<p>如果查询列，超出索引列，也会降低性能。</p>
+<blockquote>
+<p><strong>TIP:</strong><br>using index ：使用覆盖索引的时候就会出现<br>using where：在查找使用索引的情况下，需要回表去查询所需的数据<br>using index condition：查找使用了索引，但是需要回表查询数据​<br>using index ; using where：查找使用了索引，但是需要的数据都在索引列中能找到，所以不需要回表查询数据</p>
+</blockquote>
+<h2 id="使用不等于时索引失效">1.6 使用不等于时索引失效</h2><p><img src="https://api.codetool.top/img/1583403565859.png" alt></p>
+<h2 id="is-not-null-时有时索引失效">1.7 is (not) null 时有时索引失效</h2><p><img src="https://api.codetool.top/img/15834033385073.png" alt></p>
+<p>失效的情况其实是MySQL评估使用索引比全表更慢，见最后一点。</p>
+<h2 id="like-以通配符开头会导致全表扫描">1.8 like 以通配符开头会导致全表扫描</h2><p><img src="https://api.codetool.top/img/15834035806892.png" alt></p>
+<h2 id="使用-or-时索引失效">1.9 使用 or 时索引失效</h2><p><img src="https://api.codetool.top/img/1583403593215.png" alt></p>
+<p>如果or前的条件中的列有索引，而后面的列中没有索引，那么涉及的索引都不会被用到。</p>
+<p>其实还蛮好理解的，因为没有索引的列符合条件也满足or，自然要全表扫描。</p>
+<h2 id="in-走索引，-not-in-索引失效">1.10 in 走索引， not in 索引失效</h2><p><img src="https://api.codetool.top/img/15834034738616.png" alt></p>
+<h2 id="如果MySQL评估使用索引比全表更慢，则不使用索引。">1.11 如果MySQL评估使用索引比全表更慢，则不使用索引。</h2><p>这个东西就很玄学了，典型情况是查询的情况占了整表大多数。</p>
+<h1 id="索引的特殊应用">2 索引的特殊应用</h1><h2 id="InnoDB-AUTO-INCREMENT">2.1 InnoDB AUTO_INCREMENT</h2><h3 id="概述">2.1.1 概述</h3><p>如果正在使用 InnoDB 表并且没有什么数据需要聚集，那么可以定义一个代理键作为主键，这种主键的数据应该与应用无关，最简单的方法是使用 AUTO_INCREMENT 自增列。这样可以保证数据行是按顺序写入的，对于根据主键做关联操作的性能也会更好。</p>
+<p>最好避免随机的聚簇索引，特别是对于 IO 密集型应用，比如 UUID，它使得聚簇索引的插入变得完全随机，这是最坏的情况，使得数据没有任何聚集特性。</p>
+<p><strong>顺序主键的优点：</strong></p>
+<p>如果主键的值是顺序的，那么 InnoDB 会把每一条记录都存储在上一条记录的后面。当达到页的最大填充因子时，下一条记录就会写入新的页中。一旦数据按照这种顺序的方式加载，主键页就会近似于被顺序的记录填满，这也正是所期望的结果。</p>
+<p><strong>顺序主键的缺点：</strong></p>
+<p>对于高并发工作负载，在 InnoDB 中按主键顺序插入可能会造成明显的争用。主键的上界会<br>成为热点。因为所有的插入都在这里，所以并发插入可能导致锁竞争。另一个热点可能是<br>AUTO_INCREMENT 锁机制，可能需要重新设计表或应用。</p>
+<h3 id="AUTO-INC锁机制">2.1.2 AUTO-INC锁机制</h3><p>AUTO-INC锁是当向使用含有AUTO_INCREMENT列的表中插入数据时需要获取的一种特殊的表级锁。</p>
+<p>在最简单的情况下，如果一个事务正在向表中插入值，则任何其他事务必须等待对该表执行自己的插入操作，以便第一个事务插入的行的值是连续的。</p>
+<p>InnoDB 会在内存里保存一个计数器用来记录 AUTO_INCREMENT 的值，当插入一个新行数据时，就会用一个表锁来锁住这个计数器，直到插入结束。如果一行一行的插入数据则没有什么问题，但是如果大量的并发插入就废了，表锁会引起 SQL 堵塞，不但影响效率，而且可能会瞬间达到 MAX_CONNECTION 而崩溃。</p>
+<p><strong>插入类型：</strong></p>
+<ol>
+<li>simple inserts<br>simple inserts 指的是那种能够事先确定插入行数的语句，比如 INSERT/REPLACE INTO 等插入单行或者多行的语句，语句中不包括嵌套子查询。此外，INSERT INTO … ON DUPLICATE KEY UPDATE 这类语句也要除外。  </li>
+<li>bulk inserts<br>bulk inserts 指的是事先无法确定插入行数的语句，比如 INSERT/REPLACE INTO … SELECT,<br>LOAD DATA 等。</li>
+<li>mixed-mode inserts<br>指的是 simple inserts 类型中有些行指定了 auto_increment 列的值，有些行没有指定，比如：INSERT INTO t1 (c1,c2) VALUES (1,’a’), (NULL,’b’), (5,’c’), (NULL,’d’);另外一种 mixed-mode inserts 是 INSERT … ON DUPLICATE KEY UPDATE 这种语句，可能导致分配的 auto_increment 值没有被使用。</li>
+</ol>
+<p><code>innodb_autoinc_lock_mode</code> 配置选项控制用于自动增量锁定的算法。 它允许您选择如何在<br>可预测的自动递增值序列和插入操作的最大并发性之间进行权衡，配置语法：</p>
+<p><code>innodb_autoinc_lock_mode=x</code>，x可取值：</p>
+<ul>
+<li>0，传统的 auto_increment 机制。这种模式下所有<strong>针对 auto_increment 列的插入操作都会加AUTO-INC 锁</strong>，分配的值也是一个个分配，是连续的，正常情况下也<strong>不会有间隙</strong>（当然如果事务 rollback 了这个 auto_increment 值就会浪费掉，从而造成间隙）。</li>
+<li>1，这种情况下，<strong>针对 bulk inserts 才会采用 AUTO-INC 锁这种方式</strong>，而针对 simple inserts，则直接通过分析语句，获得要插入的数量，然后<strong>一次性分配足够的 auto_increment id</strong>，只会将整个分配的过程锁住。。当然，如果其他事务已经持有了AUTO-INC锁，则simple inserts需要等待.  </li>
+</ul>
+<p><strong>针对 Mixed-mode inserts：直接分析语句，获得最坏情况下需要插入的数量，然后一次性分配足够的 auto_increment id</strong>，只会将整个分配的过程锁住。保证同一条 insert 语句中新插入的 auto_increment id 都是连续的，语句之间是<strong>可能出现auto_increment 值的空隙</strong>的。比如 mixed-mode inserts 以及 bulk inserts 中都有可能导致一些分配的 auto_increment 值被浪费掉从而导致间隙。</p>
+<ul>
+<li>2，这种模式下<strong>任何类型的 inserts 都不会采用 AUTO-INC 锁</strong>，性能最好。这种模式是<strong>来一个分配一个</strong>，而不会锁表，只会锁住分配 id 的过程，和 innodb_autoinc_lock_mode = 1 的区别在于，不会预分配多个。但是在 replication 中当 binlog_format 为 statement-based 时（简称 SBR statement-based replication）存在问题，因为是来一个分配一个，这样当并发执行时，“Bulk inserts”在分配时会同时向其他的 INSERT 分配，<strong>会出现主从不一致</strong>（从库执行结果和主库执行结果不一样），因为 binlog 只会记录开始的 insert id。<strong>可能会在同一条语句内部产生 auto_increment 值间隙。</strong></li>
+</ul>
+<h2 id="覆盖索引">2.2 覆盖索引</h2><p>如果<strong>一个索引包含了所有需要查询字段的值</strong>，就称为覆盖索引。</p>
+<p>覆盖索引的优点：</p>
+<ol>
+<li>索引条目远少于数据行大小，如果只需要读取索引，则 MySQL 就会极大地<strong>减少数据访问</strong>了，这对缓存的负载非常重要，因为这种情况下响应时间大部分花费在数据拷贝上。覆盖索引对 IO 密集型应用也有帮助，因为索引比数据更小，更容易全部放入内存中。</li>
+<li>因为索引是按照列值顺序存储的，<strong>对于 IO 密集型的范围查询会比随机从磁盘读取每一行数据的 IO 次数会少得多</strong>。</li>
+<li>InnoDB 的二级索引在叶节点中保存了行的主键值，如果二级索引是覆盖索引，则可以<strong>避免对主键聚簇索引的二次查询</strong>。  </li>
+</ol>
+<p>不是所有类型的索引都可以成为覆盖索引。覆盖索引必须要存储索引列的值，而哈希索引、空间索引和全文索引都不存储索引列的值，所以 MySQL 只能使用 B 树索引做覆盖索引。当发起一个索引覆盖查询时，在 EXPLAIN 的 Extra 列可以看到 Using index 的信息。InnoDB 的二级索引的叶子节点都包含了主键的值，这意味着 InnoDB 的二级索引可以有效利用这些额外的主键列来覆盖查询。</p>
+<h2 id="使用索引进行排序">2.3 使用索引进行排序</h2><p>MySQL 有两种可以生成有序的结果：通过排序操作；按索引顺序扫描。<strong>如果 EXPLAIN 出来的 type 列的值为 index，则说明 MySQL 使用了索引顺序扫描来做排序。</strong></p>
+<p>扫描索引本身是很快的，但如果索引不能覆盖查询所需的全部列，那就不得不每扫描一条索引记录就都回表查询一次对应的行。这基本上都是随机 IO，因此按索引顺序读取数据的速度通常要比顺序地全表扫描要慢，尤其是在 IO 密集型的工作负载时。只有当索引的列顺序和 ORDER BY 子句的顺序完全一致，并且所有列的排序方向（降序或升序，索引默认是升序）都一样时，MySQL 才可以使用索引来对结果做排序。如果查询需要关联多张表，则只有当 ORDER BY 子句引用的字段全部为第一张表时，才能使用索引做排序。ORDER BY 子句和查找型索引的限制是一样的，都需要满足索引的最左前缀的要求。<strong>有一种情况下 ORDER BY 子句可以不满足索引的最左前缀的要求，就是前导列为常量的时候。</strong></p>
+<h2 id="前缀压缩索引">2.4 前缀压缩索引</h2><p>MyISAM 通过前缀压缩来减少索引的大小，从而让更多的索引可以放入内存中。默认只压缩字符串，但通过参数调整也能对整数进行压缩。</p>
+<p>MyISAM 压缩每个索引块的方法时，先完全保存索引块的第一个值，然后将其他值和第一个值进行比较得到相同前缀的字节数和剩余的不同后缀部分，把这部分存储起来即可。压缩块使用更少的情况，代价是某些操作可能更慢。因为每个值的压缩前缀都依赖前面的值，所以 <strong>MyISAM 查找时无法在索引块使用二分查找而只能从头开始扫描。</strong></p>
+<h2 id="冗余和重复索引">2.5 冗余和重复索引</h2><p>冗余索引：MySQL 允许<strong>在相同列上创建多个索引</strong>。MySQL 需要单独维护重复的索引，并且优化器在优化查询时也需要逐个地进行考虑，这会影响性能。</p>
+<p>重复索引是指<strong>在相同的列上按照相同的顺序创建的相同类型的索引（完全相同）</strong>，应该避免这样创建重复索引，发现以后也应该立即移除。</p>
+<p>冗余索引和重复索引有一些不同。如果创建了索引(A,B)，又创建了索引(A)就是冗余索引，索引(A,B)也可以当做索引(A)来使用。但是如果再创建索引(B,A)，就不是冗余索引。另外，其他不同类型的索引也不会是 B 树索引的冗余索引。</p>
+<p>冗余索引通常发生在为表添加新索引的时候。例如，有人可能会增加一个新的索引(A,B)而不是扩展已有的索引(A)，还有一种情况是将一个索引扩展为(A,PK)，对于 InnoDB 而言 PK 已经包含在二级索引中了，所以这也是冗余的。</p>
+<p><strong>大多数情况下都不需要冗余索引，应该尽量扩展已有的索引而不是创建新索引。</strong>但也<strong>有时候出于性能方面的考虑需要冗余索引，因为扩展已有的索引会导致其变得太大</strong>，从而影响其他使用该索引的查询的性能。</p>
+<p>例如，现在在整数列上有一个索引，需要额外增加一个很长的 VARCHAR 列来扩展该索引，那性能可能会急剧下降。可以使用一些工具来找出冗余和重复的索引。</p>
+<h2 id="索引重用">2.6 索引重用</h2><p>现有索引(A,B,C)，如果要使用索引，那么 where 中必须写为 A=a and B = b and C = c。如果没有对 B 的筛选，还想使用索引，怎么绕过最左前缀匹配呢？</p>
+<p>假设 B 是一个选择性很低的列，只有 b1 和 b2 两种取值，那么查询可以写为 <code>A = a and Bin(b1,b2) and C = c</code>。</p>
+<h2 id="避免多个范围条件">2.7 避免多个范围条件</h2><p>对于范围条件查询，MySQL 无法再使用范围列后面的其他索引列了，但是<strong>对于多个等值条件查询（in …）则没有这个限制。</strong></p>
+<p>假设有索引(A,B)，查询条件为 A &gt; a and B &lt; b，那么此时无法同时使用 A 和 B 的复合索引，只能用到 A 的索引。一定要用的话可以考虑将 A 转为 in(a1,a2…)。</p>
+<h2 id="优化-limit">2.8 优化 limit</h2><p>延迟关联，使用覆盖索引</p>
+<h1 id="查看索引使用情况">3 查看索引使用情况</h1><pre class=" language-sql"><code class="language-sql"><span class="token keyword">show</span> <span class="token keyword">status</span> <span class="token operator">like</span> <span class="token string">'Handler_read%'</span><span class="token punctuation">;</span>    
+
+<span class="token keyword">show</span> <span class="token keyword">global</span> <span class="token keyword">status</span> <span class="token operator">like</span> <span class="token string">'Handler_read%'</span><span class="token punctuation">;</span>    </code></pre>
+<p>这两条语句可以查看mysql索引的使用情况：</p>
+<pre><code>mysql&gt; show status like &#39;Handler_read%&#39;;
++-----------------------+-------+
+| Variable_name         | Value |
++-----------------------+-------+
+| Handler_read_first    | 40    |
+| Handler_read_key      | 43    |
+| Handler_read_last     | 0     |
+| Handler_read_next     | 306   |
+| Handler_read_prev     | 0     |
+| Handler_read_rnd      | 0     |
+| Handler_read_rnd_next | 18832 |
++-----------------------+-------+
+7 rows in set (0.00 sec)</code></pre><p>Handler_read_first：索引中第一条被读的次数。如果较高，表示服务器正执行大量全索引扫描（这个值越低越好）。</p>
+<p>Handler_read_key：如果索引正在工作，这个值代表一个行被索引值读的次数，如果值越低，表示索引得到的性能改善不高，因为索引不经常使用（这个值越高越好）。</p>
+<p>Handler_read_next ：按照键顺序读下一行的请求数。如果你用范围约束或如果执行索引扫描来查询索引列，该值增加。</p>
+<p>Handler_read_prev：按照键顺序读前一行的请求数。该读方法主要用于优化ORDER BY … DESC。</p>
+<p>Handler_read_rnd ：根据固定位置读一行的请求数。如果你正执行大量查询并需要对结果进行排序该值较高。你可能使用了大量需要MySQL扫描整个表的查询或你的连接没有正确使用键。这个值较高，意味着运行效率低，应该建立索引来补救。</p>
+<p>Handler_read_rnd_next：在数据文件中读下一行的请求数。如果你正进行大量的表扫描，该值较高。通常说明你的表索引不正确或写入的查询没有利用索引。</p>
+
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://www.codetool.top" rel="external nofollow noreferrer">Rhett Peng</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。部分转载即网络资源均已注明来源，若有版权问题请联系站长。转载请注明来源
+                    <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/%E4%BC%98%E5%8C%96/">
+                                    <span class="chip bg-color">优化</span>
+                                </a>
+                            
+                                <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">
+                                    <span class="chip bg-color">数据库</span>
+                                </a>
+                            
+                                <a href="/tags/MySQL/">
+                                    <span class="chip bg-color">MySQL</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'VUmN3m0ICuwaL4jNPnxBRln8-gzGzoHsz',
+        appKey: 'QH8FVT32jvi4qBllLg6Cf0dU',
+        notify: 'false' === 'true',
+        verify: 'true' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: '说点什么吧'
+    });
+</script>
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
+            <div class="card">
+                <a href="/article/SQL%E4%BC%98%E5%8C%96%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86%E4%B9%8B%E7%B4%A2%E5%BC%95%E7%9A%84%E6%AD%A3%E7%A1%AE%E4%BD%BF%E7%94%A8%E5%A7%BF%E5%8A%BF/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/0.jpg" class="responsive-img" alt="SQL优化前置知识之索引的正确使用姿势">
+                        
+                        <span class="card-title">SQL优化前置知识之索引的正确使用姿势</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            该文的前置知识：SQL优化前置知识之优化前分析
+1 索引失效有的sql语句会不使用索引？在编写sql语句的时候应避免这些情况，一起来看看这些情况吧：
+1.1 不遵从最左前缀规则如果索引了多列，要遵守最左前缀法则。指的是查询从索引的最左前列开
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-03-05
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/" class="post-category">
+                                    中间件/工具/框架
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E4%BC%98%E5%8C%96/">
+                        <span class="chip bg-color">优化</span>
+                    </a>
+                    
+                    <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">
+                        <span class="chip bg-color">数据库</span>
+                    </a>
+                    
+                    <a href="/tags/MySQL/">
+                        <span class="chip bg-color">MySQL</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/article/SQL%E4%BC%98%E5%8C%96%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86%E4%B9%8B%E4%BC%98%E5%8C%96%E5%89%8D%E5%88%86%E6%9E%90/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/4.jpg" class="responsive-img" alt="SQL优化前置知识之优化前分析">
+                        
+                        <span class="card-title">SQL优化前置知识之优化前分析</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            在应用的的开发过程中，由于初期数据量小，开发人员写 SQL 语句时更重视功能上的实现，但是当应用系统正式上线后，随着生产数据量的急剧增长，很多 SQL 语句开始逐渐显露出性能问题，对生产的影响也越来越大，此时这些有问题的 SQL 语句就成为
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-03-05
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/" class="post-category">
+                                    中间件/工具/框架
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E4%BC%98%E5%8C%96/">
+                        <span class="chip bg-color">优化</span>
+                    </a>
+                    
+                    <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">
+                        <span class="chip bg-color">数据库</span>
+                    </a>
+                    
+                    <a href="/tags/MySQL/">
+                        <span class="chip bg-color">MySQL</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+    
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+<!-- 代码块折行 -->
+
+<style type="text/css">
+code[class*="language-"], pre[class*="language-"] { white-space: pre !important; }
+</style>
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h1, h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h1, h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+    <footer class="page-footer bg-color">
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            <span id="year">2019-2020</span>
+            <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">286.8k</span>&nbsp;字
+            
+            
+            
+            
+            
+            <br>
+            
+            <br>
+            
+            <span id="icp"><img src="/medias/icp.png" style="vertical-align: text-bottom;" />
+                <a href="http://beian.miit.gov.cn/" target="_blank">赣ICP备19011928号</a>
+            </span>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/codeband-top" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:pctdyx@qq.net" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=995632825" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 995632825" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+$(function () {
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+});
+</script>
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":200,"height":200,"hOffset":20,"vOffset":100},"mobile":{"show":false},"dialog":{"enable":true,"hitokoto":false},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div id="chat_input"><input id="question" type="text" placeholder="陪我聊聊天吧" onkeypress="return onKeyPress(event)"/></div>
+</html>
+
+<!--动态线条背景-->
+<script type="text/javascript"
+color="0,0,0" opacity='0.5' zIndex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+</script>
+
+<script>
+
+//聊天框按回车
+function onKeyPress(e){
+    var keyCode = null;
+    if(e.which)
+        keyCode = e.which;
+    else if(e.keyCode)
+        keyCode = e.keyCode;
+        
+    //如果按下回车
+    if(keyCode == 13) {
+        // 1.获取界面上的元素value
+        var question_box = document.getElementById('question')
+        var question = question_box.value
+        question_box.value = ""
+        question_box.setAttribute("disabled","disabled")
+        var api_key = "78c33a07808c7b9e1905c89c88b3be14"
+        var api_secret = "q707tevnk00f"
+
+        // 2.通过XHR发送一个POST请求
+        var xhr = new XMLHttpRequest()
+        xhr.open('GET','https://api.codetool.top/robottalk?question='+encodeURIComponent(question)+"&api_key="+api_key+"&api_secret="+api_secret)
+		xhr.send(null)
+		xhr.onload = function(){
+            question_box.removeAttribute('disabled');
+            var live2d_dialog = document.getElementsByClassName("live2d-widget-dialog")[0]
+            live2d_dialog.style.opacity=1
+            live2d_dialog.innerHTML = this.responseText
+            window.setTimeout(()=>{
+                live2d_dialog.style.opacity=0
+            }, 5000);
+		}
+    }
+
+}
+
+</script>
+
+<style> 
+#chat_input{
+    width: 200px;
+    height: 40px;
+    position: fixed;
+    right: 0px;
+    bottom: 80px;
+    right: 20px;
+} 
+
+#question{
+    border: none;
+    border-bottom: 1px #aaaaaa solid;
+    background-color: transparent;
+    padding: 5px;
+}
+
+@media screen and (max-width: 480px) {
+    #chat_input{
+        display: none;
+    }
+    #live2d-widget{
+        display: none;
+    }
+}
+</style>
