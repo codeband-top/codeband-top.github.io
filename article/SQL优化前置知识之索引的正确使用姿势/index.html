@@ -491,7 +491,7 @@ Note (Code 1003): /* select#1 */ select `test`.`t_user`.`id` AS `id`,`test`.`t_u
 <p><strong>顺序主键的优点：</strong></p>
 <p>如果主键的值是顺序的，那么 InnoDB 会把每一条记录都存储在上一条记录的后面。当达到页的最大填充因子时，下一条记录就会写入新的页中。一旦数据按照这种顺序的方式加载，主键页就会近似于被顺序的记录填满，这也正是所期望的结果。</p>
 <p><strong>顺序主键的缺点：</strong></p>
-<p>对于高并发工作负载，在 InnoDB 中按主键顺序插入可能会造成明显的争用。主键的上界会<br>成为热点。因为所有的插入都在这里，所以并发插入可能导致锁竞争。另一个热点可能是<br>AUTO_INCREMENT 锁机制，可能需要重新设计表或应用。</p>
+<p>对于高并发工作负载，在 InnoDB 中按主键顺序插入可能会造成明显的争用。主键的上界会成为热点。因为所有的插入都在这里，所以并发插入可能导致锁竞争。另一个热点可能是AUTO_INCREMENT 锁机制，可能需要重新设计表或应用。</p>
 <h3 id="AUTO-INC锁机制">2.1.2 AUTO-INC锁机制</h3><p>AUTO-INC锁是当向使用含有AUTO_INCREMENT列的表中插入数据时需要获取的一种特殊的表级锁。</p>
 <p>在最简单的情况下，如果一个事务正在向表中插入值，则任何其他事务必须等待对该表执行自己的插入操作，以便第一个事务插入的行的值是连续的。</p>
 <p>InnoDB 会在内存里保存一个计数器用来记录 AUTO_INCREMENT 的值，当插入一个新行数据时，就会用一个表锁来锁住这个计数器，直到插入结束。如果一行一行的插入数据则没有什么问题，但是如果大量的并发插入就废了，表锁会引起 SQL 堵塞，不但影响效率，而且可能会瞬间达到 MAX_CONNECTION 而崩溃。</p>
@@ -533,7 +533,6 @@ Note (Code 1003): /* select#1 */ select `test`.`t_user`.`id` AS `id`,`test`.`t_u
 <p>假设 B 是一个选择性很低的列，只有 b1 和 b2 两种取值，那么查询可以写为 <code>A = a and Bin(b1,b2) and C = c</code>。</p>
 <h2 id="避免多个范围条件">2.7 避免多个范围条件</h2><p>对于范围条件查询，MySQL 无法再使用范围列后面的其他索引列了，但是<strong>对于多个等值条件查询（in …）则没有这个限制。</strong></p>
 <p>假设有索引(A,B)，查询条件为 A &gt; a and B &lt; b，那么此时无法同时使用 A 和 B 的复合索引，只能用到 A 的索引。一定要用的话可以考虑将 A 转为 in(a1,a2…)。</p>
-<h2 id="优化-limit">2.8 优化 limit</h2><p>延迟关联，使用覆盖索引</p>
 <h1 id="查看索引使用情况">3 查看索引使用情况</h1><pre class=" language-sql"><code class="language-sql"><span class="token keyword">show</span> <span class="token keyword">status</span> <span class="token operator">like</span> <span class="token string">'Handler_read%'</span><span class="token punctuation">;</span>    
 
 <span class="token keyword">show</span> <span class="token keyword">global</span> <span class="token keyword">status</span> <span class="token operator">like</span> <span class="token string">'Handler_read%'</span><span class="token punctuation">;</span>    </code></pre>
@@ -919,32 +918,34 @@ Note (Code 1003): /* select#1 */ select `test`.`t_user`.`id` AS `id`,`test`.`t_u
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="far fa-dot-circle"></i>&nbsp;本篇
-            </div>
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/article/SQL%E4%BC%98%E5%8C%96%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86%E4%B9%8B%E7%B4%A2%E5%BC%95%E7%9A%84%E6%AD%A3%E7%A1%AE%E4%BD%BF%E7%94%A8%E5%A7%BF%E5%8A%BF/">
+                <a href="/article/SQL%E4%BC%98%E5%8C%96-%E4%BB%8E%E6%89%A7%E8%A1%8C%E7%AD%96%E7%95%A5%E4%B8%8A%E6%8F%90%E9%AB%98%E6%95%B0%E6%8D%AE%E5%BA%93%E6%80%A7%E8%83%BD/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/0.jpg" class="responsive-img" alt="SQL优化前置知识之索引的正确使用姿势">
+                        <img src="/medias/featureimages/22.jpg" class="responsive-img" alt="SQL优化-从执行策略上提高数据库性能">
                         
-                        <span class="card-title">SQL优化前置知识之索引的正确使用姿势</span>
+                        <span class="card-title">SQL优化-从执行策略上提高数据库性能</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            该文的前置知识：SQL优化前置知识之优化前分析
-1 索引失效有的sql语句会不使用索引？在编写sql语句的时候应避免这些情况，一起来看看这些情况吧：
-1.1 不遵从最左前缀规则如果索引了多列，要遵守最左前缀法则。指的是查询从索引的最左前列开
+                            该文前置知识：
+
+SQL优化前置知识之优化前分析
+SQL优化前置知识之索引的正确使用姿势
+
+数据库的性能在系统中非常重要，在前面了解了Redis高可用的背景下也了解到了许多问题都会给数据库施加非常大的压力，一旦数据库崩溃会带来非常严重的后果
                         
                     </div>
                     <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2020-03-05
-                            </span>
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2020-03-05
+                        </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
@@ -957,7 +958,6 @@ Note (Code 1003): /* select#1 */ select `test`.`t_user`.`id` AS `id`,`test`.`t_u
                         </span>
                     </div>
                 </div>
-
                 
                 <div class="card-action article-tags">
                     
@@ -1177,7 +1177,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">286.8k</span>&nbsp;字
+                class="white-color">289.6k</span>&nbsp;字
             
             
             
