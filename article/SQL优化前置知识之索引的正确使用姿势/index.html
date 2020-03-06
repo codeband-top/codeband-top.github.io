@@ -505,10 +505,12 @@ Note (Code 1003): /* select#1 */ select `test`.`t_user`.`id` AS `id`,`test`.`t_u
 <p><code>innodb_autoinc_lock_mode=x</code>，x可取值：</p>
 <ul>
 <li>0，传统的 auto_increment 机制。这种模式下所有<strong>针对 auto_increment 列的插入操作都会加AUTO-INC 锁</strong>，分配的值也是一个个分配，是连续的，正常情况下也<strong>不会有间隙</strong>（当然如果事务 rollback 了这个 auto_increment 值就会浪费掉，从而造成间隙）。</li>
-<li>1，这种情况下，<strong>针对 bulk inserts 才会采用 AUTO-INC 锁这种方式</strong>，而针对 simple inserts，则直接通过分析语句，获得要插入的数量，然后<strong>一次性分配足够的 auto_increment id</strong>，只会将整个分配的过程锁住。。当然，如果其他事务已经持有了AUTO-INC锁，则simple inserts需要等待.  </li>
+<li>1，这种情况下<ul>
+<li><strong>针对 bulk inserts 才会采用 AUTO-INC 锁这种方式</strong></li>
+<li>针对 simple inserts，则直接通过分析语句，获得要插入的数量，然后<strong>一次性分配足够的 auto_increment id</strong>，只会将整个分配的过程锁住。。当然，如果其他事务已经持有了AUTO-INC锁，则simple inserts需要等待.   </li>
+<li><strong>针对 Mixed-mode inserts：直接分析语句，获得最坏情况下需要插入的数量，然后一次性分配足够的 auto_increment id</strong>，只会将整个分配的过程锁住。保证同一条 insert 语句中新插入的 auto_increment id 都是连续的，语句之间是<strong>可能出现auto_increment 值的空隙</strong>的。比如 mixed-mode inserts 以及 bulk inserts 中都有可能导致一些分配的 auto_increment 值被浪费掉从而导致间隙。</li>
 </ul>
-<p><strong>针对 Mixed-mode inserts：直接分析语句，获得最坏情况下需要插入的数量，然后一次性分配足够的 auto_increment id</strong>，只会将整个分配的过程锁住。保证同一条 insert 语句中新插入的 auto_increment id 都是连续的，语句之间是<strong>可能出现auto_increment 值的空隙</strong>的。比如 mixed-mode inserts 以及 bulk inserts 中都有可能导致一些分配的 auto_increment 值被浪费掉从而导致间隙。</p>
-<ul>
+</li>
 <li>2，这种模式下<strong>任何类型的 inserts 都不会采用 AUTO-INC 锁</strong>，性能最好。这种模式是<strong>来一个分配一个</strong>，而不会锁表，只会锁住分配 id 的过程，和 innodb_autoinc_lock_mode = 1 的区别在于，不会预分配多个。但是在 replication 中当 binlog_format 为 statement-based 时（简称 SBR statement-based replication）存在问题，因为是来一个分配一个，这样当并发执行时，“Bulk inserts”在分配时会同时向其他的 INSERT 分配，<strong>会出现主从不一致</strong>（从库执行结果和主库执行结果不一样），因为 binlog 只会记录开始的 insert id。<strong>可能会在同一条语句内部产生 auto_increment 值间隙。</strong></li>
 </ul>
 <h2 id="覆盖索引">2.2 覆盖索引</h2><p>如果<strong>一个索引包含了所有需要查询字段的值</strong>，就称为覆盖索引。</p>
@@ -1177,7 +1179,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">290k</span>&nbsp;字
+                class="white-color">295k</span>&nbsp;字
             
             
             
