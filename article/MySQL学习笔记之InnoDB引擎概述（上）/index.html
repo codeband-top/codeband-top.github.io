@@ -405,7 +405,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    795
+                    1.4k
                 </div>
                 
 
@@ -465,6 +465,15 @@
 <p><code>innodb_log_buffer_size</code></p>
 <h2 id="CheckPoint技术">3.5 CheckPoint技术</h2><p>CheckPoint技术即检查点技术，我在<a href="../数据库理论之事务与恢复技术/#toc-heading-18">数据库理论之事务与恢复技术</a>中有提及。不过当时对检查点相关的阐述是记录了提交的事务，然而InnoDB并不会立即写回磁盘，所以这里谈的是脏页的刷新。</p>
 <p><img src="https://api.codetool.top/img/15827025937028.png" alt></p>
+<h1 id="InnoDB逻辑存储结构">4 InnoDB逻辑存储结构</h1><p>InnoDB的所有数据都被逻辑地存放在表空间，<strong>表空间又由段，区，页组成。</strong></p>
+<p><img src="https://api.codetool.top/img/15835817616854.png" alt></p>
+<h2 id="表空间">4.1 表空间</h2><p><strong>默认情况下InnoDB存储引擎有一个共享表空间ibdata1，所有的数据都存放在这个表空间内。</strong>如果用户启用了参数<code>innodb_file_per_table</code>，则每张表的数据可以单独放到一个表空间内，对应一个ibd文件，称为独立表空间，它存放的只是数据、索引和插入缓冲 bitmap 页，其他数据，如回滚信息、插入缓冲索引页、系统事务信息、二次写缓冲等还是存放在原来的共享表空间中。</p>
+<h2 id="段">4.2 段</h2><p>段就是上图的segment区域，常见的段有数据段、索引段、回滚段等，在InnoDB存储引擎中，对段的管理都是由引擎自身所完成的。</p>
+<p>数据段即为B+树的叶子节点，索引段即为B+树的非索引节点。</p>
+<h2 id="区">4.3 区</h2><p>　　<br>区就是上图的extent区域，区是由连续的页组成的空间，无论页的大小怎么变，区的大小默认总是为1MB。为了保证区中的页的连续性，InnoDB存储引擎一次从磁盘申请4-5个区，InnoDB页的大小默认为16kb，即一个区一共有64（1MB/16kb=16）个连续的页。每个段开始，先用32页（page）大小的碎片页来存放数据，在使用完这些页之后才是64个连续页的申请。这样做的目的是，对于一些小表或者是undo类的段，可以开始申请较小的空间，节约磁盘开销。</p>
+<h2 id="页">4.4 页</h2><p>页在一些文档里也被称为块。</p>
+<p>页就是上图的page区域，也可以叫块。页是InnoDB磁盘管理的最小单位。默认大小为16KB，可以通过参数innodb_page_size来设置。常见的页类型有：数据页，undo页，系统页，事务数据页，插入缓冲位图页，插入缓冲空闲列表页，未压缩的二进制大对象页，压缩的二进制大对象页等。　　</p>
+<h2 id="行">4.5 行</h2><p>每个页允许存放 16KB/2 – 200 行的记录，即 7992 行记录。</p>
 
             </div>
             <hr/>
@@ -1084,7 +1093,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">295.3k</span>&nbsp;字
+                class="white-color">302.9k</span>&nbsp;字
             
             
             
