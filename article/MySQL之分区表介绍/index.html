@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="keywords" content="MySQL之分区表介绍, 代码段小站">
     <meta name="description" content="本文大部分参考自《MySQL技术内幕：InnoDB存储引擎》
-1 分区对于InnoDB，分区就是把一个数据表的物理存储拆分为多个ibd文件（相当于独立表空间再拆分成了多个表空间）。分区后的MyISAM，则是每个分区有一个myi文件（表的索引">
+1 概述对于InnoDB，分区就是把一个数据表的物理存储拆分为多个ibd文件（相当于独立表空间再拆分成了多个表空间）。分区后的MyISAM，则是每个分区有一个myi文件（表的索引">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -406,7 +406,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.7k
+                    1.6k
                 </div>
                 
 
@@ -420,12 +420,12 @@
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <p>本文大部分参考自《MySQL技术内幕：InnoDB存储引擎》</p>
-<h1 id="分区">1 分区</h1><p>对于InnoDB，分区就是把一个数据表的物理存储拆分为多个ibd文件（相当于独立表空间再拆分成了多个表空间）。分区后的MyISAM，则是每个分区有一个myi文件（表的索引信息）和一个myd文件（表的数据信息）。每一个分区，在MySQL看来都是一张独立的表。</p>
-<h2 id="分区类型">1.1 分区类型</h2><h3 id="水平分区">1.1.1 水平分区</h3><p>这种形式分区是对表的行进行分区，通过这样的方式不同分组里面的物理列分割的数据集得以组合，从而进行个体分割（单分区）或集体分割（1个或多个分区）。所有在表中定义的列在每个数据集中都能找到，所以表的特性依然得以保持。</p>
-<h3 id="垂直分区">1.1.2 垂直分区</h3><p>这种分区方式一般来说是通过对表的垂直划分来减少目标表的宽度，使某些特定的列被划分到特定的分区，每个分区都包含了其中的列所对应的行。</p>
+<h1 id="概述">1 概述</h1><p>对于InnoDB，分区就是把一个数据表的物理存储拆分为多个ibd文件（相当于独立表空间再拆分成了多个表空间）。分区后的MyISAM，则是每个分区有一个myi文件（表的索引信息）和一个myd文件（表的数据信息）。每一个分区，在MySQL看来都是一张独立的表。</p>
+<h1 id="分区类型">2 分区类型</h1><h2 id="水平分区">2.1 水平分区</h2><p>这种形式分区是对表的行进行分区，通过这样的方式不同分组里面的物理列分割的数据集得以组合，从而进行个体分割（单分区）或集体分割（1个或多个分区）。所有在表中定义的列在每个数据集中都能找到，所以表的特性依然得以保持。</p>
+<h2 id="垂直分区">2.2 垂直分区</h2><p>这种分区方式一般来说是通过对表的垂直划分来减少目标表的宽度，使某些特定的列被划分到特定的分区，每个分区都包含了其中的列所对应的行。</p>
 <p><strong>MySQL在5.1时添加了对水平分区的支持。并不支持垂直分区。</strong></p>
 <p>MySQL数据库的分区是局部分区索引，一个分区中既存了数据，又放了索引。也就是说，<strong>每个区的聚集索引和非聚集索引都放在各自区的</strong>（不同的物理文件）。目前MySQL数据库还不支持全局分区（数据存放在各个分区中，但是所有数据的索引放在一个对象中）。</p>
-<h2 id="分区算法">1.2 分区算法</h2><p>当前MySQL支持以下几种类型的分区：</p>
+<h1 id="分区算法">3 分区算法</h1><p>当前MySQL支持以下几种类型的分区：</p>
 <ul>
 <li>RANGE分区：行数据基于属于一个给定连续区间的列值被放入分区，MySQL5.5开始支持。</li>
 <li>LIST分区：和RANGE类似，只是LIST分区面向的是离散的值。MySQL5.5开始支持。</li>
@@ -433,7 +433,7 @@
 <li>KEY分区：根据MySQL数据库提供的哈希函数来进行分区。</li>
 </ul>
 <p>无论哪种类型的分区，如果表中存在主键或唯一索引时，分区列（用来判断该分往哪个分区）必须是唯一索引的一个组成部分。</p>
-<h3 id="RANGE分区">1.2.1 RANGE分区</h3><p>示例</p>
+<h2 id="RANGE分区">3.1 RANGE分区</h2><p>示例</p>
 <pre class=" language-sql"><code class="language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">TABLE</span> tbl_new<span class="token punctuation">(</span>
     id <span class="token keyword">INT</span> <span class="token operator">NOT</span> <span class="token boolean">NULL</span> <span class="token keyword">PRIMARY</span> <span class="token keyword">KEY</span><span class="token punctuation">,</span>
     title <span class="token keyword">VARCHAR</span><span class="token punctuation">(</span><span class="token number">20</span><span class="token punctuation">)</span> <span class="token operator">NOT</span> <span class="token boolean">NULL</span> <span class="token keyword">DEFAULT</span> <span class="token string">''</span>
@@ -450,7 +450,7 @@
 <li>&gt;20 放在 t2</li>
 </ul>
 <p>当插入一个不在分区范围内的值的时候，MySQL会报异常。</p>
-<h3 id="LIST分区">1.2.2 LIST分区</h3><p>示例</p>
+<h2 id="LIST分区">3.2 LIST分区</h2><p>示例</p>
 <pre class=" language-sql"><code class="language-sql"><span class="token keyword">create</span> <span class="token keyword">table</span> <span class="token keyword">user</span> <span class="token punctuation">(</span>
     uid <span class="token keyword">int</span> <span class="token operator">not</span> <span class="token boolean">null</span><span class="token punctuation">,</span>
     userName <span class="token keyword">varchar</span><span class="token punctuation">(</span><span class="token number">20</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
@@ -469,7 +469,7 @@
 </ul>
 <p>当插入一个不在分区范围内的值的时候，MySQL同样会报异常。</p>
 <p>当一条Insert语句插入多个值的时候，而其中有一些值是在分区范围内的，MyISAM引擎会把第一个不满足范围的数据前面的数据全部插入，而后面的不处理。而InnoDB则把它当成一个事务，都不会处理。</p>
-<h3 id="HASH分区">1.2.3 HASH分区</h3><p>示例：</p>
+<h2 id="HASH分区">3.3 HASH分区</h2><p>示例：</p>
 <pre class=" language-sql"><code class="language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">TABLE</span> t_hash<span class="token punctuation">(</span>
     <span class="token number">a</span> <span class="token keyword">INT</span><span class="token punctuation">,</span>
     <span class="token number">b</span> <span class="token keyword">DATETIME</span>
@@ -477,7 +477,7 @@
 <span class="token keyword">PARTITION</span> <span class="token keyword">BY</span> <span class="token keyword">HASH</span><span class="token punctuation">(</span>YEAR<span class="token punctuation">(</span><span class="token number">b</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
 PARTITIONS <span class="token number">4</span><span class="token punctuation">;</span></code></pre>
 <p>用户给数据库提供分区的依据，<code>YEAR(b)</code>，必须是一个正整数，然后需要通过<code>PARTITIONS num</code>告知数据库分区的数量，然后数据库自动根据<code>YEAR(b)</code>将数据均匀分到这些分区中。如果没有<code>PARTITIONS num</code>语句，分区的数量默认为1。</p>
-<h3 id="KEY分区">1.2.4 KEY分区</h3><p>KEY分区和HASH分区相似，不同之处在于HASH分区使用用户定义的函数进行分区，KEY分区使用MySQL数据库提供的函数进行分区。对于大多数存储引擎，MySQL数据库使用其内部的哈希函数，这些函数基于与PASSWORD()一样的运算法则。</p>
+<h2 id="KEY分区">3.4 KEY分区</h2><p>KEY分区和HASH分区相似，不同之处在于HASH分区使用用户定义的函数进行分区，KEY分区使用MySQL数据库提供的函数进行分区。对于大多数存储引擎，MySQL数据库使用其内部的哈希函数，这些函数基于与PASSWORD()一样的运算法则。</p>
 <p>示例：</p>
 <pre class=" language-sql"><code class="language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">TABLE</span> t_key<span class="token punctuation">(</span>
     <span class="token number">a</span> <span class="token keyword">INT</span><span class="token punctuation">,</span>
@@ -485,23 +485,23 @@ PARTITIONS <span class="token number">4</span><span class="token punctuation">;<
 <span class="token punctuation">)</span> <span class="token keyword">ENGINE</span><span class="token operator">=</span><span class="token keyword">InnoDB</span>
 <span class="token keyword">PARTITION</span> <span class="token keyword">BY</span> <span class="token keyword">KEY</span> <span class="token punctuation">(</span><span class="token number">b</span><span class="token punctuation">)</span>
 PARTITIONS <span class="token number">4</span><span class="token punctuation">;</span></code></pre>
-<h3 id="其他">1.2.5 其他</h3><p>COLUMNS分区、子分区</p>
-<h2 id="分区的应用场景">1.3 分区的应用场景</h2><ol>
+<h2 id="其他">3.5 其他</h2><p>COLUMNS分区、子分区</p>
+<h1 id="分区的应用场景">4 分区的应用场景</h1><ol>
 <li>表非常大以至于无法全部放在内存中，或者只在表的最后部分有热点数据，其他均为历史数据（可以将热点数据提取出来，加快热点数据的查询、访问效率）</li>
 <li>分区表的数据更容易维护。（批量删除数据-&gt;清除整个分区）</li>
 <li>分区表的数据可以分布在不同的物理设备上，从而高效地利用多个硬件设备</li>
 <li>可以使用分区表来避免某些特殊的瓶颈。比如 InnoDB 的单个索引的互斥访问，ext3 文件系统的 inode 锁竞争。</li>
 <li>还可以备份和恢复独立的分区</li>
 </ol>
-<h2 id="分区的限制">1.4 分区的限制</h2><ol>
+<h1 id="分区的限制">5 分区的限制</h1><ol>
 <li>一个表最多只能有 1024 个分区</li>
 <li>如果表中存在主键或唯一索引时，分区列必须是唯一索引的一个组成部分。</li>
 <li>分区表中无法使用外键索引</li>
 </ol>
-<h2 id="分区的陷阱">1.5 分区的陷阱</h2><h3 id="NULL值会使分区过滤无效">1.5.1 NULL值会使分区过滤无效</h3><p>分区的表达式的值可以是 NULL；第一个分区是一个特殊分区，如果表达式的值为 NULL 或非法值，记录都会被存放到第一个分区。WHERE 查询时即使看起来可以过滤到只有一个分区，但实际会检查两个分区，即第一个分区。最好是设置分区的列为NOT NULL。</p>
-<h3 id="分区列和索引列不匹配">1.5.2 分区列和索引列不匹配</h3><p>如果定义的索引列和分区列不匹配，会导致索引无法进行分区过滤。</p>
+<h1 id="分区的陷阱">6 分区的陷阱</h1><h2 id="NULL值会使分区过滤无效">6.1 NULL值会使分区过滤无效</h2><p>分区的表达式的值可以是 NULL；第一个分区是一个特殊分区，如果表达式的值为 NULL 或非法值，记录都会被存放到第一个分区。WHERE 查询时即使看起来可以过滤到只有一个分区，但实际会检查两个分区，即第一个分区。最好是设置分区的列为NOT NULL。</p>
+<h2 id="分区列和索引列不匹配">6.2 分区列和索引列不匹配</h2><p>如果定义的索引列和分区列不匹配，会导致索引无法进行分区过滤。</p>
 <p>假设在列 a 上定义了索引，而在列 b 上进行分区。因为每个分区都有其独立的索引，所以扫描 b 上的索引就需要扫描每一个分区内对应的索引。</p>
-<h3 id="选择分区的成本可能很高">1.5.3 选择分区的成本可能很高</h3><p>尤其是范围分区，对于回答“这一行属于哪个分区”、“这些符合查询条件的行在哪些分区”这样的问题的成本可能会非常高。其他的分区类型，比如KEY分区和HASH分区，就没有这样的问题。在批量插入时问题尤其严重。</p>
+<h2 id="选择分区的成本可能很高">6.3 选择分区的成本可能很高</h2><p>尤其是范围分区，对于回答“这一行属于哪个分区”、“这些符合查询条件的行在哪些分区”这样的问题的成本可能会非常高。其他的分区类型，比如KEY分区和HASH分区，就没有这样的问题。在批量插入时问题尤其严重。</p>
 
             </div>
             <hr/>
@@ -865,31 +865,34 @@ PARTITIONS <span class="token number">4</span><span class="token punctuation">;<
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="far fa-dot-circle"></i>&nbsp;本篇
-            </div>
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/article/MySQL%E4%B9%8B%E5%88%86%E5%8C%BA%E8%A1%A8%E4%BB%8B%E7%BB%8D/">
+                <a href="/article/SpringBoot%E4%BB%8B%E7%BB%8D%E5%92%8CHelloWorld%E5%85%A5%E9%97%A8%E7%A8%8B%E5%BA%8F/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/13.jpg" class="responsive-img" alt="MySQL之分区表介绍">
+                        <img src="/medias/featureimages/2.jpg" class="responsive-img" alt="SpringBoot介绍和HelloWorld入门程序">
                         
-                        <span class="card-title">MySQL之分区表介绍</span>
+                        <span class="card-title">SpringBoot介绍和HelloWorld入门程序</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            本文大部分参考自《MySQL技术内幕：InnoDB存储引擎》
-1 分区对于InnoDB，分区就是把一个数据表的物理存储拆分为多个ibd文件（相当于独立表空间再拆分成了多个表空间）。分区后的MyISAM，则是每个分区有一个myi文件（表的索引
+                            1 Spring Boot 简介
+简化Spring应用开发的一个框架；
+整个Spring技术栈的一个大整合；
+J2EE开发的一站式解决方案；
+
+Spring Boot用来简化Spring应用开发，约定大于配置，去繁从简，just run就能
                         
                     </div>
                     <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2020-03-07
-                            </span>
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2020-03-08
+                        </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
@@ -902,20 +905,11 @@ PARTITIONS <span class="token number">4</span><span class="token punctuation">;<
                         </span>
                     </div>
                 </div>
-
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/%E4%BC%98%E5%8C%96/">
-                        <span class="chip bg-color">优化</span>
-                    </a>
-                    
-                    <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">
-                        <span class="chip bg-color">数据库</span>
-                    </a>
-                    
-                    <a href="/tags/MySQL/">
-                        <span class="chip bg-color">MySQL</span>
+                    <a href="/tags/SpringBoot/">
+                        <span class="chip bg-color">SpringBoot</span>
                     </a>
                     
                 </div>
@@ -1120,7 +1114,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">302.9k</span>&nbsp;字
+                class="white-color">306.5k</span>&nbsp;字
             
             
             
