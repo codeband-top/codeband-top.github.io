@@ -399,7 +399,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    2k
+                    2.2k
                 </div>
                 
 
@@ -478,7 +478,35 @@
 </li>
 </ul>
 <p>这两个注解都是写在方法上。</p>
-<h1 id="基于xml配置的Spring-IoC实例">2 基于xml配置的Spring IoC实例</h1><h2 id="实体类">2.1 实体类</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
+<h1 id="条件装配Bean">2 条件装配Bean</h1><p>有时候某些客观的因素会使一些Bean无法进行初始化，例如，在数据库连接池的配置中漏掉一些配置会造成数据源不能连接上。在这样的情况下，可能不希望IoC去装配数据源，Spring4提供了新注解<code>@Conditional</code>，它的作用是按照一定的条件进行判断，满足条件给容器注册bean。它还需要配合另外一个接口Condition来完成对应的功能：</p>
+<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Target</span><span class="token punctuation">(</span><span class="token punctuation">{</span>ElementType<span class="token punctuation">.</span>TYPE<span class="token punctuation">,</span> ElementType<span class="token punctuation">.</span>METHOD<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token annotation punctuation">@Retention</span><span class="token punctuation">(</span>RetentionPolicy<span class="token punctuation">.</span>RUNTIME<span class="token punctuation">)</span>
+<span class="token annotation punctuation">@Documented</span>
+<span class="token keyword">public</span> @<span class="token keyword">interface</span> <span class="token class-name">Conditional</span> <span class="token punctuation">{</span>
+
+    <span class="token comment" spellcheck="true">/**
+     * All {@link Condition Conditions} that must {@linkplain Condition#matches match}
+     * in order for the component to be registered.
+     */</span>
+    Class<span class="token operator">&lt;</span><span class="token operator">?</span> <span class="token keyword">extends</span> <span class="token class-name">Condition</span><span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">value</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token punctuation">}</span></code></pre>
+<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@FunctionalInterface</span>
+<span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">Condition</span> <span class="token punctuation">{</span>
+
+    <span class="token comment" spellcheck="true">/**
+     * Determine if the condition matches.
+     * @param context the condition context
+     * @param metadata metadata of the {@link org.springframework.core.type.AnnotationMetadata class}
+     * or {@link org.springframework.core.type.MethodMetadata method} being checked
+     * @return {@code true} if the condition matches and the component can be registered,
+     * or {@code false} to veto the annotated component's registration
+     */</span>
+    <span class="token keyword">boolean</span> <span class="token function">matches</span><span class="token punctuation">(</span>ConditionContext context<span class="token punctuation">,</span> AnnotatedTypeMetadata metadata<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token punctuation">}</span></code></pre>
+<p>Conditional根据Condition中的match方法，返回true则注入bean，false则不注入。</p>
+<h1 id="基于xml配置的Spring-IoC实例">3 基于xml配置的Spring IoC实例</h1><h2 id="实体类">3.1 实体类</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
  * 账户的实体类
  */</span>
 <span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Account</span> <span class="token keyword">implements</span> <span class="token class-name">Serializable</span> <span class="token punctuation">{</span>
@@ -519,7 +547,7 @@
                 <span class="token string">'}'</span><span class="token punctuation">;</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span></code></pre>
-<h2 id="持久层">2.2 持久层</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
+<h2 id="持久层">3.2 持久层</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
  * 账户的持久层接口
  */</span>
 <span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">IAccountDao</span> <span class="token punctuation">{</span>
@@ -606,7 +634,7 @@
         <span class="token punctuation">}</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span></code></pre>
-<h2 id="业务层">2.3 业务层</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
+<h2 id="业务层">3.3 业务层</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
  * 账户的业务层接口
  */</span>
 <span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">IAccountService</span> <span class="token punctuation">{</span>
@@ -668,7 +696,7 @@
         accountDao<span class="token punctuation">.</span><span class="token function">deleteAccount</span><span class="token punctuation">(</span>accountId<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span></code></pre>
-<h2 id="Spring配置">2.4 Spring配置</h2><pre class=" language-xml"><code class="language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8"?></span>
+<h2 id="Spring配置">3.4 Spring配置</h2><pre class=" language-xml"><code class="language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8"?></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>beans</span> <span class="token attr-name">xmlns</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>http://www.springframework.org/schema/beans<span class="token punctuation">"</span></span>
        <span class="token attr-name"><span class="token namespace">xmlns:</span>xsi</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>http://www.w3.org/2001/XMLSchema-instance<span class="token punctuation">"</span></span>
        <span class="token attr-name"><span class="token namespace">xsi:</span>schemaLocation</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>http://www.springframework.org/schema/beans
@@ -698,7 +726,7 @@
         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>password<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>123456<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>property</span><span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>bean</span><span class="token punctuation">></span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>beans</span><span class="token punctuation">></span></span></code></pre>
-<h2 id="测试类">2.5 测试类</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
+<h2 id="测试类">3.5 测试类</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
  * 使用Junit单元测试，测试我们的配置
  */</span>
 <span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">AccountServiceTest</span> <span class="token punctuation">{</span>
@@ -747,8 +775,8 @@
         as<span class="token punctuation">.</span><span class="token function">deleteAccount</span><span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span></code></pre>
-<h1 id="基于注解配置的Spring-IoC实例">3 基于注解配置的Spring IoC实例</h1><p>实体类不变。</p>
-<h2 id="持久层-1">3.1 持久层</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
+<h1 id="基于注解配置的Spring-IoC实例">4 基于注解配置的Spring IoC实例</h1><p>实体类不变。</p>
+<h2 id="持久层-1">4.1 持久层</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
  * 账户的持久层实现类
  */</span>
 <span class="token annotation punctuation">@Repository</span><span class="token punctuation">(</span><span class="token string">"accountDao"</span><span class="token punctuation">)</span>
@@ -759,7 +787,7 @@
     <span class="token comment" spellcheck="true">//不变...</span>
 <span class="token punctuation">}</span></code></pre>
 <p>加入<code>@Repository</code>和<code>@Autowired</code></p>
-<h2 id="业务层-1">3.2 业务层</h2><pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Service</span><span class="token punctuation">(</span><span class="token string">"accountService"</span><span class="token punctuation">)</span>
+<h2 id="业务层-1">4.2 业务层</h2><pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Service</span><span class="token punctuation">(</span><span class="token string">"accountService"</span><span class="token punctuation">)</span>
 <span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">AccountServiceImpl</span> <span class="token keyword">implements</span> <span class="token class-name">IAccountService</span> <span class="token punctuation">{</span>
     <span class="token annotation punctuation">@Autowired</span>
     <span class="token keyword">private</span> IAccountDao accountDao<span class="token punctuation">;</span>
@@ -767,7 +795,7 @@
     <span class="token comment" spellcheck="true">//不变...</span>
 <span class="token punctuation">}</span></code></pre>
 <p>加入<code>@Service</code>和<code>@Autowired</code>。</p>
-<h2 id="编写配置类">3.3 编写配置类</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
+<h2 id="编写配置类">4.3 编写配置类</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
  * 该类是一个配置类，它的作用和bean.xml是一样的
  */</span>
 <span class="token annotation punctuation">@Configuration</span>
@@ -816,7 +844,7 @@
 <span class="token attr-name">jdbc.url</span> <span class="token punctuation">=</span> <span class="token attr-value">jdbc:mysql://192.168.91.1:3306/learnSpring</span>
 <span class="token attr-name">jdbc.username</span> <span class="token punctuation">=</span> <span class="token attr-value">root</span>
 <span class="token attr-name">jdbc.password</span> <span class="token punctuation">=</span> <span class="token attr-value">123456</span></code></pre>
-<h2 id="测试类-1">3.4 测试类</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">AccountServiceTest</span> <span class="token punctuation">{</span>
+<h2 id="测试类-1">4.4 测试类</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">AccountServiceTest</span> <span class="token punctuation">{</span>
 
     ApplicationContext ac<span class="token punctuation">;</span>
     IAccountService as<span class="token punctuation">;</span>
@@ -830,7 +858,7 @@
     <span class="token punctuation">}</span>
     <span class="token comment" spellcheck="true">//不变...</span>
 <span class="token punctuation">}</span></code></pre>
-<h1 id="Spring整合JUnit测试">4 Spring整合JUnit测试</h1><p>导入maven依赖：</p>
+<h1 id="Spring整合JUnit测试">5 Spring整合JUnit测试</h1><p>导入maven依赖：</p>
 <pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-test<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
@@ -1476,7 +1504,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">306.8k</span>&nbsp;字
+                class="white-color">311.2k</span>&nbsp;字
             
             
             
