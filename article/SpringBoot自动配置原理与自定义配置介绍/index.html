@@ -494,6 +494,7 @@
     <span class="token annotation punctuation">@Bean</span><span class="token punctuation">(</span>name <span class="token operator">=</span> DEFAULT_DISPATCHER_SERVLET_BEAN_NAME<span class="token punctuation">)</span>
     <span class="token keyword">public</span> DispatcherServlet <span class="token function">dispatcherServlet</span><span class="token punctuation">(</span>HttpProperties httpProperties<span class="token punctuation">,</span> WebMvcProperties webMvcProperties<span class="token punctuation">)</span> <span class="token punctuation">{</span>
         DispatcherServlet dispatcherServlet <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DispatcherServlet</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">//注意</span>
         dispatcherServlet<span class="token punctuation">.</span><span class="token function">setDispatchOptionsRequest</span><span class="token punctuation">(</span>webMvcProperties<span class="token punctuation">.</span><span class="token function">isDispatchOptionsRequest</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
         dispatcherServlet<span class="token punctuation">.</span><span class="token function">setDispatchTraceRequest</span><span class="token punctuation">(</span>webMvcProperties<span class="token punctuation">.</span><span class="token function">isDispatchTraceRequest</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
         dispatcherServlet<span class="token punctuation">.</span><span class="token function">setThrowExceptionIfNoHandlerFound</span><span class="token punctuation">(</span>webMvcProperties<span class="token punctuation">.</span><span class="token function">isThrowExceptionIfNoHandlerFound</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -513,7 +514,8 @@
     <span class="token punctuation">}</span>
 
 <span class="token punctuation">}</span></code></pre>
-<p>通过上面的代码,可以看到Spring Boot内部已经自动为我们做了很多关于DispatcherServlet的配置,其中的<code>@EnableConfigurationProperties</code>还能够在读取配置内容的情况下自动生成Spring MVC所需的类。到这里,应该明白为什么几乎在没有任何配置下就能用Spring Boot启动 Spring MVC项目,这些都是<strong>Spring Boot通过Maven依赖找到对应的jar包和嵌入的服务器,然后使用默认自动配置类来创建默认的开发环境。</strong>但是有时候,我们需要对这些默认的环境进行修改以适应个性化的要求,这些在 Spring Boot中也是非常简单的,正如<code>@EnableConfigurationProperties</code>注解那样，它允许读入配置文件的内容来自定义自动初始化所需的内容。</p>
+<p>通过上面的代码,可以看到这个自动配置类使用了许多<code>@Conditional**</code>注解来条件性地加载配置（比如说是否存在指定的类），配置的默认值从一个<code>**Properties</code>类中取出，如果用户配置了自定义属性，会覆盖掉<code>**Properties</code>中的默认值。</p>
+<p>到这里,应该明白为什么几乎在没有任何配置下就能用Spring Boot启动 Spring MVC项目。但是有时候,我们需要对这些默认的环境进行修改以适应个性化的要求,这些在 Spring Boot中也是非常简单的,正如<code>@EnableConfigurationProperties</code>注解那样，它允许读入配置文件的内容来自定义自动初始化所需的内容。</p>
 <h1 id="Spring-Boot配置文件">2 Spring Boot配置文件</h1><p>Spring Boot的所有的AutoConfiguration属性项可以在 <a href="https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#common-application-properties" target="_blank" rel="noopener">https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#common-application-properties</a> 看到。这一节我们主要介绍自定义配置。</p>
 <h2 id="yaml语法">2.1 yaml语法</h2><p>配置文件推荐使用yaml语法来写，通过缩进来表达数据关系。</p>
 <h2 id="字符串">2.2 字符串</h2><p>字符串​可以不加引号，如果加引号：</p>
@@ -570,6 +572,7 @@
       <span class="token key atrule">name</span><span class="token punctuation">:</span> 小狗
       <span class="token key atrule">age</span><span class="token punctuation">:</span> <span class="token number">7</span></code></pre>
 <p>它默认从全局配置中获取值，可以使用<code>@PropertySource(value={})</code>来指定配置文件。</p>
+<p>还有一种方法是使用<code>@Value</code>，它必须配合SpEL来指定对应配置的名称，不支持松散语法绑定（即大小写等不匹配）。</p>
 <h2 id="配置文件占位符">2.5 配置文件占位符</h2><h3 id="随机数">2.5.1 随机数</h3><ul>
 <li><code>${random.value}</code></li>
 <li><code>${random.int}</code></li>
@@ -1091,16 +1094,16 @@
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/%E6%90%9C%E7%B4%A2%E6%A0%91/">
-                        <span class="chip bg-color">搜索树</span>
-                    </a>
-                    
                     <a href="/tags/leetcode/">
                         <span class="chip bg-color">leetcode</span>
                     </a>
                     
                     <a href="/tags/%E7%AE%97%E6%B3%95/">
                         <span class="chip bg-color">算法</span>
+                    </a>
+                    
+                    <a href="/tags/%E6%90%9C%E7%B4%A2%E6%A0%91/">
+                        <span class="chip bg-color">搜索树</span>
                     </a>
                     
                 </div>
@@ -1250,7 +1253,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">313.8k</span>&nbsp;字
+                class="white-color">316.8k</span>&nbsp;字
             
             
             
