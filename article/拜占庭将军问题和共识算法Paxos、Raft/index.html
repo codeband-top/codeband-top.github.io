@@ -1,0 +1,1312 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="拜占庭将军问题和共识算法Paxos、Raft, 代码段小站">
+    <meta name="description" content="本文并不会对每种算法进行深入，我只是参考了部分网上的博客和整理的资料，也只是处于一种懵懂的状态。
+本文参考资源：
+Paxos算法 - 维基百科，自由的百科全书
+raft协议应用方面的疑问？ - 知乎
+如何浅显易懂地解说 Paxos 的算法？">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>拜占庭将军问题和共识算法Paxos、Raft | 代码段小站</title>
+    <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon.ico">
+    
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+    
+    <script src="/libs/jquery/jquery.min.js"></script>
+    
+<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper head-container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/code.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">代码段小站</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/runcode" class="waves-effect waves-light">
+      
+      <i class="fas fa-code" style="zoom: 0.6;"></i>
+      
+      <span>写代码</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/code.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">代码段小站</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/runcode" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-code"></i>
+			
+			写代码
+		</a>
+          
+        </li>
+        
+        
+    </ul>
+</div>
+
+        </div>
+
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/2.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">拜占庭将军问题和共识算法Paxos、Raft</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        margin: 35px 0 15px 0;
+        padding-left: 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        height: calc(100vh - 250px);
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #toc-content .is-active-link::before {
+        background-color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">
+                                <span class="chip bg-color">分布式</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/" class="post-category">
+                                中间件/工具/框架
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2020-03-17
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    2.9k
+                </div>
+                
+
+                
+				
+                
+            </div>
+            
+        </div>
+        <hr class="clearfix">
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>本文并不会对每种算法进行深入，我只是参考了部分网上的博客和整理的资料，也只是处于一种懵懂的状态。</p>
+<p>本文参考资源：</p>
+<p><a href="https://zh.wikipedia.org/wiki/Paxos%E7%AE%97%E6%B3%95" target="_blank" rel="noopener">Paxos算法 - 维基百科，自由的百科全书</a></p>
+<p><a href="https://www.zhihu.com/question/54997169" target="_blank" rel="noopener">raft协议应用方面的疑问？ - 知乎</a></p>
+<p><a href="https://www.zhihu.com/question/19787937" target="_blank" rel="noopener">如何浅显易懂地解说 Paxos 的算法？ - 知乎</a></p>
+<p><a href="https://www.bilibili.com/video/av21667358?from=search&seid=3548054564060124942" target="_blank" rel="noopener">一致性算法（Paxos、Raft、ZAB）_哔哩哔哩 (゜-゜)つロ 干杯~-bilibili</a></p>
+<p><a href="https://www.cnblogs.com/xybaby/p/10124083.html" target="_blank" rel="noopener">一文搞懂Raft算法 - xybaby - 博客园一文搞懂Raft算法 - xybaby - 博客园</a></p>
+<p>还有一些没记下来，研究这些东西有英文能力的还是尽量去读发明者所著论文吧。。</p>
+<h1 id="拜占庭将军问题">1 拜占庭将军问题</h1><p>拜占庭帝国有许多支军队，不同军队的将军之间必须制定一个统一的行动计划，从而做出仅供或者撤退的决定，同时，各个将军在地理上都是被分隔开的，只能依靠军队的通讯员来进行通讯。然而，在所有的通讯员中可能会存在叛徒，这些叛徒可以篡改信息，从而达到欺骗将军的目的。</p>
+<p>为了解决网络分区情况下，部分节点之间的通讯可能出现消失丢失或消息被篡改的情况。衍生出了几种共识算法：</p>
+<h1 id="Basic-Paxos">2 Basic Paxos</h1><p>Paxos是早期的共识算法，由拜占庭将军问题的提出者 Leslie Lamport 所发明。谷歌的分布式锁服务 Chubby 就是以 Paxos 算法为基础。</p>
+<p>在古希腊有一个叫做 Paxos 的小岛，岛上采用议会的形式来通过法令，议会中的议员通过信使进行消息的传递。议员和信使都是兼职的，他们随时有可能会离开议会厅，并且信使可能会重复地传递消息，也可能一去不复返。因此，议会协议要保证在这种情况下法令仍然能够正确的产生，并且不会出现冲突。</p>
+<p>Paxos算法假设没有拜占庭将军问题，即虽然有可能一个消息被传递了两次，但是绝对不会出现错误的消息。</p>
+<p>paxos有三个版本：</p>
+<ul>
+<li>Basic Paxos</li>
+<li>Multi Paxos</li>
+<li>Fast Paxos</li>
+</ul>
+<p>在paxos算法中，有四种角色，分别具有三种不同的行为，但多数情况，一个进程可能同时充当多种角色。</p>
+<ul>
+<li>client ：系统外部角色，请求发起者，不参与决策</li>
+<li>proposer ：提案提议者（至少一个）</li>
+<li>acceptor ：提案的表决者，即是否accept该提案，只有超过半数以上的acceptor接受了提案，该提案才被认为被“选定”（至少三个，必须单数）</li>
+<li>learners ：提案的学习者，当提案被选定后，其同步执行提案，不参与决策</li>
+</ul>
+<p>paxos算法的思想是，proposer 将发起提案（value）给所有 accpetor，超过半数 accpetor 获得批准后，proposer将提案写入 accpetor 内，最终所有 accpetor 获得一致性的确定性取值，且后续不允许再修改。learners只能“学习”被批准的提案。</p>
+<p>Paxos算法分为两个阶段：prepare阶段、accept阶段，这两个阶段是针对proposer的，多个proposer进入accpet的时间具有先后顺序。</p>
+<h2 id="Prepare阶段">2.1 Prepare阶段</h2><ol>
+<li>proposer提出一个提案，编号为N,发送给所有的acceptor。（Proposal Number：提议编号，可理解为提议版本号，要求不能冲突，每次生成必须是递增的）</li>
+<li>每个acceptor都保存自己的accept的最大提案编号maxN，<strong>当acceptor收到prepare(N)请求时，会比较N与maxN的值，若N小于maxN,则提案已过时，拒绝prepare(N)请求</strong>。若N大于等于maxN，则接受提案，并<strong>将该acceptor曾经接受过的编号最大的提案Proposal(myid,maxN,value)反馈给proposer</strong>：其中myid表示acceptor的标识id，maxN表示接受过的最大提案编号maxN，value表示提案内容。若当前acceptor未曾accept任何提议，会将proposal(myid,null,null)反馈给提议者。</li>
+</ol>
+<p>acceptor在接收提案之后做出两个保证（Promise）：</p>
+<ol>
+<li>不再接受Proposal Number小于等于（注意：这里是&lt;= ）当前请求的Prepare请求。</li>
+<li>不再接受Proposal Number小于（注意：这里是&lt; ）当前请求的Propose请求。</li>
+</ol>
+<h2 id="accept-阶段">2.2 accept 阶段</h2><ol>
+<li><strong>proposal发出prepare(N),若收到超过半数acceptor的反馈，proposal将真正的提案内容proposal(N,value)发送给acceptor。</strong></li>
+<li>acceptor接受提议者发送的proposal(N,value)提案后，会比较自己曾经accept过的最大提案编号maxN和反馈过的prepare的最大编号，若N<strong>大于</strong>这两个编号，则当前表决者accept该提案，并反馈给提议者。否则拒绝该提议。（最后确认的提议基本上就是版本号最新的提议，而版本号最新的提议内容永远是被大多数acceptor接收提案内容）</li>
+</ol>
+<p>被拒绝的Proposer可以重新进入Prepare阶段，并将自己的提案编号自增。</p>
+<p><img src="https://api.codetool.top/img/1584371218469.png" alt="正常流程"></p>
+<p><img src="https://api.codetool.top/img/15843714449059.png" alt="部分失联"></p>
+<p><img src="https://api.codetool.top/img/15843716226127.png" alt="proposer单点失败"></p>
+<p>Basic Paxos存在活锁问题，两个Proposers交替Prepare成功，而Accept失败，形成活锁（Livelock）。</p>
+<h1 id="Multi-Paxos">3 Multi-Paxos</h1><p>Multi-Paxos引入了Leader概念，它是唯一的Proposer，所有的请求都需经过Leader。</p>
+<p><strong>Multi-Paxos首先需要选举Leader，Leader的确定也是一次决议的形成，所以可执行一次Basic Paxos实例来选举出一个Leader。</strong> 选出Leader之后只能由Leader提交Proposal，在Leader宕机之后服务临时不可用，需要重新选举Leader继续服务。在系统中仅有一个Leader进行Proposal提交的情况下，Prepare阶段可以跳过。</p>
+<p>Multi-Paxos通过改变Prepare阶段的作用范围至后面Leader提交的所有实例，从而使得<strong>Leader的连续提交只需要执行一次Prepare阶段，后续只需要执行Accept阶段，将两阶段变为一阶段，提高了效率。</strong>为了区分连续提交的多个实例，每个实例使用一个Instance ID标识，Instance ID由Leader本地递增生成即可。</p>
+<p><img src="https://api.codetool.top/img/15843723595393.png" alt="上图：竞选leader，下图：有leader后的请求"></p>
+<p>Multi-Paxos允许有多个自认为是Leader的节点并发提交Proposal而不影响其安全性，这样的场景即退化为Basic Paxos。</p>
+<p>Chubby和Boxwood均使用Multi-Paxos。ZooKeeper使用的ZAB也是Multi-Paxos的变形。</p>
+<h1 id="Raft">4 Raft</h1><p>之前写的博客<a href="../Redis主从复制、哨兵、集群详解">Redis主从复制、哨兵、集群详解</a>中，redis的哨兵机制sentinel就是使用的raft思想，有leader sentinel和leader选举。</p>
+<p>Raft基于Multi-Paxos思想，它把Multi-Paxos划分为三个子问题：</p>
+<ul>
+<li>Leader Election：Leader的选举</li>
+<li>Log Replication：leader同步log到其他节点</li>
+<li>safety：保证被复制到大多数节点的日志不会被回滚</li>
+</ul>
+<p>Raft定义的角色：</p>
+<ul>
+<li>Leader：</li>
+<li>Follower：</li>
+<li>Candidate：如果Leader失效（宕机），follower中会产生candidate竞选leader</li>
+</ul>
+<p>leader会不停的给follower发心跳消息，表明自己的存活状态。如果leader故障，follower会在一段时间内没有收到leader的心跳包，过了超时时间那么follower会转换成candidate，重新选出leader。</p>
+<p>raft官方参考：</p>
+<p><a href="https://raft.github.io/" target="_blank" rel="noopener">https://raft.github.io/</a>  </p>
+<p><a href="http://thesecretlivesofdata.com/raft/" target="_blank" rel="noopener">http://thesecretlivesofdata.com/raft/</a></p>
+<h2 id="Leader-Election">4.1 Leader Election</h2><p>leader选举的过程：</p>
+<ul>
+<li>增加节点本地的 current term ，切换到candidate状态</li>
+<li>投自己一票</li>
+<li>并行给其他节点发送 RequestVote RPCs</li>
+<li>等待其他节点的回复</li>
+<li>在这个过程中，根据来自其他节点的消息，可能出现三种结果<ul>
+<li>收到majority的投票（含自己的一票），则赢得选举，成为leader</li>
+<li>被告知别人已当选，那么自行切换到follower</li>
+<li>一段时间内没有收到majority投票，则保持candidate状态，重新发出选举</li>
+</ul>
+</li>
+</ul>
+<p>第一种情况，赢得了选举之后，新的leader会立刻给所有节点发消息，广而告之，避免其余节点触发新的选举。</p>
+<p>而一个节点是否给其他节点投票的原则是</p>
+<ul>
+<li>对方term（任期） 和 log 都至少和自己的一样新</li>
+<li>先到先得</li>
+</ul>
+<p>如果出现平票的情况，各候选人会产生一个随机的timeout之后重新发起竞选，依据先到先得原则不会再平票。（并且很多实现是需要节点个数为奇数）</p>
+<h2 id="log-replication">4.2 log replication</h2><p>当有了leader，系统应该进入对外工作期了。客户端的一切请求来发送到leader，leader来调度这些并发请求的顺序，并且保证leader与followers状态的一致性。raft中的做法是，将这些请求以及执行顺序告知followers。leader和followers以相同的顺序来执行这些请求，保证状态一致。</p>
+<p>leader将客户端请求（command）封装到一个个log entry，将这些log entries复制（replicate）到所有follower节点，然后大家按相同顺序应用（apply）log entry中的command。下一次的的心跳包follower给leader返回ack，leader再把响应返回给请求发起者（Client）。</p>
+<h2 id="safety">4.3 safety</h2><h3 id="Follower-宕机">4.3.1 Follower 宕机</h3><p>当 leader 在 commit log 时, 某 follower 宕机，然后这个 follower 后来被选为 leader,它会覆盖掉现在 follwer 那些已经 committed log, 由于这些 log 是已经执行过的,所以结果不同的机器就执行不同的指令. 在选举过程中,再加多一个限制就可以防止这种情况发生, 即:</p>
+<p>Leader completeness property:<br><strong>对于任意一个 term, leader 都要包含所有在之前 term 里 committed 的 log。</strong></p>
+<h3 id="Leader-宕机">4.3.2 Leader 宕机</h3><h4 id="数据到达Leader节点前">4.3.2.1 数据到达Leader节点前</h4><p>这个阶段 Leader 挂掉不影响一致性</p>
+<h4 id="数据到达Leader节点，但未复制到Follower节点">4.3.2.2 数据到达Leader节点，但未复制到Follower节点</h4><p>这个阶段 Leader 挂掉，数据属于未提交状态，Client 不会收到 Ack 会认为超时失败可安全发起重试。Follower 节点上没有该数据，<strong>重新选主后 Client 重试重新提交可成功</strong>。原来的 Leader 节点恢复后作为 Follower 加入集群重新从当前任期的新 Leader 处同步数据，强制保持和 Leader 数据一致。</p>
+<h4 id="数据到达Leader节点，成功复制到所有Follower节点，但还未向Leader响应接收">4.3.2.3 数据到达Leader节点，成功复制到所有Follower节点，但还未向Leader响应接收</h4><p>这个阶段 Leader 挂掉，虽然数据在 Follower 节点处于未提交状态（Uncommitted）但保持一致，<strong>重新选出 Leader 后可完成数据提交</strong>，此时 Client 由于不知到底提交成功没有，可重试提交。针对这种情况 Raft <strong>要求 RPC 请求实现幂等性，也就是要实现内部去重机制。</strong></p>
+<h4 id="数据到达Leader节点，成功复制到部分Follower节点，但还未向Leader响应接收">4.3.2.4 数据到达Leader节点，成功复制到部分Follower节点，但还未向Leader响应接收</h4><p>这个阶段 Leader 挂掉，数据在 Follower 节点处于未提交状态（Uncommitted）且不一致，Raft 协议要求投票只能投给拥有最新数据的节点。所以<strong>拥有最新数据的节点会被选为Leader 再强制同步数据到 Follower，数据不会丢失并最终一致。</strong></p>
+<h4 id="数据到达Leader节点，成功复制到Follower所有或多数节点，数据在所有节点都处于已提交状态，但还未响应Client">4.3.2.5 数据到达Leader节点，成功复制到Follower所有或多数节点，数据在所有节点都处于已提交状态，但还未响应Client</h4><p>这个阶段 Leader 挂掉，集群内部数据其实已经是一致的，Client 重复重试基于幂等策略对一致性无影响。</p>
+<h4 id="网络分区导致的脑裂情况，出现双-Leader">4.3.2.6 网络分区导致的脑裂情况，出现双 Leader</h4><p>如果出现网络分区情况，可能会出现两边各推选出一个leader，但如果leader不能将log复制到大多数节点（majority），就不会给请求发起者返回成功消息，并让接收到自己日志复制的请求的节点回滚。（还有一个last_index, term_id作为leader竞选的依据，只有拥有最新的redo log的candidate才能成为leader）</p>
+<p>网络恢复后旧的 Leader 发现集群中有更新任期（Term）的新 Leader 则自动降级为Follower 并从新 Leader 处同步数据达成集群数据一致。</p>
+
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://www.codetool.top" rel="external nofollow noreferrer">Rhett Peng</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。参考的网络来源均已尽可能地注明，部分参考来自他人的整理资料，无法标注，在此感谢！
+                    <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">
+                                    <span class="chip bg-color">分布式</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'VUmN3m0ICuwaL4jNPnxBRln8-gzGzoHsz',
+        appKey: 'QH8FVT32jvi4qBllLg6Cf0dU',
+        notify: 'false' === 'true',
+        verify: 'true' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: '说点什么吧'
+    });
+</script>
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/article/leetcode1160-%E6%8B%BC%E5%86%99%E5%8D%95%E8%AF%8D/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/5.jpg" class="responsive-img" alt="leetcode1160-拼写单词">
+                        
+                        <span class="card-title">leetcode1160-拼写单词</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            1 原题给你一份『词汇表』（字符串数组） words 和一张『字母表』（字符串） chars。
+假如你可以用 chars 中的『字母』（字符）拼写出 words 中的某个『单词』（字符串），那么我们就认为你掌握了这个单词。
+注意：每次拼写时
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2020-03-17
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-category">
+                                    算法/数据结构
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/leetcode/">
+                        <span class="chip bg-color">leetcode</span>
+                    </a>
+                    
+                    <a href="/tags/%E7%AE%97%E6%B3%95/">
+                        <span class="chip bg-color">算法</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/article/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E7%90%86%E8%AE%BA%E5%92%8C%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE2PC%E3%80%813PC/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/23.jpg" class="responsive-img" alt="分布式一致性理论和一致性协议2PC、3PC">
+                        
+                        <span class="card-title">分布式一致性理论和一致性协议2PC、3PC</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            1 分布式一致性1.1 数据的一致性模型
+强一致性：要求无论更新操作实在哪一个副本执行，之后所有的读操作都要能获得最新的数据。
+弱一致性：用户读到某一操作对系统特定数据的更新需要一段时间，我们称这段时间为“不一致性窗口”。
+最终一致性：是弱
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-03-16
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/" class="post-category">
+                                    中间件/工具/框架
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">
+                        <span class="chip bg-color">分布式</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+    
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+<!-- 代码块折行 -->
+
+<style type="text/css">
+code[class*="language-"], pre[class*="language-"] { white-space: pre !important; }
+</style>
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h1, h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h1, h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+    <footer class="page-footer bg-color">
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            <span id="year">2019-2020</span>
+            <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">351.7k</span>&nbsp;字
+            
+            
+            
+            
+            
+            <br>
+            
+            <br>
+            
+            <span id="icp"><img src="/medias/icp.png" style="vertical-align: text-bottom;" />
+                <a href="http://beian.miit.gov.cn/" target="_blank">赣ICP备19011928号</a>
+            </span>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/codeband-top" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:pctdyx@qq.net" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=995632825" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 995632825" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+$(function () {
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+});
+</script>
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":200,"height":200,"hOffset":20,"vOffset":100},"mobile":{"show":false},"dialog":{"enable":true,"hitokoto":false},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div id="chat_input"><input id="question" type="text" placeholder="陪我聊聊天吧" onkeypress="return onKeyPress(event)"/></div>
+</html>
+
+<!--动态线条背景-->
+<script type="text/javascript"
+color="0,0,0" opacity='0.5' zIndex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+</script>
+
+<script>
+
+//聊天框按回车
+function onKeyPress(e){
+    var keyCode = null;
+    if(e.which)
+        keyCode = e.which;
+    else if(e.keyCode)
+        keyCode = e.keyCode;
+        
+    //如果按下回车
+    if(keyCode == 13) {
+        // 1.获取界面上的元素value
+        var question_box = document.getElementById('question')
+        var question = question_box.value
+        question_box.value = ""
+        question_box.setAttribute("disabled","disabled")
+        var api_key = "78c33a07808c7b9e1905c89c88b3be14"
+        var api_secret = "q707tevnk00f"
+
+        // 2.通过XHR发送一个POST请求
+        var xhr = new XMLHttpRequest()
+        xhr.open('GET','https://api.codetool.top/robottalk?question='+encodeURIComponent(question)+"&api_key="+api_key+"&api_secret="+api_secret)
+		xhr.send(null)
+		xhr.onload = function(){
+            question_box.removeAttribute('disabled');
+            var live2d_dialog = document.getElementsByClassName("live2d-widget-dialog")[0]
+            live2d_dialog.style.opacity=1
+            live2d_dialog.innerHTML = this.responseText
+            window.setTimeout(()=>{
+                live2d_dialog.style.opacity=0
+            }, 5000);
+		}
+    }
+
+}
+
+</script>
+
+<style> 
+#chat_input{
+    width: 200px;
+    height: 40px;
+    position: fixed;
+    right: 0px;
+    bottom: 80px;
+    right: 20px;
+} 
+
+#question{
+    border: none;
+    border-bottom: 1px #aaaaaa solid;
+    background-color: transparent;
+    padding: 5px;
+}
+
+@media screen and (max-width: 480px) {
+    #chat_input{
+        display: none;
+    }
+    #live2d-widget{
+        display: none;
+    }
+}
+</style>
