@@ -430,8 +430,8 @@
 <li>可靠性：一旦服务端成功应用了某个事务，并完成对客户端的响应，那么该事务所引起<br>的服务端状态变更将会被一直保留下来。</li>
 <li>实时性：Zookeeper 能保证在一定的时间段内，客户端最终一定能够从服务端上读取到最新的数据状态。</li>
 </ul>
-<h2 id="ZAB协议">1.1 ZAB协议</h2><p>ZAB（zookeeper atomic broadcast）是Zookeeper采用的协议，是一种支持<strong>崩溃恢复</strong>的原子广播协议，基于multi paxos实现。</p>
-<h3 id="三种角色">1.1.1 三种角色</h3><ul>
+<h1 id="ZAB协议">2 ZAB协议</h1><p>ZAB（zookeeper atomic broadcast）是Zookeeper采用的协议，是一种支持<strong>崩溃恢复</strong>的原子广播协议，基于multi paxos实现。</p>
+<h2 id="三种角色">2.1 三种角色</h2><ul>
 <li>leader<br>leader负责处理集群的写请求，并发起投票，只有超过半数的节点同意后才会提交该写请求</li>
 <li>follower<br>处理读请求，响应结果。转发写请求到leader，在选举leader过程中参与投票</li>
 <li>observer<br>observer可以理解为没有投票权的follower，主要职责是协助follower处理读请求。那么当整个zk集群读请求负载很高时，为什么不增加follower节点呢？原因是增加follower节点会让leader在提出写请求提案时，需要半数以上的follower投票节点同意，这样会增加leader和follower的通信通信压力，降低写操作效率。</li>
@@ -439,7 +439,7 @@
 <p>ZooKeeper使用单一主进程Leader用于处理客户端所有事务请求，即写请求。当服务器数据发生变更，集群采用ZAB原子广播协议，<strong>以事务提交proposal的形式广播到所有的副本进程，每一个事务分配一个全局的递增的事务编号xid。</strong> </p>
 <p>若客户端提交的请求为读请求时，则接受请求的节点直接根据自己保存的数据响应。若是写请求，且当前节点不是leader，那么<strong>该节点就会将请求转发给leader，leader会以提案的方式广播此写请求，如果超过半数的节点同意写请求，则该写请求就会提交。</strong>leader会通知所有的订阅者同步数据。</p>
 <p>ZAB的工作基本可以分为leader选举阶段和消息广播阶段：</p>
-<h3 id="leader选举">1.1.2 leader选举</h3><p>当服务启动或leader崩溃后，zk进入leader选举阶段，leader选出后，将完成leader和其他机器的数据同步，当大多数server完成和leader的同步后，该阶段结束。</p>
+<h2 id="leader选举">2.2 leader选举</h2><p>当服务启动或leader崩溃后，zk进入leader选举阶段，leader选出后，将完成leader和其他机器的数据同步，当大多数server完成和leader的同步后，该阶段结束。</p>
 <p>每个节点有一个zxid：zxid一个是64位长度的Long类型，其中高32位表示纪元epoch，低32位表示事务标识xid。即zxid由两部分构成：epoch和xid。epoch类似于raft的term，每一个新的选举开启时都会生成一个新的epoch，新的leader产生，会更新所有的zkServer的zxid的epoch，xid是一个依次递增的事务编号。</p>
 <p><strong>启动过程</strong></p>
 <ul>
@@ -454,7 +454,7 @@
 <p><strong>崩溃恢复过程</strong></p>
 <p>leader 挂掉后，集群中其他follower会将状态从FOLLOWING变为LOOKING，重新进入leader选举</p>
 <p>同上启动过程</p>
-<h3 id="消息广播">1.1.3 消息广播</h3><p>一旦Leader已经和多数的Follower进行了状态同步后，进入广播模式。进入广播模式后，如果有新加入的服务器，会自动从leader中同步数据。leader在接收客户端请求后，会生成事务提案广播给其他机器，有超过半数以上的follower同意该提议后，再提交事务。注意在ZAB的事务的二阶段提交中，移除了事务中断的逻辑，follower要么ack，要么放弃，leader无需等待所有的follower的ack。</p>
+<h2 id="消息广播">2.3 消息广播</h2><p>一旦Leader已经和多数的Follower进行了状态同步后，进入广播模式。进入广播模式后，如果有新加入的服务器，会自动从leader中同步数据。leader在接收客户端请求后，会生成事务提案广播给其他机器，有超过半数以上的follower同意该提议后，再提交事务。注意在ZAB的事务的二阶段提交中，移除了事务中断的逻辑，follower要么ack，要么放弃，leader无需等待所有的follower的ack。</p>
 <ul>
 <li>leader 接受到消息后，消息通过全局唯一的64位自增事务id，zxid标识</li>
 <li>leader 发送给follower的提案是有序的，leader会创建一个FIFO队列，将提案顺序写入队列中发送给follower</li>
@@ -463,7 +463,7 @@
 </ul>
 <p>更多Raft对比ZAB相关可以参考：</p>
 <p><a href="https://my.oschina.net/pingpangkuangmo/blog/782702" target="_blank" rel="noopener">Raft对比ZAB协议 - 乒乓狂魔 - OSCHINA</a></p>
-<h1 id="Zookeeper集群搭建">2 Zookeeper集群搭建</h1><p>zookeeper下载：</p>
+<h1 id="Zookeeper集群搭建">3 Zookeeper集群搭建</h1><p>zookeeper下载：</p>
 <pre class=" language-shell"><code class="language-shell">wget https://mirrors.tuna.tsinghua.edu.cn/apache/zookeeper/zookeeper-3.5.7/apache-zookeeper-3.5.7-bin.tar.gz</code></pre>
 <p>下载完成后解压：</p>
 <pre class=" language-shell"><code class="language-shell">tar -zxvf apache-zookeeper-3.5.7-bin.tar.gz</code></pre>
@@ -856,33 +856,33 @@ Mode: leader</code></pre>
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="far fa-dot-circle"></i>&nbsp;本篇
-            </div>
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/article/ZAB%E5%8D%8F%E8%AE%AE%E6%A6%82%E8%BF%B0%E5%92%8CZookeeper%E9%9B%86%E7%BE%A4%E6%90%AD%E5%BB%BA/">
+                <a href="/article/Zookeeper%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/11.jpg" class="responsive-img" alt="ZAB协议概述和Zookeeper集群搭建">
+                        <img src="/medias/featureimages/7.jpg" class="responsive-img" alt="Zookeeper基本使用">
                         
-                        <span class="card-title">ZAB协议概述和Zookeeper集群搭建</span>
+                        <span class="card-title">Zookeeper基本使用</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            推荐阅读：
-分布式一致性理论和一致性协议2PC、3PC
-拜占庭将军问题和共识算法Paxos、Raft
-1 Zookeeper概述Zookeeper 为分布式应用提供了高效且可靠的分布式协调服务，提供了诸如统一命名服务、发布订阅、负载均衡、配
+                            1 数据结构ZooKeeper数据模型的结构与Unix文件系统很类似，整体上可以看作是一棵树，每个节点称做一个ZNode，每个ZNode都可以通过其路径唯一标识
+
+Znode 节点类型
+
+持久化目录节点（PERSISTENT）客户端与zoo
                         
                     </div>
                     <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2020-03-17
-                            </span>
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2020-03-17
+                        </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
@@ -895,7 +895,6 @@ Mode: leader</code></pre>
                         </span>
                     </div>
                 </div>
-
                 
                 <div class="card-action article-tags">
                     
@@ -1109,7 +1108,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">353.5k</span>&nbsp;字
+                class="white-color">354.5k</span>&nbsp;字
             
             
             
