@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.codetool.top/"/>
-  <updated>2020-03-16T17:07:04.338Z</updated>
+  <updated>2020-03-17T10:38:37.851Z</updated>
   <id>https://www.codetool.top/</id>
   
   <author>
@@ -15,6 +15,36 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>ZAB协议概述和Zookeeper集群搭建</title>
+    <link href="https://www.codetool.top/article/ZAB%E5%8D%8F%E8%AE%AE%E6%A6%82%E8%BF%B0%E5%92%8CZookeeper%E9%9B%86%E7%BE%A4%E6%90%AD%E5%BB%BA/"/>
+    <id>https://www.codetool.top/article/ZAB协议概述和Zookeeper集群搭建/</id>
+    <published>2020-03-17T08:13:10.000Z</published>
+    <updated>2020-03-17T10:38:37.851Z</updated>
+    
+    <content type="html"><![CDATA[<p>推荐阅读：</p><p><a href="../分布式一致性理论和一致性协议2PC、3PC">分布式一致性理论和一致性协议2PC、3PC</a></p><p><a href="../拜占庭将军问题和共识算法Paxos、Raft">拜占庭将军问题和共识算法Paxos、Raft</a></p><h1 id="Zookeeper概述">1 Zookeeper概述</h1><p>Zookeeper 为分布式应用提供了高效且可靠的分布式协调服务，提供了诸如统一命名服务、发布订阅、负载均衡、配置管理和分布式锁等分布式的基础服务。</p><p>设计目标是将那些复杂且容易出错的分布式一致性服务封装起来，构成一个高效可靠的原语集，并以一系列简单易用的接口提供给用户使用。</p><p>可以保证以下特性：</p><ul><li>顺序一致性：从同一个客户端发起的事务请求，最终将会严格地按照其发起顺序被应用到 Zookeeper 中。</li><li>原子性：要么集群中所有机器都成功应用了某一个事务，要么都没有应用。</li><li>单一视图：无论客户端连接的是哪一个 Zookeeper 服务器，其看到的服务端数据模型都是一致性的</li><li>可靠性：一旦服务端成功应用了某个事务，并完成对客户端的响应，那么该事务所引起<br>的服务端状态变更将会被一直保留下来。</li><li>实时性：Zookeeper 能保证在一定的时间段内，客户端最终一定能够从服务端上读取到最新的数据状态。</li></ul><h2 id="ZAB协议">1.1 ZAB协议</h2><p>ZAB（zookeeper atomic broadcast）是Zookeeper采用的协议，是一种支持<strong>崩溃恢复</strong>的原子广播协议，基于multi paxos实现。</p><h3 id="三种角色">1.1.1 三种角色</h3><ul><li>leader<br>leader负责处理集群的写请求，并发起投票，只有超过半数的节点同意后才会提交该写请求</li><li>follower<br>处理读请求，响应结果。转发写请求到leader，在选举leader过程中参与投票</li><li>observer<br>observer可以理解为没有投票权的follower，主要职责是协助follower处理读请求。那么当整个zk集群读请求负载很高时，为什么不增加follower节点呢？原因是增加follower节点会让leader在提出写请求提案时，需要半数以上的follower投票节点同意，这样会增加leader和follower的通信通信压力，降低写操作效率。</li></ul><p>ZooKeeper使用单一主进程Leader用于处理客户端所有事务请求，即写请求。当服务器数据发生变更，集群采用ZAB原子广播协议，<strong>以事务提交proposal的形式广播到所有的副本进程，每一个事务分配一个全局的递增的事务编号xid。</strong> </p><p>若客户端提交的请求为读请求时，则接受请求的节点直接根据自己保存的数据响应。若是写请求，且当前节点不是leader，那么<strong>该节点就会将请求转发给leader，leader会以提案的方式广播此写请求，如果超过半数的节点同意写请求，则该写请求就会提交。</strong>leader会通知所有的订阅者同步数据。</p><p>ZAB的工作基本可以分为leader选举阶段和消息广播阶段：</p><h3 id="leader选举">1.1.2 leader选举</h3><p>当服务启动或leader崩溃后，zk进入leader选举阶段，leader选出后，将完成leader和其他机器的数据同步，当大多数server完成和leader的同步后，该阶段结束。</p><p>每个节点有一个zxid：zxid一个是64位长度的Long类型，其中高32位表示纪元epoch，低32位表示事务标识xid。即zxid由两部分构成：epoch和xid。epoch类似于raft的term，每一个新的选举开启时都会生成一个新的epoch，新的leader产生，会更新所有的zkServer的zxid的epoch，xid是一个依次递增的事务编号。</p><p><strong>启动过程</strong></p><ul><li>每一个 server发出一个投票给集群中其他节点</li><li>收到各个服务器的投票后，判断该投票有效性，比如是否是本轮投票，是否是looking状态</li><li>处理投票， pk别人的投票和自己的投票 比较规则xid&gt;myid “取大原则”</li><li>统计是否超过半数的接受相同的选票</li><li>确认 leader，改变服务器状态</li><li>添加新 server，leader已经选举出来，只能以follower身份加入集群中</li></ul><p>注意一个节点可以投多票，即每次收到竞选信息的时候都可以决定是否投票，而不是raft的先来先得。</p><p><strong>崩溃恢复过程</strong></p><p>leader 挂掉后，集群中其他follower会将状态从FOLLOWING变为LOOKING，重新进入leader选举</p><p>同上启动过程</p><h3 id="消息广播">1.1.3 消息广播</h3><p>一旦Leader已经和多数的Follower进行了状态同步后，进入广播模式。进入广播模式后，如果有新加入的服务器，会自动从leader中同步数据。leader在接收客户端请求后，会生成事务提案广播给其他机器，有超过半数以上的follower同意该提议后，再提交事务。注意在ZAB的事务的二阶段提交中，移除了事务中断的逻辑，follower要么ack，要么放弃，leader无需等待所有的follower的ack。</p><ul><li>leader 接受到消息后，消息通过全局唯一的64位自增事务id，zxid标识</li><li>leader 发送给follower的提案是有序的，leader会创建一个FIFO队列，将提案顺序写入队列中发送给follower</li><li>follower 接受到提案后，会比较提案zxid和本地事务日志最大的zxid，若提案zxid比本地事务id大，将提案记录到本地日志中，反馈ack给leader，否则拒绝</li><li>leader 接收到过半ack后，leader向所有的follower发送commit，通知每个follower执行本地事务</li></ul><p>更多Raft对比ZAB相关可以参考：</p><p><a href="https://my.oschina.net/pingpangkuangmo/blog/782702" target="_blank" rel="noopener">Raft对比ZAB协议 - 乒乓狂魔 - OSCHINA</a></p><h1 id="Zookeeper集群搭建">2 Zookeeper集群搭建</h1><p>zookeeper下载：</p><pre class=" language-shell"><code class="language-shell">wget https://mirrors.tuna.tsinghua.edu.cn/apache/zookeeper/zookeeper-3.5.7/apache-zookeeper-3.5.7-bin.tar.gz</code></pre><p>下载完成后解压：</p><pre class=" language-shell"><code class="language-shell">tar -zxvf apache-zookeeper-3.5.7-bin.tar.gz</code></pre><p>进入文件夹并创建一个data目录：</p><pre class=" language-shell"><code class="language-shell">cd apache-zookeeper-3.5.7-binmkdir data</code></pre><p>我们在单机使用三个zookeeper进程来搭建伪集群：</p><pre class=" language-shell"><code class="language-shell">cd ..mv apache-zookeeper-3.5.7-bin zookeeper-01cp -r zookeeper-01 zookeeper-02cp -r zookeeper-01 zookeeper-03</code></pre><p>为每个zookeeper文件夹下的data文件夹新建一个myid文件，内容分别为1、2、3</p><pre class=" language-shell"><code class="language-shell">cd zookeeper-01/datavim myid</code></pre><p>将每一个zookeeper文件夹下的<code>conf/zoo_sample.cfg</code>重命名为<code>zoo.cfg</code>，并修改内容：</p><pre class=" language-shell"><code class="language-shell">mv zoo_sample.cfg zoo.cfgvim zoo.cfg</code></pre><p>配置文件中默认<code>dataDir=/temp/zookeeper</code>，修改为各自目录下的data文件夹，并将zookeeper02、zookeeper03的端口号修改为2182和2183（默认为2181）</p><pre class=" language-conf"><code class="language-conf"># 安装的文件夹dataDir=/root/zookeeper-02/dataclientPort=2182</code></pre><p>并在末尾添加：</p><pre><code>server.1=192.168.91.1:2881:3881server.2=192.168.91.1:2882:3882server.3=192.168.91.1:2883:3883</code></pre><p>它的格式是：<code>server.服务器ID=服务器IP地址：服务器之间通信端口：服务器之间投票选举端口</code></p><p>保存并退出，依次启动1、2、3：</p><pre class=" language-shell"><code class="language-shell">bin/zkServer.sh start</code></pre><p>按照ZAB的投票机制，2号主机将会成为leader：</p><pre><code>root@DESKTOP-TTLFG6F:~/zookeeper-02# bin/zkServer.sh status/usr/bin/javaZooKeeper JMX enabled by defaultUsing config: /root/zookeeper-02/bin/../conf/zoo.cfgClient port found: 2182. Client address: localhost.Mode: leader</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;推荐阅读：&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;../分布式一致性理论和一致性协议2PC、3PC&quot;&gt;分布式一致性理论和一致性协议2PC、3PC&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;../拜占庭将军问题和共识算法Paxos、Raft&quot;&gt;拜占庭将军问题和共识算法Paxos、Ra
+      
+    
+    </summary>
+    
+    
+      <category term="中间件/工具/框架" scheme="https://www.codetool.top/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/"/>
+    
+    
+      <category term="分布式" scheme="https://www.codetool.top/tags/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
+    
+      <category term="zookeeper" scheme="https://www.codetool.top/tags/zookeeper/"/>
+    
+  </entry>
   
   <entry>
     <title>leetcode1160-拼写单词</title>
@@ -556,34 +586,6 @@
     
     
       <category term="消息队列" scheme="https://www.codetool.top/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>leetcode1071-字符串的最大公因子</title>
-    <link href="https://www.codetool.top/article/leetcode1071-%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84%E6%9C%80%E5%A4%A7%E5%85%AC%E5%9B%A0%E5%AD%90/"/>
-    <id>https://www.codetool.top/article/leetcode1071-字符串的最大公因子/</id>
-    <published>2020-03-11T16:52:34.000Z</published>
-    <updated>2020-03-11T17:00:26.087Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>对于字符串 <code>S</code> 和 <code>T</code>，只有在 <code>S = T + ... + T</code>（T 与自身连接 1 次或多次）时，我们才认定 “<code>T</code> 能除尽 <code>S</code>”。</p><p>返回最长字符串 <code>X</code>，要求满足 <code>X</code> 能除尽 <code>str1</code> 且 <code>X</code> 能除尽 <code>str2</code>。</p><p><strong>示例 1:</strong></p><blockquote><p><strong>输入:</strong> str1 = “ABCABC”, str2 = “ABC”<br><strong>输出:</strong> “ABC”  </p></blockquote><p><strong>示例 2:</strong></p><blockquote><p><strong>输入:</strong> str1 = “ABABAB”, str2 = “ABAB”<br><strong>输出:</strong> “AB”      </p></blockquote><p><strong>示例 3:</strong></p><blockquote><p><strong>输入:</strong> str1 = “LEET”, str2 = “CODE”<br><strong>输出:</strong> “”  </p></blockquote><p><strong>提示：</strong></p><ol><li><code>1 &lt;= str1.length &lt;= 1000</code></li><li><code>1 &lt;= str2.length &lt;= 1000</code></li><li><code>str1[i] 和 str2[i] 为大写英文字母</code></li></ol><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>这道题我之前想得很复杂！结果一看题解：卧槽还能这样。给大佬们跪了。</p><p>确实好久没接触这样的数学知识了：辗转相除法。</p><p>首先如果str1和str2有最大公因子，那么str1+str2就会等于str2+str1。</p><p>然后就是考虑怎么把最大公因子子字符串取出来，说实话辗转相除法我是没想到的，百度百科：</p><blockquote><p>欧几里德算法又称辗转相除法，是指用于计算两个正整数a，b的最大公约数。应用领域有数学和计算机两个方面。计算公式gcd(a,b) = gcd(b,a mod b)。</p></blockquote><p>这样求出两个字符串的长度的最大公因数，就是子字符串的长度，然后用substring取出来。</p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> String <span class="token function">gcdOfStrings</span><span class="token punctuation">(</span>String str1<span class="token punctuation">,</span> String str2<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token punctuation">(</span>str1<span class="token operator">+</span>str2<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span>str2<span class="token operator">+</span>str1<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token string">""</span><span class="token punctuation">;</span>        <span class="token keyword">return</span> str1<span class="token punctuation">.</span><span class="token function">substring</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span><span class="token function">gcd</span><span class="token punctuation">(</span>str1<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>str2<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">gcd</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">,</span><span class="token keyword">int</span> y<span class="token punctuation">)</span><span class="token punctuation">{</span>        <span class="token keyword">return</span> x<span class="token operator">%</span>y<span class="token operator">==</span><span class="token number">0</span><span class="token operator">?</span>y<span class="token operator">:</span><span class="token function">gcd</span><span class="token punctuation">(</span>y<span class="token punctuation">,</span>x<span class="token operator">%</span>y<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h1 id=&quot;原题&quot;&gt;1 原题&lt;/h1&gt;&lt;p&gt;对于字符串 &lt;code&gt;S&lt;/code&gt; 和 &lt;code&gt;T&lt;/code&gt;，只有在 &lt;code&gt;S = T + ... + T&lt;/code&gt;（T 与自身连接 1 次或多次）时，我们才认定 “&lt;code&gt;T&lt;/code&gt; 能除尽 &lt;c
-      
-    
-    </summary>
-    
-    
-      <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
-    
-    
-      <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
-    
-      <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
