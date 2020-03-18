@@ -5,11 +5,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="keywords" content="Zookeeper基本使用, 代码段小站">
-    <meta name="description" content="1 数据结构ZooKeeper数据模型的结构与Unix文件系统很类似，整体上可以看作是一棵树，每个节点称做一个ZNode，每个ZNode都可以通过其路径唯一标识
+    <meta name="description" content="本文参考资源：
+一文了解Zookeeper数据节点-znode - 简书
+1 数据结构ZooKeeper数据模型的结构与Unix文件系统很类似，整体上可以看作是一棵树，每个节点称做一个ZNode，每个ZNode都可以通过其路径唯一标识
 
-Znode 节点类型
-
-持久化目录节点（PERSISTENT）客户端与zoo">
+Z">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -405,7 +405,7 @@ Znode 节点类型
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    997
+                    1.6k
                 </div>
                 
 
@@ -418,7 +418,9 @@ Znode 节点类型
         <hr class="clearfix">
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h1 id="数据结构">1 数据结构</h1><p>ZooKeeper数据模型的结构与Unix文件系统很类似，整体上可以看作是一棵树，每个节点称做一个ZNode，每个ZNode都可以通过其路径唯一标识</p>
+                <p>本文参考资源：</p>
+<p><a href="https://www.jianshu.com/p/cbe5f0dd6cca" target="_blank" rel="noopener">一文了解Zookeeper数据节点-znode - 简书</a></p>
+<h1 id="数据结构">1 数据结构</h1><p>ZooKeeper数据模型的结构与Unix文件系统很类似，整体上可以看作是一棵树，每个节点称做一个ZNode，每个ZNode都可以通过其路径唯一标识</p>
 <p><img src="https://api.codetool.top/img/15844417208023.png" alt></p>
 <p>Znode 节点类型</p>
 <ul>
@@ -427,6 +429,119 @@ Znode 节点类型
 <li>临时目录节点（EPHEMERAL）<br>客户端与zookeeper断开连接后，该节点被删除</li>
 <li>临时顺序编号目录节点（ EPHEMERAL_SEQUENTIAL）<br>客户端与zookeeper断开连接后，该节点被删除，Zookeeper会给该节点按照顺序编号</li>
 </ul>
+<h2 id="znode状态信息">1.1 znode状态信息</h2><table>
+<thead>
+<tr>
+<th>znode状态信息</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>cZxid</td>
+<td>create ZXID，即该数据节点被创建时的事务id</td>
+</tr>
+<tr>
+<td>ctime</td>
+<td>create time，即该节点的创建时间</td>
+</tr>
+<tr>
+<td>mZxid</td>
+<td>modified ZXID，即该节点最终一次更新时的事务id</td>
+</tr>
+<tr>
+<td>mtime</td>
+<td>modified time，即该节点最后一次的更新时间</td>
+</tr>
+<tr>
+<td>pZxid</td>
+<td>该节点的子节点列表最后一次修改时的事务id，只有子节点列表变更才会更新pZxid，子节点内容变更不会更新</td>
+</tr>
+<tr>
+<td>cversion</td>
+<td>子节点版本号，当前节点的子节点每次变化时值增加1</td>
+</tr>
+<tr>
+<td>dataVersion</td>
+<td>数据节点内容版本号，节点创建时为0，每更新一次节点内容(不管内容有无变化)该版本号的值增加1</td>
+</tr>
+<tr>
+<td>aclVersion</td>
+<td>节点的ACL版本号，表示该节点ACL信息变更次数</td>
+</tr>
+<tr>
+<td>ephemeralOwner</td>
+<td>创建该临时节点的会话的sessionId；如果当前节点为持久节点，则ephemeralOwner=0</td>
+</tr>
+<tr>
+<td>dataLength</td>
+<td>数据节点内容长度</td>
+</tr>
+<tr>
+<td>numChildren</td>
+<td>当前节点的子节点个数</td>
+</tr>
+</tbody></table>
+<h2 id="ACL权限">1.2 ACL权限</h2><p>ZooKeeper提供了一套完善的ACL权限控制机制保障数据安全性。</p>
+<p>对于身份认证，提供了以下几种方式：</p>
+<table>
+<thead>
+<tr>
+<th>身份认证方式</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>world</td>
+<td>默认方式，所有用户都可无条件访问，组合形式为：<code>world:anyone:[permissions]</code></td>
+</tr>
+<tr>
+<td>digest</td>
+<td>用户名:密码认证方式，最常用，组合形式为：<code>digest:username:BASE64(SHA1(password)):[permissions]</code></td>
+</tr>
+<tr>
+<td>ip</td>
+<td>对指定ip进行限制，组合形式为：<code>ip:127.0.0.1:[permissions]</code></td>
+</tr>
+<tr>
+<td>auth</td>
+<td>认证登录形式，需要用户获取权限后才可访问，组合形式为 <code>auth:userpassword:[permissions]</code></td>
+</tr>
+</tbody></table>
+<p>对于znode权限，提供了以下5种操作权限。</p>
+<table>
+<thead>
+<tr>
+<th>权限</th>
+<th>简写</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CREATE</td>
+<td>C</td>
+<td>允许授权对象在当前节点下创建子节点</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td>D</td>
+<td>允许授权对象在当前节点下删除子节点</td>
+</tr>
+<tr>
+<td>WRITE</td>
+<td>W</td>
+<td>允许授权对象在当前节点进行更新操作</td>
+</tr>
+<tr>
+<td>READ</td>
+<td>R</td>
+<td>允许授权对象在当前节点获取节点内容或获取子节点列表</td>
+</tr>
+<tr>
+<td>ADMIN</td>
+<td>A</td>
+<td>允许授权对象对当前节点进行ACL相关的设置操作</td>
+</tr>
+</tbody></table>
 <h1 id="命令行使用">2 命令行使用</h1><p>使用Zookeeper下的<code>bin/zkCli.sh</code>进入命令行</p>
 <pre class=" language-shell"><code class="language-shell">bin/zkCli.sh -server host:port</code></pre>
 <p>相关命令有：</p>
@@ -531,7 +646,8 @@ numChildren = 0</code></pre><h1 id="java使用zookeeper-api">3 java使用zookeep
     <span class="token keyword">for</span> <span class="token punctuation">(</span>String child <span class="token operator">:</span> children<span class="token punctuation">)</span> <span class="token punctuation">{</span>
         System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>child<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">//修改值，第一个参数路径，第二个参数值，第三个参数指定版本号，-1可匹配任何版本。</span>
+    <span class="token comment" spellcheck="true">//修改值，第一个参数路径，第二个参数值</span>
+    <span class="token comment" spellcheck="true">//第三个参数指定版本号，即znode的dataVersion，可以保证操作的顺序性，-1可匹配任何版本。</span>
     Stat stat <span class="token operator">=</span> zooKeeper<span class="token punctuation">.</span><span class="token function">setData</span><span class="token punctuation">(</span><span class="token string">"/app2"</span><span class="token punctuation">,</span> <span class="token string">"app2Update"</span><span class="token punctuation">.</span><span class="token function">getBytes</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>stat<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
@@ -873,7 +989,7 @@ numChildren = 0</code></pre><h1 id="java使用zookeeper-api">3 java使用zookeep
 </style>
 
 <div class="card valine-card" data-aos="fade-up">
-    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; left: 20px; top: 15px; padding-bottom: 5px;">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
         <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
         <span>评论</span>
     </div>
@@ -905,56 +1021,52 @@ numChildren = 0</code></pre><h1 id="java使用zookeeper-api">3 java使用zookeep
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="far fa-dot-circle"></i>&nbsp;本篇
-            </div>
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/article/Zookeeper%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/">
+                <a href="/article/leetcode836-%E7%9F%A9%E5%BD%A2%E9%87%8D%E5%8F%A0/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/7.jpg" class="responsive-img" alt="Zookeeper基本使用">
+                        <img src="/medias/featureimages/3.jpg" class="responsive-img" alt="leetcode836-矩形重叠">
                         
-                        <span class="card-title">Zookeeper基本使用</span>
+                        <span class="card-title">leetcode836-矩形重叠</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 数据结构ZooKeeper数据模型的结构与Unix文件系统很类似，整体上可以看作是一棵树，每个节点称做一个ZNode，每个ZNode都可以通过其路径唯一标识
-
-Znode 节点类型
-
-持久化目录节点（PERSISTENT）客户端与zoo
+                            1 原题矩形以列表 [x1, y1, x2, y2] 的形式表示，其中 (x1, y1) 为左下角的坐标，(x2, y2) 是右上角的坐标。
+如果相交的面积为正，则称两矩形重叠。需要明确的是，只在角或边接触的两个矩形不构成重叠。
+给出两个矩
                         
                     </div>
                     <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2020-03-17
-                            </span>
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2020-03-18
+                        </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/" class="post-category">
-                                    中间件/工具/框架
+                            <a href="/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-category">
+                                    算法/数据结构
                                 </a>
                             
                             
                         </span>
                     </div>
                 </div>
-
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">
-                        <span class="chip bg-color">分布式</span>
+                    <a href="/tags/leetcode/">
+                        <span class="chip bg-color">leetcode</span>
                     </a>
                     
-                    <a href="/tags/zookeeper/">
-                        <span class="chip bg-color">zookeeper</span>
+                    <a href="/tags/%E7%AE%97%E6%B3%95/">
+                        <span class="chip bg-color">算法</span>
                     </a>
                     
                 </div>
@@ -1160,7 +1272,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">354.5k</span>&nbsp;字
+                class="white-color">363.4k</span>&nbsp;字
             
             
             
