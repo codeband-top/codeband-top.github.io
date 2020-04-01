@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="keywords" content="使用OpenResty实现Nginx层面的多级缓存查询响应, 代码段小站">
-    <meta name="description" content="使用OpenResty实现Nginx层面的多级缓存查询响应 | 代码段小站">
+    <meta name="description" content="1 OpenResty概述OpenResty® 是一个基于 Nginx 与 Lua 的高性能 Web 平台，其内部集成了大量精良的 Lua 库、第三方模块以及大多数的依赖项。用于方便地搭建能够处理超高并发、扩展性极高的动态 Web 应用、W">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -361,12 +361,25 @@
             <div class="row tag-cate">
                 <div class="col s7">
                     
-                          <div class="article-tag">
-                            <span class="chip bg-color">无标签</span>
-                          </div>
+                    <div class="article-tag">
+                        
+                            <a href="/tags/OpenResty/">
+                                <span class="chip bg-color">OpenResty</span>
+                            </a>
+                        
+                    </div>
                     
                 </div>
                 <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/" class="post-category">
+                                编程语言
+                            </a>
+                        
+                    </div>
                     
                 </div>
             </div>
@@ -384,7 +397,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    0
+                    839
                 </div>
                 
 
@@ -397,7 +410,102 @@
         <hr class="clearfix">
         <div class="card-content article-card-content">
             <div id="articleContent">
-                
+                <h1 id="OpenResty概述">1 OpenResty概述</h1><p>OpenResty® 是一个基于 Nginx 与 Lua 的高性能 Web 平台，其内部集成了大量精良的 Lua 库、第三方模块以及大多数的依赖项。用于方便地搭建能够处理超高并发、扩展性极高的动态 Web 应用、Web 服务和动态网关。</p>
+<p>OpenResty® 通过<strong>汇聚各种设计精良的 Nginx 模块</strong>（主要由 OpenResty 团队自主开发），从而将 Nginx 有效地变成一个强大的通用 Web 应用平台。这样，Web 开发人员和系统工程师<strong>可以使用 Lua 脚本语言调动 Nginx 支持的各种 C 以及 Lua 模块，快速构造出足以胜任 10K 乃至 1000K 以上单机并发连接的高性能 Web 应用系统。</strong></p>
+<p>OpenResty® 的目标是让你的Web服务直接跑在 Nginx 服务内部，充分利用 Nginx 的非阻塞 I/O 模型，不仅仅对 HTTP 客户端请求,甚至于对远程后端诸如 MySQL、PostgreSQL、Memcached 以及 Redis 等都进行一致的高性能响应。</p>
+<p>以上介绍来自官网：<a href="http://openresty.org/cn/" target="_blank" rel="noopener">http://openresty.org/cn/</a></p>
+<p><a href="https://www.cnblogs.com/huanxiyun/articles/6676972.html" target="_blank" rel="noopener">由Lua 粘合的Nginx生态环境 - 天涯逐梦 - 博客园</a> 是OpenResty作者章亦春在2012年厦门TechClub沙龙上发表的一次关于OpenResty技术介绍的演讲听录。</p>
+<p>下面这个网址则是章亦春用 Perl 生成的一个简单 git 动画，可能就是在这次大会上当作幻灯片使用：</p>
+<p><a href="http://agentzh.org/misc/slides/ngx-openresty-ecosystem" target="_blank" rel="noopener">http://agentzh.org/misc/slides/ngx-openresty-ecosystem</a></p>
+<h1 id="安装">2 安装</h1><p>添加仓库执行命令</p>
+<pre><code>yum install yum-utils
+yum-config-manager --add-repo https://openresty.org/package/centos/openresty.repo</code></pre><p>执行安装</p>
+<pre><code>yum install openresty</code></pre><p>安装成功后 会在默认的目录如下：</p>
+<pre><code>/usr/local/openresty</code></pre><p>OpenResty默认已经集成了nginx,在目录：/usr/local/openresty/nginx 下。</p>
+<h1 id="在nginx层面实现多级缓存查询">3 在nginx层面实现多级缓存查询</h1><p><img src="https://api.codetool.top/img/15857443207883.png" alt></p>
+<p>为什么要这样做：</p>
+<p>在Nginx层面响应请求，不用再转发给后端服务器，减少后端服务器的压力</p>
+<h2 id="步骤">3.1 步骤</h2><p>在<code>nginx.conf</code>中定义lua缓存命名空间及其大小：</p>
+<pre class=" language-nginx"><code class="language-nginx"><span class="token keyword">user</span>  <span class="token keyword">root</span> <span class="token keyword">root</span><span class="token punctuation">;</span>
+<span class="token keyword">worker_processes</span>  <span class="token number">1</span><span class="token punctuation">;</span>
+
+<span class="token keyword">events</span> <span class="token punctuation">{</span>
+    <span class="token keyword">worker_connections</span>  <span class="token number">1024</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">http</span> <span class="token punctuation">{</span>
+    <span class="token keyword">include</span>       mime<span class="token punctuation">.</span><span class="token keyword">types</span><span class="token punctuation">;</span>
+    <span class="token keyword">default_type</span>  application<span class="token operator">/</span>octet<span class="token operator">-</span>stream<span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">#定义Nginx缓存模块，模块名字叫dis_cache,容量大小128M</span>
+    lua_shared_dict dis_cache 128m<span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">#keepalive_timeout  0;</span>
+    <span class="token keyword">keepalive_timeout</span>  <span class="token number">65</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">#gzip  on;</span>
+
+    <span class="token keyword">server</span> <span class="token punctuation">{</span>
+        <span class="token keyword">listen</span>       <span class="token number">80</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">#监听的域名</span>
+        <span class="token keyword">server_name</span>  localhost<span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">#表示所有以 localhost/read_content的请求都由该配置处理</span>
+        <span class="token keyword">location</span> <span class="token operator">/</span>read_content <span class="token punctuation">{</span>
+            <span class="token comment" spellcheck="true">#content_by_lua_file:所有请求都交给指定的lua脚本处理(/root/lua/read_content.lua)</span>
+            content_by_lua_file <span class="token operator">/</span><span class="token keyword">root</span><span class="token operator">/</span>lua<span class="token operator">/</span>read_content<span class="token punctuation">.</span>lua<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>lua脚本：</p>
+<pre class=" language-lua"><code class="language-lua">ngx<span class="token punctuation">.</span>header<span class="token punctuation">.</span>content_type<span class="token operator">=</span><span class="token string">"application/json;charset=utf8"</span>
+<span class="token keyword">local</span> uri_args <span class="token operator">=</span> ngx<span class="token punctuation">.</span>req<span class="token punctuation">.</span><span class="token function">get_uri_args</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">local</span> id <span class="token operator">=</span> uri_args<span class="token punctuation">[</span><span class="token string">"id"</span><span class="token punctuation">]</span>
+<span class="token comment" spellcheck="true">--获取本地缓存</span>
+<span class="token keyword">local</span> cache_ngx <span class="token operator">=</span> ngx<span class="token punctuation">.</span>shared<span class="token punctuation">.</span>dis_cache
+<span class="token comment" spellcheck="true">--根据ID 获取本地缓存数据</span>
+<span class="token keyword">local</span> contentCache <span class="token operator">=</span> cache_ngx<span class="token punctuation">:</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">'content_cache_'</span><span class="token operator">..</span>id<span class="token punctuation">)</span>
+
+<span class="token comment" spellcheck="true">-- 如果nginx缓存中没有，读取redis缓存</span>
+<span class="token keyword">if</span> contentCache <span class="token operator">==</span> <span class="token string">""</span> <span class="token keyword">or</span> contentCache <span class="token operator">==</span> <span class="token keyword">nil</span> <span class="token keyword">then</span>
+    <span class="token keyword">local</span> redis <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"resty.redis"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">local</span> red <span class="token operator">=</span> redis<span class="token punctuation">:</span><span class="token function">new</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    red<span class="token punctuation">:</span><span class="token function">set_timeout</span><span class="token punctuation">(</span><span class="token number">2000</span><span class="token punctuation">)</span>
+    red<span class="token punctuation">:</span><span class="token function">connect</span><span class="token punctuation">(</span><span class="token string">"192.168.176.129"</span><span class="token punctuation">,</span> <span class="token number">6379</span><span class="token punctuation">)</span>
+    <span class="token keyword">local</span> rescontent<span class="token operator">=</span>red<span class="token punctuation">:</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"content_"</span><span class="token operator">..</span>id<span class="token punctuation">)</span>
+
+    <span class="token comment" spellcheck="true">-- 如果redis缓存中没有，读取mysql数据库</span>
+    <span class="token keyword">if</span> ngx<span class="token punctuation">.</span>null <span class="token operator">==</span> rescontent <span class="token keyword">then</span>
+        <span class="token keyword">local</span> cjson <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"cjson"</span><span class="token punctuation">)</span>
+        <span class="token keyword">local</span> mysql <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"resty.mysql"</span><span class="token punctuation">)</span>
+        <span class="token keyword">local</span> db <span class="token operator">=</span> mysql<span class="token punctuation">:</span><span class="token function">new</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+        db<span class="token punctuation">:</span><span class="token function">set_timeout</span><span class="token punctuation">(</span><span class="token number">2000</span><span class="token punctuation">)</span>
+        <span class="token keyword">local</span> props <span class="token operator">=</span> <span class="token punctuation">{</span>
+            host <span class="token operator">=</span> <span class="token string">"192.168.176.129"</span><span class="token punctuation">,</span>
+            port <span class="token operator">=</span> <span class="token number">3306</span><span class="token punctuation">,</span>
+            database <span class="token operator">=</span> <span class="token string">"changgou_content"</span><span class="token punctuation">,</span>
+            user <span class="token operator">=</span> <span class="token string">"root"</span><span class="token punctuation">,</span>
+            password <span class="token operator">=</span> <span class="token string">"123456"</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">local</span> res <span class="token operator">=</span> db<span class="token punctuation">:</span><span class="token function">connect</span><span class="token punctuation">(</span>props<span class="token punctuation">)</span>
+        <span class="token keyword">local</span> select_sql <span class="token operator">=</span> <span class="token string">"select url,pic from tb_content where status ='1' and category_id="</span><span class="token operator">..</span>id<span class="token operator">..</span><span class="token string">" order by sort_order"</span><span class="token punctuation">;</span>
+        res <span class="token operator">=</span> db<span class="token punctuation">:</span><span class="token function">query</span><span class="token punctuation">(</span>select_sql<span class="token punctuation">)</span>
+        <span class="token keyword">local</span> responsejson <span class="token operator">=</span> cjson<span class="token punctuation">.</span><span class="token function">encode</span><span class="token punctuation">(</span>res<span class="token punctuation">)</span>
+        <span class="token comment" spellcheck="true">-- 写入redis缓存</span>
+        red<span class="token punctuation">:</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">"content_"</span><span class="token operator">..</span>id<span class="token punctuation">,</span>responsejson<span class="token punctuation">)</span>
+        ngx<span class="token punctuation">.</span><span class="token function">say</span><span class="token punctuation">(</span>responsejson<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        db<span class="token punctuation">:</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token comment" spellcheck="true">-- 如果redis缓存中存在数据，响应数据并写入nginx缓存</span>
+    <span class="token keyword">else</span>
+        cache_ngx<span class="token punctuation">:</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'content_cache_'</span><span class="token operator">..</span>id<span class="token punctuation">,</span> rescontent<span class="token punctuation">,</span> <span class="token number">10</span><span class="token operator">*</span><span class="token number">60</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ngx<span class="token punctuation">.</span><span class="token function">say</span><span class="token punctuation">(</span>rescontent<span class="token punctuation">)</span>
+    <span class="token keyword">end</span>
+    red<span class="token punctuation">:</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token comment" spellcheck="true">-- 如果nginx缓存中存在直接响应</span>
+<span class="token keyword">else</span>
+    ngx<span class="token punctuation">.</span><span class="token function">say</span><span class="token punctuation">(</span>contentCache<span class="token punctuation">)</span>
+<span class="token keyword">end</span></code></pre>
+
             </div>
             <hr/>
 
@@ -449,7 +557,11 @@
                 <div class="post-meta__tag-list" style="display: inline-block;">
                     
                         <div class="article-tag">
-                            <span class="chip bg-color">无标签</span>
+                            
+                                <a href="/tags/OpenResty/">
+                                    <span class="chip bg-color">OpenResty</span>
+                                </a>
+                            
                         </div>
                     
                 </div>
@@ -765,7 +877,7 @@
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            
+                            1 OpenResty概述OpenResty® 是一个基于 Nginx 与 Lua 的高性能 Web 平台，其内部集成了大量精良的 Lua 库、第三方模块以及大多数的依赖项。用于方便地搭建能够处理超高并发、扩展性极高的动态 Web 应用、W
                         
                     </div>
                     <div class="publish-info">
@@ -774,13 +886,25 @@
                             </span>
                         <span class="publish-author">
                             
-                            <i class="fas fa-user fa-fw"></i>
-                            Rhett Peng
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/" class="post-category">
+                                    编程语言
+                                </a>
+                            
                             
                         </span>
                     </div>
                 </div>
 
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/OpenResty/">
+                        <span class="chip bg-color">OpenResty</span>
+                    </a>
+                    
+                </div>
                 
             </div>
         </div>
@@ -976,7 +1100,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">435.7k</span>&nbsp;字
+                class="white-color">437.1k</span>&nbsp;字
             
             
             
