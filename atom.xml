@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.codetool.top/"/>
-  <updated>2020-04-05T14:49:09.242Z</updated>
+  <updated>2020-04-06T12:04:59.919Z</updated>
   <id>https://www.codetool.top/</id>
   
   <author>
@@ -15,6 +15,65 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Redis常用数据类型使用的数据结构</title>
+    <link href="https://www.codetool.top/article/Redis%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E4%BD%BF%E7%94%A8%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
+    <id>https://www.codetool.top/article/Redis常用数据类型使用的数据结构/</id>
+    <published>2020-04-06T11:00:07.000Z</published>
+    <updated>2020-04-06T12:04:59.919Z</updated>
+    
+    <content type="html"><![CDATA[<p>本文参考资源：</p><p>[Redis数据结构——压缩列表 - 老於` - 博客园](<a href="https://www.cnblogs.com/hunternet/p/11306690.html" target="_blank" rel="noopener">https://www.cnblogs.com/hunternet/p/11306690.html</a>)</p><p>极客时间《数据结构与算法之美》</p><p>总体来说，Redis的key-value数据存储是通过哈希表实现的，那么具体到某一数据类型，又是使用了什么数据结构呢？这里我们着重看Redis中的五大数据类型：String、Hash、List、Set、Sorted_set。其中String类型非常简单，就是字符串。</p><h1 id="List">1 List</h1><p>我们先来看列表。列表这种数据类型支持存储一组数据。这种数据类型对应两种实现方法，一种是压缩列表（ziplist），另一种是双向循环链表。</p><h2 id="压缩列表（ZipList）">1.1 压缩列表（ZipList）</h2><p>当列表中存储的数据量比较小的时候，列表就可以采用压缩列表的方式实现。具体需要同时满足下面两个条件：</p><ul><li>列表中保存的单个数据（有可能是字符串类型的）小于 64 字节。</li><li>列表中数据个数少于 512 个。</li></ul><p>它不是基础数据结构，而是 Redis 自己设计的一种数据存储结构。它有点儿类似数组，通过一片连续的内存空间，来存储数据。不过，它跟数组不同的一点是，它允许存储的数据大小不同（可以混合存储不同类型，不同大小的数据）。</p><p>听到“压缩”两个字，直观的反应就是节省内存。之所以说这种存储结构节省内存,是相较于数组的存储思路而言的。我们知道,数组要求每个元素的大小相同,如果我们要存储不同长度的字符串,那我们就需要用最大长度的字符串大小作为元素的大小(假设是20个字节)。存储小于 20 个字节长度的字符串的时候，便会浪费部分存储空间。</p><p><img src="https://api.codetool.top/img/15861719516161.png" alt></p><p>数组的优势是占用一片连续的空间可以很好的利用CPU缓存访问数据。如果我们想要保留这种优势，又想节省存储空间我们可以对数组进行压缩。</p><p><img src="https://api.codetool.top/img/158617199613.png" alt></p><p>但是这样有一个问题，我们在遍历它的时候由于不知道每个元素的大小是多少，因此也就无法计算出下一个节点的具体位置。这个时候我们可以给每个节点增加一个length的属性。</p><p><img src="https://api.codetool.top/img/15861720704814.png" alt></p><p>这种设计思想并不少见，java的class文件字节码中涉及到字段表、方法表、属性表，都会先给一个数据项数，然后紧跟的是数据项的列表，每一个数据项开头都会记录数据项的长度。这部分相关内容见<a href="../Java字节码实例探究">Java字节码实例探究</a></p><p>Redis中的压缩列表，构成如下图：</p><p><img src="https://api.codetool.top/img/15861721358278.png" alt></p><p>一个压缩列表可以包含任意多个节点(entry),<strong>每个节点可以保存一个字节数组或者一个整数值</strong>。除了存储节点外，头部还存储了额外的信息：</p><ul><li>zlbytes：列表总长度</li><li>zltail：最后一个节点地址据列表起始地址的偏移量</li><li>zllen：节点个数</li></ul><p>尾部附加了一个<code>zlend</code>作为结束的标识。</p><p>压缩列表相较于数组，虽然节省了空间，但失去了数组的随机访问性，由于每个数据项的大小都可能不同，不能通过计算偏移量来获取某一中间元素的地址，只能顺序访问，这一点就跟链表一样，比链表好的是物理上的存储还是连续的，不必多次寻址。所以数据项较多时压缩列表就不适用了，进而使用双向循环链表。</p><h2 id="双向循环链表">1.2 双向循环链表</h2><p>当不满足压缩列表的使用条件时，就使用双向循环链表，这部分较简单。</p><p><img src="https://api.codetool.top/img/15861730113811.png" alt></p><h1 id="Hash">2 Hash</h1><p>Hash类型又称字典类型，也有两种实现方式。一种是我们刚刚讲到的压缩列表，另一种是散列表。</p><p>同样，只有当存储的数据量比较小的情况下，Redis 才使用压缩列表来实现字典类型。具体需要满足两个条件：</p><ul><li>字典中保存的键和值的大小都要小于 64 字节；</li><li>字典中键值对的个数要小于 512 个。</li></ul><p>当不能同时满足上面两个条件的时候，Redis 就使用散列表来实现字典类型。Redis 使用<code>MurmurHash2</code> 这种运行速度快、随机性好的哈希算法作为哈希函数。<strong>对于哈希冲突问题，Redis 使用链表法（拉链法）来解决。</strong>除此之外，Redis 还支持散列表的动态扩容、缩容。</p><p>当数据动态增加之后，散列表的装载因子会不停地变大。为了避免散列表性能的下降，<strong>当装载因子大于 1 的时候（对于使用拉链法解决哈希冲突的哈希表装载因子是有可能大于1的），Redis 会触发扩容，将散列表扩大为原来大小的 2 倍左右。</strong></p><p>当数据动态减少之后，为了节省内存，<strong>当装载因子小于 0.1 的时候，Redis 就会触发缩容，缩小为字典中数据个数的大约 2 倍大小。</strong></p><p>由于扩容缩容要做大量的数据搬移和哈希值的重新计算，比较耗时。针对这个问题，Redis 使用了渐进式扩容缩容策略，将数据的搬移分批进行，避免了大量数据一次性搬移导致的服务停顿。</p><h1 id="Set">3 Set</h1><p>集合这种数据类型用来存储一组不重复的数据。这种数据类型也有两种实现方法，一种是基于有序数组，另一种是基于散列表。</p><p>当要存储的数据，同时满足下面这样两个条件的时候，Redis 就采用有序数组，来实现集合这种数据类型。</p><ul><li>存储的数据都是整数。</li><li>存储的数据元素个数不超过 512 个。</li></ul><p>当不能同时满足这两个条件的时候，Redis 就使用散列表来存储集合中的数据。</p><h1 id="Sorted-set">4 Sorted_set</h1><p>Sorted_set又称有序集合，它用来存储一组数据，并且每个数据会附带一个得分。根据得分实现对个数据进行排序。</p><p>它的底层通过跳表实现，相关内容参考<a href="../跳表-披着链表外衣的伪搜索树">跳表-披着链表外衣的伪搜索树</a>。通过得分的大小，我们将数据组织成跳表这样的数据结构，以支持快速地按照得分值、得分区间获取数据。</p><p>实际上，跟 Redis 的其他数据类型一样，有序集合也并不仅仅只有跳表这一种实现方式。当数据量比较小的时候，Redis 会用压缩列表来实现有序集合。具体点说就是，使用压缩列表来实现有序集合的前提，有这样两个：</p><ul><li>所有数据的大小都要小于 64 字节。</li><li>元素个数要小于 128 个。</li></ul>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;本文参考资源：&lt;/p&gt;
+&lt;p&gt;[Redis数据结构——压缩列表 - 老於` - 博客园](&lt;a href=&quot;https://www.cnblogs.com/hunternet/p/11306690.html&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;h
+      
+    
+    </summary>
+    
+    
+      <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
+    
+    
+      <category term="数据结构" scheme="https://www.codetool.top/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
+    
+      <category term="Redis" scheme="https://www.codetool.top/tags/Redis/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>leetcode72-编辑距离</title>
+    <link href="https://www.codetool.top/article/leetcode72-%E7%BC%96%E8%BE%91%E8%B7%9D%E7%A6%BB/"/>
+    <id>https://www.codetool.top/article/leetcode72-编辑距离/</id>
+    <published>2020-04-06T05:23:46.000Z</published>
+    <updated>2020-04-06T05:55:00.040Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>给你两个单词 <em>word1</em> 和 <em>word2*，请你计算出将 *word1</em> 转换成 <em>word2</em> 所使用的最少操作数 。</p><p>你可以对一个单词进行如下三种操作：</p><ol><li>插入一个字符</li><li>删除一个字符</li><li>替换一个字符</li></ol><p><strong>示例1:</strong></p><blockquote><p><strong>输入：</strong> word1 = “horse”, word2 = “ros”<br><strong>输出：</strong> 3<br><strong>解释：</strong><br>horse -&gt; rorse (将 ‘h’ 替换为 ‘r’)<br>rorse -&gt; rose (删除 ‘r’)<br>rose -&gt; ros (删除 ‘e’)      </p></blockquote><p><strong>示例2:</strong></p><blockquote><p><strong>输入：</strong> word1 = “intention”, word2 = “execution”<br><strong>输出：</strong> 5<br><strong>解释:</strong><br>intention -&gt; inention (删除 ‘t’)<br>inention -&gt; enention (将 ‘i’ 替换为 ‘e’)<br>enention -&gt; exention (将 ‘n’ 替换为 ‘x’)<br>exention -&gt; exection (将 ‘n’ 替换为 ‘c’)<br>exection -&gt; execution (插入 ‘u’)   </p></blockquote><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>编辑距离算法，和KMP算法一样，属于字符串处理里面的经典算法了，KMP算法属于精准模式匹配，而编辑距离算法用于处理两个字符串之间的相似度，也属于一种匹配方式。</p><p>一般来说,编辑距离越小,两个字符串的相似度越大。 并且编辑距离算法广泛运用于生产中，例如搜索引擎通过编辑距离算法来智能识错，word软件通过编辑距离算法做拼写检查。</p><p>思想就是动态规划：</p><p><img src="https://api.codetool.top/img/1586151429724.png" alt></p><p>画一个矩阵，中间的格子代表从一个字符串到另一个字符串的编辑距离。</p><p>对于第一行、第一列，我们提前赋值1~n，代表仅通过插入的方式计算的编辑距离。</p><p>然后，对于任意一个格子，例如图中的红色格子<code>dp[m][n]</code>，它可能由字符串A插入一个字符、字符串B插入一个字符，字符串A修改一个字符得到，对于修改字符，如果两个字符串在该位置上的字符相同，则不用修改，对应的最小编辑距离就是<code>min(dp[m][n-1],dp[m-1][n],dp[m-1][n-1]-1)+1</code>，实际上最小的必是<code>dp[m-1][n-1]-1</code>，即此时编辑距离为<code>dp[m-1][n-1]</code>，如果两个字符串在该位置上的字符不同，则需要修改最后一个字符，此时最小编辑距离为<code>min(dp[m][n-1],dp[m-1][n],dp[m-1][n-1])+1</code></p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">minDistance</span><span class="token punctuation">(</span>String word1<span class="token punctuation">,</span> String word2<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">int</span> n1 <span class="token operator">=</span> word1<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> n2 <span class="token operator">=</span> word2<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span> dp <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">int</span><span class="token punctuation">[</span>n1 <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">[</span>n2 <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// 第一行</span>        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> j <span class="token operator">&lt;=</span> n2<span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span> dp<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">=</span> dp<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">[</span>j <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// 第一列</span>        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> i <span class="token operator">&lt;=</span> n1<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> dp<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> dp<span class="token punctuation">[</span>i <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span>        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> i <span class="token operator">&lt;=</span> n1<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>            <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> j <span class="token operator">&lt;=</span> n2<span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>                <span class="token keyword">if</span> <span class="token punctuation">(</span>word1<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">==</span> word2<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>j <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span> dp<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">=</span> dp<span class="token punctuation">[</span>i <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">[</span>j <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>                <span class="token keyword">else</span> dp<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span>dp<span class="token punctuation">[</span>i <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">[</span>j <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> dp<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span>j <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span> dp<span class="token punctuation">[</span>i <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> dp<span class="token punctuation">[</span>n1<span class="token punctuation">]</span><span class="token punctuation">[</span>n2<span class="token punctuation">]</span><span class="token punctuation">;</span>      <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;原题&quot;&gt;1 原题&lt;/h1&gt;&lt;p&gt;给你两个单词 &lt;em&gt;word1&lt;/em&gt; 和 &lt;em&gt;word2*，请你计算出将 *word1&lt;/em&gt; 转换成 &lt;em&gt;word2&lt;/em&gt; 所使用的最少操作数 。&lt;/p&gt;
+&lt;p&gt;你可以对一个单词进行如下三种操作：&lt;/p&gt;
+&lt;o
+      
+    
+    </summary>
+    
+    
+      <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
+    
+    
+      <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
+    
+      <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
   
   <entry>
     <title>SpringBoot整合模板引擎Thymeleaf</title>
@@ -513,64 +572,6 @@
       
       
         &lt;h1 id=&quot;docker-compose&quot;&gt;1 docker-compose&lt;/h1&gt;&lt;h2 id=&quot;介绍与安装&quot;&gt;1.1 介绍与安装&lt;/h2&gt;&lt;p&gt;微服务架构的应用系统中一般包含若干个微服务，每个微服务一般都会部署多个实例，如果每个微服务都要手动启停，维护的工作量会很大。&lt;
-      
-    
-    </summary>
-    
-    
-      <category term="中间件/工具/框架" scheme="https://www.codetool.top/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/"/>
-    
-    
-      <category term="docker" scheme="https://www.codetool.top/tags/docker/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>docker镜像原理与dockerfile</title>
-    <link href="https://www.codetool.top/article/docker%E9%95%9C%E5%83%8F%E5%8E%9F%E7%90%86%E4%B8%8Edockerfile/"/>
-    <id>https://www.codetool.top/article/docker镜像原理与dockerfile/</id>
-    <published>2020-03-29T10:20:24.000Z</published>
-    <updated>2020-03-29T14:12:24.869Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="Docker-镜像本质是什么？">1 Docker 镜像本质是什么？</h1><p>是一个分层文件系统</p><p><strong>统一文件系统</strong>（Union File System）技术能够将不同的层整合成一个文件系统，为这些层提供了一个统一的视角，这样就隐藏了多层的存在，在用户的角度看来，只存在一个文件系统。 </p><p>一个镜像可以放在另一个镜像的上面。位于下面的镜像称为父镜像，最底部的镜像成为基础镜像。</p><p>当从一个镜像启动容器时，Docker会在最顶层加载一个读写文件系统作为容器</p><h1 id="Docker-中一个centos镜像为什么只有200MB，而一个centos操作系统的iso文件要几个个G？">2 Docker 中一个centos镜像为什么只有200MB，而一个centos操作系统的iso文件要几个个G？</h1><p>Docker镜像是由特殊的文件系统叠加而成，<br>最底端是 <code>bootfs</code>，并使用宿主机的 <code>bootfs</code>。</p><p>第二层是root文件系统<code>rootfs</code>,称为<code>base image</code><br>然后再往上可以叠加其他的镜像文件</p><p><img src="https://api.codetool.top/img/15854771588983.png" alt></p><p>Centos的iso镜像文件包含<code>bootfs</code>和<code>rootfs</code>，而docker的centos镜像复用操作系统的<code>bootfs</code>，只有<code>rootfs</code>和其他镜像层</p><p>Docker 中一个tomcat镜像为什么有500MB，而一个tomcat安装包只有70多MB？</p><p>由于docker中镜像是分层的，tomcat虽然只有70多MB，但他需要依赖于父镜像和基础镜像，所有整个对外暴露的tomcat镜像大小500多MB</p><p>使用<code>docker inspect 镜像名</code>也可以看到<code>layers</code>，即分层镜像。</p><h1 id="dockerfile">3 dockerfile</h1><p>容器转成镜像：</p><pre><code>docker commit 容器id 镜像名称:版本号</code></pre><p>压缩和解压：</p><pre><code>docker save -o 压缩文件名称 镜像名称:版本号docker load -i 压缩文件名称</code></pre><p>除此之外，可以用dockerfile来制作镜像。</p><h2 id="语法">3.1 语法</h2><h3 id="FROM-amp-RUN-amp-USER">3.1.1 FROM &amp; RUN &amp; USER</h3><pre class=" language-dockerfile"><code class="language-dockerfile">From debian:wheezyUSER cowsayRun apt-get update && apt-get install -y cowsay fortune</code></pre><p><code>FROM</code>指令指定初始镜像，这里使用debian，并且指定了wheezy版本</p><p><code>USER</code>指定build或启动的时候，run cmd entrypoint执行时使用的用户。</p><p><code>RUN</code>用于执行指令</p><h3 id="ENTRYPOINT">3.1.2 ENTRYPOINT</h3><pre class=" language-dockerfile"><code class="language-dockerfile">ENTRYPOINT ["/usr/games/cowsay"]</code></pre><p>ENTRYPOINT指定一个可执行文件，传给docker run作参数，一般在制作一些执行就关闭的容器中会使用。</p><h3 id="COPY-amp-ADD">3.1.3 COPY &amp; ADD</h3><pre class=" language-dockerfile"><code class="language-dockerfile">COPY entrypoint.sh /ADD entrypoint.sh /</code></pre><p>把一个文件从主机（可使用dockerfile所在路径的相对路径）复制到镜像的文件系统。COPY指令和ADD指令的唯一区别在于是否支持从远程URL获取资源。COPY指令只能从执行docker build所在的主机上读取资源并复制到镜像中。而ADD指令还支持通过URL从远程服务器读取资源并复制到镜像中。</p><h3 id="ENV-amp-ARG">3.1.4 ENV &amp; ARG</h3><pre class=" language-dockerfile"><code class="language-dockerfile">ENV NGINX_VERSION   1.17.9</code></pre><p>指定环境变量</p><pre class=" language-dockerfile"><code class="language-dockerfile">ARG some_variable_name=default_valueRUN echo "Oh dang look at that $some_variable_name"</code></pre><p>可以用来作为构建的参数（当然也可以使用环境变量）。</p><h3 id="MAINTAINER-amp-LABEL">3.1.5 MAINTAINER &amp; LABEL</h3><pre class=" language-dockerfile"><code class="language-dockerfile">MAINTAINER John Smith <john@smith.com>LABEL maintainer="John Smith <john@smith.com>"</code></pre><p><code>MAINTAINER</code>设定作者的联系信息，可以使用<code>LABEL</code>代替，LABEL设置的属性最终可以在docker image的基本属性中查看</p><h3 id="EXPOSE">3.1.6 EXPOSE</h3><pre class=" language-dockerfile"><code class="language-dockerfile">EXPOSE 80</code></pre><p>暴露端口</p><h3 id="VOLUME-amp-WORKDIR">3.1.7 VOLUME &amp; WORKDIR</h3><pre class=" language-dockerfile"><code class="language-dockerfile">VOLUME /dataWORKDIR /data</code></pre><p><code>VOLUME</code>定义外部可以挂载的数据卷，<code>WORKDIR</code>指定工作目录，如果没有自动创建</p><h3 id="CMD">3.1.8 CMD</h3><p>第一种用法：</p><pre class=" language-dockerfile"><code class="language-dockerfile">CMD java -jar app.jar</code></pre><p>运行一个可执行的文件并提供参数。</p><p>第二种用法：为ENTRYPOINT指定参数。</p><p>第三种用法：</p><pre class=" language-dockerfile"><code class="language-dockerfile">CMD["/bin/bash"]</code></pre><p>设置启动容器默认打开的终端</p><h2 id="使用Dockerfile创建镜像">3.2 使用Dockerfile创建镜像</h2><pre><code>docker build -f ./centos_dockerfile -t vim_centos:1 .</code></pre><p><code>-f Dockerfile</code>指定dockerfile的位置</p><p><code>-t image_name:tag</code>指定镜像的名字及标签</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h1 id=&quot;Docker-镜像本质是什么？&quot;&gt;1 Docker 镜像本质是什么？&lt;/h1&gt;&lt;p&gt;是一个分层文件系统&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;统一文件系统&lt;/strong&gt;（Union File System）技术能够将不同的层整合成一个文件系统，为这些层提供了一个统一的
-      
-    
-    </summary>
-    
-    
-      <category term="中间件/工具/框架" scheme="https://www.codetool.top/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/"/>
-    
-    
-      <category term="docker" scheme="https://www.codetool.top/tags/docker/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>常用软件的docker部署</title>
-    <link href="https://www.codetool.top/article/%E5%B8%B8%E7%94%A8%E8%BD%AF%E4%BB%B6%E7%9A%84docker%E9%83%A8%E7%BD%B2/"/>
-    <id>https://www.codetool.top/article/常用软件的docker部署/</id>
-    <published>2020-03-29T06:07:45.000Z</published>
-    <updated>2020-03-29T06:15:44.152Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="docker端口映射">1 docker端口映射</h1><ul><li>容器内的网络服务和外部机器不能直接通信</li><li>外部机器和宿主机可以直接通信</li><li>宿主机和容器可以直接通信</li></ul><p>当容器中的网络服务需要被外部机器访问时，可以将容器中提供服务的端口映射到宿主机的端口上。外部机器访问宿主机的该端口，从而间接访问容器的服务。这种操作称为：端口映射</p><h1 id="Mysql部署">2 Mysql部署</h1><ol><li>搜索mysql镜像</li></ol><pre><code>docker search mysql</code></pre><ol start="2"><li>拉取mysql镜像</li></ol><pre><code>docker pull mysql:5.7</code></pre><ol start="3"><li>创建容器，设置端口映射、目录映射</li></ol><pre class=" language-shell"><code class="language-shell"># 在/root目录下创建mysql目录用于存储mysql数据信息mkdir ~/mysqlcd ~/mysqldocker run -id \-p 3306:3306 \--name=c_mysql \-v $PWD/conf:/etc/mysql/conf.d \-v $PWD/logs:/logs \-v $PWD/data:/var/lib/mysql \-e MYSQL_ROOT_PASSWORD=123456 \mysql:5.7</code></pre><p>参数说明：</p><ul><li><code>-p 3306:3306</code>：将容器的 3306 端口映射到宿主机的 3306 端口。前一个3306是宿主机的端口。</li><li><code>-v $PWD/conf:/etc/mysql/conf.d</code>：将主机当前目录下的 conf/my.cnf 挂载到容器的 /etc/mysql/my.cnf。配置目录</li><li><code>-v $PWD/logs:/logs</code>：将主机当前目录下的 logs 目录挂载到容器的 /logs。日志目录</li><li><code>-v $PWD/data:/var/lib/mysql</code>：将主机当前目录下的data目录挂载到容器的 /var/lib/mysql 。数据目录</li><li><code>-e MYSQL_ROOT_PASSWORD=123456</code>：初始化 root 用户的密码。</li></ul><p>【注】如果提示<code>[Warning] IPv4 forwarding is disabled. Networking will not work.</code>：</p><p>在docker的宿主机中更改文件：</p><pre><code>vim /usr/lib/sysctl.d/00-system.conf</code></pre><p>在文件末尾添加<code>net.ipv4.ip_forward=1</code></p><p>重新启动network服务：<code>systemctl restart network</code></p><ol start="4"><li>进入容器环境</li></ol><pre><code>docker exec -it c_mysql /bin/bash</code></pre><h1 id="Nginx部署">3 Nginx部署</h1><pre><code>docker pull nginx</code></pre><p>下面这个步骤是把nginx.conf文件复制出来：</p><pre><code>mkdir ~/nginxcd ~/nginxmkdir confdocker run -id --name=c_nginx -p 80:80 nginxdocker cp c_nginx:/etc/nginx/nginx.conf ~/nginx/confdocker stop c_nginxdocker rm c_nginx</code></pre><p>重新生成容器，并绑定数据卷：</p><pre><code>docker run -id --name=c_nginx \-p 80:80 \-v $PWD/conf/nginx.conf:/etc/nginx/nginx.conf \-v $PWD/logs:/var/log/nginx \-v $PWD/html:/usr/share/nginx/html \nginx</code></pre><p>在<code>html/</code>下新建index.html：</p><pre class=" language-html"><code class="language-html"><span class="token doctype">&lt;!DOCTYPE html></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>html</span> <span class="token attr-name">lang</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>en<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>head</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">charset</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>UTF-8<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>viewport<span class="token punctuation">"</span></span> <span class="token attr-name">content</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>width<span class="token punctuation">=</span>device-width, initial-scale<span class="token punctuation">=</span>1.0<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>title</span><span class="token punctuation">></span></span>Document<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>title</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>head</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>body</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h1</span><span class="token punctuation">></span></span>hello docker nginx！<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h1</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>html</span><span class="token punctuation">></span></span></code></pre><p>保存并退出，访问宿主机的80端口，可以看见网站成功响应</p><p><img src="https://api.codetool.top/img/15854600337280.png" alt></p><h1 id="redis部署">4 redis部署</h1><pre><code>docker pull redis:5.0docker run -id --name=c_redis -p 6379:6379 redis:5.0</code></pre>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h1 id=&quot;docker端口映射&quot;&gt;1 docker端口映射&lt;/h1&gt;&lt;ul&gt;
-&lt;li&gt;容器内的网络服务和外部机器不能直接通信&lt;/li&gt;
-&lt;li&gt;外部机器和宿主机可以直接通信&lt;/li&gt;
-&lt;li&gt;宿主机和容器可以直接通信&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;当容器中的网络服务需要被外部
       
     
     </summary>
