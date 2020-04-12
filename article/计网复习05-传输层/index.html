@@ -1,0 +1,1351 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="计网复习05-传输层, 代码段小站">
+    <meta name="description" content="这里的传输层指的是原理体系结构的传输层，对应OSI七层体系结构中的传输层，对应TCP/IP四层体系结构中的传输层。它为应用层提供服务。
+1 传输层协议概述
+1.1 复用和分用因为在一台主机中经常有多个应用进程同时分别和另一台主机中的多个应用">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>计网复习05-传输层 | 代码段小站</title>
+    <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon.ico">
+    
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+    
+    <script src="/libs/jquery/jquery.min.js"></script>
+    
+<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper head-container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/code.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">代码段小站</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/runcode" class="waves-effect waves-light">
+      
+      <i class="fas fa-code" style="zoom: 0.6;"></i>
+      
+      <span>写代码</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/code.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">代码段小站</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/runcode" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-code"></i>
+			
+			写代码
+		</a>
+          
+        </li>
+        
+        
+    </ul>
+</div>
+
+        </div>
+
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/2.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">计网复习05-传输层</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        margin: 35px 0 15px 0;
+        padding-left: 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        height: calc(100vh - 250px);
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #toc-content .is-active-link::before {
+        background-color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">
+                                <span class="chip bg-color">计算机网络</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%9B%B8%E5%85%B3/" class="post-category">
+                                计算机相关
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2020-04-12
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    4.2k
+                </div>
+                
+
+                
+				
+                
+            </div>
+            
+        </div>
+        <hr class="clearfix">
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>这里的传输层指的是原理体系结构的传输层，对应OSI七层体系结构中的传输层，对应TCP/IP四层体系结构中的传输层。它为应用层提供服务。</p>
+<h1 id="传输层协议概述">1 传输层协议概述</h1><p><img src="https://api.codetool.top/img/15866799087510.png" alt></p>
+<h2 id="复用和分用">1.1 复用和分用</h2><p>因为在一台主机中经常有多个应用进程同时分别和另一台主机中的多个应用进程通信。这表明运输层有一个很重要的功能——复用 (multiplexing)和分用 (demultiplexing)。</p>
+<p>应用层-&gt;传输层基于端口的TCP/UDP复用，整合为TCP报文段/UDP用户数据报。传输层-&gt;网络层是IP复用，整合为IP数据报。在接收端进行分用处理。</p>
+<h1 id="用户数据报协议UDP">2 用户数据报协议UDP</h1><p><img src="https://api.codetool.top/img/15866799611274.png" alt></p>
+<p>UDP只在IP数据报服务之上增加了很少功能，即复用分用和差错检测功能。</p>
+<h2 id="UDP的主要特点">2.1 UDP的主要特点</h2><ol>
+<li>UDP是<strong>无连接</strong>的，减少开销和发送数据之前的时延。</li>
+<li>UDP使用<strong>最大努力交付</strong>，即不保证可靠交付。</li>
+<li>UDP是<strong>面向报文</strong>的，适合一次性传输少量数据的网络应用。</li>
+<li>UDP<strong>无拥塞控制</strong>，适合很多实时应用。</li>
+<li>UDP的<strong>首部开销小</strong>，只有八字节</li>
+</ol>
+<h2 id="UDP的报文格式">2.2 UDP的报文格式</h2><p><img src="https://api.codetool.top/img/15866813837256.png" alt></p>
+<p>源端口号是可有可无的（如果没有想收到回复的需求），可以填写全0。</p>
+<p>分用时，找不到对应的目的端口号，就丢弃报文，并给发送方发送ICMP“端口不可达”差错报告报文。</p>
+<h3 id="校验和的计算">2.2.1 校验和的计算</h3><p><img src="https://api.codetool.top/img/15866818094214.png" alt></p>
+<p>计算校验和时，会先抽象出一个“伪首部”，从IP数据报的首部获取信息。</p>
+<p>伪首部只有在计算检验和时才出现，不向下传送也不向上递交。</p>
+<p><img src="https://api.codetool.top/img/15866820631253.png" alt></p>
+<p>在计算校验和时，将每组对齐的2字节对应的16位相加，得到的结果求反码。这样就产生了校验码，发送端将它填入。</p>
+<p>接收端的验证也是将将每组对齐的2字节对应的16位相加，得到的结果求反码，若全为1说明校验通过，否则说明出错。</p>
+<h1 id="传输控制协议TCP">3 传输控制协议TCP</h1><p><img src="https://api.codetool.top/img/15866808929918.png" alt></p>
+<ul>
+<li>发送缓存：准备发送的数和已发送但尚未收到确认的数据</li>
+<li>接收缓存：按序到达但尚未被接受应用程序读取的数据和不按序到达的数据</li>
+</ul>
+<h1 id="可靠传输的工作原理">4 可靠传输的工作原理</h1><p><img src="https://api.codetool.top/img/15866809274469.png" alt></p>
+<p>这部分的协议我用到的数据单位是“帧”，是因为这部分也可以由数据链路层来控制，传输层的思想与其一致。</p>
+<h2 id="停止-等待协议">4.1 停止-等待协议</h2><p>为什么要有停止等待协议?</p>
+<ul>
+<li>除了比特出差错，底层信道还会出现丢包问题。</li>
+<li>为了实现流量控制。</li>
+</ul>
+<p>每发送完一个帧就停止发送，等待对方的确认，在<strong>收到确认后再发送下一个帧</strong>。停止等待协议是一种特殊的滑动窗口协议。</p>
+<p>如果未收到确认，就要有<strong>超时重传机制，通常这个超时时间比平均RTT更长一些，如果超时还没有收到接收方发来的确认帧，就重新发送一次上一帧。</strong></p>
+<p><strong>发送帧和确认帧都有编号，这样即使帧重复，接收方也能知道是收到了重复帧。</strong></p>
+<ul>
+<li>停止等待协议：发送窗口大小=1，接收窗口大小=1;</li>
+<li>后退N帧协议(GBN)：发送窗口大小&gt;1， 接收窗口大小=1:</li>
+<li>选择重传协议(SR)：发送窗口大小&gt;1，接收窗口大小&gt;1;</li>
+</ul>
+<h2 id="滑动窗口协议">4.2 滑动窗口协议</h2><h3 id="后退N帧协议（GBN）">4.2.1 后退N帧协议（GBN）</h3><p><img src="https://api.codetool.top/img/1586335862716.png" alt></p>
+<p>发送方有一个发送窗口，接收方有一个接收窗口（大小为1），发送方可以发出发送窗口范围内允许的发出的帧，当接收方收到一帧之后，接收窗口向后滑动一格，响应一个确认帧，发送方收到确认帧之后将发送窗口也向后滑动一格。</p>
+<p>对于发送窗口内的发送帧都要有备份，为了超时重传。发送帧和确认帧都要有编号，为了区别传送中发生的错误。</p>
+<p><strong>如果接收方收到了编号不连续的帧，说明中途发生了帧丢失，那么从此刻开始，将所有接收到的的帧丢弃，只响应上一个连续帧序列中最后一个帧的编号对应的确认帧，直到再次收到能形成连续编号的帧。</strong></p>
+<p>若采用n个比特对帧编号，那么发送窗口的尺寸W<sub>T</sub>应满足: <span color="red">1≤W<sub>T</sub>≤2<sup>n</sup>-1<span>。因为发送窗口尺寸过大，就会使得接收方无法区别新帧和旧帧。</span></span></p>
+<h3 id="选择重传协议（SR）">4.2.2 选择重传协议（SR）</h3><p>选择重传协议的发送窗口大小和接收窗口大小均大于1。</p>
+<p><img src="https://api.codetool.top/img/15863418002044.png" alt></p>
+<p>发送窗口内某个帧的超时时间一过还没收到确认的，就进行重传。一旦发送窗口左侧有连续被确认的发送帧，就进行滑动，滑动到具有最小序号的未确认帧处。</p>
+<p>接收方并不要求接收的帧是顺序的，只要是在接收窗口内的帧序号就接收。</p>
+<p>发送窗口最好等于接收窗口，不大于2<sup>n-1</sup>。</p>
+<h2 id="TCP报文格式">4.3 TCP报文格式</h2><p><img src="https://api.codetool.top/img/15866887476632.png" alt></p>
+<ul>
+<li>序号：在一个TCP连接中传送的字节流中的每一个字节都按顺序编号，本字段表示本报文段所发送数据的第一个字节的序号。</li>
+<li>确认号：期望收到对方下一个报文段的第一个数据字节的序号。若确认号为N,则证明到序号N-1为止的所有数据都已正确收到。</li>
+<li>数据偏移(首部长度) : TCP报文段的数据起始处距离TCP报文段的起始处有多远，以4B为单位，即1个数值是4B。</li>
+<li>六个控制位：<ul>
+<li><strong>紧急位URG</strong>: URG=1时， 标明此报文段中有紧急数据，是高优先级的数据，应尽快传送，不用在缓存里排队，配合紧急指针字段使用。</li>
+<li><strong>确认位ACK</strong>: ACK=1时确认号有效， 在连接建立后所有传送的报文段都必须把ACK置为1。</li>
+<li>推送位PSH: PSH=1时，接收方尽快交付接收应用进程，不再等到缓存填满再向上交付。</li>
+<li>复位RST: RST=1时， 表明TCP连接中出现严重差错，必须释放连接，然后再重新建立传输链接。</li>
+<li><strong>同步位SYN</strong>: SYN=1时， 表明是一个连接请求/连接接受报文。</li>
+<li><strong>终止位FIN</strong>: FIN=1时， 表明此报文段发送方数据已发完，要求释放连接。</li>
+</ul>
+</li>
+<li>窗口：指的是<strong>发送本报文段的一方的接收窗口</strong>，即现在允许对方发送的数据量。</li>
+<li>检验和：和UDP中的检验和类似，检验首部+数据，检验时要加上12B伪首部，第四个字段为6。</li>
+<li>紧急指针: URG=1时才有意义，指出本报文段中紧急数据的字节数。</li>
+<li>选项:最大报文段长度MSS、窗口扩大、时间戳、选择确认…</li>
+</ul>
+<h2 id="TCP实现可靠传输的机制">4.4 TCP实现可靠传输的机制</h2><ul>
+<li>累计确认——和首部中的确认号相关，接收方可以在合适的时候发送确认，也可以在自己有数据要发送时把确认信息顺便捎带上。</li>
+<li>超时重传——TCP采用自适应算法，动态改变重传时间RTTs (加权平均往返时间)</li>
+<li>选择确认（累计确认的改进，明确指出自己只收到了哪些数据）——接收方可以在合适的时候发送确认，也可以在自己有数据要发送时把确认信息顺便捎带上。接收方收到了和前面的字节流不连续的两个字节块。如果这些字节的序号都在接收窗口之内，那么接收方就先收下这些数据，但要把这些信息准确地告诉发送方，使发送方不要再重复发送这些已收到的数据。如果要使用选择确认，那么在建立 TCP 连接时，就要在 TCP 首部的选项中加上“允许 SACK”的选项，而双方必须都事先商定好。</li>
+</ul>
+<h1 id="TCP的流量控制">5 TCP的流量控制</h1><p><img src="https://api.codetool.top/img/1586679921603.png" alt></p>
+<p>TCP利用滑动窗口机制实现流量控制。</p>
+<p>在通信过程中，接收方根据自己接收缓存的大小，动态地调整发送方的发送窗口大小，即<strong>接收窗口rwnd</strong>(接收方设置确认报文段的窗口字段来将rwnd通知给发送方)，发送方的发送窗口取接收窗口rwnd和拥塞窗口cwnd的最小值。发送窗口=Min{接收窗口rwnd,拥塞窗口cwnd}</p>
+<p><img src="https://api.codetool.top/img/15866978885363.png" alt></p>
+<p>假设B向A发送了零窗口的报文段后不久，B的接收缓存又有了一些存储空间。于是B向A发送了rwnd = 400的报文段。</p>
+<p>但这个报文段在传送过程中丢失了。A一直等待收到B发送的非零窗口的通知，而B也一直等待 A 发送的数据。</p>
+<p>如果没有其他措施，这种互相等待的死锁局面将一直延续下去。</p>
+<p>为了解决这个问题，TCP 为每一个连接设有一个持续计时器 (persistence timer)。</p>
+<p>只要TCP连接的一方收到对方的零窗口通知，就启动持续计时器。若持续计时器设置的时间到期，就发送一个零窗口探测报文段。接收方收到探测报文段时给出现在的窗口值。若窗口仍然是0，那么发送方就重新设置持续计时器。</p>
+<h1 id="TCP的拥塞控制">6 TCP的拥塞控制</h1><p><img src="https://api.codetool.top/img/15866809887057.png" alt></p>
+<p>假定:<br>1.数据单方向传送，而另一个方向只传送确认<br>2.接收方总是有足够大的缓存空间，因而发送窗口大小取决于拥塞程度</p>
+<p><img src="https://api.codetool.top/img/15866985256419.png" alt="拥塞控制所起的作用"></p>
+<h2 id="拥塞控制的一般原理">6.1 拥塞控制的一般原理</h2><p>在某段时间，<strong>若对网络中某资源的需求超过了该资源所能提供的可用部</strong>分，网络的性能就要变坏。这种现象称为拥塞 (congestion)。</p>
+<p>若网络中有许多资源同时产生拥塞，网络的性能就要明显变坏，整个网络的吞吐量将随输入负荷的增大而下降。</p>
+<p>开环控制方法就是在设计网络时事先将有关发生拥塞的因素考虑周到，力求网络在工作时不产生拥塞。 </p>
+<p>闭环控制方法是基于反馈环路的概念。属于闭环控制的有以下几种措施： </p>
+<ol>
+<li>监测网络系统以便检测到拥塞在何时、何处发生。</li>
+<li>将拥塞发生的信息传送到可采取行动的地方。</li>
+<li>调整网络系统的运行以解决出现的问题。</li>
+</ol>
+<p>TCP只能使用闭环控制，<strong>发送方维护一个拥塞窗口，是根据自己估算的网络拥塞程度而设置的窗口值</strong>，反映网络当前容量。<strong>只要网络没有出现拥塞，拥塞窗口就可以再增大一些</strong>，以便把更多的分组发送出去，这样就可以提高网络的利用率。但<strong>只要网络出现拥塞或有可能出现拥塞，就必须把拥塞窗口减小一些</strong>，以减少注入到网络中的分组数，以便缓解网络出现的拥塞。</p>
+<p>如何判断网络拥塞？</p>
+<ul>
+<li>重传定时器超时</li>
+<li>收到三个相同（重复）的 ACK</li>
+</ul>
+<h2 id="慢开始-amp-拥塞避免">6.2 慢开始&amp;拥塞避免</h2><p><img src="https://api.codetool.top/img/15866984718786.png" alt></p>
+<p>由小到大逐渐增大拥塞窗口数值。用来确定网络的负载能力。在每收到一个对新的报文段的确认后，可以把拥塞窗口增加最多一个 SMSS 的数值，<strong>此时cwnd就是翻倍增长的</strong>。</p>
+<p>新的 RFC 5681 把初始拥塞窗口 cwnd 设置为不超过2至4个SMSS的数值。</p>
+<p>慢开始门限 ssthresh（状态变量）：防止拥塞窗口cwnd 增长过大引起网络拥塞。<strong>到达这个上限使用拥塞避免算法增大cwnd，使用“加法增大”。</strong>一旦发生网络拥塞，此时的<code>swnd/2</code>得到新的ssthresh，再重新开始慢开始。</p>
+<p>“拥塞避免”并非指完全能够避免了拥塞。利用以上的措施要完全避免网络拥塞还是不可能的。</p>
+<p>“拥塞避免”是说<strong>在拥塞避免阶段把拥塞窗口控制为按线性规律增长，使网络比较不容易出现拥塞</strong>。 </p>
+<h2 id="快重传-amp-快恢复">6.3 快重传&amp;快恢复</h2><p><img src="https://api.codetool.top/img/15866991261225.png" alt></p>
+<p>采用快重传 FR (Fast Retransmission) 算法可以让发送方尽早知道发生了个别报文段的丢失。<strong>快重传算法首先要求接收方不要等待自己发送数据时才进行捎带确认，而是要立即发送确认，即使收到了失序的报文段也要立即发出对已收到的报文段的重复确认。</strong></p>
+<p>发送方只要一连收到三个重复确认，就知道接收方确实没有收到报文段，因而应当立即进行重传（即“快重传”），这样就不会出现超时，发送方也不就会误认为出现了网络拥塞。<strong>此时发送方认为网络很可能没有发生拥塞，因此现在不执行慢开始算法，而是执行快恢复算法 FR (Fast Recovery) 算法</strong>：</p>
+<p>直接将当前cwnd/2作为新的ssthresh值，并直接从这个值开始拥塞避免的“加法增大”。</p>
+<h1 id="TCP的传输连接管理">7 TCP的传输连接管理</h1><p><img src="https://api.codetool.top/img/15866810135462.png" alt></p>
+<h2 id="连接建立">7.1 连接建立</h2><p>TCP连接的建立采用客户服务器方式，主动发起连接建立的应用进程叫做客户，而被动等待连接建立的应用进程叫服务器。</p>
+<p><img src="https://api.codetool.top/img/15866928231497.png" alt></p>
+<p>假设运行在一台主机(客户)上的一个进程想与另一台主机(服务器)上的一个进程建立一条连接，客户应用进程首先通知客户TCP，他想建立一个与服务器上某个进程之间的连接，客户中的TCP会用以下步骤与服务器中的TCP建立一条TCP连接:</p>
+<ol>
+<li>客户端发送连接请求报文段，无应用层数据。SYN=1，seq（首部中的序号）=x(随机)</li>
+<li>服务器端为该TCP连接分配缓存和变量，并向客户端返回确认报文段，允许连接，无应用层数据。<br>SYN=1，ACK=1，seq=y(随机)， ack=x+1</li>
+<li>客户端为该TCP连接分配缓存和变量，并向服务器端返回确认的确认，可以携带数据。SYN=0，ACK=1，seq=x+1，ack=y+1</li>
+</ol>
+<p>SYN洪泛攻击：</p>
+<p>SYN洪泛攻击发生在OSI第四层，这种方式利用TCP协议的特性，就是三次握手。攻击者发送TCP SYN，SYN是TCP三次握手中的第一个数据包，<strong>而当服务器返回ACK后，该攻击者就不对其进行再确认，那这个TCP连接就处于挂起状态</strong>，也就是所谓的半连接状态，<strong>服务器收不到再确认的话，还会重复发送ACK给攻击者。这样更加会浪费服务器的资源</strong>。攻击者就对服务器发送非常大量的这种TCP连接，由于每一个都没法完成三次握手，所以在服务器上，这些TCP连接会因为挂起状态而消耗CPU和内存，最后服务器可能死机，就无法为正常用户提供服务了。</p>
+<h2 id="连接释放">7.2 连接释放</h2><p>参与一条TCP连接的两个进程中的任何-一个都能终止该连接，连接结束后，主机中的“资源”(缓存和变量) 将被释放。</p>
+<p><img src="https://api.codetool.top/img/15866928416535.png" alt></p>
+<ol>
+<li>客户端发送连接释放报文段，停止发送数据，主动关闭TCP连接。FIN=1，seq=u</li>
+<li>服务器端回送一个确认报文段，客户到服务器这个方向的连接就释放了——半关闭状态。ACK=1，seq=v，ack=u+1</li>
+<li>服务器端发完数据，就发出连接释放报文段，主动关闭TCP连接。FIN=1，ACK=1，seq=w，ack=u+1</li>
+<li>客户端回送一一个确认报文段，再等到时间等待计时器设置的2MSL (最长报文段寿命)后，连接彻底关闭。</li>
+</ol>
+<p>这个过程也被称为“四次挥手”</p>
+
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://www.codetool.top" rel="external nofollow noreferrer">Rhett Peng</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。参考的网络来源均已尽可能地注明，部分参考来自他人的整理资料，无法标注，在此感谢！
+                    <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">
+                                    <span class="chip bg-color">计算机网络</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'VUmN3m0ICuwaL4jNPnxBRln8-gzGzoHsz',
+        appKey: 'QH8FVT32jvi4qBllLg6Cf0dU',
+        notify: 'false' === 'true',
+        verify: 'true' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: '说点什么吧'
+    });
+</script>
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
+            <div class="card">
+                <a href="/article/%E8%AE%A1%E7%BD%91%E5%A4%8D%E4%B9%A005-%E4%BC%A0%E8%BE%93%E5%B1%82/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/2.jpg" class="responsive-img" alt="计网复习05-传输层">
+                        
+                        <span class="card-title">计网复习05-传输层</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            这里的传输层指的是原理体系结构的传输层，对应OSI七层体系结构中的传输层，对应TCP/IP四层体系结构中的传输层。它为应用层提供服务。
+1 传输层协议概述
+1.1 复用和分用因为在一台主机中经常有多个应用进程同时分别和另一台主机中的多个应用
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-04-12
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%9B%B8%E5%85%B3/" class="post-category">
+                                    计算机相关
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">
+                        <span class="chip bg-color">计算机网络</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/article/leetcode79-%E5%8D%95%E8%AF%8D%E6%90%9C%E7%B4%A2/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/4.jpg" class="responsive-img" alt="leetcode79-单词搜索">
+                        
+                        <span class="card-title">leetcode79-单词搜索</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            1 原题给定一个二维网格和一个单词，找出该单词是否存在于网格中。
+单词必须按照字母顺序，通过相邻的单元格内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母不允许被重复使用。
+示例:
+board =
+[
+ 
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-04-12
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-category">
+                                    算法/数据结构
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/leetcode/">
+                        <span class="chip bg-color">leetcode</span>
+                    </a>
+                    
+                    <a href="/tags/%E7%AE%97%E6%B3%95/">
+                        <span class="chip bg-color">算法</span>
+                    </a>
+                    
+                    <a href="/tags/%E5%9B%9E%E6%BA%AF%E6%B3%95/">
+                        <span class="chip bg-color">回溯法</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+    
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+<!-- 代码块折行 -->
+
+<style type="text/css">
+code[class*="language-"], pre[class*="language-"] { white-space: pre !important; }
+</style>
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h1, h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h1, h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+    <footer class="page-footer bg-color">
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            <span id="year">2019-2020</span>
+            <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">473.7k</span>&nbsp;字
+            
+            
+            
+            
+            
+            <br>
+            
+            <br>
+            
+            <span id="icp"><img src="/medias/icp.png" style="vertical-align: text-bottom;" />
+                <a href="http://beian.miit.gov.cn/" target="_blank">赣ICP备19011928号</a>
+            </span>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/codeband-top" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:pctdyx@qq.net" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=995632825" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 995632825" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+$(function () {
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+});
+</script>
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":200,"height":200,"hOffset":20,"vOffset":100},"mobile":{"show":false},"dialog":{"enable":true,"hitokoto":false},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div id="chat_input"><input id="question" type="text" placeholder="陪我聊聊天吧" onkeypress="return onKeyPress(event)"/></div>
+</html>
+
+<!--动态线条背景-->
+<script type="text/javascript"
+color="0,0,0" opacity='0.5' zIndex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+</script>
+
+<script>
+
+//聊天框按回车
+function onKeyPress(e){
+    var keyCode = null;
+    if(e.which)
+        keyCode = e.which;
+    else if(e.keyCode)
+        keyCode = e.keyCode;
+        
+    //如果按下回车
+    if(keyCode == 13) {
+        // 1.获取界面上的元素value
+        var question_box = document.getElementById('question')
+        var question = question_box.value
+        question_box.value = ""
+        question_box.setAttribute("disabled","disabled")
+        var api_key = "78c33a07808c7b9e1905c89c88b3be14"
+        var api_secret = "q707tevnk00f"
+
+        // 2.通过XHR发送一个POST请求
+        var xhr = new XMLHttpRequest()
+        xhr.open('GET','https://api.codetool.top/robottalk?question='+encodeURIComponent(question)+"&api_key="+api_key+"&api_secret="+api_secret)
+		xhr.send(null)
+		xhr.onload = function(){
+            question_box.removeAttribute('disabled');
+            var live2d_dialog = document.getElementsByClassName("live2d-widget-dialog")[0]
+            live2d_dialog.style.opacity=1
+            live2d_dialog.innerHTML = this.responseText
+            window.setTimeout(()=>{
+                live2d_dialog.style.opacity=0
+            }, 5000);
+		}
+    }
+
+}
+
+</script>
+
+<style> 
+#chat_input{
+    width: 200px;
+    height: 40px;
+    position: fixed;
+    right: 0px;
+    bottom: 80px;
+    right: 20px;
+} 
+
+#question{
+    border: none;
+    border-bottom: 1px #aaaaaa solid;
+    background-color: transparent;
+    padding: 5px;
+}
+
+@media screen and (max-width: 601px) {
+    #chat_input{
+        display: none;
+    }
+    #live2d-widget{
+        display: none;
+    }
+}
+</style>
