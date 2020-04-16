@@ -1,0 +1,1519 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="操作系统复习02-处理器管理（进程管理）, 代码段小站">
+    <meta name="description" content="1 处理器概念
+特权指令和非特权指令、管态和目态已在上一篇提及。
+Intel的X86处理器具有四个特权级别，分别是RING0、RING1、RING2、RING3，RING0层拥有最高权限，依此向下RING3层即拥有最低的权限。
+用户态切换为">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>操作系统复习02-处理器管理（进程管理） | 代码段小站</title>
+    <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon.ico">
+    
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+    
+    <script src="/libs/jquery/jquery.min.js"></script>
+    
+<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper head-container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/code.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">代码段小站</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/runcode" class="waves-effect waves-light">
+      
+      <i class="fas fa-code" style="zoom: 0.6;"></i>
+      
+      <span>写代码</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/code.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">代码段小站</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/runcode" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-code"></i>
+			
+			写代码
+		</a>
+          
+        </li>
+        
+        
+    </ul>
+</div>
+
+        </div>
+
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/6.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">操作系统复习02-处理器管理（进程管理）</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        margin: 35px 0 15px 0;
+        padding-left: 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        height: calc(100vh - 250px);
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #toc-content .is-active-link::before {
+        background-color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">
+                                <span class="chip bg-color">操作系统</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%9B%B8%E5%85%B3/" class="post-category">
+                                计算机相关
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2020-04-16
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    5.7k
+                </div>
+                
+
+                
+				
+                
+            </div>
+            
+        </div>
+        <hr class="clearfix">
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h1 id="处理器概念">1 处理器概念</h1><p><img src="https://api.codetool.top/img/15870310461239.png" alt></p>
+<p>特权指令和非特权指令、管态和目态已在上一篇提及。</p>
+<p>Intel的X86处理器具有四个特权级别，分别是RING0、RING1、RING2、RING3，RING0层拥有最高权限，依此向下RING3层即拥有最低的权限。</p>
+<p>用户态切换为核心态是通过中断实现的。并且中断是唯一途径，用户手动触发中断的指令称为陷阱指令，也称为访管指令。</p>
+<p>核心态切换为用户态是通过执行一个特权指令，将程序状态字(PSW)的标志位设置为用户态。</p>
+<h2 id="用户栈和核心栈">1.1 用户栈和核心栈</h2><p>用户栈：是用户进程空间中开辟的内存区域，用于保存应用程序的子程序(函数)间相互调用的参数、返回值、返回点以及子程序的局部变量。</p>
+<p>核心栈：每个进程被创建时捆绑一个核心栈，是内存中属于OS空间的区域，用途包括：用于保存中断现场；或保存OS程序间相互调用的参数、返回值、返回点以及程序局部变量。</p>
+<h2 id="程序状态字PSW">1.2 程序状态字PSW</h2><p>计算机如何知道当前处于管态还是目态？通常OS都引入程序状态字PSW（Program Status Word）来区别不同的处理器工作状态。</p>
+<p>PSW用来<strong>控制指令执行顺序并保留和指示与程序有关的系统状态</strong>，主要作用是实现程序状态的保护和恢复。<strong>每个程序都有一个与其执行相关的PSW，每个处理器都设置一个PSW寄存器。</strong>程序占有处理器执行，它的PSW将占有PSW寄存器。 </p>
+<p>PSW寄存器包括以下内容：</p>
+<ul>
+<li>程序基本状态：<ol>
+<li>程序计数器；</li>
+<li>条件码；</li>
+<li>处理器状态位。</li>
+</ol>
+</li>
+<li>中断码：保存程序执行时当前发生的中断事件。</li>
+<li>中断屏蔽位：指明程序执行中发生中断事件时，是否响应出现的中断事件。</li>
+</ul>
+<p>Intel x86中，PSW由标志寄存器EFLAGS和指令指针寄存器EIP组成，均为32位。</p>
+<p>EFLAGS的低16位称FLAGS，标志可划分为三组：状态标志、控制标志、系统标志。</p>
+<h1 id="中断技术">2 中断技术</h1><p><img src="https://api.codetool.top/img/15870310716982.png" alt></p>
+<p>中断是指程序执行过程中，遇到急需处理的事件时，暂时中止CPU上现行程序的运行，转去执行相应的事件处理程序，待处理完成后再返回原程序被中断处或调度其他程序执行的过程。</p>
+<h2 id="中断源分类">2.1 中断源分类</h2><ul>
+<li>内中断：信号的来源是CPU内部，与当前执行的指令有关<ul>
+<li>I/O中断</li>
+<li>访管中断：调用访管指令，是程序自愿的</li>
+<li>硬件故障</li>
+<li>程序性中断（和编程时的问题有关）</li>
+</ul>
+</li>
+<li>外中断：信号的来源是CPU外部，与当前执行的指令无关<ul>
+<li>外部设备请求</li>
+<li>时钟中断</li>
+</ul>
+</li>
+</ul>
+<p>外中断又分可屏蔽中断和不可屏蔽中断，内中断完全不可屏蔽。</p>
+<p>时钟是操作系统进行调度工作的重要工具，如让分时进程作时间片轮转、让实时进程定时发出或接收控制信号、系统定时唤醒或阻塞一个进程、对用户进程进行记账。</p>
+<h2 id="中断优先级">2.2 中断优先级</h2><p>每个不同中断具有不同的中断优先级，表示事件的紧急程度，在处理高一级中断时，往往会屏蔽部分或全部低级中断。级别高的有优先获得响应的权力，中断装置预定的这个响应顺序称为中断优先级。 </p>
+<h2 id="多重中断事件的处理">2.3 多重中断事件的处理</h2><p><strong>中断正在进行处理期间，CPU又响应新的中断事件</strong>，于是暂时停止正在运行的中断处理程序，转去执行新的中断处理程序，就叫多重中断（又称中断嵌套）。处理方法：</p>
+<ol>
+<li>串行处理，</li>
+<li>嵌套处理，</li>
+<li>即时处理。</li>
+</ol>
+<h1 id="进程及其实现">3 进程及其实现</h1><p><img src="https://api.codetool.top/img/15870310852352.png" alt></p>
+<h2 id="进程概念">3.1 进程概念</h2><ul>
+<li>进程是可并发执行的程序在某个数据集合上的一次计算活动，也是<strong>操作系统进行资源分配和保护的基本单位。</strong></li>
+<li>进程是一个<strong>既能用来共享资源，又能描述程序并发执行过程的系统基本单位。</strong></li>
+<li>进程是一种支持程序执行的系统机制。</li>
+</ul>
+<p>进程的属性：</p>
+<ul>
+<li>动态性</li>
+<li>共享性</li>
+<li>独立性：独立性会体现在虚存、程序计数器、内部状态上</li>
+<li>制约性</li>
+<li>并发性</li>
+</ul>
+<h2 id="进程状态和转换">3.2 进程状态和转换</h2><p>本节参考和图片来源：<a href="https://www.cnblogs.com/lrhya/p/10636011.html" target="_blank" rel="noopener">进程的状态转换 - LRH呀 - 博客园</a></p>
+<h3 id="三态模型">3.2.1 三态模型</h3><p>三态模型，也是最基本的几个状态：</p>
+<p><img src="https://api.codetool.top/img/15870345103687.png" alt></p>
+<ul>
+<li>就绪态意味着运行条件满足，等待系统分配处理器以便运行</li>
+<li>运行态是已分配处理器，正在运行的状态</li>
+<li>等待态是不具备运行条件，等待某个事件完成，如IO输入。</li>
+</ul>
+<h3 id="五态模型">3.2.2 五态模型</h3><p><img src="https://api.codetool.top/img/15870348059720.png" alt></p>
+<p>五态模型在三态模型的基础上加了新建态和终止态。</p>
+<ul>
+<li>新建态：对应于进程被创建时的状态，尚未进入就绪队列。<blockquote>
+<p>创建一个进程需要通过两个步骤：  </p>
+</blockquote>
+</li>
+</ul>
+<p>1.为新进程分配所需要资源和建立必要的管理信息。<br>2.设置该进程为就绪态，并等待被调度执行。  </p>
+<ul>
+<li>终止态：指进程完成任务到达正常结束点，或出现无法克服的错误而异常终止，或被操作系统及有终止权的进程所终止时所处的状态。<blockquote>
+<p>处于终止态的进程不再被调度执行，下一步将被系统撤销，最终从系统中消失。<br>终止一个进程需要两个步骤：    </p>
+</blockquote>
+</li>
+</ul>
+<p>1.先等待操作系统或相关的进程进行善后处理（如抽取信息）。<br>2.然后回收占用的资源并被系统删除。</p>
+<h3 id="七态模型">3.2.3 七态模型</h3><p>三态模型和五态模型都是假设所有进程都在内存中的事实上有序不断的创建进程，<strong>当系统资源尤其是内存资源已经不能满足进程运行的要求时，必须把某些进程挂起（suspend），对换到磁盘对换区中，释放它占有的某些资源，暂时不参与低级调度。</strong> 起到平滑系统操作负荷的目的。</p>
+<p>七态模型在五态模型的基础上增加了挂起就绪态（ready suspend）和挂起等待态（blocked suspend）。</p>
+<ul>
+<li>挂起就绪态：进程具备运行条件，但目前<strong>在外存中</strong>，只有它被对换到内存才能被调度执行。</li>
+<li>挂起等待态：表明进程正在等待某一个事件发生且<strong>在外存中</strong>。</li>
+</ul>
+<p><img src="https://api.codetool.top/img/15870350867344.png" alt></p>
+<h2 id="进程的描述和组成">3.3 进程的描述和组成</h2><h3 id="进程映像">3.3.1 进程映像</h3><p>进程实体(进程映像)的组成：</p>
+<ul>
+<li>进程控制块（<strong>PCB</strong>）</li>
+<li>进程<strong>程序块</strong></li>
+<li>进程核心栈</li>
+<li>进程<strong>数据块</strong></li>
+</ul>
+<p>进程控制块PCB，是OS<strong>用于记录和刻划进程状态及有关信息的数据结构</strong>。也是OS掌握进程的唯一资料结构，它包括<strong>进程执行时的情况，以及进程让出处理器后所处的状态、断点等信息。</strong> PCB是进程存在的唯一标志。</p>
+<p>进程控制块包含三类信息：</p>
+<ul>
+<li>标识信息，包括进程号（pid），进程组，用户标识符（uid）</li>
+<li>现场信息，包含中断时处理器的信息</li>
+<li>控制信息<ul>
+<li>进程调度的相关信息，如进程优先级</li>
+<li>进程组成信息</li>
+<li>进程间的族系信息</li>
+<li>进程间通信信息</li>
+</ul>
+</li>
+</ul>
+<h3 id="进程队列及其管理">3.3.2 进程队列及其管理</h3><p>处于同一状态的所有PCB链接在一起的数据结构称为进程队列。 可按先来先到的原则排成队列，也可按优先数或其它原则排队。</p>
+<p>组织方式：</p>
+<ul>
+<li>线性方式</li>
+<li>链接方式：操作系统持有指向各个队列的指针</li>
+<li>索引方式：根据进程状态的不同，建立几张索引表，操作系统持有指向各个索引表的指针</li>
+</ul>
+<h3 id="进程上下文切换">3.3.3 进程上下文切换</h3><p>进程切换是让处于运行态的进程中断运行，让出处理器，这时要做一次进程上下文切换、即保存老进程的上下文而装入被保护了的新进程的上下文，以便新进程运行。</p>
+<p>中断运行的三种情况：</p>
+<ul>
+<li>被阻塞的高优先级进程变为就绪态</li>
+<li>运行进程的时间片耗尽</li>
+<li>运行进程执行阻塞型I/O指令（变为准备态）</li>
+</ul>
+<p>当然，这些情况触发也不一定就会立即进行进程调度和切换，例外情况：</p>
+<ul>
+<li>内核正在处理中断的过程中</li>
+<li>进程运行在内核临界区中</li>
+<li>内核处在需要屏蔽中断的原子操作过程中</li>
+</ul>
+<p>进程上下文切换的步骤：</p>
+<ol>
+<li>保存被中断进程的处理器现场信息</li>
+<li>修改被中断进程的PCB有关信息，如进程状态等</li>
+<li>把被中断进程的PSB加入有关队列</li>
+<li>选择下一个占有处理器运行的进程</li>
+<li>修改被选中进程的PSB的有关信息</li>
+<li>根据被选中进程设置操作系统用到的地址转换和存储保护信息</li>
+<li>根据被选中进程恢复处理器现场</li>
+</ol>
+<p>当中断/系统调用发生时，暂时中断正在执行的用户进程，把进程从用户状态转换到内核状态，去执行操作系统服务程序以获得服务，这就是一次处理器状态转换。</p>
+<p>处理器状态转换的步骤：</p>
+<ol>
+<li>保存被中断进程的处理器现场信息；</li>
+<li>处理器从用户态转换到核心态，以便执行服务程序或中断处理程序；</li>
+<li>如果处理中断，可根据规定的中断级设置中断屏蔽位；</li>
+<li>根据系统调用号或中断号，从系统调用表或中断入口表找到服务程序或中断处理程序地址。</li>
+</ol>
+<h2 id="进程管理原语">3.4 进程管理原语</h2><p>这个不属于进程上下文切换中的内容，思维导图里面是我弄错了。</p>
+<p>进程管理原语用于进程控制，有：</p>
+<ul>
+<li>进程创建</li>
+<li>进程撤销</li>
+<li>进程阻塞</li>
+<li>进程唤醒</li>
+<li>进程挂起</li>
+<li>进程激活</li>
+</ul>
+<p>进程创建的详细步骤：</p>
+<ol>
+<li>在进程列表中增加一项，从PCB池中申请一个空闲PCB，为新进程分配惟一的进程标识符</li>
+<li>为新进程的进程映像分配地址空间，以便容纳进程实体。进程管理程序确定加载到进程地址空间中的程序</li>
+<li>为新进程分配除主存空间外的其他各种所需资源；</li>
+<li>初始化PCB，如进程标识符、处理器初始状态、进程优先级等；</li>
+<li>把新进程状态置为就绪态，并移入就绪进程队列；</li>
+<li>通知操作系统的某些模块，如记账程序、性能监控程序。</li>
+</ol>
+<p>linux创建进程/线程可以使用：</p>
+<ul>
+<li><code>fork()</code>：父子进程是独立的进程 </li>
+<li><code>clone()</code>：父子进程允许共享资源</li>
+<li><code>vfork()</code>：子进程租用父进程地址空间 </li>
+</ul>
+<p>进程撤销的详细步骤：</p>
+<ol>
+<li>根据撤销进程标识号，从相应队列中找到并移出它</li>
+<li>将该进程拥有的资源归还给父进程或操作系统</li>
+<li>若该进程拥有子进程，先撤销它的所有子进程，以防它们脱离控制</li>
+<li>回收PCB，并归还到PCB池</li>
+</ol>
+<p>进程阻塞步骤：</p>
+<ol>
+<li>停止进程执行，保存现场信息到PCB</li>
+<li>修改进程PCB有关内容，如进程状态由运行态改为等待态等，并把修改状态后的进程移入相应事件的等待队列中</li>
+<li>转入进程调度程序去调度其他进程运行</li>
+</ol>
+<p>进程唤醒步骤：</p>
+<ol>
+<li>从相应的等待队列中移出进程</li>
+<li>修改进程PCB的有关信息，如进程状态改为就绪态，并移入就绪队列</li>
+<li>若被唤醒进程比当前运行进程优先级高，重新设置调度标志</li>
+</ol>
+<h1 id="线程及其实现">4 线程及其实现</h1><p><img src="https://api.codetool.top/img/15870311193616.png" alt></p>
+<h2 id="线程概念">4.1 线程概念</h2><p>OS中引入进程的目的是为了使多个程序并发执行，以改善资源使用率和提高系统效率，OS中再引入线程，则是<strong>为了减少程序并发执行时所付出的时空开销，使得并发粒度更细、并发性更好。</strong></p>
+<p>线程是OS进程中能够独立执行的实体（控制流），<strong>是处理器调度和分派的基本单位。线程是进程的组成部分</strong>，每个进程内允许包含多个并发执行的实体（控制流），这就是多线程。</p>
+<h2 id="线程优点">4.2 线程优点</h2><ul>
+<li>快速线程切换</li>
+<li>通信易于实现</li>
+<li>减少管理开销</li>
+<li>并发程度提高</li>
+</ul>
+<p>进程作为系统资源分配和保护的独立单位，不需要频繁地切换，而线程共享进程中的数据，利于通信。</p>
+<h2 id="多线程环境">4.3 多线程环境</h2><h3 id="线程组成">4.3.1 线程组成</h3><ol>
+<li>线程控制块：线程<strong>唯一标识符及线程状态信息</strong>(运行态、就绪态、阻塞态和终止态)</li>
+<li>线程是一条执行路径，<strong>有独立的程序计数器</strong>；未运行时保护线程上下文</li>
+<li>线程有<strong>执行栈和存放局部变量的私用存储空间</strong></li>
+<li><strong>可访问所属进程的内存和资源</strong>，并与该进程中的其他线程共享这些资源</li>
+</ol>
+<p>线程又称轻量进程，线程运行在进程的上下文中,并使用进程的资源和环境。系统调度的基本单位是线程而不是进程,每当创建一个进程时，至少要同时为该进程创建一个线程。</p>
+<h3 id="线程状态">4.3.2 线程状态</h3><p>线程状态有：运行、就绪、等待和终止，状态转换也类似于进程。</p>
+<p>挂起状态对线程是没有意义，如果进程挂起后被对换出主存，则它的所有线程因共享进程的地址空间，也必须全部对换出去。</p>
+<h3 id="线程组织">4.3.3 线程组织</h3><p>进程中线程多种组织方式：</p>
+<ul>
+<li>调度员／工作者模式：一个线程担任调度员，用于分配任务并唤醒工作者，其他线程为工作者。</li>
+<li>组模式：各个线程都可以取得并处理工作请求，对特定任务建立相应线程队列（执行不同任务）</li>
+<li>流水线模式：线程排成某个次序，前一个线程产生的数据交给下一个线程处理 </li>
+</ul>
+<h2 id="线程的实现">4.4 线程的实现</h2><p>本节参考：<a href="https://blog.csdn.net/cxy19931018/article/details/81435811" target="_blank" rel="noopener">操作系统学习记录之五：多线程实现的混合策略_小小柴的博客-CSDN博客</a></p>
+<p>从实现角度看，线程分成:</p>
+<ul>
+<li>用户级线程ULT(如Java ,Informix)。</li>
+<li>内核级线程KLT(如OS/2)。</li>
+<li>混合式线程(如Solaris)。</li>
+</ul>
+<p>内核级线程是内核支持的线程，线程管理工作由内核完成。优点是线程切换速度快、执行效率高。缺点是用户态运行、内核态管理导致系统开销大。</p>
+<p>用户级线程是<strong>由应用程序所支持的线程实现</strong>, 内核意识不到用户级线程的实现。线程管理由应用程序完成。优点：</p>
+<ul>
+<li>节省系统模式转换开销和内核的宝贵资源</li>
+<li>允许进程按照应用的特定需要选择调度算法</li>
+<li>能够运行在任何操作系统上</li>
+<li>内核无须做任何改变</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>线程的阻塞将引起整个进程的阻塞</li>
+<li>不可能得益于多线程的并发执行</li>
+</ul>
+<p>混合式线程：线程创建完全在用户空间中完成，线程的调度和同步也在应用程序中进行。<strong>一个应用中的多个用户级线程被映射到一些(小于等于用户级线程数目)内核级线程上。</strong>该方法将会结合纯粹用户级线程方法和内核级线程方法的优点，同时减少它们的缺点。</p>
+<p><img src="https://api.codetool.top/img/15870405337015.png" alt></p>
+<h1 id="处理器调度">5 处理器调度</h1><p><img src="https://api.codetool.top/img/15870311366136.png" alt></p>
+<h2 id="调度层次">5.1 调度层次</h2><p>作业从进入系统成为后备作业开始，直到运行结束退出系统为止，需经历不同级别的调度：</p>
+<p>高级调度，又称作业调度、长程调度。任务是<strong>选择作业进入内存</strong>，控制多道程序的道数。</p>
+<p>中级调度，又称平衡调度、中程调度。任务是<strong>完成外存和内存中的进程对换工作、转换就绪态和等待态</strong>,提高内存利用率和系统吞吐率。</p>
+<p>低级调度，又称进程调度/线程调度、短程调度。任务是<strong>决定就绪队列中的某个进程/线程获得处理器</strong>。</p>
+<h2 id="选择调度算法原则">5.2 选择调度算法原则</h2><p>原则就是性能指标，包含：</p>
+<ul>
+<li>资源利用率：CPU利用率=CPU有效工作时间/CPU总的运行时间。CPU总的运行时间=CPU有效工作时间+CPU空闲等待时间。</li>
+<li>吞吐率：单位时间内CPU处理作业的个数。</li>
+<li>公平性：确保每个进程都能获得合理的资源份额，不会出现饥饿现象。</li>
+<li>响应时间：交互式进程从提交一个请求(命令)到接收到响应之间的时间间隔称响应时间。</li>
+<li>周转时间：从提交作业开始到作业完成的时间。</li>
+</ul>
+<h2 id="作业的管理与调度">5.3 作业的管理与调度</h2><h3 id="作业和进程的关系">5.3.1 作业和进程的关系</h3><p>作业是任务实体，进程是完成任务的执行实体;没有作业任务，进程无事可干，没有进程，作业任务没法完成。</p>
+<p><strong>作业概念更多地用在批处理操作系统，而进程则可以用在各种多道程序设计系统。</strong></p>
+<h3 id="作业控制块">5.3.2 作业控制块</h3><p>多道批处理操作系统具有独立的作业管理模块，必须像进程管理一样为每一个作业建立作业控制块（JCB）。</p>
+<p>JCB通常是在批作业进入系统时，由Spooling系统建立的，它是作业存在于系统的标志，作业撤离时，JCB也被撤销。</p>
+<p>JCB的主要内容包括：</p>
+<ol>
+<li>作业情况</li>
+<li>资源需求</li>
+<li>资源使用情况</li>
+</ol>
+<h3 id="批处理作业的调度">5.3.3 批处理作业的调度</h3><ol>
+<li>选择作业：按照调度算法选择</li>
+<li>分配资源</li>
+<li>创建进程：被调度时，系统为作业创建进程，并生成PCB及各种进程实体</li>
+<li>作业控制：按说明书运行</li>
+<li>后续处理：调度程序做好作业撤离和善后工作</li>
+</ol>
+<h3 id="低级调度功能和类型">5.3.4 低级调度功能和类型</h3><p><strong>调度程序两项任务：</strong> 调度和分派。<strong>调度决定就绪态线程竞争使用处理器的次序，分派决定如何时分复用CPU，处理上下文切换。</strong></p>
+<p>低级调度的基本类型：第一类称剥夺式，有两种处理器剥夺原则，其一是高优先级进程/线程可剥夺低优先级进程/线程，另一种是当运行进程/线程时间片用完后被剥夺。第二类称非剥夺式，进程/线程开始运行后不再让出处理器</p>
+<p>作业调度和低级调度算法：</p>
+<ul>
+<li>先来先服务算法FCFS</li>
+</ul>
+<p>先来先服务是<strong>按照作业进入系统后备队列的先后次序来挑选作业</strong>，先进入系统的作业优先被挑选进入内存。 它是非剥夺式算法，<strong>不利于短作业（短作业的平均周转时间会较长，因为需要等待前面的作业完成）</strong></p>
+<ul>
+<li>最短作业优先算法SJF</li>
+</ul>
+<p>SJF算法<strong>以进入系统的作业所要求的CPU时间为标准，总选取估计计算时间最短的作业投入运行。</strong>（但是由于这个时间只是估算的，并不能保证实际上一定是最短作业）。它也是非剥夺式算法，缺点是长作业可能出现饥饿现象（一直得不到调度），缺少剥夺机制，对分时实时处理不理想。</p>
+<ul>
+<li>最高响应比优先算法HRRF</li>
+</ul>
+<p>FCFS只考虑等待时间而忽视了作业的计算时间，SJF只考虑用户估计的作业计算时间而忽视了作业等待时间，因而比较片面。HRRF是介于FCFS与SJF之间的折中算法，既考虑作业等待时间，又考虑作业的运行时间，既照顾短作业又不使长作业的等待时间过长，改进了调度性能。 </p>
+<p><code>响应比 = 周转时间/处理时间 = 1+已等待时间/估计运行时间</code></p>
+<p>因而这种算法会根据作业已等待的时间和估计运行时间动态调整调度的优先级，短作业容易得到较高响应比，长作业等待时间足够长后，也将获得足够高的响应比，饥饿现象不会发生。</p>
+<ul>
+<li>优先级调度算法</li>
+</ul>
+<p>永远先选取优先级高的，这个优先级可能是用户指定的，也可能是系统根据作业的重要性等信息调整的。</p>
+<ul>
+<li>最短剩余时间优先算法SRTF</li>
+</ul>
+<p>这是一种剥夺式算法，当一个新作业进入就绪状态，<strong>如果新作业需要的CPU时间比当前正在执行的作业剩余下来还需的CPU时间短，SRTF强行赶走当前正在执行作业。</strong></p>
+<ul>
+<li>轮转调度算法RR</li>
+</ul>
+<p>轮流使用时间片，剥夺式调度。<strong>合适选取时间片的长度很重要，如果时间片太长了就会变成FCFS，如果太短了就会使系统调度开销很大。</strong></p>
+<ul>
+<li>多级反馈队列调度算法MLFQ</li>
+</ul>
+<p>又称反馈循环队列或多队列策略。主要思想是将就绪进程分为两级或多级，系统相应建立两个或多个就绪进程队列，<strong>较高优先级的队列一般分配给较短的时间片。</strong></p>
+<p>处理器调度<strong>先从高级就绪进程队列中选取可占有处理器的进程，只有在选不到时，才从较低级的就绪进程队列中选取。</strong></p>
+
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://www.codetool.top" rel="external nofollow noreferrer">Rhett Peng</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。参考的网络来源均已尽可能地注明，部分参考来自他人的整理资料，无法标注，在此感谢！
+                    <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">
+                                    <span class="chip bg-color">操作系统</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'VUmN3m0ICuwaL4jNPnxBRln8-gzGzoHsz',
+        appKey: 'QH8FVT32jvi4qBllLg6Cf0dU',
+        notify: 'false' === 'true',
+        verify: 'true' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: '说点什么吧'
+    });
+</script>
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
+            <div class="card">
+                <a href="/article/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%A4%8D%E4%B9%A002-%E5%A4%84%E7%90%86%E5%99%A8%E7%AE%A1%E7%90%86%EF%BC%88%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86%EF%BC%89/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/6.jpg" class="responsive-img" alt="操作系统复习02-处理器管理（进程管理）">
+                        
+                        <span class="card-title">操作系统复习02-处理器管理（进程管理）</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            1 处理器概念
+特权指令和非特权指令、管态和目态已在上一篇提及。
+Intel的X86处理器具有四个特权级别，分别是RING0、RING1、RING2、RING3，RING0层拥有最高权限，依此向下RING3层即拥有最低的权限。
+用户态切换为
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-04-16
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%9B%B8%E5%85%B3/" class="post-category">
+                                    计算机相关
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">
+                        <span class="chip bg-color">操作系统</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/article/leetcode56-%E5%90%88%E5%B9%B6%E5%8C%BA%E9%97%B4/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/7.jpg" class="responsive-img" alt="leetcode56-合并区间">
+                        
+                        <span class="card-title">leetcode56-合并区间</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            1 原题给出一个区间的集合，请合并所有重叠的区间。
+示例 1:
+
+输入: [[1,3],[2,6],[8,10],[15,18]]输出: [[1,6],[8,10],[15,18]]解释: 区间 [1,3] 和 [2,6] 重叠, 将它们合
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-04-16
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-category">
+                                    算法/数据结构
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/leetcode/">
+                        <span class="chip bg-color">leetcode</span>
+                    </a>
+                    
+                    <a href="/tags/%E7%AE%97%E6%B3%95/">
+                        <span class="chip bg-color">算法</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+    
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+<!-- 代码块折行 -->
+
+<style type="text/css">
+code[class*="language-"], pre[class*="language-"] { white-space: pre !important; }
+</style>
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h1, h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h1, h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+    <footer class="page-footer bg-color">
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            <span id="year">2019-2020</span>
+            <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">495.5k</span>&nbsp;字
+            
+            
+            
+            
+            
+            <br>
+            
+            <br>
+            
+            <span id="icp"><img src="/medias/icp.png" style="vertical-align: text-bottom;" />
+                <a href="http://beian.miit.gov.cn/" target="_blank">赣ICP备19011928号</a>
+            </span>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/codeband-top" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:pctdyx@qq.net" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=995632825" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 995632825" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+$(function () {
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+});
+</script>
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":200,"height":200,"hOffset":20,"vOffset":100},"mobile":{"show":false},"dialog":{"enable":true,"hitokoto":false},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div id="chat_input"><input id="question" type="text" placeholder="陪我聊聊天吧" onkeypress="return onKeyPress(event)"/></div>
+</html>
+
+<!--动态线条背景-->
+<script type="text/javascript"
+color="0,0,0" opacity='0.5' zIndex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+</script>
+
+<script>
+
+//聊天框按回车
+function onKeyPress(e){
+    var keyCode = null;
+    if(e.which)
+        keyCode = e.which;
+    else if(e.keyCode)
+        keyCode = e.keyCode;
+        
+    //如果按下回车
+    if(keyCode == 13) {
+        // 1.获取界面上的元素value
+        var question_box = document.getElementById('question')
+        var question = question_box.value
+        question_box.value = ""
+        question_box.setAttribute("disabled","disabled")
+        var api_key = "78c33a07808c7b9e1905c89c88b3be14"
+        var api_secret = "q707tevnk00f"
+
+        // 2.通过XHR发送一个POST请求
+        var xhr = new XMLHttpRequest()
+        xhr.open('GET','https://api.codetool.top/robottalk?question='+encodeURIComponent(question)+"&api_key="+api_key+"&api_secret="+api_secret)
+		xhr.send(null)
+		xhr.onload = function(){
+            question_box.removeAttribute('disabled');
+            var live2d_dialog = document.getElementsByClassName("live2d-widget-dialog")[0]
+            live2d_dialog.style.opacity=1
+            live2d_dialog.innerHTML = this.responseText
+            window.setTimeout(()=>{
+                live2d_dialog.style.opacity=0
+            }, 5000);
+		}
+    }
+
+}
+
+</script>
+
+<style> 
+#chat_input{
+    width: 200px;
+    height: 40px;
+    position: fixed;
+    right: 0px;
+    bottom: 80px;
+    right: 20px;
+} 
+
+#question{
+    border: none;
+    border-bottom: 1px #aaaaaa solid;
+    background-color: transparent;
+    padding: 5px;
+}
+
+@media screen and (max-width: 601px) {
+    #chat_input{
+        display: none;
+    }
+    #live2d-widget{
+        display: none;
+    }
+}
+</style>
