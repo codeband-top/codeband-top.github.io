@@ -439,7 +439,7 @@
 <p><img src="https://api.codetool.top/img/15870551057859.png" alt="实现安全要求的原理"></p>
 <p>可以看到，TLS为保证安全，同时使用了对称加密、非对称加密和消息摘要。不了解的可以点击前置知识链接去看一下。</p>
 <h2 id="传输加密">2.1 传输加密</h2><p>TLS保证传输加密是使用了混合加密，它同时使用了对称加密和非对称加密。</p>
-<p>为什么要混合加密呢？我们在<a href="../谈谈对称加密、非对称加密、消息摘要以及数字签名">谈谈对称加密、非对称加密、消息摘要以及数字签名</a>中提到，非对称加密虽然安全，但加密解密速度较慢，效率较低，而对称加密又需要解决密钥的传输安全性问题。于是，我们可以结合这二者，<strong>使用非对称加密解决对称加密的密钥传输问题</strong>。</p>
+<p>为什么要混合加密呢？我们在<a href="../谈谈对称加密、非对称加密、消息摘要以及数字签名">谈谈对称加密、非对称加密、消息摘要以及数字签名</a>中提到，非对称加密虽然安全，但加密解密速度较慢，效率较低，而对称加密又需要解决密钥的传输安全性问题，我们称之为 <strong>“密钥交换”</strong> 问题。于是，我们可以结合这二者，<strong>使用非对称加密解决对称加密的“密钥交换”问题</strong>。</p>
 <p>客户端用随机数产生对称算法使用的“会话密钥”（session key），再用公钥加密。因为会话密钥很短，通常只有 16 字节或 32 字节，所以慢一点也无所谓。</p>
 <p>服务端拿到密文之后再用私钥解密，拿到“会话密钥”，<strong>作为后续对称加密使用的密钥</strong>。</p>
 <h2 id="消息摘要">2.2 消息摘要</h2><p>TLS保证消息的完整性则是使用了消息摘要，只要双方在消息后附上它的摘要，就能够保证数据的完整性。当然摘要也得使用混合加密，否则会被黑客修改。</p>
@@ -450,7 +450,7 @@
 <p>当服务端向客户端返回公钥A1的时候，中间人将其替换成自己的公钥B1传送给浏览器。</p>
 <p>而浏览器此时一无所知，傻乎乎地使用公钥B1加密了密钥K发送出去，又被中间人截获，中间人利用自己的私钥B2解密，得到密钥K，再使用服务端的公钥A1加密传送给服务端，完成了通信链路，而服务端和客户端毫无感知。</p>
 <p><img src="https://api.codetool.top/img/15870559453668.jpg" alt></p>
-<p>这个时候就需要CA证书了，<strong>CA证书证明该公钥确实是来自服务端</strong>。服务端在使用HTTPS前，去经过认证的CA机构申请颁发一份数字证书，数字证书里包含有证书持有者、证书有效期、服务端的公钥、CA使用的消息摘要算法等信息，称为明文数据，CA还会将证书的明文数据进行消息摘要，并使用私钥生成数字签名，附在证书内。服务端将证书发送给客户端，客户端校验证书身份和要访问的网站身份确实一致后再进行后续的加密操作。（<strong>证书的构成：证书的明文信息+由证书的明文信息+CA的私钥生成的数字签名</strong>）</p>
+<p>这个时候就需要CA证书了，<strong>CA证书证明该公钥确实是来自服务端</strong>。服务端在使用HTTPS前，去经过认证的CA机构申请颁发一份数字证书，数字证书里包含有证书持有者、证书有效期、服务端的公钥、CA使用的消息摘要算法等信息，称为明文数据，CA还会将证书的明文数据进行消息摘要，并使用私钥生成数字签名，附在证书内。服务端将证书发送给客户端，客户端校验证书身份和要访问的网站身份确实一致后再进行后续的加密操作。（<strong>证书的构成：证书的明文信息+由证书的明文信息和CA的私钥生成的数字签名</strong>）</p>
 <p>知名的 CA 全世界就那么几家，比如 DigiCert、VeriSign、Entrust、Let’s Encrypt 等，它们签发的证书分 DV、OV、EV 三种，区别在于可信程度。<strong>小一点的 CA 可以让大 CA 签名认证，但链条的最后，也就是Root CA，就只能自己证明自己了，这个就叫“自签名证书”（Self-Signed Certificate）或者“根证书”（Root Certificate）。</strong>你必须相信，否则整个证书信任链就走不下去了。</p>
 <p>有了这个证书体系，<strong>操作系统和浏览器都内置了各大 CA 的根证书（包含CA的公钥）</strong>，上网的时候只要服务器发过来它的证书，就可以验证证书里的签名，顺着证书链（Certificate Chain）一层层地验证，直到找到根证书，就能够确定证书是可信的，从而确定里面的公钥也是可信的。</p>
 <p>CA机构颁发证书的过程：</p>
@@ -843,56 +843,53 @@
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="far fa-dot-circle"></i>&nbsp;本篇
-            </div>
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/article/HTTPS%E7%9A%84%E5%8E%9F%E7%90%86%E2%80%94%E2%80%94%E6%B7%B7%E5%90%88%E5%8A%A0%E5%AF%86%E3%80%81%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D%E3%80%81CA/">
+                <a href="/article/%E5%89%91%E6%8C%87offer17-%E6%89%93%E5%8D%B0%E4%BB%8E1%E5%88%B0%E6%9C%80%E5%A4%A7%E7%9A%84n%E4%BD%8D%E6%95%B0/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/1.jpg" class="responsive-img" alt="HTTPS的原理——混合加密、数字签名、CA">
+                        <img src="/medias/featureimages/11.jpg" class="responsive-img" alt="剑指offer17-打印从1到最大的n位数">
                         
-                        <span class="card-title">HTTPS的原理——混合加密、数字签名、CA</span>
+                        <span class="card-title">剑指offer17-打印从1到最大的n位数</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            前置知识：谈谈对称加密、非对称加密、消息摘要以及数字签名
-本文参考资源：
-全网最透彻HTTPS（面试常问）
-网络篇 - https协议中的数据是否需要二次加密_网络_u014294681的博客-CSDN博客
-1 HTTPS概述1.1 HTT
+                            1 原题（来源Leetcode）输入数字 n，按顺序打印出从 1 到最大的 n 位十进制数。比如输入 3，则打印出 1、2、3 一直到最大的 3 位数 999。
+示例 1:
+
+输入： n = 1输出： [1,2,3,4,5,6,7,8,9]
                         
                     </div>
                     <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2020-04-17
-                            </span>
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2020-04-17
+                        </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%9B%B8%E5%85%B3/" class="post-category">
-                                    计算机相关
+                            <a href="/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-category">
+                                    算法/数据结构
                                 </a>
                             
                             
                         </span>
                     </div>
                 </div>
-
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">
-                        <span class="chip bg-color">计算机网络</span>
+                    <a href="/tags/%E7%AE%97%E6%B3%95/">
+                        <span class="chip bg-color">算法</span>
                     </a>
                     
-                    <a href="/tags/HTTP/">
-                        <span class="chip bg-color">HTTP</span>
+                    <a href="/tags/%E5%89%91%E6%8C%87offer/">
+                        <span class="chip bg-color">剑指offer</span>
                     </a>
                     
                 </div>
@@ -1094,7 +1091,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">498.6k</span>&nbsp;字
+                class="white-color">499.8k</span>&nbsp;字
             
             
             
