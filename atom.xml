@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.codetool.top/"/>
-  <updated>2020-04-27T15:28:58.172Z</updated>
+  <updated>2020-04-28T06:24:45.972Z</updated>
   <id>https://www.codetool.top/</id>
   
   <author>
@@ -15,6 +15,37 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>leetcode260-只出现一次的数字III</title>
+    <link href="https://www.codetool.top/article/leetcode260-%E5%8F%AA%E5%87%BA%E7%8E%B0%E4%B8%80%E6%AC%A1%E7%9A%84%E6%95%B0%E5%AD%97III/"/>
+    <id>https://www.codetool.top/article/leetcode260-只出现一次的数字III/</id>
+    <published>2020-04-28T04:55:15.000Z</published>
+    <updated>2020-04-28T06:24:45.972Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>给定一个整数数组 <code>nums</code>，其中恰好有两个元素只出现一次，其余所有元素均出现两次。 找出只出现一次的那两个元素。</p><p><strong>示例：</strong></p><blockquote><p><strong>输入:</strong> [1,2,1,3,2,5]<br><strong>输出:</strong> [3,5]</p></blockquote><p><strong>注意：</strong></p><ol><li>结果输出的顺序并不重要，对于上面的例子， <code>[5, 3]</code> 也是正确答案。</li><li>你的算法应该具有线性时间复杂度。你能否仅使用常数空间复杂度来实现？</li></ol><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>如果不限制常数空间复杂度用哈希表计数可以很容易做出来，但是限制了空间复杂度，可以用位运算：</p><p>只看题目，和<a href="../leetcode136-只出现一次的数字">leetcode136-只出现一次的数字</a>很相似，对于唯一一个只出现一次的数字，我们可以通过异或将其找出，这道题有两个只出现一次的数字，如果将所有的数字异或，结果并不能显示是哪两个数字只出现一次。可以想办法将这些数字分为两组，并将两个不同的数字分到不同的组中，再进行查找。</p><p>那么如何将两个不同的数字分到两个不同的组中呢，可以使用第一次将全部数字异或的结果，得到的结果其实就是这两个数字异或的结果。因为这两个数字不一样，得到的异或结果也必定有至少一位是1。只要将这一位是1的数字分为一组，是0的数字分为一组，就能将所有数字分为两组，而这两组中只有一个只出现一次的数字，异或的结果就是这个数字。</p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">singleNumbers</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> nums<span class="token punctuation">)</span> <span class="token punctuation">{</span>        <span class="token keyword">int</span> k <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> num<span class="token operator">:</span> nums<span class="token punctuation">)</span> <span class="token punctuation">{</span>            k <span class="token operator">^=</span> num<span class="token punctuation">;</span>        <span class="token punctuation">}</span>        <span class="token keyword">int</span> mask <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">//找到k中最靠近低位的1</span>        <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token punctuation">(</span>k <span class="token operator">&amp;</span> mask<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>            mask <span class="token operator">&lt;&lt;=</span> <span class="token number">1</span><span class="token punctuation">;</span>        <span class="token punctuation">}</span>        <span class="token keyword">int</span> a <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> b <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">//使用掩码进行与运算，结果是0分为一组，结果是1分为一组</span>        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> num<span class="token operator">:</span> nums<span class="token punctuation">)</span> <span class="token punctuation">{</span>            <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token punctuation">(</span>num <span class="token operator">&amp;</span> mask<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>                a <span class="token operator">^=</span> num<span class="token punctuation">;</span>            <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>                b <span class="token operator">^=</span> num<span class="token punctuation">;</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">{</span>a<span class="token punctuation">,</span> b<span class="token punctuation">}</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;原题&quot;&gt;1 原题&lt;/h1&gt;&lt;p&gt;给定一个整数数组 &lt;code&gt;nums&lt;/code&gt;，其中恰好有两个元素只出现一次，其余所有元素均出现两次。 找出只出现一次的那两个元素。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;示例：&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;
+      
+    
+    </summary>
+    
+    
+      <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
+    
+    
+      <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
+    
+      <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
   
   <entry>
     <title>二叉树中序遍历-折纸问题</title>
@@ -555,33 +586,6 @@
       <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
     
       <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>在浏览器地址栏输入URL，按下回车之后发生了什么？</title>
-    <link href="https://www.codetool.top/article/%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E5%9C%B0%E5%9D%80%E6%A0%8F%E8%BE%93%E5%85%A5URL%EF%BC%8C%E6%8C%89%E4%B8%8B%E5%9B%9E%E8%BD%A6%E4%B9%8B%E5%90%8E%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88%EF%BC%9F/"/>
-    <id>https://www.codetool.top/article/在浏览器地址栏输入URL，按下回车之后发生了什么？/</id>
-    <published>2020-04-17T18:05:08.000Z</published>
-    <updated>2020-04-17T18:48:52.213Z</updated>
-    
-    <content type="html"><![CDATA[<p>一道经典的面试题~ 这篇文章不会用来讲知识点，如果按一个问题去讲里面的知识点完全形成不了体系，这篇文章只是做一个知识点的串联、回顾，帮助缕清知识点之间的关系，形成知识脉络。</p><p>下面的回答仅针对HTTP/HTTPS协议：（毕竟浏览器还可以ftp、websocket什么的，如果各种协议都谈真没完了）</p><ol><li><p>浏览器检查缓存，<strong>缓存未过期一般会使用强缓存，缓存过期一般会使用协商缓存</strong>，如果协商缓存未命中或没有缓存，继续下一步。</p><ul><li>具体请参考<a href="../HTTP浏览器缓存策略和服务器的缓存控制">HTTP浏览器缓存策略和服务器的缓存控制</a></li></ul></li><li><p>对域名进行DNS解析，<strong>如果客户机有DNS缓存，直接获得对应的IP</strong>，否则向DNS服务器发出请求解析域名，<strong>如果网站配置了CDN，会返回一个cname，指向CDN的全局负载均衡器</strong>，由智能算法为用户分配为其服务的服务器ip。如果没有配置CDN，根据网站的DNS配置返回一个IP。</p><ul><li>DNS相关请参考<a href="../计网复习06-应用层之域名系统DNS/">计网复习06-应用层之域名系统DNS</a>，CDN相关的东西我目前倒是没有写博客讲过，这里可以提一下，其实CDN的核心技术就是全局负载均衡和缓存管理，通常用于静态资源的分发（缓存代理），客户从<strong>边缘节点</strong>上取数据。和CDN性能相关的名词有<strong>命中率</strong>和<strong>回源率</strong>。最近还流行一种<strong>边缘计算</strong>的技术，把计算动态资源的代码和数据也放在cdn的节点上，就可以实现在cdn里获取动态资源而不用回源站。</li></ul></li><li><p>客户机使用IP与服务器建立TCP连接，通过TCP三次握手，建立连接之后如果是HTTPS协议还需要TLS握手，交换密码套件，通过椭圆曲线算法实现密钥交换。</p><ul><li>TCP建立连接三次握手相关内容见<a href="../计网复习05-传输层">计网复习05-传输层</a></li><li>TLS握手的详细过程我也没有写过博客，因为比较理论，我也没有那么权威，自己写不敢保证正确，复制粘贴也没有意思，不过HTTPS原理可以参考<a href="../HTTPS的原理——混合加密、数字签名、CA">HTTPS的原理——混合加密、数字签名、CA</a>。我这里简单提一下TLS的握手：<strong>TLS握手主要目的就是获取CA证书验证服务端身份和密钥交换，即获取后面用于对称加密的密钥。（也成为会话密钥）</strong>客户端和服务器会先协商使用同一个<strong>密码套件</strong>。密码套件的命名是<code>密钥交换算法-签名算法-对称加密算法-分组模式-摘要算法</code>，如<code>ECDHE-RSA-AES256-GCM-SHA384</code>。TLS1.2还有用RSA进行密钥交换，但由于<strong>前向安全</strong>的问题（RSA使用的公私钥是固定的，如果黑客坚持不懈的收集所有监听到的HTTPS报文，一旦有一天私钥泄露，所有之前收集的报文都能被破解），<strong>TLS1.3就完全废弃了使用RSA密钥交换，并推荐使用ECDHE密钥交换</strong>（即ECC+DH，基于椭圆曲线的离散对数问题，每次握手时都会生成一对临时的公钥和私钥，保证了前向安全）。</li><li>传输层再往下的协议我觉得就没必要讲了吧？网络层找IP，数据链路层找MAC，物理层传输。</li></ul></li><li><p>握手完成之后可以发送HTTP/HTTPS报文（对于一个复用的TCP连接我们会遇到队头阻塞等待，不过这里既然是在地址栏输入URL然后回车，肯定是第一次请求，没有这个问题），服务器收到后进行处理。（处理过程不定，如果是动态资源可能会调用后端程序），处理完成之后组成HTTP响应报文发送给客户端。</p><ul><li>网上有的博客说这里会服务器就会断开连接了？？未免知识点太久远了一点了吧，HTTPS1.1就默认长连接了。关于HTTP的版本相关可以参考<a href="../HTTP版本发展与Google的暗中助力">HTTP版本发展与Google的暗中助力</a></li></ul></li><li><p>浏览器下载对应的响应数据，并对HTML（如果是）进行渲染。渲染相关的知识我也不是很清楚，应该是前端比较需要掌握的部分。</p></li></ol>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;一道经典的面试题~ 这篇文章不会用来讲知识点，如果按一个问题去讲里面的知识点完全形成不了体系，这篇文章只是做一个知识点的串联、回顾，帮助缕清知识点之间的关系，形成知识脉络。&lt;/p&gt;
-&lt;p&gt;下面的回答仅针对HTTP/HTTPS协议：（毕竟浏览器还可以ftp、websocket
-      
-    
-    </summary>
-    
-    
-      <category term="计算机相关" scheme="https://www.codetool.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%9B%B8%E5%85%B3/"/>
-    
-    
-      <category term="计算机网络" scheme="https://www.codetool.top/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
     
   </entry>
   
