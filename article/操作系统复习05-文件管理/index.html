@@ -1,0 +1,1458 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="操作系统复习05-设备管理, 代码段小站">
+    <meta name="description" content="设备管理的功能：
+
+外围设备中断处理
+缓冲区管理
+外围设备的分配和去配     
+外围设备驱动调度
+虚拟设备及其实现
+
+1 I/O硬件原理
+1.1 IO系统I/O系统是I/O设备及其接口线路、控制部件、通道和管理软件的总称。 I/O就是“输">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>操作系统复习05-设备管理 | 代码段小站</title>
+    <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon.ico">
+    
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+    
+    <script src="/libs/jquery/jquery.min.js"></script>
+    
+<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper head-container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/code.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">代码段小站</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/runcode" class="waves-effect waves-light">
+      
+      <i class="fas fa-code" style="zoom: 0.6;"></i>
+      
+      <span>写代码</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/code.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">代码段小站</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/runcode" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-code"></i>
+			
+			写代码
+		</a>
+          
+        </li>
+        
+        
+    </ul>
+</div>
+
+        </div>
+
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/8.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">操作系统复习05-设备管理</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        margin: 35px 0 15px 0;
+        padding-left: 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        height: calc(100vh - 250px);
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #toc-content .is-active-link::before {
+        background-color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">
+                                <span class="chip bg-color">操作系统</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%9B%B8%E5%85%B3/" class="post-category">
+                                计算机相关
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2020-04-28
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    5.4k
+                </div>
+                
+
+                
+				
+                
+            </div>
+            
+        </div>
+        <hr class="clearfix">
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>设备管理的功能：</p>
+<ul>
+<li>外围设备中断处理</li>
+<li>缓冲区管理</li>
+<li>外围设备的分配和去配     </li>
+<li>外围设备驱动调度</li>
+<li>虚拟设备及其实现</li>
+</ul>
+<h1 id="I-O硬件原理">1 I/O硬件原理</h1><p><img src="https://api.codetool.top/img/15880927472084.png" alt></p>
+<h2 id="IO系统">1.1 IO系统</h2><p>I/O系统是<strong>I/O设备及其接口线路、控制部件、通道和管理软件的总称。</strong> <code>I/O</code>就是“输入/输出”(Input/Output)</p>
+<h3 id="I-O设备">1.1.1 I/O设备</h3><p>I/O设备就是可以将数据输入到计算机，或者可以接收计算机输出数据的外部设备，属于计算机中的硬件部件。</p>
+<p>I/O设备按使用特性分类：</p>
+<ul>
+<li>人机交互类外设：鼠标、键盘、打印机等——用于人机交互，数据传输速度慢。</li>
+<li>存储设备：移动硬盘、光盘等——用于数据存储，数据传输速度快。</li>
+<li>网络通信设备：调制解调器等——用于网络通信，数据传输速度介于上述二者之间。</li>
+</ul>
+<p>I/O设备按信息交换的单位分类：</p>
+<ul>
+<li>块设备：如磁盘等——<strong>数据传输的基本单位是“块”，传输速率较高，可寻址</strong>，即对它可随机地读/写任一块。</li>
+<li>字符设备：鼠标、键盘等——<strong>数据传输的基本单位是字符，传输速率较慢，不可寻址</strong>，在输入/输出时常采用中断驱动方式</li>
+</ul>
+<h2 id="设备控制器">1.2 设备控制器</h2><p>CPU无法直接控制I/O设备的机械部件，因此I/O设备还要有一个电子部件（称设备控制器或适配器）作为CPU和I/O设备机械部件之间的“中介”，<strong>用于实现CPU对设备的控制</strong>。</p>
+<p>如果没有控制器，复杂操作必须由操作系统来解决，引入控制器后，通过传递简单参数就可进行I/O操作，大大简化系统的设计，<strong>有利于计算机系统对各类控制器和设备的兼容性</strong>。</p>
+<p>主要功能:</p>
+<ol>
+<li><strong>接收和识别CPU或通道发来的命令</strong>：如CPU发来的<code>read/write</code>命令，I/O控制器中会有相应的<strong>控制寄存器来存放命令和参数</strong>。</li>
+<li>实现<strong>数据交换</strong>,包括设备和控制器间的数据传输：I/O控制器中会设置相应的数据寄存器。输出时，数据寄存器用于暂存CPU发来的数据，之后再由控制器传送设备。输入时，数据寄存器用于暂存设备发来的数据，之后CPU从数据寄存器中取走数据。</li>
+<li><strong>发现和记录设备及自身的状态信息</strong>，供CPU处理：I/O控制器中会有相应的状态寄存器，用于记录I/O设备的当前状态。如:1表示空闲，0表示忙碌。</li>
+<li><strong>设备地址识别</strong>：类似于内存的地址，为了区分设备控制器中的各个寄存器，也需要给各个寄存器设置一个特定的“地址”。I/O控制器通过CPU提供的“地址”来判断CPU要读/写的是哪个寄存器</li>
+</ol>
+<p>它是一个可编址设备,当它连接多台设备时,则应具有多个设备地址。</p>
+<h2 id="I-O控制方式">1.3 I/O控制方式</h2><h3 id="轮询方式">1.3.1 轮询方式</h3><p>又称<strong>程序直接控制方式</strong>，使用<strong>查询指令</strong>测试设备控制器的<strong>忙闲状态位</strong>，决定内存和设备是否能交换数据。</p>
+<p><img src="https://api.codetool.top/img/15880934336329.png" alt></p>
+<p>轮询程序中用到的三种指令：</p>
+<ol>
+<li>查询指令：查询设备是否就绪</li>
+<li>读/写指令：当设备就绪时，执行数据交换</li>
+<li>转移指令：当设备未就绪时，执行转移指令转向查询指令继续查询。</li>
+</ol>
+<p>特点：</p>
+<ul>
+<li>CPU干预的频率很频繁，I/O操作开始之前、完成之后需要CPU介入，并且在等待I/O完成的过程中CPU需要不断地轮询检查。</li>
+<li>每次读写一个字</li>
+<li>需要CPU的帮助</li>
+</ul>
+<p>缺点:<br>CPU和I/O设备只能串行工作，CPU需要一直轮询检查，长期处于“忙等”状态，CPU利用率低。</p>
+<h3 id="中断方式">1.3.2 中断方式</h3><p>中断方式要求<strong>CPU与设备控制器及设备之间有中断请求线</strong>，控制器的状态寄存器有相应<strong>中断允许位</strong>。</p>
+<p>在CPU发出读/写命令后，可<strong>将等待I/O的进程阻塞</strong>，先切换到别的进程执行。<strong>当I/O完成后，控制器会向CPU发出一个中断信号</strong>，CPU检测到中断信号后，会<strong>保存当前进程的运行环境信息，转去执行中断处理程序处理该中断</strong>。处理中断的过程中，CPU<strong>从I/O控制器读一个字的数据传送到CPU寄存器，再写入主存。</strong>接着，CPU恢复等待I/O的进程（或其他进程）的运行环境，然后继续执行</p>
+<p><img src="https://api.codetool.top/img/15880937593363.png" alt></p>
+<p>注意：</p>
+<ol>
+<li><strong>CPU会在每个指令周期的末尾检查中断</strong></li>
+<li>中断处理过程中需要保存、恢复进程的运行环境，这个过程是需要一定时间开销的。可见，<strong>如果中断发生的频率太高，也会降低系统性能</strong></li>
+</ol>
+<p>特点：</p>
+<ul>
+<li>每次I/O操作开始之前、完成之后需要CPU介入。等待I/O完成的过程中CPU可以切换到别的进程执行。</li>
+<li>每次读写一个字</li>
+<li>需要CPU的帮助</li>
+</ul>
+<p>缺点：每个字在I/O设备与内存之间的传输，都需要经过CPU。而频繁的中断处理会消耗较多的CPU时间。</p>
+<h3 id="DMA方式">1.3.3 DMA方式</h3><p>与“中断驱动方式”相比，DMA方式（Direct Memory Access，直接存储器存取。主要用于块设备的I/0控制）有这样几个改进:</p>
+<ol>
+<li><strong>数据的传送单位是“块”</strong>。不再是一一个字、一个字的传送</li>
+<li>数据的流向是从设备直接放入内存，或者从内存直接到设备。<strong>不再需要CPU的帮助</strong>。</li>
+<li><strong>仅在传送一个或多个数据块的开始和结束时，才需要CPU干预。</strong></li>
+</ol>
+<p>步骤：</p>
+<ol>
+<li>CPU指明此次要进行的操作（如：读操作），并说明要读入多少数据、数据要存放在内存的什么位置、数据在外部设备上的地址（如：在磁盘上的地址）</li>
+<li>控制器会根据CPU提出的要求完成数据的读/写工作，<strong>整块数据的传输完成后，才向CPU发出中断信号</strong></li>
+</ol>
+<p><img src="https://api.codetool.top/img/15880942153789.png" alt></p>
+<p>DMA方式需以下设施：</p>
+<ol>
+<li>内存地址寄存器：在输入时表示数据应放到内存中的什么位置，输出时表示要输出的数据放在内存中的什么位置中。</li>
+<li>数据计数器：表示剩余要读/写的字节数。</li>
+<li>数据缓冲寄存器或数据缓冲区：暂存从设备到内存，或从内存到设备的数据。</li>
+<li>设备地址寄存器：暂存存储设备中的地址。</li>
+<li>中断机制和控制逻辑：通过中断机制通知CPU</li>
+</ol>
+<p>特点：</p>
+<ul>
+<li>仅在传送一个或多个数据块的开始和结束时，才需要CPU干预。</li>
+<li>每次读/写一个或多个块（注意：每次读写的只能是连续的多个块，且这些块读入内存后在内存中也必须是连续的）</li>
+<li>数据传输不再需要经过CPU</li>
+</ul>
+<p>缺点: CPU每发出一条I/O指令，只能读/写一个或多个连续的数据块。<strong>如果要读/写多个离散存储的数据块，或者要将数据分别写到不同的内存区域时，CPU要分别发出多条I/O指令，进行多次中断处理才能完成。</strong></p>
+<h3 id="通道方式">1.3.4 通道方式</h3><p>为获得CPU和外围设备间更高的并行工作能力，为让种类繁多，物理特性各异的外围设备能以标准的接口连接到系统中，计算机系统引入了自成独立体系的通道结构。</p>
+<p><strong>通道也是一种硬件，可以识别并执行一系列通道指令，完成一部分CPU的工作。</strong></p>
+<p>采用通道后的I/O操作过程：</p>
+<ol>
+<li>CPU向通道发出I/O指令。指明通道程序在内存中的位置，并指明要操作的是哪个I/O设备，之后CPU就切换到其他进程执行了。</li>
+<li><strong>通道执行内存中的通道程序</strong>（其中指明了要读入/写出多少数据，读/写的数据应放在内存的什么位置等信息）</li>
+<li><strong>通道执行完规定的任务后，向CPU发出中断信号，之后CPU对中断进行处理</strong></li>
+</ol>
+<p>特点：</p>
+<ul>
+<li><strong>CPU干预的频率极低，通道会根据CPU的指示执行相应的通道程序，只有完成一组数据块的读/写后才需要发出中断信号，请求CPU干预。</strong></li>
+<li>每次读/写一组数据块</li>
+<li>CPU、通道、I/O设备可并行工作，<strong>资源利用率很高</strong>。</li>
+</ul>
+<p>缺点：需要专门的通道硬件支持。</p>
+<h1 id="I-O软件原理">2 I/O软件原理</h1><p><img src="https://api.codetool.top/img/15880927712226.png" alt></p>
+<h2 id="I-O软件设计目标和原则">2.1 I/O软件设计目标和原则</h2><p>I/O软件总体设计目标:</p>
+<ul>
+<li>高效率</li>
+<li>通用性</li>
+</ul>
+<p>I/O软件总体设计要考虑的问题： </p>
+<ul>
+<li>设备无关性</li>
+<li>出错处理</li>
+<li>同步（阻塞）—异步（中断驱动）传输</li>
+<li>独占性外围设备和共享性外围设备</li>
+</ul>
+<h2 id="I-O软件组织成四个层次">2.2 I/O软件组织成四个层次</h2><ul>
+<li>I/O中断处理程序。</li>
+<li>I/O设备驱动程序。</li>
+<li>独立于设备的操作系统I/O软件。</li>
+<li>用户空间的I/O软件。</li>
+</ul>
+<p>越往上越接近硬件，越往下越靠近用户</p>
+<h3 id="I-O中断处理程序">2.2.1 I/O中断处理程序</h3><p>当I/O任务完成时，I/O控制器会发送一个中断信号，系统会根据中断信号类型找到相应的中断处理程序并执行。</p>
+<p>I/O中断的类型和功能：</p>
+<ul>
+<li>通知用户程序<strong>I/O操作沿链推进程度</strong></li>
+<li>通知用户程序<strong>I/O操作正常结束</strong></li>
+<li>通知用户程序发现的<strong>I/O操作异常</strong></li>
+<li>通知程序<strong>外围设备上重要的异步信号</strong></li>
+</ul>
+<p>I/O中断的处理原则：（根据不同的中断原因做相应的处理）</p>
+<ul>
+<li>操作正常结束处理</li>
+<li>操作发生故障或特殊事件的中断处理</li>
+<li>人为要求而产生的中断处理</li>
+<li>外围设备的异步信号处理</li>
+</ul>
+<h3 id="设备驱动程序">2.2.2 设备驱动程序</h3><p>不同设备的内部硬件特性也不同，这些特性只有厂家才知道，因此厂家须提供与设备相对应的驱动程序，CPU执行驱动程序的指令序列，来完成设置设备寄存器，检查设备状态等工作</p>
+<p>设备驱动程序<strong>包括与设备相关的代码</strong>，其工作是：<strong>把用户提交的逻辑I/O请求转化为物理I/O操作的启动和执行</strong>，如设备名转化为端口地址、逻辑记录转化为物理记录、逻辑操作转化为物理操作等。</p>
+<p>设备驱动程序主要功能：</p>
+<ol>
+<li>设备初始化</li>
+<li>执行设备驱动例程</li>
+<li>执行中断处理例程</li>
+</ol>
+<h3 id="独立于设备的操作系统I-O软件">2.2.3 独立于设备的操作系统I/O软件</h3><p>设备独立性软件，又称设备无关性软件。与设备的硬件特性无关的功能几乎都在这一层实现。</p>
+<p>设备无关软件完成的功能：</p>
+<ul>
+<li>对设备驱动程序的统一接口（向用户提供，如read/write系统调用）</li>
+<li>设备命名</li>
+<li>设备保护：<strong>在unix系统中，设备被看做是一种特殊的文件</strong>，不同用户对各个文件的访问权限是不一样的，同理，对设备的访问权限也不一样。</li>
+<li>提供独立于设备的块大小</li>
+<li>缓冲区管理：可以通过缓冲技术屏蔽设备之间数据交换单位大小和传输速度的差异</li>
+<li>块设备的存储分配</li>
+<li>独占性外围设备的分配和释放</li>
+<li>错误报告</li>
+<li>文件和I/O设备的命名方式</li>
+<li>如何保护对设备的未授权访问 </li>
+<li>屏蔽不同磁盘扇区大小并向高层软件提供统一大小的逻辑块</li>
+<li>块设备和字符设备需要缓冲技术</li>
+<li>设备分配和状态跟踪</li>
+</ul>
+<p>错误处理多数由驱动程序完成，设备独立性软件需要对一些设备的错误进行处理。</p>
+<p>缓冲技术、驱动调度技术、设备分配会在后面讲到。</p>
+<h3 id="用户空间的I-O软件">2.2.4 用户空间的I/O软件</h3><p>用户层软件实现了与用户交互的接口，用户可直接使用该层提供的、与I/O操作相关的库函数对设备进行操作。</p>
+<ul>
+<li>用户空间的I/O软件：I/O系统调用通常先是库函数调用<code>count=write(fd，buffer，nbytes)；</code></li>
+<li>非库函数实现的I/O系统调用：SPOOLing系统 </li>
+</ul>
+<p>Windows操作系统向外提供的一系列系统调用，但是由于系统调用的格式严格，使用麻烦，因此在用户层上封装了一系列更方便的库函数接口供用户使用(Windows API)</p>
+<h2 id="I-O操作过程总览">2.3 I/O操作过程总览</h2><ol>
+<li>进程对已打开文件的文件描述符执行读库函数；</li>
+<li>独立设备I/O软件检查参数正确性。<strong>高速缓存中有要读的信息块，从缓冲区直接读到用户区，完成I/O请求；</strong></li>
+<li>若数据不在缓冲区，执行物理I/O，实现<strong>将设备逻辑名转换成物理名，检查对设备操作的权限，将I/O请求排队，阻塞进程且等待I/O完成</strong>；</li>
+<li>内核<strong>启动设备驱动程序，分配存放读出块的缓冲区，准备接收数据，且向设备控制寄存器发启动命令，或建立DMA传输</strong>，启动I/O；</li>
+<li><strong>设备控制器操作设备，执行数据传输</strong>；</li>
+<li><strong>DMA控制器控制一块传输完成，硬件产生I/O结束中断</strong>；</li>
+<li><strong>CPU响应中断，转向磁盘中断处理程序</strong>。</li>
+<li>当应用进程被再次调度执行时，从I/O系统调用的断点恢复执行。 </li>
+</ol>
+<h1 id="缓冲技术">3 缓冲技术</h1><p><img src="https://api.codetool.top/img/15880927834414.png" alt></p>
+<h2 id="缓冲技术概念">3.1 缓冲技术概念</h2><p>缓冲区是一个存储区域，<strong>可以由专门的硬件寄存器组成，也可利用内存作为缓冲区。</strong></p>
+<p>使用硬件作为缓冲区的成本较高，容量也较小，一般仅用在对速度要求非常高的场合(如存储器管理中所用的联想寄存器，由于对页表的访问频率极高，因此使用速度很快的联想寄存器来存放页表项的副本)</p>
+<p>一般情况下，更多的是利用内存作为缓冲区，“设备独立性软件”的缓冲区管理就是要组织管理好这些缓冲区。</p>
+<p>引入缓冲技术的目的：</p>
+<ul>
+<li>改善中央处理器与外围设备之间速度不配的矛盾，</li>
+<li>减少对CPU的中断频率，放宽对CPU中断相应时间的限制</li>
+<li>协调逻辑记录大小与物理记录大小不一致</li>
+<li>提高CPU和I/O设备的并行性</li>
+</ul>
+<p>实现缓冲技术的基本思想：</p>
+<ul>
+<li>进程执行写操作输出数据时，向系统申请一个缓冲区，<strong>若为顺序写请求，则不断把数据填到缓冲区，直到被装满。</strong>此后，进程继续它的计算，系统将缓冲区内容写到I/O设备上。</li>
+<li>进程执行操作输入数据时，向系统申请一个缓冲区，<strong>系统将一个物理记录的内容读到缓冲区，根据进程要求，把当前需要的逻辑记录从缓冲区中选出并传送给进程。</strong></li>
+<li>在输出数据时，只有在系统还来不及腾空缓冲而进程又要写数据时，它才需要等待；</li>
+<li>在输入数据时，仅当缓冲区空而进程又要从中读取数据时，它才被迫等待。</li>
+</ul>
+<h1 id="驱动调度技术">4 驱动调度技术</h1><p><img src="https://api.codetool.top/img/15880928021600.png" alt></p>
+<h2 id="驱动调度技术的概念">4.1 驱动调度技术的概念</h2><p>驱动调度能<strong>减少为若干个I/O请求服务所需的总时间</strong>，提高系统效率、除了<strong>I/O请求的优化排</strong>序外，<strong>信息在辅助存储器上的排列方式</strong>，<strong>存储空间分配方法</strong>都能影响存取访问速度。</p>
+<h2 id="存储设备的物理结构">4.2 存储设备的物理结构</h2><p>顺序存取存储设备是严格依赖信息的物理位置进行定位和读写的存储设备，具有存储容量大、稳定可靠、卷可装卸和便于保存等优点。</p>
+<p>磁盘是一种直接(随机)存取存储设备。每个物理记录有确定的位置和唯一的地址，存取任何一个物理块所需的时间几乎不依赖于此信息的位置。</p>
+<p><strong>访问磁盘记录参数：盘面号、磁道号、扇区号。</strong></p>
+<p><img src="https://api.codetool.top/img/15881495266638.jpg" alt="磁盘结构"></p>
+<h2 id="移臂调度的算法">4.3 移臂调度的算法</h2><ul>
+<li>“先来先服务” 算法：磁盘臂是随机移动的，<strong>按照I/O请求的次序寻道</strong>，不考虑各 I/O 请求间的相对次序和移动臂当前所处位置，进程等待 I/O 请求时间会很长，寻道性能较差。</li>
+<li>“最短查找时间优先”算法：<strong>每次选择离当前磁头最近的磁道</strong>，与FIFO 算法相比有较好寻道性能。</li>
+<li>“扫描”算法：<strong>磁盘臂每次沿一个方向移动，扫过所有柱面，遇到最近的I/O请求便进行处理，直到最后一个柱面后，再向相反方向移动回来。</strong></li>
+<li>“分步扫描”算法：<strong>进程重复请求访问同一柱面会垄断设备，造成“磁臂粘性”，导致其他柱面访问请求长时间得不到服务</strong>，采用“分步扫描”算法可以避免这类问题。具体做法是：将 I/O 请求分为长度为N的子队列，<strong>按FIFO算法依次处理每个子队列，而每个子队列采用扫描算法</strong>，处理完一个后再服务下一个子队列，以避免出现磁臂粘住现象。这种调度算法能保证每个I/O请求的等待时间不致太长，当 N 值很大时，接近于“扫描”算法性能；当N＝１时，接近于 FIFO算法性能。</li>
+<li>“电梯调度”算法：<strong>是扫描算法的一种改进，无访问请求时，移动臂停止不动</strong>，有访问请求时，移动臂按电梯规律移动。</li>
+<li>“循环扫描”算法：为适应有大量柱面均匀分布的存取请求进入系统而设计的扫描方式。移动臂总是从０柱面至最大号柱面顺序扫描，<strong>然后，直接返回０柱面重复进行，归途中不再提供服务</strong>，构成一个循环，缩短处理新来请求的最大延迟。</li>
+</ul>
+<h1 id="设备分配">5 设备分配</h1><p><img src="https://api.codetool.top/img/15880928246319.png" alt></p>
+<h2 id="设备独立性">5.1 设备独立性</h2><p>用户不指定特定设备，指定逻辑设备，使得用户作业和物理设备独立开来，通过其它途径建立逻辑设备和物理设备之间对应关系，这种特性为“设备独立性”。</p>
+<p>好处：用户与物理的外围设备无关，系统增减或变更外围设备时程序不必修改；易于对付输入输出设备的故障。</p>
+<p>从设备的特性来看，可以把设备分成独占设备、共享设备和虚拟设备三类，相应的管理和分配外围设备的技术可分成：独占方式、共享方式和虚拟方式。</p>
+<p>从进程运行的安全性上考虑，设备分配有两种方式:</p>
+<ul>
+<li>安全分配方式:为进程分配一个设备后就将进程阻塞，本次I/O完成后才将进程唤醒。一个时段内每个进程只能使用一个设备。</li>
+</ul>
+<p>优点:破坏了“请求和保持”条件，不会死锁<br>缺点:对于一个进程来说，CPU和I/O设备只能串行工作</p>
+<ul>
+<li>不安全分配方式:进程发出I/O请求后，系统为其分配I/O设备，进程可继续执行，之后还可以发出新的I/O请求。只有某个I/O请求得不到满足时才将进程阻塞。一个进程可以同时使用多个设备。</li>
+</ul>
+<p>优点:进程的计算任务和I/O任务可以并行处理，使进程迅速推进<br>缺点:有可能发生死锁(需要考虑死锁避免、死锁的检测和解除)</p>
+<h2 id="设备分配的数据结构">5.2 设备分配的数据结构</h2><p>设备分配的数据结构：设备类表和设备表。</p>
+<p>系统中拥有一张<strong>设备类表</strong>，每类设备对应于表中一栏，包括内容有：<strong>设备类、总台数、空闲台数和设备表起始地址等。</strong></p>
+<p>每一类设备都有各自的<strong>设备表</strong>，用来登记这类设备中每一台设备的状态，包含的内容有：<strong>物理设备名、逻辑设备名、占有设备的进程号、已分配/未分配、好/坏等。</strong></p>
+<p>采用通道结构的系统中，设备分配的数据结构设置：系统设备表、通道控制表、控制器控制表和设备控制表。</p>
+<p>常用的I/O设备分配算法有先请求先服务，优先级高者先服务等。此外，在多进程请求I/O设备分配时，应防止因循环等待对方所占用的设备而产生死锁，应预先进行性检查。</p>
+<h1 id="虚拟设备">6 虚拟设备</h1><p><img src="https://api.codetool.top/img/15880928415734.png" alt></p>
+
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://www.codetool.top" rel="external nofollow noreferrer">Rhett Peng</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。参考的网络来源均已尽可能地注明，部分参考来自他人的整理资料，无法标注，在此感谢！
+                    <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">
+                                    <span class="chip bg-color">操作系统</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'VUmN3m0ICuwaL4jNPnxBRln8-gzGzoHsz',
+        appKey: 'QH8FVT32jvi4qBllLg6Cf0dU',
+        notify: 'false' === 'true',
+        verify: 'true' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: '说点什么吧'
+    });
+</script>
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/article/leetcode1095-%E5%B1%B1%E8%84%89%E6%95%B0%E7%BB%84%E4%B8%AD%E6%9F%A5%E6%89%BE%E7%9B%AE%E6%A0%87%E5%80%BC/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/6.jpg" class="responsive-img" alt="leetcode1095-山脉数组中查找目标值">
+                        
+                        <span class="card-title">leetcode1095-山脉数组中查找目标值</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            1 原题（这是一个 交互式问题 ）
+给你一个 山脉数组 mountainArr，请你返回能够使得 mountainArr.get(index) 等于 target 最小 的下标 index 值。
+如果不存在这样的下标 index，就请返回 
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2020-04-29
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-category">
+                                    算法/数据结构
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/leetcode/">
+                        <span class="chip bg-color">leetcode</span>
+                    </a>
+                    
+                    <a href="/tags/%E7%AE%97%E6%B3%95/">
+                        <span class="chip bg-color">算法</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/article/leetcode260-%E5%8F%AA%E5%87%BA%E7%8E%B0%E4%B8%80%E6%AC%A1%E7%9A%84%E6%95%B0%E5%AD%97III/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/17.jpg" class="responsive-img" alt="leetcode260-只出现一次的数字III">
+                        
+                        <span class="card-title">leetcode260-只出现一次的数字III</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            1 原题给定一个整数数组 nums，其中恰好有两个元素只出现一次，其余所有元素均出现两次。 找出只出现一次的那两个元素。
+示例：
+
+输入: [1,2,1,3,2,5]输出: [3,5]
+
+注意：
+
+结果输出的顺序并不重要，对于上面的例子， 
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-04-28
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-category">
+                                    算法/数据结构
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/leetcode/">
+                        <span class="chip bg-color">leetcode</span>
+                    </a>
+                    
+                    <a href="/tags/%E7%AE%97%E6%B3%95/">
+                        <span class="chip bg-color">算法</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+    
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+<!-- 代码块折行 -->
+
+<style type="text/css">
+code[class*="language-"], pre[class*="language-"] { white-space: pre !important; }
+</style>
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h1, h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h1, h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+    <footer class="page-footer bg-color">
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            <span id="year">2019-2020</span>
+            <a href="https://www.codetool.top" target="_blank">Rhett Peng</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">530.1k</span>&nbsp;字
+            
+            
+            
+            
+            
+            <br>
+            
+            <br>
+            
+            <span id="icp"><img src="/medias/icp.png" style="vertical-align: text-bottom;" />
+                <a href="http://beian.miit.gov.cn/" target="_blank">赣ICP备19011928号</a>
+            </span>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/codeband-top" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:pctdyx@qq.net" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=995632825" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 995632825" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+$(function () {
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+});
+</script>
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":200,"height":200,"hOffset":20,"vOffset":100},"mobile":{"show":false},"dialog":{"enable":true,"hitokoto":false},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div id="chat_input"><input id="question" type="text" placeholder="陪我聊聊天吧" onkeypress="return onKeyPress(event)"/></div>
+</html>
+
+<!--动态线条背景-->
+<script type="text/javascript"
+color="0,0,0" opacity='0.5' zIndex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+</script>
+
+<script>
+
+//聊天框按回车
+function onKeyPress(e){
+    var keyCode = null;
+    if(e.which)
+        keyCode = e.which;
+    else if(e.keyCode)
+        keyCode = e.keyCode;
+        
+    //如果按下回车
+    if(keyCode == 13) {
+        // 1.获取界面上的元素value
+        var question_box = document.getElementById('question')
+        var question = question_box.value
+        question_box.value = ""
+        question_box.setAttribute("disabled","disabled")
+        var api_key = "78c33a07808c7b9e1905c89c88b3be14"
+        var api_secret = "q707tevnk00f"
+
+        // 2.通过XHR发送一个POST请求
+        var xhr = new XMLHttpRequest()
+        xhr.open('GET','https://api.codetool.top/robottalk?question='+encodeURIComponent(question)+"&api_key="+api_key+"&api_secret="+api_secret)
+		xhr.send(null)
+		xhr.onload = function(){
+            question_box.removeAttribute('disabled');
+            var live2d_dialog = document.getElementsByClassName("live2d-widget-dialog")[0]
+            live2d_dialog.style.opacity=1
+            live2d_dialog.innerHTML = this.responseText
+            window.setTimeout(()=>{
+                live2d_dialog.style.opacity=0
+            }, 5000);
+		}
+    }
+
+}
+
+</script>
+
+<style> 
+#chat_input{
+    width: 200px;
+    height: 40px;
+    position: fixed;
+    right: 0px;
+    bottom: 80px;
+    right: 20px;
+} 
+
+#question{
+    border: none;
+    border-bottom: 1px #aaaaaa solid;
+    background-color: transparent;
+    padding: 5px;
+}
+
+@media screen and (max-width: 601px) {
+    #chat_input{
+        display: none;
+    }
+    #live2d-widget{
+        display: none;
+    }
+}
+</style>
