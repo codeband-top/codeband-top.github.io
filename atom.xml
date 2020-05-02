@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.codetool.top/"/>
-  <updated>2020-05-01T15:56:22.858Z</updated>
+  <updated>2020-05-02T05:41:37.907Z</updated>
   <id>https://www.codetool.top/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>leetcode40-组合总和II</title>
+    <link href="https://www.codetool.top/article/leetcode40-%E7%BB%84%E5%90%88%E6%80%BB%E5%92%8CII/"/>
+    <id>https://www.codetool.top/article/leetcode40-组合总和II/</id>
+    <published>2020-05-02T05:15:56.000Z</published>
+    <updated>2020-05-02T05:41:37.907Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>给定一个数组 <code>candidates</code> 和一个目标数 <code>target</code> ，找出 <code>candidates</code> 中所有可以使数字和为 <code>target</code> 的组合。</p><p><code>candidates</code> 中的每个数字在每个组合中只能使用一次。</p><p><strong>说明：</strong></p><ul><li>所有数字（包括目标数）都是正整数。</li><li>解集不能包含重复的组合。 </li></ul><p><strong>示例 1:</strong></p><pre><strong>输入:</strong> candidates =&nbsp;<code>[10,1,2,7,6,1,5]</code>, target =&nbsp;<code>8</code>,<strong>所求解集为:</strong>[  [1, 7],  [1, 2, 5],  [2, 6],  [1, 1, 6]]</pre><p><strong>示例 2:</strong></p><pre><strong>输入:</strong> candidates =&nbsp;[2,5,2,1,2], target =&nbsp;5,<strong>所求解集为:</strong>[&nbsp; [1,2,2],&nbsp; [5]]</pre><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>这道题和<a href="../leetcode39-组合总和">leetcode39-组合总和</a>的区别是，数组中的每个数字只能使用一次，并且数组中可能存在相同的数字。</p><p>该题要求反映到搜索树中，就是<strong>不允许同层出现相同的数字，而允许上下层之间存在相同的数字。</strong> </p><p>我们使用上道题的代码进行改造，如下所示：</p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    List<span class="token operator">&lt;</span>List<span class="token operator">&lt;</span>Integer<span class="token operator">>></span> ans<span class="token punctuation">;</span>    <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> candidates<span class="token punctuation">;</span>    <span class="token keyword">public</span> List<span class="token operator">&lt;</span>List<span class="token operator">&lt;</span>Integer<span class="token operator">>></span> <span class="token function">combinationSum2</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> candidates<span class="token punctuation">,</span> <span class="token keyword">int</span> target<span class="token punctuation">)</span> <span class="token punctuation">{</span>        ans <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        Arrays<span class="token punctuation">.</span><span class="token function">sort</span><span class="token punctuation">(</span>candidates<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">this</span><span class="token punctuation">.</span>candidates <span class="token operator">=</span> candidates<span class="token punctuation">;</span>        List<span class="token operator">&lt;</span>Integer<span class="token operator">></span> list <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token function">dfs</span><span class="token punctuation">(</span>list<span class="token punctuation">,</span>target<span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">return</span> ans<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">dfs</span><span class="token punctuation">(</span>List<span class="token operator">&lt;</span>Integer<span class="token operator">></span> list<span class="token punctuation">,</span><span class="token keyword">int</span> target<span class="token punctuation">,</span><span class="token keyword">int</span> minIndex<span class="token punctuation">)</span><span class="token punctuation">{</span>        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> minIndex<span class="token punctuation">;</span>i<span class="token operator">&lt;</span>candidates<span class="token punctuation">.</span>length<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>            <span class="token comment" spellcheck="true">//如果当前元素等于上一元素，则跳过（不允许同层出现相同的数字）</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>i<span class="token operator">!=</span>minIndex <span class="token operator">&amp;&amp;</span> candidates<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">==</span> candidates<span class="token punctuation">[</span>i<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token keyword">continue</span><span class="token punctuation">;</span>            <span class="token keyword">if</span><span class="token punctuation">(</span>candidates<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">&lt;=</span>target<span class="token punctuation">)</span><span class="token punctuation">{</span>                List<span class="token operator">&lt;</span>Integer<span class="token operator">></span> copyList <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span>list<span class="token punctuation">)</span><span class="token punctuation">;</span>                copyList<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>candidates<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>                <span class="token keyword">if</span><span class="token punctuation">(</span>candidates<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">==</span>target<span class="token punctuation">)</span> <span class="token punctuation">{</span>                    ans<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>copyList<span class="token punctuation">)</span><span class="token punctuation">;</span>                    <span class="token keyword">return</span><span class="token punctuation">;</span>                <span class="token punctuation">}</span>                <span class="token comment" spellcheck="true">//允许搜索的最小的下标加一（允许上下层之间存在相同的数字）</span>                <span class="token function">dfs</span><span class="token punctuation">(</span>copyList<span class="token punctuation">,</span>target<span class="token operator">-</span>candidates<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span>i<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;原题&quot;&gt;1 原题&lt;/h1&gt;&lt;p&gt;给定一个数组 &lt;code&gt;candidates&lt;/code&gt; 和一个目标数 &lt;code&gt;target&lt;/code&gt; ，找出 &lt;code&gt;candidates&lt;/code&gt; 中所有可以使数字和为 &lt;code&gt;target&lt;/code&gt;
+      
+    
+    </summary>
+    
+    
+      <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
+    
+    
+      <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
+    
+      <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
   
   <entry>
     <title>JWT结构及io.jsonwebtoken.jjwt工具使用</title>
@@ -157,9 +185,9 @@
     
       <category term="日常" scheme="https://www.codetool.top/tags/%E6%97%A5%E5%B8%B8/"/>
     
-      <category term="OpenFeign" scheme="https://www.codetool.top/tags/OpenFeign/"/>
-    
       <category term="Hystrix" scheme="https://www.codetool.top/tags/Hystrix/"/>
+    
+      <category term="OpenFeign" scheme="https://www.codetool.top/tags/OpenFeign/"/>
     
   </entry>
   
@@ -560,36 +588,6 @@
       
         &lt;h1 id=&quot;原题（来源Leetcode）&quot;&gt;1 原题（来源Leetcode）&lt;/h1&gt;&lt;p&gt;硬币。给定数量不限的硬币，币值为25分、10分、5分和1分，编写代码计算n分有几种表示法。(结果可能会很大，你需要将结果模上1000000007)&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;示例 
-      
-    
-    </summary>
-    
-    
-      <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
-    
-    
-      <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
-    
-      <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>leetcode199-二叉树的右视图</title>
-    <link href="https://www.codetool.top/article/leetcode199-%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%8F%B3%E8%A7%86%E5%9B%BE/"/>
-    <id>https://www.codetool.top/article/leetcode199-二叉树的右视图/</id>
-    <published>2020-04-22T04:20:57.000Z</published>
-    <updated>2020-04-22T05:01:54.897Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>给定一棵二叉树，想象自己站在它的右侧，按照从顶部到底部的顺序，返回从右侧所能看到的节点值。</p><p><strong>示例：</strong></p><pre><strong>输入:</strong>&nbsp;[1,2,3,null,5,null,4]<strong>输出:</strong>&nbsp;[1, 3, 4]<strong>解释:</strong>   1            &lt;--- /   \2     3         &lt;--- \     \  5     4       &lt;---</pre><style>pre,pre>*{    color:#e8eaf6;}</style><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>dfs，注意查找顺序即可，用list存储答案下标代表层数，后找到的不会覆盖先找到的</p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    List<span class="token operator">&lt;</span>Integer<span class="token operator">></span> ans<span class="token punctuation">;</span>    <span class="token keyword">public</span> List<span class="token operator">&lt;</span>Integer<span class="token operator">></span> <span class="token function">rightSideView</span><span class="token punctuation">(</span>TreeNode root<span class="token punctuation">)</span> <span class="token punctuation">{</span>        ans <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token function">dfs</span><span class="token punctuation">(</span>root<span class="token punctuation">,</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">return</span> ans<span class="token punctuation">;</span>    <span class="token punctuation">}</span>    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">dfs</span><span class="token punctuation">(</span>TreeNode node<span class="token punctuation">,</span><span class="token keyword">int</span> depth<span class="token punctuation">)</span><span class="token punctuation">{</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>node<span class="token operator">==</span>null<span class="token punctuation">)</span> <span class="token keyword">return</span><span class="token punctuation">;</span>        <span class="token keyword">if</span><span class="token punctuation">(</span>ans<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">&lt;</span>depth<span class="token punctuation">)</span><span class="token punctuation">{</span>            ans<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>node<span class="token punctuation">.</span>val<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token punctuation">}</span>        <span class="token function">dfs</span><span class="token punctuation">(</span>node<span class="token punctuation">.</span>right<span class="token punctuation">,</span>depth<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token function">dfs</span><span class="token punctuation">(</span>node<span class="token punctuation">.</span>left<span class="token punctuation">,</span>depth<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h1 id=&quot;原题&quot;&gt;1 原题&lt;/h1&gt;&lt;p&gt;给定一棵二叉树，想象自己站在它的右侧，按照从顶部到底部的顺序，返回从右侧所能看到的节点值。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;示例：&lt;/strong&gt;&lt;/p&gt;
-&lt;pre&gt;&lt;strong&gt;输入:&lt;/strong&gt;&amp;nbsp;[1,2,3,
       
     
     </summary>
