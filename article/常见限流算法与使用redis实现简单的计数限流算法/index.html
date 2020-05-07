@@ -422,7 +422,7 @@ Spring Cloud Gateway中的令牌桶限流浅析 | KL博客
 <p><a href="http://kailing.pub/article/index/arcid/251.html" target="_blank" rel="noopener">Spring Cloud Gateway中的令牌桶限流浅析 | KL博客</a></p>
 <p>《Redis深度历险：核心原理与应用实践》</p>
 <h1 id="网站吞吐量指标">1 网站吞吐量指标</h1><p><strong>网站吞吐量指单位时间内系统处理的请求数量，体现系统的整体处理能力。</strong> 可以用<code>请求数/秒</code>，或者<code>页面数/每秒</code>来衡量，也可以用<code>访问人数/天</code>，或者<code>处理的业务数/小时</code>等来衡量。</p>
-<p>TPS（Transaction Per Second，每秒事务数）是吞吐量的一个常用量化指标，此外还有 QPS（Queries Per Second，每秒查询数）、HPS（每秒 HTTP 请求数）等。</p>
+<p>QPS（Queries Per Second，每秒查询数）是吞吐量的一个常用量化指标，此外还有TPS（Transaction Per Second，每秒事务数）、HPS（每秒 HTTP 请求数）等。</p>
 <p>通常就将QPS理解为请求数，强调服务器的处理能力。</p>
 <h1 id="常见限流算法">2 常见限流算法</h1><p>在开发高并发系统时有三把利器用来保护系统：缓存、降级和限流。限流就是通过限制网站吞吐量，防止系统不被瞬时大流量冲垮。</p>
 <p>常见的限流算法有三种：</p>
@@ -490,11 +490,12 @@ Spring Cloud Gateway中的令牌桶限流浅析 | KL博客
         SimpleRateLimiter limiter <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SimpleRateLimiter</span><span class="token punctuation">(</span>jedis<span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token comment" spellcheck="true">//短时间处理20个请求</span>
         <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span><span class="token number">20</span><span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"第"</span><span class="token operator">+</span><span class="token punctuation">(</span>i<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token operator">+</span><span class="token string">"个请求："</span><span class="token operator">+</span>limiter<span class="token punctuation">.</span><span class="token function">isActionAllowed</span><span class="token punctuation">(</span><span class="token string">"123"</span><span class="token punctuation">,</span><span class="token string">"reply"</span> <span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">boolean</span> isAllowed <span class="token operator">=</span> limiter<span class="token punctuation">.</span><span class="token function">isActionAllowed</span><span class="token punctuation">(</span><span class="token string">"123"</span><span class="token punctuation">,</span><span class="token string">"reply"</span> <span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"第"</span><span class="token operator">+</span><span class="token punctuation">(</span>i<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token operator">+</span><span class="token string">"个请求："</span><span class="token operator">+</span>isAllowed<span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token punctuation">}</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span></code></pre>
-<p>注意这是一种滑动时间窗口，和我们一开始介绍的时间窗口算法又有一些不同，它的时间窗口不是固定在两个时间点之间的，而是每次请求的时间点向前推一个时间窗口，避免了临界值问题。</p>
+<p>注意这是一种滑动时间窗口，和我们一开始介绍的时间窗口算法又有一些不同，应当说是计数算法的改进。它的时间窗口不是固定在两个时间点之间的，而是每次请求的时间点向前推了一个时间窗口，避免了临界值问题。</p>
 <p>查看输出：</p>
 <pre><code>第1个请求：true
 第2个请求：true
@@ -871,53 +872,55 @@ Spring Cloud Gateway中的令牌桶限流浅析 | KL博客
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="far fa-dot-circle"></i>&nbsp;本篇
-            </div>
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/article/%E5%B8%B8%E8%A7%81%E9%99%90%E6%B5%81%E7%AE%97%E6%B3%95%E4%B8%8E%E4%BD%BF%E7%94%A8redis%E5%AE%9E%E7%8E%B0%E7%AE%80%E5%8D%95%E7%9A%84%E8%AE%A1%E6%95%B0%E9%99%90%E6%B5%81%E7%AE%97%E6%B3%95/">
+                <a href="/article/leetcode100-%E7%9B%B8%E5%90%8C%E7%9A%84%E6%A0%91/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/7.jpg" class="responsive-img" alt="常见限流算法与使用redis实现简单的计数限流算法">
+                        <img src="/medias/featureimages/22.jpg" class="responsive-img" alt="leetcode100-相同的树">
                         
-                        <span class="card-title">常见限流算法与使用redis实现简单的计数限流算法</span>
+                        <span class="card-title">leetcode100-相同的树</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            本文参考资源：
-QPS、TPS是什么 - 春眠觉晓 - 博客园
-常用限流算法 - 香芋牛奶面包 - 博客园
-几种常见的限流算法 - 知乎
-Spring Cloud Gateway中的令牌桶限流浅析 | KL博客
-《Redis深度历险：核心原
+                            1 原题给定两个二叉树，编写一个函数来检验它们是否相同。
+如果两个树在结构上相同，并且节点具有相同的值，则认为它们是相同的。
+示例 1:
+输入:      1         1
+          / \       / \
+      
                         
                     </div>
                     <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2020-05-06
-                            </span>
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2020-05-07
+                        </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/" class="post-category">
-                                    中间件/工具/框架
+                            <a href="/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-category">
+                                    算法/数据结构
                                 </a>
                             
                             
                         </span>
                     </div>
                 </div>
-
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Redis/">
-                        <span class="chip bg-color">Redis</span>
+                    <a href="/tags/leetcode/">
+                        <span class="chip bg-color">leetcode</span>
+                    </a>
+                    
+                    <a href="/tags/%E7%AE%97%E6%B3%95/">
+                        <span class="chip bg-color">算法</span>
                     </a>
                     
                 </div>
@@ -1123,7 +1126,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">543.7k</span>&nbsp;字
+                class="white-color">544k</span>&nbsp;字
             
             
             
