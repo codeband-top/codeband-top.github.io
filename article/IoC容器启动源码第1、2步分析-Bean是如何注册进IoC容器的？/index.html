@@ -403,7 +403,7 @@ public void refresh() throws Be">
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    3.3k
+                    3.4k
                 </div>
                 
 
@@ -843,6 +843,7 @@ public void refresh() throws Be">
         <span class="token function">getReaderContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">fireComponentRegistered</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">BeanComponentDefinition</span><span class="token punctuation">(</span>bdHolder<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span></code></pre>
+<p>深入<code>parseBeanDefinitionElement</code>方法可知是通过构建了一个<code>AbstractBeanDefinition</code>对象来创建<code>BeanDefinition</code>实例的。</p>
 <p>查看BeanDefinitionHolder的定义：</p>
 <pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">BeanDefinitionHolder</span> <span class="token keyword">implements</span> <span class="token class-name">BeanMetadataElement</span> <span class="token punctuation">{</span>
 
@@ -1019,7 +1020,7 @@ public void refresh() throws Be">
 
     <span class="token comment" spellcheck="true">//...</span>
 <span class="token punctuation">}</span></code></pre>
-<p>可见，里面确实有一个<code>ConcurrentHashMap&lt;String, BeanDefinition&gt;</code>类型的<code>beanDefinitionMap</code>，我们姑且认为它就是Spring IoC的核心容器（这里指狭义上最底层的集合）。</p>
+<p>可见，里面确实有一个<code>ConcurrentHashMap&lt;String, BeanDefinition&gt;</code>类型的<code>beanDefinitionMap</code>，并且初始容量为256。目前暂不知道实例化后的单例对象放在了哪里。</p>
 <h1 id="BeanDefinition">4 BeanDefinition</h1><p>而BeanDefinition的属性有（BeanDefinition是一个接口，基本上定义了这些属性的getter/setter方法，这里查看的是AbstractBeanDefinition的源码）：</p>
 <pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">abstract</span> <span class="token keyword">class</span> <span class="token class-name">AbstractBeanDefinition</span> <span class="token keyword">extends</span> <span class="token class-name">BeanMetadataAttributeAccessor</span>
         <span class="token keyword">implements</span> <span class="token class-name">BeanDefinition</span><span class="token punctuation">,</span> Cloneable <span class="token punctuation">{</span>
@@ -1113,7 +1114,7 @@ public void refresh() throws Be">
     <span class="token comment" spellcheck="true">//...</span>
 <span class="token punctuation">}</span></code></pre>
 <p>可见基本上都是在XML中配置的Bean信息。</p>
-<p>走完我们上述这些流程后，已经向ApplicationContext中的<code>ConfigurableListableBeanFactory</code>注册进了Bean，基本可以断定<code>ApplicationContext</code>实现<code>BeanFactory</code>的功能就是通过了组合的方式，毕竟Bean注册都是在内部的<code>ConfigurableListableBeanFactory</code>中。</p>
+<p>走完我们上述这些流程后，已经向ApplicationContext中的<code>ConfigurableListableBeanFactory</code>注册进了Bean，基本可以断定<code>ApplicationContext</code>实现<code>BeanFactory</code>的功能就是通过了组合的方式，毕竟BeanDefinition注册都是在内部的<code>ConfigurableListableBeanFactory</code>中。</p>
 <p>好了，快熄灯了，refresh后面的步骤留到以后再继续吧。</p>
 
             </div>
@@ -1474,54 +1475,57 @@ public void refresh() throws Be">
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="far fa-dot-circle"></i>&nbsp;本篇
-            </div>
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/article/IoC%E5%AE%B9%E5%99%A8%E5%90%AF%E5%8A%A8%E6%BA%90%E7%A0%81%E7%AC%AC1%E3%80%812%E6%AD%A5%E5%88%86%E6%9E%90-Bean%E6%98%AF%E5%A6%82%E4%BD%95%E6%B3%A8%E5%86%8C%E8%BF%9BIoC%E5%AE%B9%E5%99%A8%E7%9A%84%EF%BC%9F/">
+                <a href="/article/leetcode560-%E5%92%8C%E4%B8%BAK%E7%9A%84%E5%AD%90%E6%95%B0%E7%BB%84/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/16.jpg" class="responsive-img" alt="IoC容器启动源码第1、2步分析-Bean是如何注册进IoC容器的？">
+                        <img src="/medias/featureimages/22.jpg" class="responsive-img" alt="leetcode560-和为K的子数组">
                         
-                        <span class="card-title">IoC容器启动源码第1、2步分析-Bean是如何注册进IoC容器的？</span>
+                        <span class="card-title">leetcode560-和为K的子数组</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            我们接着Spring各模块说明和IoC容器启动源码简析继续分析，上一次，我们提到IoC容器的启动逻辑核心就在refresh方法中，今天深入分析，走到哪算哪：
-@Override
-public void refresh() throws Be
+                            1 原题给定一个整数数组和一个整数 k，你需要找到该数组中和为 k 的连续的子数组的个数。
+示例 1:  
+
+输入: nums = [1,1,1], k = 2输出: 2 , [1,1] 与 [1,1] 为两种不同的情况。
+
+说明 :
+
+数
                         
                     </div>
                     <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2020-05-14
-                            </span>
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2020-05-15
+                        </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/" class="post-category">
-                                    中间件/工具/框架
+                            <a href="/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-category">
+                                    算法/数据结构
                                 </a>
                             
                             
                         </span>
                     </div>
                 </div>
-
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
-                        <span class="chip bg-color">源码分析</span>
+                    <a href="/tags/leetcode/">
+                        <span class="chip bg-color">leetcode</span>
                     </a>
                     
-                    <a href="/tags/Spring/">
-                        <span class="chip bg-color">Spring</span>
+                    <a href="/tags/%E7%AE%97%E6%B3%95/">
+                        <span class="chip bg-color">算法</span>
                     </a>
                     
                 </div>
@@ -1732,7 +1736,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">564k</span>&nbsp;字
+                class="white-color">568.3k</span>&nbsp;字
             
             
             
