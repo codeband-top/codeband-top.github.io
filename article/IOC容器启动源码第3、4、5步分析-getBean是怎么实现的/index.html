@@ -403,7 +403,7 @@ prepareBeanFactory(">
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    4k
+                    4.1k
                 </div>
                 
 
@@ -1029,8 +1029,9 @@ prepareBeanFactory(">
     <span class="token keyword">final</span> String beanName <span class="token operator">=</span> <span class="token function">transformedBeanName</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
     Object bean<span class="token punctuation">;</span>
 
-    <span class="token comment" spellcheck="true">// 检查手动注册单例对象的单例缓存</span>
+    <span class="token comment" spellcheck="true">// 先检查是否有缓存的单例bean</span>
     Object sharedInstance <span class="token operator">=</span> <span class="token function">getSingleton</span><span class="token punctuation">(</span>beanName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment" spellcheck="true">// 如果有缓存的单例bean，不再创建，而是直接返回</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span>sharedInstance <span class="token operator">!=</span> null <span class="token operator">&amp;&amp;</span> args <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
         <span class="token keyword">if</span> <span class="token punctuation">(</span>logger<span class="token punctuation">.</span><span class="token function">isTraceEnabled</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
             <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">isSingletonCurrentlyInCreation</span><span class="token punctuation">(</span>beanName<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -1041,11 +1042,12 @@ prepareBeanFactory(">
                 logger<span class="token punctuation">.</span><span class="token function">trace</span><span class="token punctuation">(</span><span class="token string">"Returning cached instance of singleton bean '"</span> <span class="token operator">+</span> beanName <span class="token operator">+</span> <span class="token string">"'"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token punctuation">}</span>
         <span class="token punctuation">}</span>
+        <span class="token comment" spellcheck="true">// 如果Bean是FactoryBean，完成相关处理与转换</span>
         bean <span class="token operator">=</span> <span class="token function">getObjectForBeanInstance</span><span class="token punctuation">(</span>sharedInstance<span class="token punctuation">,</span> name<span class="token punctuation">,</span> beanName<span class="token punctuation">,</span> null<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">}</span>
 
     <span class="token keyword">else</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// 如果正在创建这个bean的实例，报错</span>
+        <span class="token comment" spellcheck="true">// 如果正在创建这个bean的原型实例，报错</span>
         <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">isPrototypeCurrentlyInCreation</span><span class="token punctuation">(</span>beanName<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
             <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">BeanCurrentlyInCreationException</span><span class="token punctuation">(</span>beanName<span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token punctuation">}</span>
@@ -1074,7 +1076,9 @@ prepareBeanFactory(">
             <span class="token punctuation">}</span>
         <span class="token punctuation">}</span>
 
+        <span class="token comment" spellcheck="true">//创建的bean是否需要类型验证</span>
         <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>typeCheckOnly<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token comment" spellcheck="true">//标记该bean已创建</span>
             <span class="token function">markBeanAsCreated</span><span class="token punctuation">(</span>beanName<span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token punctuation">}</span>
 
@@ -1125,15 +1129,18 @@ prepareBeanFactory(">
                 <span class="token comment" spellcheck="true">// 创建一个新的对象</span>
                 Object prototypeInstance <span class="token operator">=</span> null<span class="token punctuation">;</span>
                 <span class="token keyword">try</span> <span class="token punctuation">{</span>
+                    <span class="token comment" spellcheck="true">//把该bean标记为正在创建</span>
                     <span class="token function">beforePrototypeCreation</span><span class="token punctuation">(</span>beanName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token comment" spellcheck="true">//创建对象</span>
                     prototypeInstance <span class="token operator">=</span> <span class="token function">createBean</span><span class="token punctuation">(</span>beanName<span class="token punctuation">,</span> mbd<span class="token punctuation">,</span> args<span class="token punctuation">)</span><span class="token punctuation">;</span>
                 <span class="token punctuation">}</span>
                 <span class="token keyword">finally</span> <span class="token punctuation">{</span>
+                    <span class="token comment" spellcheck="true">//把该bean的正在创建标记清除</span>
                     <span class="token function">afterPrototypeCreation</span><span class="token punctuation">(</span>beanName<span class="token punctuation">)</span><span class="token punctuation">;</span>
                 <span class="token punctuation">}</span>
                 bean <span class="token operator">=</span> <span class="token function">getObjectForBeanInstance</span><span class="token punctuation">(</span>prototypeInstance<span class="token punctuation">,</span> name<span class="token punctuation">,</span> beanName<span class="token punctuation">,</span> mbd<span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token punctuation">}</span>
-
+            <span class="token comment" spellcheck="true">//既不是单例的，也不是原型，基本上就是web服务中的request或session</span>
             <span class="token keyword">else</span> <span class="token punctuation">{</span>
                 String scopeName <span class="token operator">=</span> mbd<span class="token punctuation">.</span><span class="token function">getScope</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
                 <span class="token keyword">final</span> Scope scope <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>scopes<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>scopeName<span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -1166,7 +1173,7 @@ prepareBeanFactory(">
         <span class="token punctuation">}</span>
     <span class="token punctuation">}</span>
 
-    <span class="token comment" spellcheck="true">// Check if required type matches the type of the actual bean instance.</span>
+    <span class="token comment" spellcheck="true">// 检查创建的bean与需要的类型是否匹配</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span>requiredType <span class="token operator">!=</span> null <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>requiredType<span class="token punctuation">.</span><span class="token function">isInstance</span><span class="token punctuation">(</span>bean<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
         <span class="token keyword">try</span> <span class="token punctuation">{</span>
             T convertedBean <span class="token operator">=</span> <span class="token function">getTypeConverter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">convertIfNecessary</span><span class="token punctuation">(</span>bean<span class="token punctuation">,</span> requiredType<span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -1185,7 +1192,7 @@ prepareBeanFactory(">
     <span class="token punctuation">}</span>
     <span class="token keyword">return</span> <span class="token punctuation">(</span>T<span class="token punctuation">)</span> bean<span class="token punctuation">;</span>
 <span class="token punctuation">}</span></code></pre>
-<p>时间不早了，具体创建对象的流程留到下次再说吧。</p>
+<p>可以看出不论是单例还是原型对象，都是通过<code>createBean</code>这个方法进行创建，时间不早了，具体创建对象的流程留到下次再说吧。</p>
 
             </div>
             <hr/>
@@ -1545,54 +1552,55 @@ prepareBeanFactory(">
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="far fa-dot-circle"></i>&nbsp;本篇
-            </div>
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/article/IOC%E5%AE%B9%E5%99%A8%E5%90%AF%E5%8A%A8%E6%BA%90%E7%A0%81%E7%AC%AC3%E3%80%814%E3%80%815%E6%AD%A5%E5%88%86%E6%9E%90-getBean%E6%98%AF%E6%80%8E%E4%B9%88%E5%AE%9E%E7%8E%B0%E7%9A%84/">
+                <a href="/article/leetcode60-%E7%AC%ACk%E4%B8%AA%E6%8E%92%E5%88%97/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/14.jpg" class="responsive-img" alt="IOC容器启动源码第3、4、5步分析-容器加载了哪些非Bean对象？">
+                        <img src="/medias/featureimages/18.jpg" class="responsive-img" alt="leetcode60-第k个排列">
                         
-                        <span class="card-title">IOC容器启动源码第3、4、5步分析-容器加载了哪些非Bean对象？</span>
+                        <span class="card-title">leetcode60-第k个排列</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            继续顺着IoC容器启动源码第1、2步分析-Bean是如何注册进IoC容器的？写下去，从第三步开始分析了：
-1 prepareBeanFactory// 3. 准备当前上下文要用的BeanFactory
-prepareBeanFactory(
+                            1 原题给出集合 [1,2,3,…,n]，其所有元素共有 n! 种排列。
+按大小顺序列出所有排列情况，并一一标记，当 n = 3 时, 所有排列如下：
+
+&quot;123&quot;
+&quot;132&quot;
+&quot;213&q
                         
                     </div>
                     <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2020-05-15
-                            </span>
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2020-05-16
+                        </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6-%E5%B7%A5%E5%85%B7-%E6%A1%86%E6%9E%B6/" class="post-category">
-                                    中间件/工具/框架
+                            <a href="/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-category">
+                                    算法/数据结构
                                 </a>
                             
                             
                         </span>
                     </div>
                 </div>
-
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
-                        <span class="chip bg-color">源码分析</span>
+                    <a href="/tags/leetcode/">
+                        <span class="chip bg-color">leetcode</span>
                     </a>
                     
-                    <a href="/tags/Spring/">
-                        <span class="chip bg-color">Spring</span>
+                    <a href="/tags/%E7%AE%97%E6%B3%95/">
+                        <span class="chip bg-color">算法</span>
                     </a>
                     
                 </div>
@@ -1802,7 +1810,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">568.3k</span>&nbsp;字
+                class="white-color">574.4k</span>&nbsp;字
             
             
             
