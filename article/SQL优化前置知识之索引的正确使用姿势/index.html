@@ -532,7 +532,7 @@ Note (Code 1003): /* select#1 */ select `test`.`t_user`.`id` AS `id`,`test`.`t_u
 <p><strong>大多数情况下都不需要冗余索引，应该尽量扩展已有的索引而不是创建新索引。</strong>但也<strong>有时候出于性能方面的考虑需要冗余索引，因为扩展已有的索引会导致其变得太大</strong>，从而影响其他使用该索引的查询的性能。</p>
 <p>例如，现在在整数列上有一个索引，需要额外增加一个很长的 VARCHAR 列来扩展该索引，那性能可能会急剧下降。可以使用一些工具来找出冗余和重复的索引。</p>
 <h2 id="索引重用">2.6 索引重用</h2><p>现有索引(A,B,C)，如果要使用索引，那么 where 中必须写为 A=a and B = b and C = c。如果没有对 B 的筛选，还想使用索引，怎么绕过最左前缀匹配呢？</p>
-<p>假设 B 是一个选择性很低的列，只有 b1 和 b2 两种取值，那么查询可以写为 <code>A = a and Bin(b1,b2) and C = c</code>。</p>
+<p>假设 B 是一个选择性很低的列，只有 b1 和 b2 两种取值，那么查询可以写为 <code>A = a and B in(b1,b2) and C = c</code>。</p>
 <h2 id="避免多个范围条件">2.7 避免多个范围条件</h2><p>对于范围条件查询，MySQL 无法再使用范围列后面的其他索引列了，但是<strong>对于多个等值条件查询（in …）则没有这个限制。</strong></p>
 <p>假设有索引(A,B)，查询条件为 A &gt; a and B &lt; b，那么此时无法同时使用 A 和 B 的复合索引，只能用到 A 的索引。一定要用的话可以考虑将 A 转为 in(a1,a2…)。</p>
 <h1 id="查看索引使用情况">3 查看索引使用情况</h1><pre class=" language-sql"><code class="language-sql"><span class="token keyword">show</span> <span class="token keyword">status</span> <span class="token operator">like</span> <span class="token string">'Handler_read%'</span><span class="token punctuation">;</span>    
@@ -1180,7 +1180,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">600.7k</span>&nbsp;字
+                class="white-color">601.3k</span>&nbsp;字
             
             
             
