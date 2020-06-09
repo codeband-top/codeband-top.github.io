@@ -1029,7 +1029,7 @@ prepareBeanFactory(">
     <span class="token keyword">final</span> String beanName <span class="token operator">=</span> <span class="token function">transformedBeanName</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
     Object bean<span class="token punctuation">;</span>
 
-    <span class="token comment" spellcheck="true">// 先检查是否有缓存的单例bean</span>
+    <span class="token comment" spellcheck="true">// 先检查是否有缓存的单例bean（即因循环依赖问题而早期暴露的单例Bean）</span>
     Object sharedInstance <span class="token operator">=</span> <span class="token function">getSingleton</span><span class="token punctuation">(</span>beanName<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token comment" spellcheck="true">// 如果有缓存的单例bean，不再创建，而是直接返回</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span>sharedInstance <span class="token operator">!=</span> null <span class="token operator">&amp;&amp;</span> args <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -1047,7 +1047,7 @@ prepareBeanFactory(">
     <span class="token punctuation">}</span>
 
     <span class="token keyword">else</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// 如果正在创建这个bean的原型实例，报错</span>
+        <span class="token comment" spellcheck="true">// 如果这个多例Bean已经在创建模式中了，说明发生了循环依赖问题（构造器注入），需要报异常</span>
         <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">isPrototypeCurrentlyInCreation</span><span class="token punctuation">(</span>beanName<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
             <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">BeanCurrentlyInCreationException</span><span class="token punctuation">(</span>beanName<span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token punctuation">}</span>
@@ -1112,7 +1112,7 @@ prepareBeanFactory(">
 
             <span class="token comment" spellcheck="true">// 如果是单例</span>
             <span class="token keyword">if</span> <span class="token punctuation">(</span>mbd<span class="token punctuation">.</span><span class="token function">isSingleton</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token comment" spellcheck="true">//创建单例对象</span>
+                <span class="token comment" spellcheck="true">//创建单例对象，如果该Bean已经在创建模式也会报异常，说明发生了循环依赖</span>
                 sharedInstance <span class="token operator">=</span> <span class="token function">getSingleton</span><span class="token punctuation">(</span>beanName<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> <span class="token punctuation">{</span>
                     <span class="token keyword">try</span> <span class="token punctuation">{</span>
                         <span class="token keyword">return</span> <span class="token function">createBean</span><span class="token punctuation">(</span>beanName<span class="token punctuation">,</span> mbd<span class="token punctuation">,</span> args<span class="token punctuation">)</span><span class="token punctuation">;</span>
