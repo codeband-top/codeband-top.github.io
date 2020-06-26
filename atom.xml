@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.codetool.top/"/>
-  <updated>2020-06-21T13:30:58.527Z</updated>
+  <updated>2020-06-26T04:15:44.548Z</updated>
   <id>https://www.codetool.top/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>为什么说Java只有值传递？</title>
+    <link href="https://www.codetool.top/article/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AF%B4Java%E5%8F%AA%E6%9C%89%E5%80%BC%E4%BC%A0%E9%80%92%EF%BC%9F/"/>
+    <id>https://www.codetool.top/article/为什么说Java只有值传递？/</id>
+    <published>2020-06-26T03:20:14.000Z</published>
+    <updated>2020-06-26T04:15:44.548Z</updated>
+    
+    <content type="html"><![CDATA[<p>先说一下。。以后可能不会怎么写Java相关的博客了，因为找到了字节跳动的实习工作，用Go/Python开发后端，所以这几天在抓紧时间学Go，在学Go的时候，了解到Go语言只有值传递，我突然就想起网上对Java是引用传递还是值传递有很多种说法，那么我的看法是：Java中同样只有值传递。理由且听我慢慢道来。</p><h1 id="最简单的验证方法">1 最简单的验证方法</h1><p>其实要验证Java只有值传递有个非常简单的方法。首先我们要了解值传递和引用传递的区别是什么，其实“引用传递”这个词，在C++语言中听到得最多，在值传递中，实参是传入对象的一份拷贝，因此对参数的修改不会影响传入的对象。而在引用传递中，传递的是对象的一个别名，若创建引用后，原对象的地址发生改变，引用的对象依然不会改变，而这种机制目前我只在C++语言中听说过。（主要还是学过的编程语言太少）</p><p>这种机制甚至在C语言中都没有，那么C语言要通过函数去改变一个参数该怎么办呢？正确的做法是<strong>指针传递</strong>。</p><pre class=" language-c"><code class="language-c"><span class="token keyword">void</span> <span class="token function">swap</span><span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span>a<span class="token punctuation">,</span><span class="token keyword">int</span> <span class="token operator">*</span>b<span class="token punctuation">)</span><span class="token punctuation">{</span>    <span class="token keyword">int</span> temp<span class="token punctuation">;</span>    temp <span class="token operator">=</span> <span class="token operator">*</span>a    <span class="token operator">*</span>a <span class="token operator">=</span> <span class="token operator">*</span>b<span class="token punctuation">;</span>    <span class="token operator">*</span>b <span class="token operator">=</span> temp<span class="token punctuation">;</span><span class="token punctuation">}</span></code></pre><p><strong>指针传递</strong>可以改变传入的参数，那么它是指针传递吗？并不是，它只是传递了指针的值，而函数内部因为获取了指针的值，于是可以通过指针获取指向的对象，从而修改它。</p><p><strong>指针传递</strong>在C++中也可以使用，而C++要实现同样的功能还可以使用引用传递：</p><pre class=" language-cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">swap</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token operator">&amp;</span> a<span class="token punctuation">,</span> <span class="token keyword">int</span><span class="token operator">&amp;</span> b<span class="token punctuation">)</span><span class="token punctuation">{</span>    <span class="token keyword">int</span> swap <span class="token operator">=</span> a<span class="token punctuation">;</span>    a <span class="token operator">=</span> b<span class="token punctuation">;</span>    b <span class="token operator">=</span> swap<span class="token punctuation">;</span><span class="token punctuation">}</span></code></pre><p>那么这两种方法有什么区别呢？区别就是，在指针传递的方法中，改变指针的值，外部并不会变化。</p><p>例如下面这段代码（引用传递）输出10，引用发生改变：</p><iframe src="https://run.codetool.top/?id=36" frameborder="0" height="500" style="width:100%;border:1px solid #ccc;"></iframe><p>而下面这段代码（指针传递）则还是输出5，因为外部的指针不会随之发生改变：</p><iframe src="https://run.codetool.top/?id=38" frameborder="0" height="500" style="width:100%;border:1px solid #ccc;"></iframe><p>那么，通过这两个示例，我们就可以写出一段Java代码来验证一下Java中是引用传递还是值传递：</p><iframe src="https://run.codetool.top/?id=39" frameborder="0" height="500" style="width:100%;border:1px solid #ccc;"></iframe><p>既然网上很多资料说，Java除了基本类型，都是引用传递，那么我们这里就写了一个类进行测试，在函数内部去修改了一下获取的参数。</p><p>你可以尝试运行这段代码，输出的结果仍是：<code>TestObject{value=1}</code>，说明它和C++中的<strong>指针传递</strong>的机制是一样的。这也是为什么我认为Java中都是值传递的原因。</p><h1 id="Java中不是没有指针吗？">2 Java中不是没有指针吗？</h1><p>Java只是对使用者封装了指针的概念，我们看下面这行代码：</p><pre class=" language-java"><code class="language-java">Object o <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Object</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><p><code>new Object</code>实际上是在堆上创建了一个对象，<strong>而<code>o</code>这个局部变量，是分配在栈上的，一个八字节的引用（reference）类型，指向堆上的对象</strong> </p><p>所以可以认为<code>o</code>就是一个指针，具体的机制在<a href="../深入理解java虚拟机第三版读书笔记03">深入理解java虚拟机第三版读书笔记03–1.3 对象的访问定位</a>中也有提到，<strong>HotSpot使用的对象访问定位的方式是直接指针访问，栈上的reference数据存储的就是对象在堆中的地址。</strong></p><p>因此我倾向于认为，Java的这种传参方式，类似于C++中的指针传递，并没有引用传递的概念，因此可以说，Java中只有值传递。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;先说一下。。以后可能不会怎么写Java相关的博客了，因为找到了字节跳动的实习工作，用Go/Python开发后端，所以这几天在抓紧时间学Go，在学Go的时候，了解到Go语言只有值传递，我突然就想起网上对Java是引用传递还是值传递有很多种说法，那么我的看法是：Java中同样只
+      
+    
+    </summary>
+    
+    
+      <category term="编程语言" scheme="https://www.codetool.top/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/"/>
+    
+    
+      <category term="Java" scheme="https://www.codetool.top/tags/Java/"/>
+    
+      <category term="基础知识" scheme="https://www.codetool.top/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/"/>
+    
+  </entry>
   
   <entry>
     <title>leetcode1413-逐步求和得到正数的最小值</title>
@@ -50,9 +78,9 @@
     <link href="https://www.codetool.top/article/leetcode%E9%A2%98%E8%A7%A3%E9%93%BE%E6%8E%A5%E5%90%88%E9%9B%86/"/>
     <id>https://www.codetool.top/article/leetcode题解链接合集/</id>
     <published>2020-06-20T05:06:52.000Z</published>
-    <updated>2020-06-21T13:51:35.021Z</updated>
+    <updated>2020-06-21T14:01:14.526Z</updated>
     
-    <content type="html"><![CDATA[<p>慢慢更，把以前做过的题解整理在一起，方便找一些。</p><h1 id="leetcode">1 leetcode</h1><ul><li><a href="../leetcode1-两数之和">leetcode1-两数之和</a></li><li><a href="../leetcode2-两数相加">leetcode2-两数相加</a></li><li><a href="../leetcode3-无重复字符的最长子串">leetcode3-无重复字符的最长子串</a></li><li><a href="../leetcode4-寻找两个正序数组的中位数">leetcode4-寻找两个正序数组的中位数</a></li><li><a href="../leetcode5-最长回文子串">leetcode5-最长回文子串</a></li><li><a href="../leetcode7-整数反转">leetcode7-整数反转</a></li><li><a href="../leetcode8-字符串转换整数atoi">leetcode8-字符串转换整数atoi</a></li><li><a href="../leetcode9-回文数">leetcode9-回文数</a></li><li><a href="../leetcode11-盛最多水的容器">leetcode11-盛最多水的容器</a></li><li><a href="../leetcode12-整数转罗马数字">leetcode12-整数转罗马数字</a></li><li><a href="../leetcode13-罗马数字转整数">leetcode13-罗马数字转整数</a></li><li><a href="../leetcode14-最长公共前缀">leetcode14-最长公共前缀</a></li><li><a href="../leetcode15-三数之和">leetcode15-三数之和</a></li><li><a href="../leetcode16-最接近的三数之和">leetcode16-最接近的三数之和</a></li><li><a href="../leetcode17-电话号码的字母组合">leetcode17-电话号码的字母组合</a></li><li><a href="../leetcode18-四数之和">leetcode18-四数之和</a></li><li><a href="../leetcode19-删除链表的倒数第N个节点">leetcode19-删除链表的倒数第N个节点</a></li><li><a href="../leetcode20-有效的括号">leetcode20-有效的括号</a></li><li><a href="../leetcode21-合并两个有序链表">leetcode21-合并两个有序链表</a></li><li><a href="../leetcode22-括号生成/">leetcode22-括号生成</a></li><li><a href="../leetcode23-合并K个排序链表">leetcode23-合并K个排序链表</a></li><li><a href="../leetcode24-两两交换链表中的节点">leetcode24-两两交换链表中的节点</a></li><li><a href="../leetcode25-K个一组翻转链表">leetcode25-K个一组翻转链表</a></li><li><a href="../leetcode26-删除排序数组中的重复项">leetcode26-删除排序数组中的重复项</a></li><li><a href="../leetcode27-移除元素">leetcode27-移除元素</a></li><li><a href="../leetcode28-实现strStr">leetcode28-实现strStr</a></li><li><a href="../leetcode32-最长有效括号">leetcode32-最长有效括号</a></li><li><a href="../leetcode33-搜索旋转排序数组">leetcode33-搜索旋转排序数组</a></li><li><a href="../leetcode34-在排序数组中查找元素的第一个和最后一个位置/">leetcode34-在排序数组中查找元素的第一个和最后一个位置</a></li><li><a href="../leetcode35-搜索插入位置">leetcode35-搜索插入位置</a></li><li><a href="../leetcode36-有效的数独">leetcode36-有效的数独</a></li><li><a href="../leetcode38-外观数列">leetcode38-外观数列</a></li><li><a href="../leetcode39-组合总和">leetcode39-组合总和</a></li><li><a href="../leetcode40-组合总和II">leetcode40-组合总和II</a></li><li><a href="../leetcode41-缺失的第一个正数">leetcode41-缺失的第一个正数</a></li><li><a href="../leetcode42-接雨水">leetcode42-接雨水</a></li><li><a href="../leetcode45-跳跃游戏II">leetcode45-跳跃游戏II</a></li><li><a href="../leetcode46-全排列">leetcode46-全排列</a></li><li><a href="../leetcode47-全排列II">leetcode47-全排列II</a></li><li><a href="../leetcode49-字母异位词分组">leetcode49-字母异位词分组</a></li><li><a href="../leetcode50-Pow-x-n">leetcode50-Pow(x,n)</a></li><li><a href="../leetcode53-最大子序和">leetcode53-最大子序和</a></li><li><a href="../leetcode54-螺旋矩阵">leetcode54-螺旋矩阵</a></li><li><a href="../leetcode55-跳跃游戏">leetcode55-跳跃游戏</a></li><li><a href="../leetcode56-合并区间">leetcode56-合并区间</a></li><li><a href="../leetcode57-插入区间">leetcode57-插入区间</a></li><li><a href="../leetcode59-螺旋矩阵II">leetcode59-螺旋矩阵II</a></li><li><a href="../leetcode60-第k个排列">leetcode60-第k个排列</a></li><li><a href="../leetcode61-旋转链表">leetcode61-旋转链表</a></li><li><a href="../leetcode62-不同路径">leetcode62-不同路径</a></li><li><a href="../leetcode63-不同路径II">leetcode63-不同路径II</a></li><li><a href="../leetcode64-最小路径和">leetcode64-最小路径和</a></li><li><a href="../leetcode66-加一">leetcode66-加一</a></li><li><a href="../leetcode67-二进制求和">leetcode67-二进制求和</a></li><li><a href="../leetcode69-x的平方根">leetcode69-x的平方根</a></li><li><a href="../leetcode70-爬楼梯">leetcode70-爬楼梯</a></li><li><a href="../leetcode71-简化路径">leetcode71-简化路径</a></li><li><a href="../leetcode72-编辑距离">leetcode72-编辑距离</a></li><li><a href="../leetcode73-矩阵置零">leetcode73-矩阵置零</a></li><li><a href="../leetcode74-搜索二维矩阵">leetcode74-搜索二维矩阵</a></li><li><a href="../leetcode75-颜色分类">leetcode75-颜色分类</a></li><li><a href="../leetcode76-最小覆盖子串">leetcode76-最小覆盖子串</a></li><li><a href="../leetcode1413-逐步求和得到正数的最小值">leetcode1413-逐步求和得到正数的最小值</a></li></ul>]]></content>
+    <content type="html"><![CDATA[<p>慢慢更，把以前做过的题解整理在一起，方便找一些。</p><h1 id="leetcode">1 leetcode</h1><ul><li><a href="../leetcode1-两数之和">leetcode1-两数之和</a></li><li><a href="../leetcode2-两数相加">leetcode2-两数相加</a></li><li><a href="../leetcode3-无重复字符的最长子串">leetcode3-无重复字符的最长子串</a></li><li><a href="../leetcode4-寻找两个正序数组的中位数">leetcode4-寻找两个正序数组的中位数</a></li><li><a href="../leetcode5-最长回文子串">leetcode5-最长回文子串</a></li><li><a href="../leetcode7-整数反转">leetcode7-整数反转</a></li><li><a href="../leetcode8-字符串转换整数atoi">leetcode8-字符串转换整数atoi</a></li><li><a href="../leetcode9-回文数">leetcode9-回文数</a></li><li><a href="../leetcode11-盛最多水的容器">leetcode11-盛最多水的容器</a></li><li><a href="../leetcode12-整数转罗马数字">leetcode12-整数转罗马数字</a></li><li><a href="../leetcode13-罗马数字转整数">leetcode13-罗马数字转整数</a></li><li><a href="../leetcode14-最长公共前缀">leetcode14-最长公共前缀</a></li><li><a href="../leetcode15-三数之和">leetcode15-三数之和</a></li><li><a href="../leetcode16-最接近的三数之和">leetcode16-最接近的三数之和</a></li><li><a href="../leetcode17-电话号码的字母组合">leetcode17-电话号码的字母组合</a></li><li><a href="../leetcode18-四数之和">leetcode18-四数之和</a></li><li><a href="../leetcode19-删除链表的倒数第N个节点">leetcode19-删除链表的倒数第N个节点</a></li><li><a href="../leetcode20-有效的括号">leetcode20-有效的括号</a></li><li><a href="../leetcode21-合并两个有序链表">leetcode21-合并两个有序链表</a></li><li><a href="../leetcode22-括号生成/">leetcode22-括号生成</a></li><li><a href="../leetcode23-合并K个排序链表">leetcode23-合并K个排序链表</a></li><li><a href="../leetcode24-两两交换链表中的节点">leetcode24-两两交换链表中的节点</a></li><li><a href="../leetcode25-K个一组翻转链表">leetcode25-K个一组翻转链表</a></li><li><a href="../leetcode26-删除排序数组中的重复项">leetcode26-删除排序数组中的重复项</a></li><li><a href="../leetcode27-移除元素">leetcode27-移除元素</a></li><li><a href="../leetcode28-实现strStr">leetcode28-实现strStr</a></li><li><a href="../leetcode32-最长有效括号">leetcode32-最长有效括号</a></li><li><a href="../leetcode33-搜索旋转排序数组">leetcode33-搜索旋转排序数组</a></li><li><a href="../leetcode34-在排序数组中查找元素的第一个和最后一个位置/">leetcode34-在排序数组中查找元素的第一个和最后一个位置</a></li><li><a href="../leetcode35-搜索插入位置">leetcode35-搜索插入位置</a></li><li><a href="../leetcode36-有效的数独">leetcode36-有效的数独</a></li><li><a href="../leetcode38-外观数列">leetcode38-外观数列</a></li><li><a href="../leetcode39-组合总和">leetcode39-组合总和</a></li><li><a href="../leetcode40-组合总和II">leetcode40-组合总和II</a></li><li><a href="../leetcode41-缺失的第一个正数">leetcode41-缺失的第一个正数</a></li><li><a href="../leetcode42-接雨水">leetcode42-接雨水</a></li><li><a href="../leetcode45-跳跃游戏II">leetcode45-跳跃游戏II</a></li><li><a href="../leetcode46-全排列">leetcode46-全排列</a></li><li><a href="../leetcode47-全排列II">leetcode47-全排列II</a></li><li><a href="../leetcode49-字母异位词分组">leetcode49-字母异位词分组</a></li><li><a href="../leetcode50-Pow-x-n">leetcode50-Pow(x,n)</a></li><li><a href="../leetcode53-最大子序和">leetcode53-最大子序和</a></li><li><a href="../leetcode54-螺旋矩阵">leetcode54-螺旋矩阵</a></li><li><a href="../leetcode55-跳跃游戏">leetcode55-跳跃游戏</a></li><li><a href="../leetcode56-合并区间">leetcode56-合并区间</a></li><li><a href="../leetcode57-插入区间">leetcode57-插入区间</a></li><li><a href="../leetcode59-螺旋矩阵II">leetcode59-螺旋矩阵II</a></li><li><a href="../leetcode60-第k个排列">leetcode60-第k个排列</a></li><li><a href="../leetcode61-旋转链表">leetcode61-旋转链表</a></li><li><a href="../leetcode62-不同路径">leetcode62-不同路径</a></li><li><a href="../leetcode63-不同路径II">leetcode63-不同路径II</a></li><li><a href="../leetcode64-最小路径和">leetcode64-最小路径和</a></li><li><a href="../leetcode66-加一">leetcode66-加一</a></li><li><a href="../leetcode67-二进制求和">leetcode67-二进制求和</a></li><li><a href="../leetcode69-x的平方根">leetcode69-x的平方根</a></li><li><a href="../leetcode70-爬楼梯">leetcode70-爬楼梯</a></li><li><a href="../leetcode71-简化路径">leetcode71-简化路径</a></li><li><a href="../leetcode72-编辑距离">leetcode72-编辑距离</a></li><li><a href="../leetcode73-矩阵置零">leetcode73-矩阵置零</a></li><li><a href="../leetcode74-搜索二维矩阵">leetcode74-搜索二维矩阵</a></li><li><a href="../leetcode75-颜色分类">leetcode75-颜色分类</a></li><li><a href="../leetcode76-最小覆盖子串">leetcode76-最小覆盖子串</a></li><li><a href="../leetcode77-组合">leetcode77-组合</a></li><li><a href="../leetcode78-子集">leetcode78-子集</a></li><li><a href="../leetcode79-单词搜索">leetcode79-单词搜索</a></li><li><a href="../leetcode80-删除排序数组中的重复项II">leetcode80-删除排序数组中的重复项II</a></li><li><a href="../leetcode81-搜索旋转排序数组II">leetcode81-搜索旋转排序数组II</a></li><li><a href="../leetcode82-删除排序链表中的重复元素II">leetcode82-删除排序链表中的重复元素II</a></li><li><a href="../leetcode83-删除排序链表中的重复元素">leetcode83-删除排序链表中的重复元素</a></li><li><a href="../leetcode84-柱状图中最大的矩形">leetcode84-柱状图中最大的矩形</a></li><li><a href="../leetcode85-最大矩形">leetcode85-最大矩形</a></li><li><a href="../leetcode86-分隔链表">leetcode86-分隔链表</a></li><li><a href="../leetcode88-合并两个有序数组">leetcode88-合并两个有序数组</a></li><li><a href="../leetcode94-二叉树的中序遍历">leetcode94-二叉树的中序遍历</a></li><li><a href="../leetcode95-不同的二叉搜索树II">leetcode95-不同的二叉搜索树II</a></li><li><a href="../leetcode96-不同的二叉搜索树">leetcode96-不同的二叉搜索树</a></li><li><a href="../leetcode98-验证二叉搜索树">leetcode98-验证二叉搜索树</a></li><li><a href="../leetcode99-恢复二叉搜索树">leetcode99-恢复二叉搜索树</a></li><li><a href="../leetcode100-相同的树">leetcode100-相同的树</a></li><li><a href="../leetcode1413-逐步求和得到正数的最小值">leetcode1413-逐步求和得到正数的最小值</a></li></ul>]]></content>
     
     <summary type="html">
     
@@ -479,13 +507,13 @@
       <category term="项目/编程理论" scheme="https://www.codetool.top/categories/%E9%A1%B9%E7%9B%AE-%E7%BC%96%E7%A8%8B%E7%90%86%E8%AE%BA/"/>
     
     
-      <category term="CodeMirror" scheme="https://www.codetool.top/tags/CodeMirror/"/>
-    
-      <category term="项目" scheme="https://www.codetool.top/tags/%E9%A1%B9%E7%9B%AE/"/>
-    
       <category term="Docker" scheme="https://www.codetool.top/tags/Docker/"/>
     
       <category term="Netty" scheme="https://www.codetool.top/tags/Netty/"/>
+    
+      <category term="项目" scheme="https://www.codetool.top/tags/%E9%A1%B9%E7%9B%AE/"/>
+    
+      <category term="CodeMirror" scheme="https://www.codetool.top/tags/CodeMirror/"/>
     
   </entry>
   
@@ -564,38 +592,6 @@
         &lt;h1 id=&quot;原题&quot;&gt;1 原题&lt;/h1&gt;&lt;p&gt;给定一个长度为 n 的&lt;strong&gt;非空&lt;/strong&gt;整数数组，找到让数组所有元素相等的最小移动次数。每次移动将会使 n - 1 个元素增加 1。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;示例:&lt;/strong&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;s
-      
-    
-    </summary>
-    
-    
-      <category term="算法/数据结构" scheme="https://www.codetool.top/categories/%E7%AE%97%E6%B3%95-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
-    
-    
-      <category term="leetcode" scheme="https://www.codetool.top/tags/leetcode/"/>
-    
-      <category term="算法" scheme="https://www.codetool.top/tags/%E7%AE%97%E6%B3%95/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>leetcode128-最长连续序列</title>
-    <link href="https://www.codetool.top/article/leetcode128-%E6%9C%80%E9%95%BF%E8%BF%9E%E7%BB%AD%E5%BA%8F%E5%88%97/"/>
-    <id>https://www.codetool.top/article/leetcode128-最长连续序列/</id>
-    <published>2020-06-06T06:02:06.000Z</published>
-    <updated>2020-06-06T06:44:23.892Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="原题">1 原题</h1><p>给定一个未排序的整数数组，找出最长连续序列的长度。</p><p>要求算法的时间复杂度为 O(n)。</p><p><strong>示例:</strong></p><blockquote><p><strong>输入:</strong> [100, 4, 200, 1, 3, 2]<br><strong>输出:</strong> 4<br><strong>解释:</strong> 最长连续序列是 [1, 2, 3, 4]。它的长度为 4。  </p></blockquote><h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>哈希集，记录出现过的数（我感觉不是严格的<code>O(n)</code>）</p><h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">longestConsecutive</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> nums<span class="token punctuation">)</span> <span class="token punctuation">{</span>        Set<span class="token operator">&lt;</span>Integer<span class="token operator">></span> set <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashSet</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> num <span class="token operator">:</span> nums<span class="token punctuation">)</span> set<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>num<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token keyword">int</span> maxLen <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> num <span class="token operator">:</span> nums<span class="token punctuation">)</span> <span class="token punctuation">{</span>            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>set<span class="token punctuation">.</span><span class="token function">contains</span><span class="token punctuation">(</span>num <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>                <span class="token keyword">int</span> curNum <span class="token operator">=</span> num<span class="token punctuation">;</span>                <span class="token keyword">int</span> curLen <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>                <span class="token keyword">while</span> <span class="token punctuation">(</span>set<span class="token punctuation">.</span><span class="token function">contains</span><span class="token punctuation">(</span>curNum <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>                    curNum <span class="token operator">+=</span> <span class="token number">1</span><span class="token punctuation">;</span>                    curLen <span class="token operator">+=</span> <span class="token number">1</span><span class="token punctuation">;</span>                <span class="token punctuation">}</span>                maxLen <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span>maxLen<span class="token punctuation">,</span>curLen<span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token punctuation">}</span>        <span class="token punctuation">}</span>        <span class="token keyword">return</span> maxLen<span class="token punctuation">;</span>    <span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h1 id=&quot;原题&quot;&gt;1 原题&lt;/h1&gt;&lt;p&gt;给定一个未排序的整数数组，找出最长连续序列的长度。&lt;/p&gt;
-&lt;p&gt;要求算法的时间复杂度为 O(n)。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;示例:&lt;/strong&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;输入:&lt;/stro
       
     
     </summary>
