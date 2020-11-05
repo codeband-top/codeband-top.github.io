@@ -25,10 +25,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -447,71 +447,71 @@
 <li>请不要使用内置的队列库。</li>
 </ul>
 <h1 id="解法">1 解法</h1><h2 id="思想">1.1 思想</h2><p>根据循环队列的定义来实现，理解head指针和tail指针指向的位置。<br><strong>通常情况下：</strong><br>添加元素，tail++。<br>删除元素，head++。<br><strong>当tail或head处于数组的最末端的时候：</strong><br>操作之后应该指向下标0。<br><strong>当数组为空：</strong><br>不能移除元素。<br><strong>当数组满了：</strong><br>不能添加元素。</p>
-<h2 id="代码">1.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">MyCircularQueue</span> <span class="token punctuation">{</span>
-    <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> queue<span class="token punctuation">;</span>
-    <span class="token keyword">int</span> head<span class="token punctuation">;</span>
-    <span class="token keyword">int</span> tail<span class="token punctuation">;</span>
-    <span class="token keyword">int</span> size<span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">/** Initialize your data structure here. Set the size of the queue to be k. */</span>
-    <span class="token keyword">public</span> <span class="token function">MyCircularQueue</span><span class="token punctuation">(</span><span class="token keyword">int</span> k<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        queue <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">int</span><span class="token punctuation">[</span>k<span class="token punctuation">]</span><span class="token punctuation">;</span>
-        size <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
-        head <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
-        tail <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+<h2 id="代码">1.2 代码</h2><pre><code class="java">class MyCircularQueue {
+    int[] queue;
+    int head;
+    int tail;
+    int size;
+    /** Initialize your data structure here. Set the size of the queue to be k. */
+    public MyCircularQueue(int k) {
+        queue = new int[k];
+        size = 0;
+        head = -1;
+        tail = -1;
+    }
 
-    <span class="token comment" spellcheck="true">/** Insert an element into the circular queue. Return true if the operation is successful. */</span>
-    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">enQueue</span><span class="token punctuation">(</span><span class="token keyword">int</span> value<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">isFull</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>tail <span class="token operator">==</span> queue<span class="token punctuation">.</span>length<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            tail <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
-            queue<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> value<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">else</span> queue<span class="token punctuation">[</span><span class="token operator">++</span>tail<span class="token punctuation">]</span> <span class="token operator">=</span> value<span class="token punctuation">;</span> 
-        size<span class="token operator">++</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>head<span class="token operator">==</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> head <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    /** Insert an element into the circular queue. Return true if the operation is successful. */
+    public boolean enQueue(int value) {
+        if(isFull()) return false;
+        if(tail == queue.length-1) {
+            tail = 0;
+            queue[0] = value;
+        }
+        else queue[++tail] = value; 
+        size++;
+        if(head==-1) head = 0;
+        return true;
+    }
 
-    <span class="token comment" spellcheck="true">/** Delete an element from the circular queue. Return true if the operation is successful. */</span>
-    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">deQueue</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>size<span class="token operator">==</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-            tail <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
-            head <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span><span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span>head <span class="token operator">==</span> queue<span class="token punctuation">.</span>length<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-            head <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
-            head<span class="token operator">++</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        size<span class="token operator">--</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    /** Delete an element from the circular queue. Return true if the operation is successful. */
+    public boolean deQueue() {
+        if(isEmpty()) return false;
+        if(size==1){
+            tail = -1;
+            head = -1;
+        }else if(head == queue.length-1){
+            head = 0;
+        }else{
+            head++;
+        }
+        size--;
+        return true;
+    }
 
-    <span class="token comment" spellcheck="true">/** Get the front item from the queue. */</span>
-    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">Front</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>head<span class="token operator">==</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> queue<span class="token punctuation">[</span>head<span class="token punctuation">]</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    /** Get the front item from the queue. */
+    public int Front() {
+        if(head==-1) return -1;
+        return queue[head];
+    }
 
-    <span class="token comment" spellcheck="true">/** Get the last item from the queue. */</span>
-    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">Rear</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>tail<span class="token operator">==</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> queue<span class="token punctuation">[</span>tail<span class="token punctuation">]</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    /** Get the last item from the queue. */
+    public int Rear() {
+        if(tail==-1) return -1;
+        return queue[tail];
+    }
 
-    <span class="token comment" spellcheck="true">/** Checks whether the circular queue is empty or not. */</span>
-    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> size <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    /** Checks whether the circular queue is empty or not. */
+    public boolean isEmpty() {
+        return size == 0;
+    }
 
-    <span class="token comment" spellcheck="true">/** Checks whether the circular queue is full or not. */</span>
-    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">isFull</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> size <span class="token operator">==</span> queue<span class="token punctuation">.</span>length<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
+    /** Checks whether the circular queue is full or not. */
+    public boolean isFull() {
+        return size == queue.length;
+    }
+}
 
-<span class="token comment" spellcheck="true">/**
+/**
  * Your MyCircularQueue object will be instantiated and called as such:
  * MyCircularQueue obj = new MyCircularQueue(k);
  * boolean param_1 = obj.enQueue(value);
@@ -520,7 +520,7 @@
  * int param_4 = obj.Rear();
  * boolean param_5 = obj.isEmpty();
  * boolean param_6 = obj.isFull();
- */</span></code></pre>
+ */</code></pre>
 
             </div>
             <hr/>
@@ -1134,7 +1134,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1214,6 +1214,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

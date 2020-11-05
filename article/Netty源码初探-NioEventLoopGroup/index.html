@@ -25,10 +25,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -402,7 +402,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.6k
+                    1.7k
                 </div>
                 
 
@@ -432,245 +432,245 @@
 <p>而EventExecutor实际上是一个实现了EventExecutorGroup的子接口，它提供了<code>parent()</code>方法获取所属的EventExecutorGroup。</p>
 <p>通过<code>AbstractEventExecutorGroup</code>发现，他调用submit、schedule等方法实际上是在<code>next()</code>返回的EventExecutor上调用。</p>
 <p>然后看<code>MultithreadEventExecutorGroup</code>类，这个类已经提供了绝大部分实现，</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">abstract</span> <span class="token keyword">class</span> <span class="token class-name">MultithreadEventExecutorGroup</span> <span class="token keyword">extends</span> <span class="token class-name">AbstractEventExecutorGroup</span> <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">//维护了一个EventExecutor数组</span>
-    <span class="token keyword">private</span> <span class="token keyword">final</span> EventExecutor<span class="token punctuation">[</span><span class="token punctuation">]</span> children<span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//只读的EventExecutor</span>
-    <span class="token keyword">private</span> <span class="token keyword">final</span> Set<span class="token operator">&lt;</span>EventExecutor<span class="token operator">></span> readonlyChildren<span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//终止的EventExecutor计数</span>
-    <span class="token keyword">private</span> <span class="token keyword">final</span> AtomicInteger terminatedChildren <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AtomicInteger</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//Promise是一个可写的Future</span>
-    <span class="token keyword">private</span> <span class="token keyword">final</span> Promise<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> terminationFuture <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DefaultPromise</span><span class="token punctuation">(</span>GlobalEventExecutor<span class="token punctuation">.</span>INSTANCE<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//Chooses the next EventExecutor to use.选择下一个EventExecutor</span>
-    <span class="token keyword">private</span> <span class="token keyword">final</span> EventExecutorChooserFactory<span class="token punctuation">.</span>EventExecutorChooser chooser<span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//...</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public abstract class MultithreadEventExecutorGroup extends AbstractEventExecutorGroup {
+    //维护了一个EventExecutor数组
+    private final EventExecutor[] children;
+    //只读的EventExecutor
+    private final Set&lt;EventExecutor&gt; readonlyChildren;
+    //终止的EventExecutor计数
+    private final AtomicInteger terminatedChildren = new AtomicInteger();
+    //Promise是一个可写的Future
+    private final Promise&lt;?&gt; terminationFuture = new DefaultPromise(GlobalEventExecutor.INSTANCE);
+    //Chooses the next EventExecutor to use.选择下一个EventExecutor
+    private final EventExecutorChooserFactory.EventExecutorChooser chooser;
+    //...
+}</code></pre>
 <p>然后从最底下NioEventLoopGroup的构造方法看起，这个类没有什么新增的属性和方法，基本是提供了一些构造方法，默认构造</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token function">NioEventLoopGroup</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">this</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public NioEventLoopGroup() {
+    this(0);
+}</code></pre>
 <p>传递链：</p>
-<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">//nThreads = 0</span>
-<span class="token keyword">public</span> <span class="token function">NioEventLoopGroup</span><span class="token punctuation">(</span><span class="token keyword">int</span> nThreads<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">this</span><span class="token punctuation">(</span>nThreads<span class="token punctuation">,</span> <span class="token punctuation">(</span>Executor<span class="token punctuation">)</span> null<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+<pre><code class="java">//nThreads = 0
+public NioEventLoopGroup(int nThreads) {
+    this(nThreads, (Executor) null);
+}
 
-<span class="token comment" spellcheck="true">//nThreads = 0, executor = null</span>
-<span class="token keyword">public</span> <span class="token function">NioEventLoopGroup</span><span class="token punctuation">(</span><span class="token keyword">int</span> nThreads<span class="token punctuation">,</span> Executor executor<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">this</span><span class="token punctuation">(</span>nThreads<span class="token punctuation">,</span> executor<span class="token punctuation">,</span> SelectorProvider<span class="token punctuation">.</span><span class="token function">provider</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+//nThreads = 0, executor = null
+public NioEventLoopGroup(int nThreads, Executor executor) {
+    this(nThreads, executor, SelectorProvider.provider());
+}
 
-<span class="token comment" spellcheck="true">//nThreads = 0, executor = null,selectorProvider = SelectorProvider.provider()</span>
-<span class="token comment" spellcheck="true">//selectorProvider使用来提供NIO核心selector的一个类</span>
-<span class="token keyword">public</span> <span class="token function">NioEventLoopGroup</span><span class="token punctuation">(</span>
-        <span class="token keyword">int</span> nThreads<span class="token punctuation">,</span> Executor executor<span class="token punctuation">,</span> <span class="token keyword">final</span> SelectorProvider selectorProvider<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">this</span><span class="token punctuation">(</span>nThreads<span class="token punctuation">,</span> executor<span class="token punctuation">,</span> selectorProvider<span class="token punctuation">,</span> DefaultSelectStrategyFactory<span class="token punctuation">.</span>INSTANCE<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
-<span class="token comment" spellcheck="true">//nThreads = 0, executor = null,selectorProvider = SelectorProvider.provider()</span>
-<span class="token comment" spellcheck="true">//selectStrategyFactory = DefaultSelectStrategyFactory()</span>
-<span class="token keyword">public</span> <span class="token function">NioEventLoopGroup</span><span class="token punctuation">(</span><span class="token keyword">int</span> nThreads<span class="token punctuation">,</span> Executor executor<span class="token punctuation">,</span> <span class="token keyword">final</span> SelectorProvider selectorProvider<span class="token punctuation">,</span>
-                            <span class="token keyword">final</span> SelectStrategyFactory selectStrategyFactory<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">super</span><span class="token punctuation">(</span>nThreads<span class="token punctuation">,</span> executor<span class="token punctuation">,</span> selectorProvider<span class="token punctuation">,</span> selectStrategyFactory<span class="token punctuation">,</span> RejectedExecutionHandlers<span class="token punctuation">.</span><span class="token function">reject</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+//nThreads = 0, executor = null,selectorProvider = SelectorProvider.provider()
+//selectorProvider使用来提供NIO核心selector的一个类
+public NioEventLoopGroup(
+        int nThreads, Executor executor, final SelectorProvider selectorProvider) {
+    this(nThreads, executor, selectorProvider, DefaultSelectStrategyFactory.INSTANCE);
+}
+//nThreads = 0, executor = null,selectorProvider = SelectorProvider.provider()
+//selectStrategyFactory = DefaultSelectStrategyFactory()
+public NioEventLoopGroup(int nThreads, Executor executor, final SelectorProvider selectorProvider,
+                            final SelectStrategyFactory selectStrategyFactory) {
+    super(nThreads, executor, selectorProvider, selectStrategyFactory, RejectedExecutionHandlers.reject());
+}</code></pre>
 <p>接下来调用父类MultithreadEventLoopGroup的构造方法：</p>
-<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">//nThreads = 0, executor = null</span>
-<span class="token comment" spellcheck="true">//args = [SelectorProvider.provider(),DefaultSelectStrategyFactory(),RejectedExecutionHandlers.reject()]</span>
-<span class="token keyword">protected</span> <span class="token function">MultithreadEventLoopGroup</span><span class="token punctuation">(</span><span class="token keyword">int</span> nThreads<span class="token punctuation">,</span> Executor executor<span class="token punctuation">,</span> Object<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">super</span><span class="token punctuation">(</span>nThreads <span class="token operator">==</span> <span class="token number">0</span> <span class="token operator">?</span> DEFAULT_EVENT_LOOP_THREADS <span class="token operator">:</span> nThreads<span class="token punctuation">,</span> executor<span class="token punctuation">,</span> args<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">//nThreads = 0, executor = null
+//args = [SelectorProvider.provider(),DefaultSelectStrategyFactory(),RejectedExecutionHandlers.reject()]
+protected MultithreadEventLoopGroup(int nThreads, Executor executor, Object... args) {
+    super(nThreads == 0 ? DEFAULT_EVENT_LOOP_THREADS : nThreads, executor, args);
+}</code></pre>
 <p>这里如果nThreads是0，传了一个DEFAULT_EVENT_LOOP_THREADS给父类的构造方法，而前面传过来的nThreads就是0，那么这个DEFAULT_EVENT_LOOP_THREADS是多少呢？</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">int</span> DEFAULT_EVENT_LOOP_THREADS<span class="token punctuation">;</span>
+<pre><code class="java">private static final int DEFAULT_EVENT_LOOP_THREADS;
 
-<span class="token keyword">static</span> <span class="token punctuation">{</span>
-    DEFAULT_EVENT_LOOP_THREADS <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> SystemPropertyUtil<span class="token punctuation">.</span><span class="token function">getInt</span><span class="token punctuation">(</span>
-            <span class="token string">"io.netty.eventLoopThreads"</span><span class="token punctuation">,</span> NettyRuntime<span class="token punctuation">.</span><span class="token function">availableProcessors</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+static {
+    DEFAULT_EVENT_LOOP_THREADS = Math.max(1, SystemPropertyUtil.getInt(
+            &quot;io.netty.eventLoopThreads&quot;, NettyRuntime.availableProcessors() * 2));
 
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>logger<span class="token punctuation">.</span><span class="token function">isDebugEnabled</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        logger<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"-Dio.netty.eventLoopThreads: {}"</span><span class="token punctuation">,</span> DEFAULT_EVENT_LOOP_THREADS<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    if (logger.isDebugEnabled()) {
+        logger.debug(&quot;-Dio.netty.eventLoopThreads: {}&quot;, DEFAULT_EVENT_LOOP_THREADS);
+    }
+}</code></pre>
 <p>可见它是从1、环境配置中的<code>io.netty.eventLoopThreads</code>、<code>NettyRuntime.availableProcessors() * 2</code>中取最大值，而<code>NettyRuntime.availableProcessors() * 2</code>是netty可用主机CPU的核数*2。</p>
 <p>最后，它调用MultithreadEventExecutorGroup的构造方法：</p>
-<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
+<pre><code class="java">/**
 * nThreads：这个MultithreadEventExecutorGroup会用几个线程
 * executor：使用的线程池，如果是null使用默认的
 * chooserFactory，给chooserFactory赋值
-*/</span>
-<span class="token keyword">protected</span> <span class="token function">MultithreadEventExecutorGroup</span><span class="token punctuation">(</span><span class="token keyword">int</span> nThreads<span class="token punctuation">,</span> Executor executor<span class="token punctuation">,</span>
-                                        EventExecutorChooserFactory chooserFactory<span class="token punctuation">,</span> Object<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>nThreads <span class="token operator">&lt;=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IllegalArgumentException</span><span class="token punctuation">(</span>String<span class="token punctuation">.</span><span class="token function">format</span><span class="token punctuation">(</span><span class="token string">"nThreads: %d (expected: > 0)"</span><span class="token punctuation">,</span> nThreads<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">//前面默认传过来的就是空，使用new ThreadPerTaskExecutor(newDefaultThreadFactory());</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>executor <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        executor <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ThreadPerTaskExecutor</span><span class="token punctuation">(</span><span class="token function">newDefaultThreadFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">//children的大小为nThreads，即默认是netty可用主机CPU的核数*2（如果是最大值）</span>
-    children <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">EventExecutor</span><span class="token punctuation">[</span>nThreads<span class="token punctuation">]</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//给children赋值</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> nThreads<span class="token punctuation">;</span> i <span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">boolean</span> success <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            children<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token function">newChild</span><span class="token punctuation">(</span>executor<span class="token punctuation">,</span> args<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            success <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// TODO: Think about if this is a good exception type</span>
-            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IllegalStateException</span><span class="token punctuation">(</span><span class="token string">"failed to create a child event loop"</span><span class="token punctuation">,</span> e<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>success<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> i<span class="token punctuation">;</span> j <span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    children<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">shutdownGracefully</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
+*/
+protected MultithreadEventExecutorGroup(int nThreads, Executor executor,
+                                        EventExecutorChooserFactory chooserFactory, Object... args) {
+    if (nThreads &lt;= 0) {
+        throw new IllegalArgumentException(String.format(&quot;nThreads: %d (expected: &gt; 0)&quot;, nThreads));
+    }
+    //前面默认传过来的就是空，使用new ThreadPerTaskExecutor(newDefaultThreadFactory());
+    if (executor == null) {
+        executor = new ThreadPerTaskExecutor(newDefaultThreadFactory());
+    }
+    //children的大小为nThreads，即默认是netty可用主机CPU的核数*2（如果是最大值）
+    children = new EventExecutor[nThreads];
+    //给children赋值
+    for (int i = 0; i &lt; nThreads; i ++) {
+        boolean success = false;
+        try {
+            children[i] = newChild(executor, args);
+            success = true;
+        } catch (Exception e) {
+            // TODO: Think about if this is a good exception type
+            throw new IllegalStateException(&quot;failed to create a child event loop&quot;, e);
+        } finally {
+            if (!success) {
+                for (int j = 0; j &lt; i; j ++) {
+                    children[j].shutdownGracefully();
+                }
 
-                <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> i<span class="token punctuation">;</span> j <span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    EventExecutor e <span class="token operator">=</span> children<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">;</span>
-                    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                        <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token operator">!</span>e<span class="token punctuation">.</span><span class="token function">isTerminated</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                            e<span class="token punctuation">.</span><span class="token function">awaitTermination</span><span class="token punctuation">(</span>Integer<span class="token punctuation">.</span>MAX_VALUE<span class="token punctuation">,</span> TimeUnit<span class="token punctuation">.</span>SECONDS<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                        <span class="token punctuation">}</span>
-                    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> interrupted<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                        <span class="token comment" spellcheck="true">// Let the caller handle the interruption.</span>
-                        Thread<span class="token punctuation">.</span><span class="token function">currentThread</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">interrupt</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                        <span class="token keyword">break</span><span class="token punctuation">;</span>
-                    <span class="token punctuation">}</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+                for (int j = 0; j &lt; i; j ++) {
+                    EventExecutor e = children[j];
+                    try {
+                        while (!e.isTerminated()) {
+                            e.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
+                        }
+                    } catch (InterruptedException interrupted) {
+                        // Let the caller handle the interruption.
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            }
+        }
+    }
 
-    chooser <span class="token operator">=</span> chooserFactory<span class="token punctuation">.</span><span class="token function">newChooser</span><span class="token punctuation">(</span>children<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    chooser = chooserFactory.newChooser(children);
 
-    <span class="token keyword">final</span> FutureListener<span class="token operator">&lt;</span>Object<span class="token operator">></span> terminationListener <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">FutureListener</span><span class="token operator">&lt;</span>Object<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token annotation punctuation">@Override</span>
-        <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">operationComplete</span><span class="token punctuation">(</span>Future<span class="token operator">&lt;</span>Object<span class="token operator">></span> future<span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception <span class="token punctuation">{</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>terminatedChildren<span class="token punctuation">.</span><span class="token function">incrementAndGet</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> children<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                terminationFuture<span class="token punctuation">.</span><span class="token function">setSuccess</span><span class="token punctuation">(</span>null<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    final FutureListener&lt;Object&gt; terminationListener = new FutureListener&lt;Object&gt;() {
+        @Override
+        public void operationComplete(Future&lt;Object&gt; future) throws Exception {
+            if (terminatedChildren.incrementAndGet() == children.length) {
+                terminationFuture.setSuccess(null);
+            }
+        }
+    };
 
-    <span class="token keyword">for</span> <span class="token punctuation">(</span>EventExecutor e<span class="token operator">:</span> children<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        e<span class="token punctuation">.</span><span class="token function">terminationFuture</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addListener</span><span class="token punctuation">(</span>terminationListener<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    for (EventExecutor e: children) {
+        e.terminationFuture().addListener(terminationListener);
+    }
 
-    Set<span class="token operator">&lt;</span>EventExecutor<span class="token operator">></span> childrenSet <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">LinkedHashSet</span><span class="token operator">&lt;</span>EventExecutor<span class="token operator">></span><span class="token punctuation">(</span>children<span class="token punctuation">.</span>length<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    Collections<span class="token punctuation">.</span><span class="token function">addAll</span><span class="token punctuation">(</span>childrenSet<span class="token punctuation">,</span> children<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    readonlyChildren <span class="token operator">=</span> Collections<span class="token punctuation">.</span><span class="token function">unmodifiableSet</span><span class="token punctuation">(</span>childrenSet<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+    Set&lt;EventExecutor&gt; childrenSet = new LinkedHashSet&lt;EventExecutor&gt;(children.length);
+    Collections.addAll(childrenSet, children);
+    readonlyChildren = Collections.unmodifiableSet(childrenSet);
+}</code></pre>
 <p>newChild，对于NioEventLoopGroup的实现为：</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Override</span>
-<span class="token keyword">protected</span> EventLoop <span class="token function">newChild</span><span class="token punctuation">(</span>Executor executor<span class="token punctuation">,</span> Object<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception <span class="token punctuation">{</span>
-    EventLoopTaskQueueFactory queueFactory <span class="token operator">=</span> args<span class="token punctuation">.</span>length <span class="token operator">==</span> <span class="token number">4</span> <span class="token operator">?</span> <span class="token punctuation">(</span>EventLoopTaskQueueFactory<span class="token punctuation">)</span> args<span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span> <span class="token operator">:</span> null<span class="token punctuation">;</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">NioEventLoop</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> executor<span class="token punctuation">,</span> <span class="token punctuation">(</span>SelectorProvider<span class="token punctuation">)</span> args<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-        <span class="token punctuation">(</span><span class="token punctuation">(</span>SelectStrategyFactory<span class="token punctuation">)</span> args<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">newSelectStrategy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>RejectedExecutionHandler<span class="token punctuation">)</span> args<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">,</span> queueFactory<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">@Override
+protected EventLoop newChild(Executor executor, Object... args) throws Exception {
+    EventLoopTaskQueueFactory queueFactory = args.length == 4 ? (EventLoopTaskQueueFactory) args[3] : null;
+    return new NioEventLoop(this, executor, (SelectorProvider) args[0],
+        ((SelectStrategyFactory) args[1]).newSelectStrategy(), (RejectedExecutionHandler) args[2], queueFactory);
+}</code></pre>
 <p>它返回一个EventLoop，可以看到对于NioEventLoopGroup，它的children数组中存放的实际是一个NioEventLoop对象。</p>
 <p><img src="https://api.codetool.top/img/15843496948104.png" alt></p>
-<pre class=" language-java"><code class="language-java"><span class="token function">NioEventLoop</span><span class="token punctuation">(</span>NioEventLoopGroup parent<span class="token punctuation">,</span> Executor executor<span class="token punctuation">,</span> SelectorProvider selectorProvider<span class="token punctuation">,</span>
-                SelectStrategy strategy<span class="token punctuation">,</span> RejectedExecutionHandler rejectedExecutionHandler<span class="token punctuation">,</span>
-                EventLoopTaskQueueFactory queueFactory<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">super</span><span class="token punctuation">(</span>parent<span class="token punctuation">,</span> executor<span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token function">newTaskQueue</span><span class="token punctuation">(</span>queueFactory<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">newTaskQueue</span><span class="token punctuation">(</span>queueFactory<span class="token punctuation">)</span><span class="token punctuation">,</span>
-            rejectedExecutionHandler<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>selectorProvider <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">NullPointerException</span><span class="token punctuation">(</span><span class="token string">"selectorProvider"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>strategy <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">NullPointerException</span><span class="token punctuation">(</span><span class="token string">"selectStrategy"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    provider <span class="token operator">=</span> selectorProvider<span class="token punctuation">;</span>
-    <span class="token keyword">final</span> SelectorTuple selectorTuple <span class="token operator">=</span> <span class="token function">openSelector</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    selector <span class="token operator">=</span> selectorTuple<span class="token punctuation">.</span>selector<span class="token punctuation">;</span>
-    unwrappedSelector <span class="token operator">=</span> selectorTuple<span class="token punctuation">.</span>unwrappedSelector<span class="token punctuation">;</span>
-    selectStrategy <span class="token operator">=</span> strategy<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">NioEventLoop(NioEventLoopGroup parent, Executor executor, SelectorProvider selectorProvider,
+                SelectStrategy strategy, RejectedExecutionHandler rejectedExecutionHandler,
+                EventLoopTaskQueueFactory queueFactory) {
+    super(parent, executor, false, newTaskQueue(queueFactory), newTaskQueue(queueFactory),
+            rejectedExecutionHandler);
+    if (selectorProvider == null) {
+        throw new NullPointerException(&quot;selectorProvider&quot;);
+    }
+    if (strategy == null) {
+        throw new NullPointerException(&quot;selectStrategy&quot;);
+    }
+    provider = selectorProvider;
+    final SelectorTuple selectorTuple = openSelector();
+    selector = selectorTuple.selector;
+    unwrappedSelector = selectorTuple.unwrappedSelector;
+    selectStrategy = strategy;
+}</code></pre>
 <p>NioEventLoop有以下属性：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> Selector selector<span class="token punctuation">;</span>
-<span class="token keyword">private</span> Selector unwrappedSelector<span class="token punctuation">;</span>
-<span class="token keyword">private</span> SelectedSelectionKeySet selectedKeys<span class="token punctuation">;</span>
+<pre><code class="java">private Selector selector;
+private Selector unwrappedSelector;
+private SelectedSelectionKeySet selectedKeys;
 
-<span class="token keyword">private</span> <span class="token keyword">final</span> SelectorProvider provider<span class="token punctuation">;</span></code></pre>
+private final SelectorProvider provider;</code></pre>
 <p>而它继承的SingleThreadEventExecutor有以下属性：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">final</span> Queue<span class="token operator">&lt;</span>Runnable<span class="token operator">></span> taskQueue<span class="token punctuation">;</span>
+<pre><code class="java">private final Queue&lt;Runnable&gt; taskQueue;
 
-<span class="token keyword">private</span> <span class="token keyword">volatile</span> Thread thread<span class="token punctuation">;</span>
-<span class="token annotation punctuation">@SuppressWarnings</span><span class="token punctuation">(</span><span class="token string">"unused"</span><span class="token punctuation">)</span>
-<span class="token keyword">private</span> <span class="token keyword">volatile</span> ThreadProperties threadProperties<span class="token punctuation">;</span>
-<span class="token keyword">private</span> <span class="token keyword">final</span> Executor executor<span class="token punctuation">;</span>
-<span class="token keyword">private</span> <span class="token keyword">volatile</span> <span class="token keyword">boolean</span> interrupted<span class="token punctuation">;</span>
+private volatile Thread thread;
+@SuppressWarnings(&quot;unused&quot;)
+private volatile ThreadProperties threadProperties;
+private final Executor executor;
+private volatile boolean interrupted;
 
-<span class="token keyword">private</span> <span class="token keyword">final</span> CountDownLatch threadLock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CountDownLatch</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">private</span> <span class="token keyword">final</span> Set<span class="token operator">&lt;</span>Runnable<span class="token operator">></span> shutdownHooks <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">LinkedHashSet</span><span class="token operator">&lt;</span>Runnable<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token keyword">boolean</span> addTaskWakesUp<span class="token punctuation">;</span>
-<span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token keyword">int</span> maxPendingTasks<span class="token punctuation">;</span>
-<span class="token keyword">private</span> <span class="token keyword">final</span> RejectedExecutionHandler rejectedExecutionHandler<span class="token punctuation">;</span>
+private final CountDownLatch threadLock = new CountDownLatch(1);
+private final Set&lt;Runnable&gt; shutdownHooks = new LinkedHashSet&lt;Runnable&gt;();
+private final boolean addTaskWakesUp;
+private final int maxPendingTasks;
+private final RejectedExecutionHandler rejectedExecutionHandler;
 
-<span class="token keyword">private</span> <span class="token keyword">long</span> lastExecutionTime<span class="token punctuation">;</span>
+private long lastExecutionTime;
 
-<span class="token annotation punctuation">@SuppressWarnings</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token string">"FieldMayBeFinal"</span><span class="token punctuation">,</span> <span class="token string">"unused"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
-<span class="token keyword">private</span> <span class="token keyword">volatile</span> <span class="token keyword">int</span> state <span class="token operator">=</span> ST_NOT_STARTED<span class="token punctuation">;</span>
+@SuppressWarnings({ &quot;FieldMayBeFinal&quot;, &quot;unused&quot; })
+private volatile int state = ST_NOT_STARTED;
 
-<span class="token keyword">private</span> <span class="token keyword">volatile</span> <span class="token keyword">long</span> gracefulShutdownQuietPeriod<span class="token punctuation">;</span>
-<span class="token keyword">private</span> <span class="token keyword">volatile</span> <span class="token keyword">long</span> gracefulShutdownTimeout<span class="token punctuation">;</span>
-<span class="token keyword">private</span> <span class="token keyword">long</span> gracefulShutdownStartTime<span class="token punctuation">;</span>
+private volatile long gracefulShutdownQuietPeriod;
+private volatile long gracefulShutdownTimeout;
+private long gracefulShutdownStartTime;
 
-<span class="token keyword">private</span> <span class="token keyword">final</span> Promise<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> terminationFuture <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DefaultPromise</span><span class="token operator">&lt;</span>Void<span class="token operator">></span><span class="token punctuation">(</span>GlobalEventExecutor<span class="token punctuation">.</span>INSTANCE<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+private final Promise&lt;?&gt; terminationFuture = new DefaultPromise&lt;Void&gt;(GlobalEventExecutor.INSTANCE);</code></pre>
 <p>不同操作系统的I/O多路复用选择器各自内核实现不同，目前有select、poll、epoll、kqueue四种实现，JDK里与之对应的实现也随着操作系统的不同而不同，</p>
 <p>JDK里对于Selector的实现都交由SelectorProvider的方法<code>openSelector()</code>来提供，而SelectorProvider的实现根据操作系统而变化：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> SelectorProvider <span class="token function">provider</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>lock<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>provider <span class="token operator">!=</span> null<span class="token punctuation">)</span>
-            <span class="token keyword">return</span> provider<span class="token punctuation">;</span>
-        <span class="token keyword">return</span> AccessController<span class="token punctuation">.</span><span class="token function">doPrivileged</span><span class="token punctuation">(</span>
-            <span class="token keyword">new</span> <span class="token class-name">PrivilegedAction</span><span class="token operator">&lt;</span>SelectorProvider<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">public</span> SelectorProvider <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">loadProviderFromProperty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-                            <span class="token keyword">return</span> provider<span class="token punctuation">;</span>
-                        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">loadProviderAsService</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-                            <span class="token keyword">return</span> provider<span class="token punctuation">;</span>
-                        <span class="token comment" spellcheck="true">//根据不同操作系统的实现来创建SelectorProvider</span>
-                        provider <span class="token operator">=</span> sun<span class="token punctuation">.</span>nio<span class="token punctuation">.</span>ch<span class="token punctuation">.</span>DefaultSelectorProvider<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                        <span class="token keyword">return</span> provider<span class="token punctuation">;</span>
-                    <span class="token punctuation">}</span>
-                <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public static SelectorProvider provider() {
+    synchronized (lock) {
+        if (provider != null)
+            return provider;
+        return AccessController.doPrivileged(
+            new PrivilegedAction&lt;SelectorProvider&gt;() {
+                public SelectorProvider run() {
+                        if (loadProviderFromProperty())
+                            return provider;
+                        if (loadProviderAsService())
+                            return provider;
+                        //根据不同操作系统的实现来创建SelectorProvider
+                        provider = sun.nio.ch.DefaultSelectorProvider.create();
+                        return provider;
+                    }
+                });
+    }
+}</code></pre>
 <p>Windows实现：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> SelectorProvider <span class="token function">create</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">sun<span class="token punctuation">.</span>nio<span class="token punctuation">.</span>ch<span class="token punctuation">.</span>WindowsSelectorProvider</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">WindowsSelectorProvider</span> <span class="token keyword">extends</span> <span class="token class-name">SelectorProviderImpl</span> <span class="token punctuation">{</span>
+<pre><code class="java">public static SelectorProvider create() {
+    return new sun.nio.ch.WindowsSelectorProvider();
+}</code></pre>
+<pre><code class="java">public class WindowsSelectorProvider extends SelectorProviderImpl {
 
-    <span class="token keyword">public</span> AbstractSelector <span class="token function">openSelector</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">WindowsSelectorImpl</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    public AbstractSelector openSelector() throws IOException {
+        return new WindowsSelectorImpl(this);
+    }
+}</code></pre>
 <p>通过阅读<code>WindowsSelectorImpl.c</code>源码发现它是通过<code>select</code>实现的</p>
 <p>Unix系实现：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> SelectorProvider <span class="token function">create</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    String osname <span class="token operator">=</span> AccessController
-        <span class="token punctuation">.</span><span class="token function">doPrivileged</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">GetPropertyAction</span><span class="token punctuation">(</span><span class="token string">"os.name"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>osname<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">"SunOS"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-        <span class="token keyword">return</span> <span class="token function">createProvider</span><span class="token punctuation">(</span><span class="token string">"sun.nio.ch.DevPollSelectorProvider"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>osname<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">"Linux"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-        <span class="token keyword">return</span> <span class="token function">createProvider</span><span class="token punctuation">(</span><span class="token string">"sun.nio.ch.EPollSelectorProvider"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">sun<span class="token punctuation">.</span>nio<span class="token punctuation">.</span>ch<span class="token punctuation">.</span>PollSelectorProvider</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">EPollSelectorProvider</span>
-    <span class="token keyword">extends</span> <span class="token class-name">SelectorProviderImpl</span>
-<span class="token punctuation">{</span>
-    <span class="token keyword">public</span> AbstractSelector <span class="token function">openSelector</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">EPollSelectorImpl</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+<pre><code class="java">public static SelectorProvider create() {
+    String osname = AccessController
+        .doPrivileged(new GetPropertyAction(&quot;os.name&quot;));
+    if (osname.equals(&quot;SunOS&quot;))
+        return createProvider(&quot;sun.nio.ch.DevPollSelectorProvider&quot;);
+    if (osname.equals(&quot;Linux&quot;))
+        return createProvider(&quot;sun.nio.ch.EPollSelectorProvider&quot;);
+    return new sun.nio.ch.PollSelectorProvider();
+}</code></pre>
+<pre><code class="java">public class EPollSelectorProvider
+    extends SelectorProviderImpl
+{
+    public AbstractSelector openSelector() throws IOException {
+        return new EPollSelectorImpl(this);
+    }
 
-    <span class="token keyword">public</span> Channel <span class="token function">inheritedChannel</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> InheritedChannel<span class="token punctuation">.</span><span class="token function">getChannel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    public Channel inheritedChannel() throws IOException {
+        return InheritedChannel.getChannel();
+    }
+}</code></pre>
 <p>Linux是通过EPollSelectorImpl中调用EPollArrayWrapper类来通过系统函数<code>epoll</code>实现的<br>SunOS（solaris）则是调用DevPollArrayWrapper通过系统函数<code>poll</code>实现的</p>
 <p>MacosX实现：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> SelectorProvider <span class="token function">create</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">sun<span class="token punctuation">.</span>nio<span class="token punctuation">.</span>ch<span class="token punctuation">.</span>KQueueSelectorProvider</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public static SelectorProvider create() {
+    return new sun.nio.ch.KQueueSelectorProvider();
+}</code></pre>
 <p>KQueue是另一种多路复用的方法，这里就不去看了。</p>
 
             </div>
@@ -1277,7 +1277,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1357,6 +1357,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

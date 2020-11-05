@@ -25,10 +25,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -428,22 +428,22 @@
 <p><strong>输入:</strong> root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 4<br><strong>输出:</strong> 5<br><strong>解释:</strong> 节点 5 和节点 4 的最近公共祖先是节点 5。因为根据定义最近公共祖先节点可以为节点本身。  </p>
 </blockquote>
 <h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>我首先的思路就是要有一个reach函数，可以判断一个节点是不是指定节点的祖先，通过dfs实现，返回一个bool值。<br>那么这道题要寻找离p、q最近的祖先节点，就可以再使用一个dfs，我们都知道dfs回溯的时候是从下往上的，那么只要调用函数最早对参数p、q都返回true的节点就是要得到的答案了，然后沿着回溯返回值链传回这个节点。</p>
-<h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>
-    <span class="token keyword">public</span> TreeNode <span class="token function">lowestCommonAncestor</span><span class="token punctuation">(</span>TreeNode root<span class="token punctuation">,</span> TreeNode p<span class="token punctuation">,</span> TreeNode q<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>root <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token keyword">return</span> null<span class="token punctuation">;</span>
-        TreeNode left <span class="token operator">=</span> <span class="token function">lowestCommonAncestor</span><span class="token punctuation">(</span>root<span class="token punctuation">.</span>left<span class="token punctuation">,</span>p<span class="token punctuation">,</span>q<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>left<span class="token operator">!=</span>null<span class="token punctuation">)</span> <span class="token keyword">return</span> left<span class="token punctuation">;</span>
-        TreeNode right <span class="token operator">=</span> <span class="token function">lowestCommonAncestor</span><span class="token punctuation">(</span>root<span class="token punctuation">.</span>right<span class="token punctuation">,</span>p<span class="token punctuation">,</span>q<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>right<span class="token operator">!=</span>null<span class="token punctuation">)</span> <span class="token keyword">return</span> right<span class="token punctuation">;</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">reach</span><span class="token punctuation">(</span>root<span class="token punctuation">,</span>p<span class="token punctuation">.</span>val<span class="token punctuation">)</span><span class="token operator">==</span><span class="token boolean">true</span><span class="token operator">&amp;&amp;</span><span class="token function">reach</span><span class="token punctuation">(</span>root<span class="token punctuation">,</span>q<span class="token punctuation">.</span>val<span class="token punctuation">)</span><span class="token operator">==</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token keyword">return</span> root<span class="token punctuation">;</span>
-        <span class="token keyword">return</span> null<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">reach</span><span class="token punctuation">(</span>TreeNode root<span class="token punctuation">,</span><span class="token keyword">int</span> value<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>root <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>root<span class="token punctuation">.</span>val <span class="token operator">==</span> value<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> <span class="token function">reach</span><span class="token punctuation">(</span>root<span class="token punctuation">.</span>left<span class="token punctuation">,</span>value<span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token function">reach</span><span class="token punctuation">(</span>root<span class="token punctuation">.</span>right<span class="token punctuation">,</span>value<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<h2 id="代码">2.2 代码</h2><pre><code class="java">class Solution {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if(root == null) return null;
+        TreeNode left = lowestCommonAncestor(root.left,p,q);
+        if(left!=null) return left;
+        TreeNode right = lowestCommonAncestor(root.right,p,q);
+        if(right!=null) return right;
+        if(reach(root,p.val)==true&amp;&amp;reach(root,q.val)==true) return root;
+        return null;
+    }
+    public boolean reach(TreeNode root,int value){
+        if(root == null) return false;
+        if(root.val == value) return true;
+        return reach(root.left,value) || reach(root.right,value);
+    }
+}</code></pre>
 
             </div>
             <hr/>
@@ -1054,7 +1054,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1134,6 +1134,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

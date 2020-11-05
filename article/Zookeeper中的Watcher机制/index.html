@@ -25,10 +25,10 @@ Watcher机制包括三">
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -402,7 +402,7 @@ Watcher机制包括三">
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    3k
+                    3.2k
                 </div>
                 
 
@@ -422,647 +422,647 @@ Watcher机制包括三">
 <h1 id="源码分析">2 源码分析</h1><h2 id="客户端注册">2.1 客户端注册</h2><p>我们通过zkCli的执行命令流程来看一下watch起到了什么作用：</p>
 <p><img src="https://api.codetool.top/img/15845035952250.png" alt="zkCli.sh"></p>
 <p>找到对应的类下的main方法：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String args<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> CliException<span class="token punctuation">,</span> IOException<span class="token punctuation">,</span> InterruptedException
-<span class="token punctuation">{</span>
-    ZooKeeperMain main <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ZooKeeperMain</span><span class="token punctuation">(</span>args<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    main<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//跟进去</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">void</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> CliException<span class="token punctuation">,</span> IOException<span class="token punctuation">,</span> InterruptedException <span class="token punctuation">{</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>cl<span class="token punctuation">.</span><span class="token function">getCommand</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"Welcome to ZooKeeper!"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">boolean</span> jlinemissing <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">//这一部分使用反射生成ConsoleReader实例读取命令行指令</span>
-            Class<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> consoleC <span class="token operator">=</span> Class<span class="token punctuation">.</span><span class="token function">forName</span><span class="token punctuation">(</span><span class="token string">"jline.console.ConsoleReader"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            Class<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> completorC <span class="token operator">=</span>
-                Class<span class="token punctuation">.</span><span class="token function">forName</span><span class="token punctuation">(</span><span class="token string">"org.apache.zookeeper.JLineZNodeCompleter"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre><code class="java">public static void main(String args[]) throws CliException, IOException, InterruptedException
+{
+    ZooKeeperMain main = new ZooKeeperMain(args);
+    main.run();//跟进去
+}</code></pre>
+<pre><code class="java">void run() throws CliException, IOException, InterruptedException {
+    if (cl.getCommand() == null) {
+        System.out.println(&quot;Welcome to ZooKeeper!&quot;);
+        boolean jlinemissing = false;
+        try {
+            //这一部分使用反射生成ConsoleReader实例读取命令行指令
+            Class&lt;?&gt; consoleC = Class.forName(&quot;jline.console.ConsoleReader&quot;);
+            Class&lt;?&gt; completorC =
+                Class.forName(&quot;org.apache.zookeeper.JLineZNodeCompleter&quot;);
 
-            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"JLine support is enabled"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            System.out.println(&quot;JLine support is enabled&quot;);
 
-            Object console <span class="token operator">=</span>
-                consoleC<span class="token punctuation">.</span><span class="token function">getConstructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">newInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            Object console =
+                consoleC.getConstructor().newInstance();
 
-            Object completor <span class="token operator">=</span>
-                completorC<span class="token punctuation">.</span><span class="token function">getConstructor</span><span class="token punctuation">(</span>ZooKeeper<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">newInstance</span><span class="token punctuation">(</span>zk<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            Method addCompletor <span class="token operator">=</span> consoleC<span class="token punctuation">.</span><span class="token function">getMethod</span><span class="token punctuation">(</span><span class="token string">"addCompleter"</span><span class="token punctuation">,</span>
-                    Class<span class="token punctuation">.</span><span class="token function">forName</span><span class="token punctuation">(</span><span class="token string">"jline.console.completer.Completer"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            addCompletor<span class="token punctuation">.</span><span class="token function">invoke</span><span class="token punctuation">(</span>console<span class="token punctuation">,</span> completor<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">//执行指令</span>
-            String line<span class="token punctuation">;</span>
-            Method readLine <span class="token operator">=</span> consoleC<span class="token punctuation">.</span><span class="token function">getMethod</span><span class="token punctuation">(</span><span class="token string">"readLine"</span><span class="token punctuation">,</span> String<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>line <span class="token operator">=</span> <span class="token punctuation">(</span>String<span class="token punctuation">)</span>readLine<span class="token punctuation">.</span><span class="token function">invoke</span><span class="token punctuation">(</span>console<span class="token punctuation">,</span> <span class="token function">getPrompt</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token comment" spellcheck="true">//执行！此处跟进</span>
-                <span class="token function">executeLine</span><span class="token punctuation">(</span>line<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span><span class="token comment" spellcheck="true">//catch ...</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">executeLine</span><span class="token punctuation">(</span>String line<span class="token punctuation">)</span> <span class="token keyword">throws</span> CliException<span class="token punctuation">,</span> InterruptedException<span class="token punctuation">,</span> IOException <span class="token punctuation">{</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>line<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">""</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">//将命令字符串转换成MyCommandOptions对象</span>
-        cl<span class="token punctuation">.</span><span class="token function">parseCommand</span><span class="token punctuation">(</span>line<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//添加命令到历史记录</span>
-        <span class="token function">addToHistory</span><span class="token punctuation">(</span>commandCount<span class="token punctuation">,</span>line<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//执行命令，此处跟进</span>
-        <span class="token function">processCmd</span><span class="token punctuation">(</span>cl<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        commandCount<span class="token operator">++</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">protected</span> <span class="token keyword">boolean</span> <span class="token function">processCmd</span><span class="token punctuation">(</span>MyCommandOptions co<span class="token punctuation">)</span> <span class="token keyword">throws</span> CliException<span class="token punctuation">,</span> IOException<span class="token punctuation">,</span> InterruptedException <span class="token punctuation">{</span>
-    <span class="token keyword">boolean</span> watch <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">//执行命令，此处跟进</span>
-        watch <span class="token operator">=</span> <span class="token function">processZKCmd</span><span class="token punctuation">(</span>co<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        exitCode <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">CliException</span> ex<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        exitCode <span class="token operator">=</span> ex<span class="token punctuation">.</span><span class="token function">getExitCode</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        System<span class="token punctuation">.</span>err<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>ex<span class="token punctuation">.</span><span class="token function">getMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> watch<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">protected</span> <span class="token keyword">boolean</span> <span class="token function">processZKCmd</span><span class="token punctuation">(</span>MyCommandOptions co<span class="token punctuation">)</span> <span class="token keyword">throws</span> CliException<span class="token punctuation">,</span> IOException<span class="token punctuation">,</span> InterruptedException <span class="token punctuation">{</span>
-    String<span class="token punctuation">[</span><span class="token punctuation">]</span> args <span class="token operator">=</span> co<span class="token punctuation">.</span><span class="token function">getArgArray</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    String cmd <span class="token operator">=</span> co<span class="token punctuation">.</span><span class="token function">getCommand</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//命令没输入</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>args<span class="token punctuation">.</span>length <span class="token operator">&lt;</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token function">usage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">MalformedCommandException</span><span class="token punctuation">(</span><span class="token string">"No command entered"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">//不存在该指令</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>commandMap<span class="token punctuation">.</span><span class="token function">containsKey</span><span class="token punctuation">(</span>cmd<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token function">usage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">CommandNotFoundException</span><span class="token punctuation">(</span><span class="token string">"Command not found "</span> <span class="token operator">+</span> cmd<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+            Object completor =
+                completorC.getConstructor(ZooKeeper.class).newInstance(zk);
+            Method addCompletor = consoleC.getMethod(&quot;addCompleter&quot;,
+                    Class.forName(&quot;jline.console.completer.Completer&quot;));
+            addCompletor.invoke(console, completor);
+            //执行指令
+            String line;
+            Method readLine = consoleC.getMethod(&quot;readLine&quot;, String.class);
+            while ((line = (String)readLine.invoke(console, getPrompt())) != null) {
+                //执行！此处跟进
+                executeLine(line);
+            }
+        }//catch ...
+}</code></pre>
+<pre><code class="java">public void executeLine(String line) throws CliException, InterruptedException, IOException {
+    if (!line.equals(&quot;&quot;)) {
+        //将命令字符串转换成MyCommandOptions对象
+        cl.parseCommand(line);
+        //添加命令到历史记录
+        addToHistory(commandCount,line);
+        //执行命令，此处跟进
+        processCmd(cl);
+        commandCount++;
+    }
+}</code></pre>
+<pre><code class="java">protected boolean processCmd(MyCommandOptions co) throws CliException, IOException, InterruptedException {
+    boolean watch = false;
+    try {
+        //执行命令，此处跟进
+        watch = processZKCmd(co);
+        exitCode = 0;
+    } catch (CliException ex) {
+        exitCode = ex.getExitCode();
+        System.err.println(ex.getMessage());
+    }
+    return watch;
+}</code></pre>
+<pre><code class="java">protected boolean processZKCmd(MyCommandOptions co) throws CliException, IOException, InterruptedException {
+    String[] args = co.getArgArray();
+    String cmd = co.getCommand();
+    //命令没输入
+    if (args.length &lt; 1) {
+        usage();
+        throw new MalformedCommandException(&quot;No command entered&quot;);
+    }
+    //不存在该指令
+    if (!commandMap.containsKey(cmd)) {
+        usage();
+        throw new CommandNotFoundException(&quot;Command not found &quot; + cmd);
+    }
 
-    <span class="token keyword">boolean</span> watch <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-    LOG<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"Processing "</span> <span class="token operator">+</span> cmd<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    boolean watch = false;
+    LOG.debug(&quot;Processing &quot; + cmd);
 
-    <span class="token comment" spellcheck="true">//quit等无实际操作的指令</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>cmd<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">"quit"</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        zk<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        System<span class="token punctuation">.</span><span class="token function">exit</span><span class="token punctuation">(</span>exitCode<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>cmd<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">"redo"</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> args<span class="token punctuation">.</span>length <span class="token operator">>=</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        Integer i <span class="token operator">=</span> Integer<span class="token punctuation">.</span><span class="token function">decode</span><span class="token punctuation">(</span>args<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>commandCount <span class="token operator">&lt;=</span> i <span class="token operator">||</span> i <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment" spellcheck="true">// don't allow redoing this redo</span>
-            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">MalformedCommandException</span><span class="token punctuation">(</span><span class="token string">"Command index out of range"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        cl<span class="token punctuation">.</span><span class="token function">parseCommand</span><span class="token punctuation">(</span>history<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>cl<span class="token punctuation">.</span><span class="token function">getCommand</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">"redo"</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">MalformedCommandException</span><span class="token punctuation">(</span><span class="token string">"No redoing redos"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        history<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>commandCount<span class="token punctuation">,</span> history<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token function">processCmd</span><span class="token punctuation">(</span>cl<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>cmd<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">"history"</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> commandCount <span class="token operator">-</span> <span class="token number">10</span><span class="token punctuation">;</span> i <span class="token operator">&lt;=</span> commandCount<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>i <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token keyword">continue</span><span class="token punctuation">;</span>
-            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>i <span class="token operator">+</span> <span class="token string">" - "</span> <span class="token operator">+</span> history<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>cmd<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">"printwatches"</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>args<span class="token punctuation">.</span>length <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"printwatches is "</span> <span class="token operator">+</span> <span class="token punctuation">(</span>printWatches <span class="token operator">?</span> <span class="token string">"on"</span> <span class="token operator">:</span> <span class="token string">"off"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
-            printWatches <span class="token operator">=</span> args<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">"on"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>cmd<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">"connect"</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>args<span class="token punctuation">.</span>length <span class="token operator">>=</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token function">connectToZK</span><span class="token punctuation">(</span>args<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
-            <span class="token function">connectToZK</span><span class="token punctuation">(</span>host<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+    //quit等无实际操作的指令
+    if (cmd.equals(&quot;quit&quot;)) {
+        zk.close();
+        System.exit(exitCode);
+    } else if (cmd.equals(&quot;redo&quot;) &amp;&amp; args.length &gt;= 2) {
+        Integer i = Integer.decode(args[1]);
+        if (commandCount &lt;= i || i &lt; 0) { // don&#39;t allow redoing this redo
+            throw new MalformedCommandException(&quot;Command index out of range&quot;);
+        }
+        cl.parseCommand(history.get(i));
+        if (cl.getCommand().equals(&quot;redo&quot;)) {
+            throw new MalformedCommandException(&quot;No redoing redos&quot;);
+        }
+        history.put(commandCount, history.get(i));
+        processCmd(cl);
+    } else if (cmd.equals(&quot;history&quot;)) {
+        for (int i = commandCount - 10; i &lt;= commandCount; ++i) {
+            if (i &lt; 0) continue;
+            System.out.println(i + &quot; - &quot; + history.get(i));
+        }
+    } else if (cmd.equals(&quot;printwatches&quot;)) {
+        if (args.length == 1) {
+            System.out.println(&quot;printwatches is &quot; + (printWatches ? &quot;on&quot; : &quot;off&quot;));
+        } else {
+            printWatches = args[1].equals(&quot;on&quot;);
+        }
+    } else if (cmd.equals(&quot;connect&quot;)) {
+        if (args.length &gt;= 2) {
+            connectToZK(args[1]);
+        } else {
+            connectToZK(host);
+        }
+    }
 
-    <span class="token comment" spellcheck="true">// Below commands all need a live connection</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>zk <span class="token operator">==</span> null <span class="token operator">||</span> <span class="token operator">!</span>zk<span class="token punctuation">.</span><span class="token function">getState</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">isAlive</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"Not connected"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    // Below commands all need a live connection
+    if (zk == null || !zk.getState().isAlive()) {
+        System.out.println(&quot;Not connected&quot;);
+        return false;
+    }
 
-    <span class="token comment" spellcheck="true">// 如果是正常的操作命令，使用cliCmd的子类执行</span>
-    CliCommand cliCmd <span class="token operator">=</span> commandMapCli<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>cmd<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span><span class="token punctuation">(</span>cliCmd <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        cliCmd<span class="token punctuation">.</span><span class="token function">setZk</span><span class="token punctuation">(</span>zk<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        watch <span class="token operator">=</span> cliCmd<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>args<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//此处跟进</span>
-    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>commandMap<span class="token punctuation">.</span><span class="token function">containsKey</span><span class="token punctuation">(</span>cmd<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token function">usage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> watch<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+    // 如果是正常的操作命令，使用cliCmd的子类执行
+    CliCommand cliCmd = commandMapCli.get(cmd);
+    if(cliCmd != null) {
+        cliCmd.setZk(zk);
+        watch = cliCmd.parse(args).exec();//此处跟进
+    } else if (!commandMap.containsKey(cmd)) {
+            usage();
+    }
+    return watch;
+}</code></pre>
 <p>这里我们选择cliCmd的子类GetCommand跟进exec方法：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">exec</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> CliException <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">//根据是否具有'-w'参数判断是否监听</span>
-    <span class="token keyword">boolean</span> watch <span class="token operator">=</span> cl<span class="token punctuation">.</span><span class="token function">hasOption</span><span class="token punctuation">(</span><span class="token string">"w"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    String path <span class="token operator">=</span> args<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-    Stat stat <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Stat</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">byte</span> data<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">//使用getData命令获取数据，此处跟进</span>
-        data <span class="token operator">=</span> zk<span class="token punctuation">.</span><span class="token function">getData</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> watch<span class="token punctuation">,</span> stat<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IllegalArgumentException</span> ex<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">MalformedPathException</span><span class="token punctuation">(</span>ex<span class="token punctuation">.</span><span class="token function">getMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">KeeperException</span><span class="token operator">|</span>InterruptedException ex<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">CliException</span><span class="token punctuation">(</span>ex<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    data <span class="token operator">=</span> <span class="token punctuation">(</span>data <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token string">"null"</span><span class="token punctuation">.</span><span class="token function">getBytes</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">:</span> data<span class="token punctuation">;</span>
-    out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">String</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>cl<span class="token punctuation">.</span><span class="token function">hasOption</span><span class="token punctuation">(</span><span class="token string">"s"</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">new</span> <span class="token class-name">StatPrinter</span><span class="token punctuation">(</span>out<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">print</span><span class="token punctuation">(</span>stat<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> watch<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">getData</span><span class="token punctuation">(</span>String path<span class="token punctuation">,</span> <span class="token keyword">boolean</span> watch<span class="token punctuation">,</span> Stat stat<span class="token punctuation">)</span>
-        <span class="token keyword">throws</span> KeeperException<span class="token punctuation">,</span> InterruptedException <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">//可以看到这里有一个watchManager.defaultWatcher，它是一个默认的watcher</span>
-    <span class="token keyword">return</span> <span class="token function">getData</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> watch <span class="token operator">?</span> watchManager<span class="token punctuation">.</span>defaultWatcher <span class="token operator">:</span> null<span class="token punctuation">,</span> stat<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">getData</span><span class="token punctuation">(</span><span class="token keyword">final</span> String path<span class="token punctuation">,</span> Watcher watcher<span class="token punctuation">,</span> Stat stat<span class="token punctuation">)</span>
-    <span class="token keyword">throws</span> KeeperException<span class="token punctuation">,</span> InterruptedException
-    <span class="token punctuation">{</span>
-    <span class="token keyword">final</span> String clientPath <span class="token operator">=</span> path<span class="token punctuation">;</span>
-    PathUtils<span class="token punctuation">.</span><span class="token function">validatePath</span><span class="token punctuation">(</span>clientPath<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre><code class="java">public boolean exec() throws CliException {
+    //根据是否具有&#39;-w&#39;参数判断是否监听
+    boolean watch = cl.hasOption(&quot;w&quot;);
+    String path = args[1];
+    Stat stat = new Stat();
+    byte data[];
+    try {
+        //使用getData命令获取数据，此处跟进
+        data = zk.getData(path, watch, stat);
+    } catch (IllegalArgumentException ex) {
+        throw new MalformedPathException(ex.getMessage());
+    } catch (KeeperException|InterruptedException ex) {
+        throw new CliException(ex);
+    }
+    data = (data == null) ? &quot;null&quot;.getBytes() : data;
+    out.println(new String(data));
+    if (cl.hasOption(&quot;s&quot;)) {
+        new StatPrinter(out).print(stat);
+    }
+    return watch;
+}</code></pre>
+<pre><code class="java">public byte[] getData(String path, boolean watch, Stat stat)
+        throws KeeperException, InterruptedException {
+    //可以看到这里有一个watchManager.defaultWatcher，它是一个默认的watcher
+    return getData(path, watch ? watchManager.defaultWatcher : null, stat);
+}</code></pre>
+<pre><code class="java">public byte[] getData(final String path, Watcher watcher, Stat stat)
+    throws KeeperException, InterruptedException
+    {
+    final String clientPath = path;
+    PathUtils.validatePath(clientPath);
 
-    <span class="token comment" spellcheck="true">// the watch contains the un-chroot path</span>
-    WatchRegistration wcb <span class="token operator">=</span> null<span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>watcher <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">//如果watcher不为空注册watcher，此处跟进，返回一个WatchRegistration</span>
-        wcb <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DataWatchRegistration</span><span class="token punctuation">(</span>watcher<span class="token punctuation">,</span> clientPath<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    // the watch contains the un-chroot path
+    WatchRegistration wcb = null;
+    if (watcher != null) {
+        //如果watcher不为空注册watcher，此处跟进，返回一个WatchRegistration
+        wcb = new DataWatchRegistration(watcher, clientPath);
+    }
 
-    <span class="token keyword">final</span> String serverPath <span class="token operator">=</span> <span class="token function">prependChroot</span><span class="token punctuation">(</span>clientPath<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    final String serverPath = prependChroot(clientPath);
 
-    RequestHeader h <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RequestHeader</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    h<span class="token punctuation">.</span><span class="token function">setType</span><span class="token punctuation">(</span>ZooDefs<span class="token punctuation">.</span>OpCode<span class="token punctuation">.</span>getData<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    GetDataRequest request <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">GetDataRequest</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    request<span class="token punctuation">.</span><span class="token function">setPath</span><span class="token punctuation">(</span>serverPath<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    request<span class="token punctuation">.</span><span class="token function">setWatch</span><span class="token punctuation">(</span>watcher <span class="token operator">!=</span> null<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    GetDataResponse response <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">GetDataResponse</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//此处用到了返回的WatchRegistration，跟进</span>
-    ReplyHeader r <span class="token operator">=</span> cnxn<span class="token punctuation">.</span><span class="token function">submitRequest</span><span class="token punctuation">(</span>h<span class="token punctuation">,</span> request<span class="token punctuation">,</span> response<span class="token punctuation">,</span> wcb<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>r<span class="token punctuation">.</span><span class="token function">getErr</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">throw</span> KeeperException<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span>KeeperException<span class="token punctuation">.</span>Code<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>r<span class="token punctuation">.</span><span class="token function">getErr</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-                clientPath<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>stat <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        DataTree<span class="token punctuation">.</span><span class="token function">copyStat</span><span class="token punctuation">(</span>response<span class="token punctuation">.</span><span class="token function">getStat</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> stat<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> response<span class="token punctuation">.</span><span class="token function">getData</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token function">DataWatchRegistration</span><span class="token punctuation">(</span>Watcher watcher<span class="token punctuation">,</span> String clientPath<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">super</span><span class="token punctuation">(</span>watcher<span class="token punctuation">,</span> clientPath<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//调用WatchRegistration的构造方法</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token function">WatchRegistration</span><span class="token punctuation">(</span>Watcher watcher<span class="token punctuation">,</span> String clientPath<span class="token punctuation">)</span>
-<span class="token punctuation">{</span>   
-    <span class="token comment" spellcheck="true">//包含一个watcher和一个监听地址</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>watcher <span class="token operator">=</span> watcher<span class="token punctuation">;</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>clientPath <span class="token operator">=</span> clientPath<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> ReplyHeader <span class="token function">submitRequest</span><span class="token punctuation">(</span>RequestHeader h<span class="token punctuation">,</span> Record request<span class="token punctuation">,</span>
-        Record response<span class="token punctuation">,</span> WatchRegistration watchRegistration<span class="token punctuation">)</span>
-        <span class="token keyword">throws</span> InterruptedException <span class="token punctuation">{</span>
-    <span class="token keyword">return</span> <span class="token function">submitRequest</span><span class="token punctuation">(</span>h<span class="token punctuation">,</span> request<span class="token punctuation">,</span> response<span class="token punctuation">,</span> watchRegistration<span class="token punctuation">,</span> null<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> ReplyHeader <span class="token function">submitRequest</span><span class="token punctuation">(</span>RequestHeader h<span class="token punctuation">,</span> Record request<span class="token punctuation">,</span>
-        Record response<span class="token punctuation">,</span> WatchRegistration watchRegistration<span class="token punctuation">,</span>
-        WatchDeregistration watchDeregistration<span class="token punctuation">)</span>
-        <span class="token keyword">throws</span> InterruptedException <span class="token punctuation">{</span>
-    ReplyHeader r <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ReplyHeader</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//使用watchRegistration构建了一个queuePacket</span>
-    Packet packet <span class="token operator">=</span> <span class="token function">queuePacket</span><span class="token punctuation">(</span>h<span class="token punctuation">,</span> r<span class="token punctuation">,</span> request<span class="token punctuation">,</span> response<span class="token punctuation">,</span> null<span class="token punctuation">,</span> null<span class="token punctuation">,</span> null<span class="token punctuation">,</span>
-            null<span class="token punctuation">,</span> watchRegistration<span class="token punctuation">,</span> watchDeregistration<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>packet<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>requestTimeout <span class="token operator">></span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// Wait for request completion with timeout</span>
-            <span class="token function">waitForPacketFinish</span><span class="token punctuation">(</span>r<span class="token punctuation">,</span> packet<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// Wait for request completion infinitely</span>
-            <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token operator">!</span>packet<span class="token punctuation">.</span>finished<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                packet<span class="token punctuation">.</span><span class="token function">wait</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>r<span class="token punctuation">.</span><span class="token function">getErr</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> Code<span class="token punctuation">.</span>REQUESTTIMEOUT<span class="token punctuation">.</span><span class="token function">intValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        sendThread<span class="token punctuation">.</span><span class="token function">cleanAndNotifyState</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> r<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> Packet <span class="token function">queuePacket</span><span class="token punctuation">(</span>RequestHeader h<span class="token punctuation">,</span> ReplyHeader r<span class="token punctuation">,</span> Record request<span class="token punctuation">,</span>
-        Record response<span class="token punctuation">,</span> AsyncCallback cb<span class="token punctuation">,</span> String clientPath<span class="token punctuation">,</span>
-        String serverPath<span class="token punctuation">,</span> Object ctx<span class="token punctuation">,</span> WatchRegistration watchRegistration<span class="token punctuation">,</span>
-        WatchDeregistration watchDeregistration<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    Packet packet <span class="token operator">=</span> null<span class="token punctuation">;</span>
+    RequestHeader h = new RequestHeader();
+    h.setType(ZooDefs.OpCode.getData);
+    GetDataRequest request = new GetDataRequest();
+    request.setPath(serverPath);
+    request.setWatch(watcher != null);
+    GetDataResponse response = new GetDataResponse();
+    //此处用到了返回的WatchRegistration，跟进
+    ReplyHeader r = cnxn.submitRequest(h, request, response, wcb);
+    if (r.getErr() != 0) {
+        throw KeeperException.create(KeeperException.Code.get(r.getErr()),
+                clientPath);
+    }
+    if (stat != null) {
+        DataTree.copyStat(response.getStat(), stat);
+    }
+    return response.getData();
+}</code></pre>
+<pre><code class="java">public DataWatchRegistration(Watcher watcher, String clientPath) {
+    super(watcher, clientPath);//调用WatchRegistration的构造方法
+}</code></pre>
+<pre><code class="java">public WatchRegistration(Watcher watcher, String clientPath)
+{   
+    //包含一个watcher和一个监听地址
+    this.watcher = watcher;
+    this.clientPath = clientPath;
+}</code></pre>
+<pre><code class="java">public ReplyHeader submitRequest(RequestHeader h, Record request,
+        Record response, WatchRegistration watchRegistration)
+        throws InterruptedException {
+    return submitRequest(h, request, response, watchRegistration, null);
+}</code></pre>
+<pre><code class="java">public ReplyHeader submitRequest(RequestHeader h, Record request,
+        Record response, WatchRegistration watchRegistration,
+        WatchDeregistration watchDeregistration)
+        throws InterruptedException {
+    ReplyHeader r = new ReplyHeader();
+    //使用watchRegistration构建了一个queuePacket
+    Packet packet = queuePacket(h, r, request, response, null, null, null,
+            null, watchRegistration, watchDeregistration);
+    synchronized (packet) {
+        if (requestTimeout &gt; 0) {
+            // Wait for request completion with timeout
+            waitForPacketFinish(r, packet);
+        } else {
+            // Wait for request completion infinitely
+            while (!packet.finished) {
+                packet.wait();
+            }
+        }
+    }
+    if (r.getErr() == Code.REQUESTTIMEOUT.intValue()) {
+        sendThread.cleanAndNotifyState();
+    }
+    return r;
+}</code></pre>
+<pre><code class="java">public Packet queuePacket(RequestHeader h, ReplyHeader r, Record request,
+        Record response, AsyncCallback cb, String clientPath,
+        String serverPath, Object ctx, WatchRegistration watchRegistration,
+        WatchDeregistration watchDeregistration) {
+    Packet packet = null;
 
-    <span class="token comment" spellcheck="true">// Note that we do not generate the Xid for the packet yet. It is</span>
-    <span class="token comment" spellcheck="true">// generated later at send-time, by an implementation of ClientCnxnSocket::doIO(),</span>
-    <span class="token comment" spellcheck="true">// where the packet is actually sent.</span>
-    packet <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Packet</span><span class="token punctuation">(</span>h<span class="token punctuation">,</span> r<span class="token punctuation">,</span> request<span class="token punctuation">,</span> response<span class="token punctuation">,</span> watchRegistration<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    packet<span class="token punctuation">.</span>cb <span class="token operator">=</span> cb<span class="token punctuation">;</span>
-    packet<span class="token punctuation">.</span>ctx <span class="token operator">=</span> ctx<span class="token punctuation">;</span>
-    packet<span class="token punctuation">.</span>clientPath <span class="token operator">=</span> clientPath<span class="token punctuation">;</span>
-    packet<span class="token punctuation">.</span>serverPath <span class="token operator">=</span> serverPath<span class="token punctuation">;</span>
-    packet<span class="token punctuation">.</span>watchDeregistration <span class="token operator">=</span> watchDeregistration<span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// The synchronized block here is for two purpose:</span>
-    <span class="token comment" spellcheck="true">// 1. synchronize with the final cleanup() in SendThread.run() to avoid race</span>
-    <span class="token comment" spellcheck="true">// 2. synchronized against each packet. So if a closeSession packet is added,</span>
-    <span class="token comment" spellcheck="true">// later packet will be notified.</span>
-    <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>state<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>state<span class="token punctuation">.</span><span class="token function">isAlive</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">||</span> closing<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token function">conLossPacket</span><span class="token punctuation">(</span>packet<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// If the client is asking to close the session then</span>
-            <span class="token comment" spellcheck="true">// mark as closing</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>h<span class="token punctuation">.</span><span class="token function">getType</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> OpCode<span class="token punctuation">.</span>closeSession<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                closing <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-            outgoingQueue<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>packet<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">//将该packet添加到了sendThread的ClientCnxnSocket中</span>
-    sendThread<span class="token punctuation">.</span><span class="token function">getClientCnxnSocket</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">packetAdded</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> packet<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+    // Note that we do not generate the Xid for the packet yet. It is
+    // generated later at send-time, by an implementation of ClientCnxnSocket::doIO(),
+    // where the packet is actually sent.
+    packet = new Packet(h, r, request, response, watchRegistration);
+    packet.cb = cb;
+    packet.ctx = ctx;
+    packet.clientPath = clientPath;
+    packet.serverPath = serverPath;
+    packet.watchDeregistration = watchDeregistration;
+    // The synchronized block here is for two purpose:
+    // 1. synchronize with the final cleanup() in SendThread.run() to avoid race
+    // 2. synchronized against each packet. So if a closeSession packet is added,
+    // later packet will be notified.
+    synchronized (state) {
+        if (!state.isAlive() || closing) {
+            conLossPacket(packet);
+        } else {
+            // If the client is asking to close the session then
+            // mark as closing
+            if (h.getType() == OpCode.closeSession) {
+                closing = true;
+            }
+            outgoingQueue.add(packet);
+        }
+    }
+    //将该packet添加到了sendThread的ClientCnxnSocket中
+    sendThread.getClientCnxnSocket().packetAdded();
+    return packet;
+}</code></pre>
 <p>在将packet添加到了<code>sendThread</code>的<code>ClientCnxnSocket</code>中之后，注意SendThread是不停地在<code>doIO</code>，而这里<code>packetAdded</code>之后还会调用selector的wakeup()方法，通知服务端这边有一个packet发过去了，并且在<code>finishPacket</code>之后，向ZooKeeper中的一个静态内部类<code>ZKWatchManager</code>内的hashmap添加了这个watcher</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">final</span> Map<span class="token operator">&lt;</span>String<span class="token punctuation">,</span> Set<span class="token operator">&lt;</span>Watcher<span class="token operator">>></span> dataWatches <span class="token operator">=</span>
-    <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token operator">&lt;</span>String<span class="token punctuation">,</span> Set<span class="token operator">&lt;</span>Watcher<span class="token operator">>></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">private</span> <span class="token keyword">final</span> Map<span class="token operator">&lt;</span>String<span class="token punctuation">,</span> Set<span class="token operator">&lt;</span>Watcher<span class="token operator">>></span> existWatches <span class="token operator">=</span>
-    <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token operator">&lt;</span>String<span class="token punctuation">,</span> Set<span class="token operator">&lt;</span>Watcher<span class="token operator">>></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">private</span> <span class="token keyword">final</span> Map<span class="token operator">&lt;</span>String<span class="token punctuation">,</span> Set<span class="token operator">&lt;</span>Watcher<span class="token operator">>></span> childWatches <span class="token operator">=</span>
-    <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token operator">&lt;</span>String<span class="token punctuation">,</span> Set<span class="token operator">&lt;</span>Watcher<span class="token operator">>></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="java">private final Map&lt;String, Set&lt;Watcher&gt;&gt; dataWatches =
+    new HashMap&lt;String, Set&lt;Watcher&gt;&gt;();
+private final Map&lt;String, Set&lt;Watcher&gt;&gt; existWatches =
+    new HashMap&lt;String, Set&lt;Watcher&gt;&gt;();
+private final Map&lt;String, Set&lt;Watcher&gt;&gt; childWatches =
+    new HashMap&lt;String, Set&lt;Watcher&gt;&gt;();</code></pre>
 <h2 id="服务端存储">2.2 服务端存储</h2><p>那么服务端干了什么呢？</p>
 <p>研究服务端源码可以发现，在服务端是leading状态时，通过调用LeaderZooKeeperServer的startup方法，里面再调用ZooKeeperServer中的startup方法，在调用setupRequestProcessors()进行请求处理:</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">setupRequestProcessors</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    RequestProcessor finalProcessor <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">FinalRequestProcessor</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    RequestProcessor syncProcessor <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SyncRequestProcessor</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span>
-            finalProcessor<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">(</span><span class="token punctuation">(</span>SyncRequestProcessor<span class="token punctuation">)</span>syncProcessor<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    firstProcessor <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">PrepRequestProcessor</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> syncProcessor<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">(</span><span class="token punctuation">(</span>PrepRequestProcessor<span class="token punctuation">)</span>firstProcessor<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">protected void setupRequestProcessors() {
+    RequestProcessor finalProcessor = new FinalRequestProcessor(this);
+    RequestProcessor syncProcessor = new SyncRequestProcessor(this,
+            finalProcessor);
+    ((SyncRequestProcessor)syncProcessor).start();
+    firstProcessor = new PrepRequestProcessor(this, syncProcessor);
+    ((PrepRequestProcessor)firstProcessor).start();
+}</code></pre>
 <p>这里面有一个PrepRequestProcessor和一个封装了FinalRequestProcessor的SyncRequestProcessor，通过阅读源码发现FinalRequestProcessor的processRequest中</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">processRequest</span><span class="token punctuation">(</span>Request request<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">//prehandling...</span>
-        <span class="token keyword">switch</span> <span class="token punctuation">(</span>request<span class="token punctuation">.</span>type<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">//case...</span>
-        <span class="token keyword">case</span> OpCode<span class="token punctuation">.</span>getData<span class="token operator">:</span> <span class="token punctuation">{</span>
-            lastOp <span class="token operator">=</span> <span class="token string">"GETD"</span><span class="token punctuation">;</span>
-            GetDataRequest getDataRequest <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">GetDataRequest</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            ByteBufferInputStream<span class="token punctuation">.</span><span class="token function">byteBuffer2Record</span><span class="token punctuation">(</span>request<span class="token punctuation">.</span>request<span class="token punctuation">,</span>
-                    getDataRequest<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            DataNode n <span class="token operator">=</span> zks<span class="token punctuation">.</span><span class="token function">getZKDatabase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getNode</span><span class="token punctuation">(</span>getDataRequest<span class="token punctuation">.</span><span class="token function">getPath</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>n <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">KeeperException<span class="token punctuation">.</span>NoNodeException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-            PrepRequestProcessor<span class="token punctuation">.</span><span class="token function">checkACL</span><span class="token punctuation">(</span>zks<span class="token punctuation">,</span> zks<span class="token punctuation">.</span><span class="token function">getZKDatabase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">aclForNode</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span><span class="token punctuation">,</span>
-                    ZooDefs<span class="token punctuation">.</span>Perms<span class="token punctuation">.</span>READ<span class="token punctuation">,</span>
-                    request<span class="token punctuation">.</span>authInfo<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            Stat stat <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Stat</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">//通过getWatch获取是否监视，如果监视传递一个ServerCnxn对象，继承自Watcher</span>
-            <span class="token keyword">byte</span> b<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> zks<span class="token punctuation">.</span><span class="token function">getZKDatabase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getData</span><span class="token punctuation">(</span>getDataRequest<span class="token punctuation">.</span><span class="token function">getPath</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> stat<span class="token punctuation">,</span>
-                    getDataRequest<span class="token punctuation">.</span><span class="token function">getWatch</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">?</span> cnxn <span class="token operator">:</span> null<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            rsp <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">GetDataResponse</span><span class="token punctuation">(</span>b<span class="token punctuation">,</span> stat<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">break</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token comment" spellcheck="true">//case...</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">getData</span><span class="token punctuation">(</span>String path<span class="token punctuation">,</span> Stat stat<span class="token punctuation">,</span> Watcher watcher<span class="token punctuation">)</span>
-<span class="token keyword">throws</span> KeeperException<span class="token punctuation">.</span>NoNodeException <span class="token punctuation">{</span>
-    <span class="token keyword">return</span> dataTree<span class="token punctuation">.</span><span class="token function">getData</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> stat<span class="token punctuation">,</span> watcher<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">getData</span><span class="token punctuation">(</span>String path<span class="token punctuation">,</span> Stat stat<span class="token punctuation">,</span> Watcher watcher<span class="token punctuation">)</span>
-        <span class="token keyword">throws</span> KeeperException<span class="token punctuation">.</span>NoNodeException <span class="token punctuation">{</span>
-    DataNode n <span class="token operator">=</span> nodes<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>n <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">KeeperException<span class="token punctuation">.</span>NoNodeException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>n<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        n<span class="token punctuation">.</span><span class="token function">copyStat</span><span class="token punctuation">(</span>stat<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>watcher <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">//添加监视，跟进</span>
-            dataWatches<span class="token punctuation">.</span><span class="token function">addWatch</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> watcher<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">return</span> n<span class="token punctuation">.</span>data<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">synchronized</span> <span class="token keyword">void</span> <span class="token function">addWatch</span><span class="token punctuation">(</span>String path<span class="token punctuation">,</span> Watcher watcher<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">//使用watchTable记录某路径所有的监视器</span>
-    HashSet<span class="token operator">&lt;</span>Watcher<span class="token operator">></span> list <span class="token operator">=</span> watchTable<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>list <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// don't waste memory if there are few watches on a node</span>
-        <span class="token comment" spellcheck="true">// rehash when the 4th entry is added, doubling size thereafter</span>
-        <span class="token comment" spellcheck="true">// seems like a good compromise</span>
-        list <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashSet</span><span class="token operator">&lt;</span>Watcher<span class="token operator">></span><span class="token punctuation">(</span><span class="token number">4</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        watchTable<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> list<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    list<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>watcher<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre><code class="java">public void processRequest(Request request) {
+        //prehandling...
+        switch (request.type) {
+        //case...
+        case OpCode.getData: {
+            lastOp = &quot;GETD&quot;;
+            GetDataRequest getDataRequest = new GetDataRequest();
+            ByteBufferInputStream.byteBuffer2Record(request.request,
+                    getDataRequest);
+            DataNode n = zks.getZKDatabase().getNode(getDataRequest.getPath());
+            if (n == null) {
+                throw new KeeperException.NoNodeException();
+            }
+            PrepRequestProcessor.checkACL(zks, zks.getZKDatabase().aclForNode(n),
+                    ZooDefs.Perms.READ,
+                    request.authInfo);
+            Stat stat = new Stat();
+            //通过getWatch获取是否监视，如果监视传递一个ServerCnxn对象，继承自Watcher
+            byte b[] = zks.getZKDatabase().getData(getDataRequest.getPath(), stat,
+                    getDataRequest.getWatch() ? cnxn : null);
+            rsp = new GetDataResponse(b, stat);
+            break;
+        }
+        //case...</code></pre>
+<pre><code class="java">public byte[] getData(String path, Stat stat, Watcher watcher)
+throws KeeperException.NoNodeException {
+    return dataTree.getData(path, stat, watcher);
+}</code></pre>
+<pre><code class="java">public byte[] getData(String path, Stat stat, Watcher watcher)
+        throws KeeperException.NoNodeException {
+    DataNode n = nodes.get(path);
+    if (n == null) {
+        throw new KeeperException.NoNodeException();
+    }
+    synchronized (n) {
+        n.copyStat(stat);
+        if (watcher != null) {
+            //添加监视，跟进
+            dataWatches.addWatch(path, watcher);
+        }
+        return n.data;
+    }
+}</code></pre>
+<pre><code class="java">synchronized void addWatch(String path, Watcher watcher) {
+    //使用watchTable记录某路径所有的监视器
+    HashSet&lt;Watcher&gt; list = watchTable.get(path);
+    if (list == null) {
+        // don&#39;t waste memory if there are few watches on a node
+        // rehash when the 4th entry is added, doubling size thereafter
+        // seems like a good compromise
+        list = new HashSet&lt;Watcher&gt;(4);
+        watchTable.put(path, list);
+    }
+    list.add(watcher);
 
-    HashSet<span class="token operator">&lt;</span>String<span class="token operator">></span> paths <span class="token operator">=</span> watch2Paths<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>watcher<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>paths <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// cnxns typically have many watches, so use default cap here</span>
-        paths <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashSet</span><span class="token operator">&lt;</span>String<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        watch2Paths<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>watcher<span class="token punctuation">,</span> paths<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    paths<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+    HashSet&lt;String&gt; paths = watch2Paths.get(watcher);
+    if (paths == null) {
+        // cnxns typically have many watches, so use default cap here
+        paths = new HashSet&lt;String&gt;();
+        watch2Paths.put(watcher, paths);
+    }
+    paths.add(path);
+}</code></pre>
 <p>这样就把监视器和path关联起来了，而服务端可以通过刚刚传入的ServerCnxn联系客户端。</p>
 <h2 id="服务端通知">2.3 服务端通知</h2><p>而如果数据发生变动无非就是处理了set命令，找到对应的函数：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> Stat <span class="token function">setData</span><span class="token punctuation">(</span>String path<span class="token punctuation">,</span> <span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> data<span class="token punctuation">,</span> <span class="token keyword">int</span> version<span class="token punctuation">,</span> <span class="token keyword">long</span> zxid<span class="token punctuation">,</span> <span class="token keyword">long</span> time<span class="token punctuation">)</span> <span class="token keyword">throws</span> NoNodeException <span class="token punctuation">{</span>
-    Stat s <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Stat</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    DataNode n <span class="token operator">=</span> <span class="token punctuation">(</span>DataNode<span class="token punctuation">)</span><span class="token keyword">this</span><span class="token punctuation">.</span>nodes<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>n <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">NoNodeException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
-        <span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> lastdata <span class="token operator">=</span> null<span class="token punctuation">;</span>
-        <span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> lastdata<span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">// 赋值node</span>
-        <span class="token keyword">synchronized</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            lastdata <span class="token operator">=</span> n<span class="token punctuation">.</span>data<span class="token punctuation">;</span>
-            n<span class="token punctuation">.</span>data <span class="token operator">=</span> data<span class="token punctuation">;</span>
-            n<span class="token punctuation">.</span>stat<span class="token punctuation">.</span><span class="token function">setMtime</span><span class="token punctuation">(</span>time<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            n<span class="token punctuation">.</span>stat<span class="token punctuation">.</span><span class="token function">setMzxid</span><span class="token punctuation">(</span>zxid<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            n<span class="token punctuation">.</span>stat<span class="token punctuation">.</span><span class="token function">setVersion</span><span class="token punctuation">(</span>version<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            n<span class="token punctuation">.</span><span class="token function">copyStat</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
+<pre><code class="java">public Stat setData(String path, byte[] data, int version, long zxid, long time) throws NoNodeException {
+    Stat s = new Stat();
+    DataNode n = (DataNode)this.nodes.get(path);
+    if (n == null) {
+        throw new NoNodeException();
+    } else {
+        byte[] lastdata = null;
+        byte[] lastdata;
+        // 赋值node
+        synchronized(n) {
+            lastdata = n.data;
+            n.data = data;
+            n.stat.setMtime(time);
+            n.stat.setMzxid(zxid);
+            n.stat.setVersion(version);
+            n.copyStat(s);
+        }
 
-        String lastPrefix<span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>lastPrefix <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getMaxPrefixWithQuota</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">updateBytes</span><span class="token punctuation">(</span>lastPrefix<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token keyword">long</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span>data <span class="token operator">==</span> null <span class="token operator">?</span> <span class="token number">0</span> <span class="token operator">:</span> data<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token punctuation">(</span>lastdata <span class="token operator">==</span> null <span class="token operator">?</span> <span class="token number">0</span> <span class="token operator">:</span> lastdata<span class="token punctuation">.</span>length<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
+        String lastPrefix;
+        if ((lastPrefix = this.getMaxPrefixWithQuota(path)) != null) {
+            this.updateBytes(lastPrefix, (long)((data == null ? 0 : data.length) - (lastdata == null ? 0 : lastdata.length)));
+        }
 
-        <span class="token comment" spellcheck="true">// 触发watcher</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>dataWatches<span class="token punctuation">.</span><span class="token function">triggerWatch</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> EventType<span class="token punctuation">.</span>NodeDataChanged<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> s<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> Set<span class="token operator">&lt;</span>Watcher<span class="token operator">></span> <span class="token function">triggerWatch</span><span class="token punctuation">(</span>String path<span class="token punctuation">,</span> EventType type<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">triggerWatch</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> type<span class="token punctuation">,</span> <span class="token punctuation">(</span>Set<span class="token punctuation">)</span>null<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+        // 触发watcher
+        this.dataWatches.triggerWatch(path, EventType.NodeDataChanged);
+        return s;
+    }
+}</code></pre>
+<pre><code class="java">public Set&lt;Watcher&gt; triggerWatch(String path, EventType type) {
+    return this.triggerWatch(path, type, (Set)null);
+}
 
-<span class="token keyword">public</span> Set<span class="token operator">&lt;</span>Watcher<span class="token operator">></span> <span class="token function">triggerWatch</span><span class="token punctuation">(</span>String path<span class="token punctuation">,</span> EventType type<span class="token punctuation">,</span> Set<span class="token operator">&lt;</span>Watcher<span class="token operator">></span> supress<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    WatchedEvent e <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">WatchedEvent</span><span class="token punctuation">(</span>type<span class="token punctuation">,</span> KeeperState<span class="token punctuation">.</span>SyncConnected<span class="token punctuation">,</span> path<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    HashSet watchers<span class="token punctuation">;</span>
+public Set&lt;Watcher&gt; triggerWatch(String path, EventType type, Set&lt;Watcher&gt; supress) {
+    WatchedEvent e = new WatchedEvent(type, KeeperState.SyncConnected, path);
+    HashSet watchers;
 
-    <span class="token keyword">synchronized</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">//移除watcher！</span>
-        watchers <span class="token operator">=</span> <span class="token punctuation">(</span>HashSet<span class="token punctuation">)</span><span class="token keyword">this</span><span class="token punctuation">.</span>watchTable<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>watchers <span class="token operator">==</span> null <span class="token operator">||</span> watchers<span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>LOG<span class="token punctuation">.</span><span class="token function">isTraceEnabled</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                ZooTrace<span class="token punctuation">.</span><span class="token function">logTraceMessage</span><span class="token punctuation">(</span>LOG<span class="token punctuation">,</span> 64L<span class="token punctuation">,</span> <span class="token string">"No watchers for "</span> <span class="token operator">+</span> path<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
+    synchronized(this) {
+        //移除watcher！
+        watchers = (HashSet)this.watchTable.remove(path);
+        if (watchers == null || watchers.isEmpty()) {
+            if (LOG.isTraceEnabled()) {
+                ZooTrace.logTraceMessage(LOG, 64L, &quot;No watchers for &quot; + path);
+            }
 
-            <span class="token keyword">return</span> null<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
+            return null;
+        }
 
-        Iterator i$ <span class="token operator">=</span> watchers<span class="token punctuation">.</span><span class="token function">iterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        Iterator i$ = watchers.iterator();
 
-        <span class="token keyword">while</span><span class="token punctuation">(</span>i$<span class="token punctuation">.</span><span class="token function">hasNext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">//移除watcher！</span>
-            Watcher w <span class="token operator">=</span> <span class="token punctuation">(</span>Watcher<span class="token punctuation">)</span>i$<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            HashSet<span class="token operator">&lt;</span>String<span class="token operator">></span> paths <span class="token operator">=</span> <span class="token punctuation">(</span>HashSet<span class="token punctuation">)</span><span class="token keyword">this</span><span class="token punctuation">.</span>watch2Paths<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>w<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>paths <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                paths<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+        while(i$.hasNext()) {
+            //移除watcher！
+            Watcher w = (Watcher)i$.next();
+            HashSet&lt;String&gt; paths = (HashSet)this.watch2Paths.get(w);
+            if (paths != null) {
+                paths.remove(path);
+            }
+        }
+    }
 
-    Iterator i$ <span class="token operator">=</span> watchers<span class="token punctuation">.</span><span class="token function">iterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    Iterator i$ = watchers.iterator();
 
-    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        Watcher w<span class="token punctuation">;</span>
-        <span class="token keyword">do</span> <span class="token punctuation">{</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>i$<span class="token punctuation">.</span><span class="token function">hasNext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">return</span> watchers<span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
+    while(true) {
+        Watcher w;
+        do {
+            if (!i$.hasNext()) {
+                return watchers;
+            }
 
-            w <span class="token operator">=</span> <span class="token punctuation">(</span>Watcher<span class="token punctuation">)</span>i$<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">while</span><span class="token punctuation">(</span>supress <span class="token operator">!=</span> null <span class="token operator">&amp;&amp;</span> supress<span class="token punctuation">.</span><span class="token function">contains</span><span class="token punctuation">(</span>w<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            w = (Watcher)i$.next();
+        } while(supress != null &amp;&amp; supress.contains(w));
 
-        <span class="token comment" spellcheck="true">// watcher调用，这里的e对象里只有通知状态（KeeperState）、事件类型（EventType）以及节点路径（Path）</span>
-        <span class="token comment" spellcheck="true">// 没有修改过后的新值也没有老的值</span>
-        w<span class="token punctuation">.</span><span class="token function">process</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">synchronized</span> <span class="token keyword">void</span> <span class="token function">process</span><span class="token punctuation">(</span>WatchedEvent event<span class="token punctuation">)</span> <span class="token punctuation">{</span>
- 　　<span class="token comment" spellcheck="true">// 请求头标记-1，表明是通知</span>
-    ReplyHeader h <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ReplyHeader</span><span class="token punctuation">(</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token operator">-</span>1L<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>LOG<span class="token punctuation">.</span><span class="token function">isTraceEnabled</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        ZooTrace<span class="token punctuation">.</span><span class="token function">logTraceMessage</span><span class="token punctuation">(</span>LOG<span class="token punctuation">,</span> 64L<span class="token punctuation">,</span> <span class="token string">"Deliver event "</span> <span class="token operator">+</span> event <span class="token operator">+</span> <span class="token string">" to 0x"</span> <span class="token operator">+</span> Long<span class="token punctuation">.</span><span class="token function">toHexString</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>sessionId<span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token string">" through "</span> <span class="token operator">+</span> <span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+        // watcher调用，这里的e对象里只有通知状态（KeeperState）、事件类型（EventType）以及节点路径（Path）
+        // 没有修改过后的新值也没有老的值
+        w.process(e);
+    }
+}</code></pre>
+<pre><code class="java">public synchronized void process(WatchedEvent event) {
+ 　　// 请求头标记-1，表明是通知
+    ReplyHeader h = new ReplyHeader(-1, -1L, 0);
+    if (LOG.isTraceEnabled()) {
+        ZooTrace.logTraceMessage(LOG, 64L, &quot;Deliver event &quot; + event + &quot; to 0x&quot; + Long.toHexString(this.sessionId) + &quot; through &quot; + this);
+    }
 
-    WatcherEvent e <span class="token operator">=</span> event<span class="token punctuation">.</span><span class="token function">getWrapper</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 发送通知给客户端</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">sendResponse</span><span class="token punctuation">(</span>h<span class="token punctuation">,</span> e<span class="token punctuation">,</span> <span class="token string">"notification"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+    WatcherEvent e = event.getWrapper();
+    // 发送通知给客户端
+    this.sendResponse(h, e, &quot;notification&quot;);
+}</code></pre>
 <p>在此处就把监听的事件类型和状态返回给了客户端，那么再返回客户端看看客户端的处理</p>
 <h2 id="客户端处理事件（依客户端而定）">2.4 客户端处理事件（依客户端而定）</h2><p>在客户端的SendThread中调用了doTransport-&gt;doIO-&gt;readResponse来接收服务器的响应</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">void</span> <span class="token function">readResponse</span><span class="token punctuation">(</span>ByteBuffer incomingBuffer<span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>
-    ByteBufferInputStream bbis <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ByteBufferInputStream</span><span class="token punctuation">(</span>
-            incomingBuffer<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    BinaryInputArchive bbia <span class="token operator">=</span> BinaryInputArchive<span class="token punctuation">.</span><span class="token function">getArchive</span><span class="token punctuation">(</span>bbis<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    ReplyHeader replyHdr <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ReplyHeader</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre><code class="java">void readResponse(ByteBuffer incomingBuffer) throws IOException {
+    ByteBufferInputStream bbis = new ByteBufferInputStream(
+            incomingBuffer);
+    BinaryInputArchive bbia = BinaryInputArchive.getArchive(bbis);
+    ReplyHeader replyHdr = new ReplyHeader();
 
-    replyHdr<span class="token punctuation">.</span><span class="token function">deserialize</span><span class="token punctuation">(</span>bbia<span class="token punctuation">,</span> <span class="token string">"header"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//if replyHdr.getXid() == ...</span>
+    replyHdr.deserialize(bbia, &quot;header&quot;);
+    //if replyHdr.getXid() == ...
 
-    <span class="token comment" spellcheck="true">// 如果是通知</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>replyHdr<span class="token punctuation">.</span><span class="token function">getXid</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// -1 means notification</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>LOG<span class="token punctuation">.</span><span class="token function">isDebugEnabled</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            LOG<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"Got notification sessionid:0x"</span>
-                <span class="token operator">+</span> Long<span class="token punctuation">.</span><span class="token function">toHexString</span><span class="token punctuation">(</span>sessionId<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token comment" spellcheck="true">//反序列化</span>
-        WatcherEvent event <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">WatcherEvent</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        event<span class="token punctuation">.</span><span class="token function">deserialize</span><span class="token punctuation">(</span>bbia<span class="token punctuation">,</span> <span class="token string">"response"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    // 如果是通知
+    if (replyHdr.getXid() == -1) {
+        // -1 means notification
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(&quot;Got notification sessionid:0x&quot;
+                + Long.toHexString(sessionId));
+        }
+        //反序列化
+        WatcherEvent event = new WatcherEvent();
+        event.deserialize(bbia, &quot;response&quot;);
 
-        <span class="token comment" spellcheck="true">// 从服务器地址转换为客户端地址</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>chrootPath <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            String serverPath <span class="token operator">=</span> event<span class="token punctuation">.</span><span class="token function">getPath</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">if</span><span class="token punctuation">(</span>serverPath<span class="token punctuation">.</span><span class="token function">compareTo</span><span class="token punctuation">(</span>chrootPath<span class="token punctuation">)</span><span class="token operator">==</span><span class="token number">0</span><span class="token punctuation">)</span>
-                event<span class="token punctuation">.</span><span class="token function">setPath</span><span class="token punctuation">(</span><span class="token string">"/"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>serverPath<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">></span> chrootPath<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-                event<span class="token punctuation">.</span><span class="token function">setPath</span><span class="token punctuation">(</span>serverPath<span class="token punctuation">.</span><span class="token function">substring</span><span class="token punctuation">(</span>chrootPath<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">else</span> <span class="token punctuation">{</span>
-                LOG<span class="token punctuation">.</span><span class="token function">warn</span><span class="token punctuation">(</span><span class="token string">"Got server path "</span> <span class="token operator">+</span> event<span class="token punctuation">.</span><span class="token function">getPath</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-                        <span class="token operator">+</span> <span class="token string">" which is too short for chroot path "</span>
-                        <span class="token operator">+</span> chrootPath<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
+        // 从服务器地址转换为客户端地址
+        if (chrootPath != null) {
+            String serverPath = event.getPath();
+            if(serverPath.compareTo(chrootPath)==0)
+                event.setPath(&quot;/&quot;);
+            else if (serverPath.length() &gt; chrootPath.length())
+                event.setPath(serverPath.substring(chrootPath.length()));
+            else {
+                LOG.warn(&quot;Got server path &quot; + event.getPath()
+                        + &quot; which is too short for chroot path &quot;
+                        + chrootPath);
+            }
+        }
 
-        WatchedEvent we <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">WatchedEvent</span><span class="token punctuation">(</span>event<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>LOG<span class="token punctuation">.</span><span class="token function">isDebugEnabled</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            LOG<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"Got "</span> <span class="token operator">+</span> we <span class="token operator">+</span> <span class="token string">" for sessionid 0x"</span>
-                    <span class="token operator">+</span> Long<span class="token punctuation">.</span><span class="token function">toHexString</span><span class="token punctuation">(</span>sessionId<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token comment" spellcheck="true">//交给eventThread线程处理</span>
-        eventThread<span class="token punctuation">.</span><span class="token function">queueEvent</span><span class="token punctuation">(</span> we <span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">//...</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">queueEvent</span><span class="token punctuation">(</span>WatchedEvent event<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token function">queueEvent</span><span class="token punctuation">(</span>event<span class="token punctuation">,</span> null<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+        WatchedEvent we = new WatchedEvent(event);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(&quot;Got &quot; + we + &quot; for sessionid 0x&quot;
+                    + Long.toHexString(sessionId));
+        }
+        //交给eventThread线程处理
+        eventThread.queueEvent( we );
+        return;
+    }
+    //...
+}</code></pre>
+<pre><code class="java">public void queueEvent(WatchedEvent event) {
+    queueEvent(event, null);
+}
 
-<span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">queueEvent</span><span class="token punctuation">(</span>WatchedEvent event<span class="token punctuation">,</span>
-        Set<span class="token operator">&lt;</span>Watcher<span class="token operator">></span> materializedWatchers<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>event<span class="token punctuation">.</span><span class="token function">getType</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> EventType<span class="token punctuation">.</span>None
-            <span class="token operator">&amp;&amp;</span> sessionState <span class="token operator">==</span> event<span class="token punctuation">.</span><span class="token function">getState</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">//获取状态</span>
-    sessionState <span class="token operator">=</span> event<span class="token punctuation">.</span><span class="token function">getState</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">final</span> Set<span class="token operator">&lt;</span>Watcher<span class="token operator">></span> watchers<span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>materializedWatchers <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// materialize the watchers based on the event</span>
-        <span class="token comment" spellcheck="true">// 因为只有路径、事件类型，要通过这些信息获取获取所有的watcher</span>
-        watchers <span class="token operator">=</span> watcher<span class="token punctuation">.</span><span class="token function">materialize</span><span class="token punctuation">(</span>event<span class="token punctuation">.</span><span class="token function">getState</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-                event<span class="token punctuation">.</span><span class="token function">getType</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> event<span class="token punctuation">.</span><span class="token function">getPath</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
-        watchers <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashSet</span><span class="token operator">&lt;</span>Watcher<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        watchers<span class="token punctuation">.</span><span class="token function">addAll</span><span class="token punctuation">(</span>materializedWatchers<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">//将Watchers和WatchedEvent关联起来</span>
-    WatcherSetEventPair pair <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">WatcherSetEventPair</span><span class="token punctuation">(</span>watchers<span class="token punctuation">,</span> event<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// queue the pair (watch set &amp; event) for later processing</span>
-    <span class="token comment" spellcheck="true">// 加入到一个阻塞队列中待处理</span>
-    waitingEvents<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>pair<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> Set<span class="token operator">&lt;</span>Watcher<span class="token operator">></span> <span class="token function">materialize</span><span class="token punctuation">(</span>Watcher<span class="token punctuation">.</span>Event<span class="token punctuation">.</span>KeeperState state<span class="token punctuation">,</span>
-                                    Watcher<span class="token punctuation">.</span>Event<span class="token punctuation">.</span>EventType type<span class="token punctuation">,</span>
-                                    String clientPath<span class="token punctuation">)</span>
-    <span class="token punctuation">{</span>
-        Set<span class="token operator">&lt;</span>Watcher<span class="token operator">></span> result <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashSet</span><span class="token operator">&lt;</span>Watcher<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//收集并移除事件</span>
-        <span class="token keyword">switch</span> <span class="token punctuation">(</span>type<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">case</span> None<span class="token operator">:</span>
-            result<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>defaultWatcher<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">boolean</span> clear <span class="token operator">=</span> disableAutoWatchReset <span class="token operator">&amp;&amp;</span> state <span class="token operator">!=</span> Watcher<span class="token punctuation">.</span>Event<span class="token punctuation">.</span>KeeperState<span class="token punctuation">.</span>SyncConnected<span class="token punctuation">;</span>
-            <span class="token keyword">synchronized</span><span class="token punctuation">(</span>dataWatches<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">for</span><span class="token punctuation">(</span>Set<span class="token operator">&lt;</span>Watcher<span class="token operator">></span> ws<span class="token operator">:</span> dataWatches<span class="token punctuation">.</span><span class="token function">values</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    result<span class="token punctuation">.</span><span class="token function">addAll</span><span class="token punctuation">(</span>ws<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-                <span class="token keyword">if</span> <span class="token punctuation">(</span>clear<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    dataWatches<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
+private void queueEvent(WatchedEvent event,
+        Set&lt;Watcher&gt; materializedWatchers) {
+    if (event.getType() == EventType.None
+            &amp;&amp; sessionState == event.getState()) {
+        return;
+    }
+    //获取状态
+    sessionState = event.getState();
+    final Set&lt;Watcher&gt; watchers;
+    if (materializedWatchers == null) {
+        // materialize the watchers based on the event
+        // 因为只有路径、事件类型，要通过这些信息获取获取所有的watcher
+        watchers = watcher.materialize(event.getState(),
+                event.getType(), event.getPath());
+    } else {
+        watchers = new HashSet&lt;Watcher&gt;();
+        watchers.addAll(materializedWatchers);
+    }
+    //将Watchers和WatchedEvent关联起来
+    WatcherSetEventPair pair = new WatcherSetEventPair(watchers, event);
+    // queue the pair (watch set &amp; event) for later processing
+    // 加入到一个阻塞队列中待处理
+    waitingEvents.add(pair);
+}</code></pre>
+<pre><code class="java">public Set&lt;Watcher&gt; materialize(Watcher.Event.KeeperState state,
+                                    Watcher.Event.EventType type,
+                                    String clientPath)
+    {
+        Set&lt;Watcher&gt; result = new HashSet&lt;Watcher&gt;();
+        //收集并移除事件
+        switch (type) {
+        case None:
+            result.add(defaultWatcher);
+            boolean clear = disableAutoWatchReset &amp;&amp; state != Watcher.Event.KeeperState.SyncConnected;
+            synchronized(dataWatches) {
+                for(Set&lt;Watcher&gt; ws: dataWatches.values()) {
+                    result.addAll(ws);
+                }
+                if (clear) {
+                    dataWatches.clear();
+                }
+            }
 
-            <span class="token keyword">synchronized</span><span class="token punctuation">(</span>existWatches<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">for</span><span class="token punctuation">(</span>Set<span class="token operator">&lt;</span>Watcher<span class="token operator">></span> ws<span class="token operator">:</span> existWatches<span class="token punctuation">.</span><span class="token function">values</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    result<span class="token punctuation">.</span><span class="token function">addAll</span><span class="token punctuation">(</span>ws<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-                <span class="token keyword">if</span> <span class="token punctuation">(</span>clear<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    existWatches<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
+            synchronized(existWatches) {
+                for(Set&lt;Watcher&gt; ws: existWatches.values()) {
+                    result.addAll(ws);
+                }
+                if (clear) {
+                    existWatches.clear();
+                }
+            }
 
-            <span class="token keyword">synchronized</span><span class="token punctuation">(</span>childWatches<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">for</span><span class="token punctuation">(</span>Set<span class="token operator">&lt;</span>Watcher<span class="token operator">></span> ws<span class="token operator">:</span> childWatches<span class="token punctuation">.</span><span class="token function">values</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    result<span class="token punctuation">.</span><span class="token function">addAll</span><span class="token punctuation">(</span>ws<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-                <span class="token keyword">if</span> <span class="token punctuation">(</span>clear<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    childWatches<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
+            synchronized(childWatches) {
+                for(Set&lt;Watcher&gt; ws: childWatches.values()) {
+                    result.addAll(ws);
+                }
+                if (clear) {
+                    childWatches.clear();
+                }
+            }
 
-            <span class="token keyword">return</span> result<span class="token punctuation">;</span>
-        <span class="token keyword">case</span> NodeDataChanged<span class="token operator">:</span>
-        <span class="token keyword">case</span> NodeCreated<span class="token operator">:</span>
-            <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>dataWatches<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token function">addTo</span><span class="token punctuation">(</span>dataWatches<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>clientPath<span class="token punctuation">)</span><span class="token punctuation">,</span> result<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-            <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>existWatches<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token function">addTo</span><span class="token punctuation">(</span>existWatches<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>clientPath<span class="token punctuation">)</span><span class="token punctuation">,</span> result<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-            <span class="token keyword">break</span><span class="token punctuation">;</span>
-        <span class="token keyword">case</span> NodeChildrenChanged<span class="token operator">:</span>
-            <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>childWatches<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token function">addTo</span><span class="token punctuation">(</span>childWatches<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>clientPath<span class="token punctuation">)</span><span class="token punctuation">,</span> result<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-            <span class="token keyword">break</span><span class="token punctuation">;</span>
-        <span class="token keyword">case</span> NodeDeleted<span class="token operator">:</span>
-            <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>dataWatches<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token function">addTo</span><span class="token punctuation">(</span>dataWatches<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>clientPath<span class="token punctuation">)</span><span class="token punctuation">,</span> result<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-            <span class="token comment" spellcheck="true">// XXX This shouldn't be needed, but just in case</span>
-            <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>existWatches<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                Set<span class="token operator">&lt;</span>Watcher<span class="token operator">></span> list <span class="token operator">=</span> existWatches<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>clientPath<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token keyword">if</span> <span class="token punctuation">(</span>list <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    <span class="token function">addTo</span><span class="token punctuation">(</span>list<span class="token punctuation">,</span> result<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                    LOG<span class="token punctuation">.</span><span class="token function">warn</span><span class="token punctuation">(</span><span class="token string">"We are triggering an exists watch for delete! Shouldn't happen!"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-            <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>childWatches<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token function">addTo</span><span class="token punctuation">(</span>childWatches<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>clientPath<span class="token punctuation">)</span><span class="token punctuation">,</span> result<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-            <span class="token keyword">break</span><span class="token punctuation">;</span>
-        <span class="token keyword">default</span><span class="token operator">:</span>
-            String msg <span class="token operator">=</span> <span class="token string">"Unhandled watch event type "</span> <span class="token operator">+</span> type
-                <span class="token operator">+</span> <span class="token string">" with state "</span> <span class="token operator">+</span> state <span class="token operator">+</span> <span class="token string">" on path "</span> <span class="token operator">+</span> clientPath<span class="token punctuation">;</span>
-            LOG<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span>msg<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">RuntimeException</span><span class="token punctuation">(</span>msg<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
+            return result;
+        case NodeDataChanged:
+        case NodeCreated:
+            synchronized (dataWatches) {
+                addTo(dataWatches.remove(clientPath), result);
+            }
+            synchronized (existWatches) {
+                addTo(existWatches.remove(clientPath), result);
+            }
+            break;
+        case NodeChildrenChanged:
+            synchronized (childWatches) {
+                addTo(childWatches.remove(clientPath), result);
+            }
+            break;
+        case NodeDeleted:
+            synchronized (dataWatches) {
+                addTo(dataWatches.remove(clientPath), result);
+            }
+            // XXX This shouldn&#39;t be needed, but just in case
+            synchronized (existWatches) {
+                Set&lt;Watcher&gt; list = existWatches.remove(clientPath);
+                if (list != null) {
+                    addTo(list, result);
+                    LOG.warn(&quot;We are triggering an exists watch for delete! Shouldn&#39;t happen!&quot;);
+                }
+            }
+            synchronized (childWatches) {
+                addTo(childWatches.remove(clientPath), result);
+            }
+            break;
+        default:
+            String msg = &quot;Unhandled watch event type &quot; + type
+                + &quot; with state &quot; + state + &quot; on path &quot; + clientPath;
+            LOG.error(msg);
+            throw new RuntimeException(msg);
+        }
 
-        <span class="token keyword">return</span> result<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+        return result;
+    }
+}</code></pre>
 <p>这里可以看到客户端根据事件类型和路径从<code>ZKWatchManager</code>中取出了对应的watcher并移除了它，说明客户端的watcher也是一次性的，</p>
 <p>在ClientCnxn的EventThread中，不断地从waitingEvents中取事件：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        isRunning <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
-        <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">//取事件</span>
-            Object event <span class="token operator">=</span> waitingEvents<span class="token punctuation">.</span><span class="token function">take</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>event <span class="token operator">==</span> eventOfDeath<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                wasKilled <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
-                <span class="token comment" spellcheck="true">//处理事件，跟进</span>
-                <span class="token function">processEvent</span><span class="token punctuation">(</span>event<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>wasKilled<span class="token punctuation">)</span>
-            <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>waitingEvents<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">if</span> <span class="token punctuation">(</span>waitingEvents<span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    isRunning <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-                    <span class="token keyword">break</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        LOG<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span><span class="token string">"Event thread exiting due to interruption"</span><span class="token punctuation">,</span> e<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+<pre><code class="java">public void run() {
+    try {
+        isRunning = true;
+        while (true) {
+            //取事件
+            Object event = waitingEvents.take();
+            if (event == eventOfDeath) {
+                wasKilled = true;
+            } else {
+                //处理事件，跟进
+                processEvent(event);
+            }
+            if (wasKilled)
+            synchronized (waitingEvents) {
+                if (waitingEvents.isEmpty()) {
+                    isRunning = false;
+                    break;
+                }
+            }
+        }
+    } catch (InterruptedException e) {
+        LOG.error(&quot;Event thread exiting due to interruption&quot;, e);
+    }
 
-    LOG<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"EventThread shut down for session: 0x{}"</span><span class="token punctuation">,</span>
-                Long<span class="token punctuation">.</span><span class="token function">toHexString</span><span class="token punctuation">(</span><span class="token function">getSessionId</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">processEvent</span><span class="token punctuation">(</span>Object event<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// 如果是WatcherSetEventPair</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>event <span class="token keyword">instanceof</span> <span class="token class-name">WatcherSetEventPair</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// each watcher will process the event</span>
-            WatcherSetEventPair pair <span class="token operator">=</span> <span class="token punctuation">(</span>WatcherSetEventPair<span class="token punctuation">)</span> event<span class="token punctuation">;</span>
-            <span class="token keyword">for</span> <span class="token punctuation">(</span>Watcher watcher <span class="token operator">:</span> pair<span class="token punctuation">.</span>watchers<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                    <span class="token comment" spellcheck="true">//使用watcher的process</span>
-                    watcher<span class="token punctuation">.</span><span class="token function">process</span><span class="token punctuation">(</span>pair<span class="token punctuation">.</span>event<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Throwable</span> t<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    LOG<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span><span class="token string">"Error while calling watcher "</span><span class="token punctuation">,</span> t<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span> <span class="token comment" spellcheck="true">// else if...</span>
-    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Throwable</span> t<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        LOG<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span><span class="token string">"Caught unexpected throwable"</span><span class="token punctuation">,</span> t<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    LOG.info(&quot;EventThread shut down for session: 0x{}&quot;,
+                Long.toHexString(getSessionId()));
+}</code></pre>
+<pre><code class="java">private void processEvent(Object event) {
+    try {
+        // 如果是WatcherSetEventPair
+        if (event instanceof WatcherSetEventPair) {
+            // each watcher will process the event
+            WatcherSetEventPair pair = (WatcherSetEventPair) event;
+            for (Watcher watcher : pair.watchers) {
+                try {
+                    //使用watcher的process
+                    watcher.process(pair.event);
+                } catch (Throwable t) {
+                    LOG.error(&quot;Error while calling watcher &quot;, t);
+                }
+            }
+        } // else if...
+    } catch (Throwable t) {
+        LOG.error(&quot;Caught unexpected throwable&quot;, t);
+    }
+}</code></pre>
 <p>而watcher.process在zkCli中的实现就是:</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">class</span> <span class="token class-name">MyWatcher</span> <span class="token keyword">implements</span> <span class="token class-name">Watcher</span> <span class="token punctuation">{</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">process</span><span class="token punctuation">(</span>WatchedEvent event<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">getPrintWatches</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            ZooKeeperMain<span class="token punctuation">.</span><span class="token function">printMessage</span><span class="token punctuation">(</span><span class="token string">"WATCHER::"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            ZooKeeperMain<span class="token punctuation">.</span><span class="token function">printMessage</span><span class="token punctuation">(</span>event<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">private class MyWatcher implements Watcher {
+    public void process(WatchedEvent event) {
+        if (getPrintWatches()) {
+            ZooKeeperMain.printMessage(&quot;WATCHER::&quot;);
+            ZooKeeperMain.printMessage(event.toString());
+        }
+    }
+}</code></pre>
 <p>toString:</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> String <span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">return</span> <span class="token string">"WatchedEvent state:"</span> <span class="token operator">+</span> keeperState
-        <span class="token operator">+</span> <span class="token string">" type:"</span> <span class="token operator">+</span> eventType <span class="token operator">+</span> <span class="token string">" path:"</span> <span class="token operator">+</span> path<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public String toString() {
+    return &quot;WatchedEvent state:&quot; + keeperState
+        + &quot; type:&quot; + eventType + &quot; path:&quot; + path;
+}</code></pre>
 <p>完全符合客户端的监听输出，就这样一个监听过程就完成了。而对于java中zk api的使用，添加的watcher有我们提供的回调函数，就会自动调用了。</p>
 <p>源码看完了，来点其他优秀博主的总结压压惊：</p>
 <p><a href="https://www.cnblogs.com/guoyu1/p/12269344.html" target="_blank" rel="noopener">Zookeeper Watcher 机制详解 - 大数据up - 博客园</a></p>
@@ -1679,7 +1679,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1759,6 +1759,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

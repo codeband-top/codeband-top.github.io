@@ -26,10 +26,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -403,7 +403,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    3.4k
+                    3.5k
                 </div>
                 
 
@@ -425,10 +425,10 @@
 <p>在单库单表系统中可以通过自增ID来标识每一条记录，但是随着规模变大分库分表很常见，那么自增ID有仅能针对单一表生成ID，所以在这种情况下无法依靠这个来标识唯一ID。UUID就是一种全局唯一标识符。但是长度过长不易识别。</p>
 <p>在 Zookeeper中通过创建顺序节点就可以实现，所有客户端都会根据自己的任务类型来创建一个顺<br>序节点，例如 job-00000001。</p>
 <p><img src="https://api.codetool.top/img/15845162034318.jpg" alt></p>
-<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">//CreateMode.PERSISTENT_SEQUENTIAL可以在第一个参数path后面附加一个八位的全局递增的数字</span>
-String path <span class="token operator">=</span> zooKeeper<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span><span class="token string">"/type1/iob"</span><span class="token punctuation">,</span> <span class="token string">"app2Value"</span><span class="token punctuation">.</span><span class="token function">getBytes</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> ZooDefs<span class="token punctuation">.</span>Ids<span class="token punctuation">.</span>OPEN_ACL_UNSAFE<span class="token punctuation">,</span> CreateMode<span class="token punctuation">.</span>PERSISTENT_SEQUENTIAL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre><code class="java">//CreateMode.PERSISTENT_SEQUENTIAL可以在第一个参数path后面附加一个八位的全局递增的数字
+String path = zooKeeper.create(&quot;/type1/iob&quot;, &quot;app2Value&quot;.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT_SEQUENTIAL);
 
-System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+System.out.println(path);</code></pre>
 <h1 id="DNS服务">4 DNS服务</h1><h2 id="域名配置">4.1 域名配置</h2><p>在分布式系统应用中，每一个应用都需要分配一个域名，日常开发中，往往使用本地HOST绑定域名解析，开发阶段可以随时修改域名和IP的映射，大大提高开发的调试效率。如果应用的机器规模达到一定程度后，需要频繁更新域名时，需要在规模的集群中变更，无法保证实时性。所有我们在zk上创建一个节点来进行域名配置。</p>
 <h2 id="域名解析">4.2 域名解析</h2><p>应用解析时，首先从zk域名节点中获取域名映射的IP和端口。</p>
 <h2 id="域名变更">4.3 域名变更</h2><p>每个应用都会在在对应的域名节点注册一个数据变更的watcher监听，一旦监听的域名节点数据变更， zk会向所有订阅的客户端发送域名变更通知。</p>
@@ -440,15 +440,15 @@ System<span class="token punctuation">.</span>out<span class="token punctuation"
 <h3 id="insert自动加锁">6.1.1 insert自动加锁</h3><p>思想是，当我们要锁住某个方法或资源时，我们就在该表中增加一条记录，想要释放锁的时候就删除这条记录。</p>
 <p>对于UPDATE、DELETE和INSERT语句，InnoDB会自动给涉及的数据集加排他锁</p>
 <p>创建数据库：</p>
-<pre class=" language-sql"><code class="language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">TABLE</span> <span class="token punctuation">`</span>methodLock<span class="token punctuation">`</span> <span class="token punctuation">(</span>
-    <span class="token punctuation">`</span>id<span class="token punctuation">`</span> <span class="token keyword">int</span><span class="token punctuation">(</span><span class="token number">11</span><span class="token punctuation">)</span> <span class="token operator">NOT</span> <span class="token boolean">NULL</span> <span class="token keyword">AUTO_INCREMENT</span> <span class="token keyword">COMMENT</span> <span class="token string">'主键'</span><span class="token punctuation">,</span>
-    <span class="token punctuation">`</span>method_name<span class="token punctuation">`</span> <span class="token keyword">varchar</span><span class="token punctuation">(</span><span class="token number">64</span><span class="token punctuation">)</span> <span class="token keyword">UNIQUE</span> <span class="token operator">NOT</span> <span class="token boolean">NULL</span> <span class="token keyword">DEFAULT</span> <span class="token string">''</span> <span class="token keyword">COMMENT</span> <span class="token string">'锁定的方法名'</span><span class="token punctuation">,</span>
-    <span class="token punctuation">`</span><span class="token keyword">desc</span><span class="token punctuation">`</span> <span class="token keyword">varchar</span><span class="token punctuation">(</span><span class="token number">1024</span><span class="token punctuation">)</span> <span class="token operator">NOT</span> <span class="token boolean">NULL</span> <span class="token keyword">DEFAULT</span> <span class="token string">'备注信息'</span><span class="token punctuation">,</span>
-    <span class="token punctuation">`</span>update_time<span class="token punctuation">`</span> <span class="token keyword">timestamp</span> <span class="token operator">NOT</span> <span class="token boolean">NULL</span> <span class="token keyword">DEFAULT</span> <span class="token keyword">CURRENT_TIMESTAMP</span> <span class="token keyword">ON</span> <span class="token keyword">UPDATE</span>
-    <span class="token keyword">CURRENT_TIMESTAMP</span> <span class="token keyword">COMMENT</span> <span class="token string">'保存数据时间，自动生成'</span><span class="token punctuation">,</span>
-    <span class="token keyword">PRIMARY</span> <span class="token keyword">KEY</span> <span class="token punctuation">(</span><span class="token punctuation">`</span>id<span class="token punctuation">`</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-    <span class="token keyword">UNIQUE</span> <span class="token keyword">KEY</span> <span class="token punctuation">`</span>uidx_method_name<span class="token punctuation">`</span> <span class="token punctuation">(</span><span class="token punctuation">`</span>method_name <span class="token punctuation">`</span><span class="token punctuation">)</span>
-<span class="token punctuation">)</span> <span class="token keyword">DEFAULT</span> <span class="token keyword">CHARSET</span><span class="token operator">=</span>utf8 <span class="token keyword">COMMENT</span><span class="token operator">=</span><span class="token string">'锁定中的方法'</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="sql">CREATE TABLE `methodLock` (
+    `id` int(11) NOT NULL AUTO_INCREMENT COMMENT &#39;主键&#39;,
+    `method_name` varchar(64) UNIQUE NOT NULL DEFAULT &#39;&#39; COMMENT &#39;锁定的方法名&#39;,
+    `desc` varchar(1024) NOT NULL DEFAULT &#39;备注信息&#39;,
+    `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE
+    CURRENT_TIMESTAMP COMMENT &#39;保存数据时间，自动生成&#39;,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uidx_method_name` (`method_name `)
+) DEFAULT CHARSET=utf8 COMMENT=&#39;锁定中的方法&#39;;</code></pre>
 <p>注意<code>method_name</code>必须是唯一索引，否则锁的是全表而不是记录本身。</p>
 <p>获得锁:</p>
 <p><code>insert into methodLock(method_name,desc) values (&#39;method_name&#39;,&#39;desc&#39;);</code></p>
@@ -470,12 +470,12 @@ System<span class="token punctuation">.</span>out<span class="token punctuation"
 <p>这里还可能存在另外一个问题，虽然我们对 <code>method_name</code> 使用了唯一索引，并且显示使用for update 来使用行级锁。但是，MySql 会对查询进行优化，即便在条件中使用了索引字段，但是否使用索引来检索数据是由 MySQL 通过判断不同执行计划的代价来决定的，<strong>如果MySQL 认为全表扫效率更高，比如对一些很小的表，它就不会使用索引，这种情况下InnoDB 将使用表锁，而不是行锁。</strong></p>
 <h2 id="数据库乐观锁">6.2 数据库乐观锁</h2><p>数据库的乐观锁认为大多数时候操作都不会冲突，它给数据添加一个版本号，读取出数据时，将此版本号一同读出，之后更新时，对此版本号加1。在更新过程中，会对版本号进行比较，如果是一致的，没有发生改变，则会成功执行本次操作；如果版本号不一致，则会更新失败。</p>
 <p>获得锁：</p>
-<pre class=" language-sql"><code class="language-sql"><span class="token keyword">select</span> state<span class="token punctuation">,</span>version <span class="token keyword">from</span> methodLock <span class="token keyword">where</span> method_name <span class="token operator">=</span> <span class="token string">'currentMethod'</span><span class="token punctuation">;</span>
+<pre><code class="sql">select state,version from methodLock where method_name = &#39;currentMethod&#39;;
 
-<span class="token keyword">update</span> methodLock <span class="token keyword">set</span> state <span class="token operator">=</span> <span class="token string">'locked'</span><span class="token punctuation">,</span>version <span class="token operator">=</span> version <span class="token operator">+</span> <span class="token number">1</span> <span class="token keyword">where</span>
-method_name <span class="token operator">=</span> <span class="token string">'currentMethod'</span> <span class="token operator">and</span> state <span class="token operator">=</span> <span class="token string">'unlock'</span> <span class="token operator">and</span> version <span class="token operator">=</span> <span class="token string">'version'</span><span class="token punctuation">;</span></code></pre>
+update methodLock set state = &#39;locked&#39;,version = version + 1 where
+method_name = &#39;currentMethod&#39; and state = &#39;unlock&#39; and version = &#39;version&#39;;</code></pre>
 <p>释放锁：</p>
-<pre class=" language-sql"><code class="language-sql"><span class="token keyword">update</span> methodLock <span class="token keyword">set</span> state <span class="token operator">=</span> <span class="token string">'unlock'</span> <span class="token keyword">where</span> method_name <span class="token operator">=</span> <span class="token string">'currentMethod'</span> <span class="token operator">and</span> state <span class="token operator">=</span> <span class="token string">'locked'</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="sql">update methodLock set state = &#39;unlock&#39; where method_name = &#39;currentMethod&#39; and state = &#39;locked&#39;;</code></pre>
 <p>乐观锁只能解决持久化是 DB 数据的一次更新问题。假如你的数据不是在 DB，或者一个过程有三个数据的更新操作，线程 A 更新了数据 1 和数据 2，线程 B 更新了数据 3，乐观锁就不能起作用。</p>
 <h2 id="Redis">6.3 Redis</h2><p>redis分布式锁的实现和数据库的思想差不多，它是基于<code>setnx</code>（set if not exists）实现的，设置成功，返回1；设置失败，返回0，释放锁的操作通过del指令来完成。</p>
 <p>如果设置锁后在执行中间过程时，程序抛出异常，导致del指令没有调用，锁永远无法释放，这样就会陷入死锁。所以我们拿到锁之后会给锁加上一个过期时间，这样即使中间出现异常，过期时间到后会自动释放锁。</p>
@@ -1113,7 +1113,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1193,6 +1193,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

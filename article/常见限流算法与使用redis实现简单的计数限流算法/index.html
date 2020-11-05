@@ -29,10 +29,10 @@ Spring Cloud Gateway中的令牌桶限流浅析 | KL博客
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -444,57 +444,57 @@ Spring Cloud Gateway中的令牌桶限流浅析 | KL博客
 <p>如，容积为100的桶，令牌产生速率为50/s，那么就代表当桶中令牌已满的时候，最大能够承载100的流量，后面如果流量一直居高不下，也会以每秒50个流量的速度恒速处理请求。令牌桶的这种特性有效的处理了洪峰流量也能做到不被洪峰压垮，是目前限流比较常见的实现方法。比较著名的实现有谷歌<code>guava</code>中的<code>RateLimiter</code>。</p>
 <h1 id="使用Redis实现简单的计数算法">3 使用Redis实现简单的计数算法</h1><p>主要思想是使用Sorted Set的score维护一个滑动时间窗口，每一个请求到来的时候将一个时间窗口之前的请求全部丢弃，看set里面元素的个数。</p>
 <p>代码来源：《Redis深度历险：核心原理与应用实践》，我做了一点修改。</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">import</span> redis<span class="token punctuation">.</span>clients<span class="token punctuation">.</span>jedis<span class="token punctuation">.</span>Jedis<span class="token punctuation">;</span>
-<span class="token keyword">import</span> redis<span class="token punctuation">.</span>clients<span class="token punctuation">.</span>jedis<span class="token punctuation">.</span>Pipeline<span class="token punctuation">;</span>
-<span class="token keyword">import</span> redis<span class="token punctuation">.</span>clients<span class="token punctuation">.</span>jedis<span class="token punctuation">.</span>Response<span class="token punctuation">;</span>
+<pre><code class="java">import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Response;
 
-<span class="token keyword">import</span> java<span class="token punctuation">.</span>util<span class="token punctuation">.</span>UUID<span class="token punctuation">;</span>
+import java.util.UUID;
 
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">SimpleRateLimiter</span> <span class="token punctuation">{</span>
-    <span class="token keyword">private</span> Jedis jedis<span class="token punctuation">;</span>
+public class SimpleRateLimiter {
+    private Jedis jedis;
 
-    <span class="token keyword">public</span> <span class="token function">SimpleRateLimiter</span><span class="token punctuation">(</span>Jedis jedis<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>jedis <span class="token operator">=</span> jedis<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    public SimpleRateLimiter(Jedis jedis) {
+        this.jedis = jedis;
+    }
 
-    <span class="token comment" spellcheck="true">/**
+    /**
      * @param userId 标识用户
      * @param actionKey 标识处理请求的方法（或服务）
      * @param period 时间窗口的大小，单位为秒
      * @param maxCount 时间窗口内允许的最大请求
      * @return 请求是否放行
-     */</span>
-    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">isActionAllowed</span><span class="token punctuation">(</span>String userId<span class="token punctuation">,</span>String actionKey<span class="token punctuation">,</span><span class="token keyword">int</span> period<span class="token punctuation">,</span><span class="token keyword">int</span> maxCount<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        String key <span class="token operator">=</span> String<span class="token punctuation">.</span><span class="token function">format</span><span class="token punctuation">(</span><span class="token string">"hist:%s:%s"</span><span class="token punctuation">,</span> userId<span class="token punctuation">,</span>actionKey<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//当前毫秒时间戳，作为插入元素的score</span>
-        <span class="token keyword">long</span> nowTs <span class="token operator">=</span> System<span class="token punctuation">.</span><span class="token function">currentTimeMillis</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//使用Pipeline管道化进行Redis请求</span>
-        Pipeline pipe <span class="token operator">=</span> jedis<span class="token punctuation">.</span><span class="token function">pipelined</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        pipe<span class="token punctuation">.</span><span class="token function">multi</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//插入元素，score为当前时间戳，value并无具体含义，但注意每次请求必须唯一</span>
-        pipe<span class="token punctuation">.</span><span class="token function">zadd</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> nowTs<span class="token punctuation">,</span> UUID<span class="token punctuation">.</span><span class="token function">randomUUID</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//移除距当前时间一个时间窗口之前的所有元素</span>
-        pipe<span class="token punctuation">.</span><span class="token function">zremrangeByScore</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> nowTs<span class="token operator">-</span>period<span class="token operator">*</span><span class="token number">1000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//获取集合中元素数量</span>
-        Response<span class="token operator">&lt;</span>Long<span class="token operator">></span> count <span class="token operator">=</span> pipe<span class="token punctuation">.</span><span class="token function">zcard</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//若时间窗口的有效期没有续上，则会从内存中移除，节省存储空间</span>
-        pipe<span class="token punctuation">.</span><span class="token function">expire</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> period<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        pipe<span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        pipe<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//获取集合中元素数量是否小于等于允许的最大请求数</span>
-        <span class="token keyword">return</span> count<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">&lt;=</span>maxCount<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+     */
+    public boolean isActionAllowed(String userId,String actionKey,int period,int maxCount){
+        String key = String.format(&quot;hist:%s:%s&quot;, userId,actionKey);
+        //当前毫秒时间戳，作为插入元素的score
+        long nowTs = System.currentTimeMillis();
+        //使用Pipeline管道化进行Redis请求
+        Pipeline pipe = jedis.pipelined();
+        pipe.multi();
+        //插入元素，score为当前时间戳，value并无具体含义，但注意每次请求必须唯一
+        pipe.zadd(key, nowTs, UUID.randomUUID().toString());
+        //移除距当前时间一个时间窗口之前的所有元素
+        pipe.zremrangeByScore(key, 0, nowTs-period*1000);
+        //获取集合中元素数量
+        Response&lt;Long&gt; count = pipe.zcard(key);
+        //若时间窗口的有效期没有续上，则会从内存中移除，节省存储空间
+        pipe.expire(key, period+1);
+        pipe.exec();
+        pipe.close();
+        //获取集合中元素数量是否小于等于允许的最大请求数
+        return count.get()&lt;=maxCount;
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        Jedis jedis <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Jedis</span><span class="token punctuation">(</span><span class="token string">"192.168.176.128"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        SimpleRateLimiter limiter <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SimpleRateLimiter</span><span class="token punctuation">(</span>jedis<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//短时间处理20个请求</span>
-        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span><span class="token number">20</span><span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-            <span class="token keyword">boolean</span> isAllowed <span class="token operator">=</span> limiter<span class="token punctuation">.</span><span class="token function">isActionAllowed</span><span class="token punctuation">(</span><span class="token string">"123"</span><span class="token punctuation">,</span><span class="token string">"reply"</span> <span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"第"</span><span class="token operator">+</span><span class="token punctuation">(</span>i<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token operator">+</span><span class="token string">"个请求："</span><span class="token operator">+</span>isAllowed<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    public static void main(String[] args) {
+        Jedis jedis = new Jedis(&quot;192.168.176.128&quot;);
+        SimpleRateLimiter limiter = new SimpleRateLimiter(jedis);
+        //短时间处理20个请求
+        for(int i = 0;i&lt;20;i++){
+            boolean isAllowed = limiter.isActionAllowed(&quot;123&quot;,&quot;reply&quot; , 1, 10);
+            System.out.println(&quot;第&quot;+(i+1)+&quot;个请求：&quot;+isAllowed);
+        }
+    }
+}</code></pre>
 <p>注意这是一种滑动时间窗口，和我们一开始介绍的时间窗口算法又有一些不同，应当说是计数算法的改进。它的时间窗口不是固定在两个时间点之间的，而是每次请求的时间点向前推了一个时间窗口，避免了临界值问题。</p>
 <p>查看输出：</p>
 <pre><code>第1个请求：true
@@ -1127,7 +1127,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1207,6 +1207,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

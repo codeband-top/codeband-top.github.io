@@ -25,10 +25,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -424,223 +424,223 @@
 <p><a href="http://mp.weixin.qq.com/s?__biz=MzIxMjE5MTE1Nw==&mid=2653191272&idx=1&sn=9bbcd172b611b455ebfc4b7fb9a6a55e&chksm=8c990eb2bbee87a486c55572a36c577a48df395e13e74314846d221cbcfd364d44c280250234&scene=21#wechat_redirect" target="_blank" rel="noopener">漫画：Bitmap算法 整合版</a></p>
 <p>主要的思想就是把数据对应到bit位中，从而可以实现去重、查找、排序等功能。</p>
 <p>我这篇文章就不复制粘贴了 <del>（全是图片粘贴个锤子）</del>，主要看看java中BitMap的实现-BitSet</p>
-<h1 id="BitSet实现">2 BitSet实现</h1><h2 id="重要内部字段">2.1 重要内部字段</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">//用于存储数据</span>
-<span class="token keyword">private</span> <span class="token keyword">long</span><span class="token punctuation">[</span><span class="token punctuation">]</span> words<span class="token punctuation">;</span></code></pre>
+<h1 id="BitSet实现">2 BitSet实现</h1><h2 id="重要内部字段">2.1 重要内部字段</h2><pre><code class="java">//用于存储数据
+private long[] words;</code></pre>
 <p>这个字段说明了底层是long数组，而一个long是8个字节也就是64位。而且在BitSet中，把这样一个long单元称为“字”（word）。</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">transient</span> <span class="token keyword">int</span> wordsInUse <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="java">private transient int wordsInUse = 0;</code></pre>
 <p>这个字段代表目前long数组中不为0的元素的最大的下标。（就是目前实际用了多少个字）</p>
-<h2 id="构造方法">2.2 构造方法</h2><h3 id="BitSet">2.2.1 BitSet()</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token function">BitSet</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token function">initWords</span><span class="token punctuation">(</span>BITS_PER_WORD<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    sizeIsSticky <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<h2 id="构造方法">2.2 构造方法</h2><h3 id="BitSet">2.2.1 BitSet()</h3><pre><code class="java">public BitSet() {
+    initWords(BITS_PER_WORD);
+    sizeIsSticky = false;
+}</code></pre>
 <p><code>initWords</code>，看方法名就是初始化words数组了，而后面的BITS_PER_WORD应该就是默认容量。<code>sizeIsSticky</code>的java doc描述大概意思是判断这个bitset是不是用户指定容量创建的，如果是用户指定了容量，后面就尽可能会保有这个容量。</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token keyword">static</span> <span class="token keyword">int</span> ADDRESS_BITS_PER_WORD <span class="token operator">=</span> <span class="token number">6</span><span class="token punctuation">;</span>
-<span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token keyword">static</span> <span class="token keyword">int</span> BITS_PER_WORD <span class="token operator">=</span> <span class="token number">1</span> <span class="token operator">&lt;&lt;</span> ADDRESS_BITS_PER_WORD<span class="token punctuation">;</span>
+<pre><code class="java">private final static int ADDRESS_BITS_PER_WORD = 6;
+private final static int BITS_PER_WORD = 1 &lt;&lt; ADDRESS_BITS_PER_WORD;
 
-<span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">initWords</span><span class="token punctuation">(</span><span class="token keyword">int</span> nbits<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    words <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">long</span><span class="token punctuation">[</span><span class="token function">wordIndex</span><span class="token punctuation">(</span>nbits<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+private void initWords(int nbits) {
+    words = new long[wordIndex(nbits-1) + 1];
+}
 
-<span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">wordIndex</span><span class="token punctuation">(</span><span class="token keyword">int</span> bitIndex<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">return</span> bitIndex <span class="token operator">>></span> ADDRESS_BITS_PER_WORD<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+private static int wordIndex(int bitIndex) {
+    return bitIndex &gt;&gt; ADDRESS_BITS_PER_WORD;
+}</code></pre>
 <p><code>ADDRESS_BITS_PER_WORD</code>的意思就是一个字的地址占多少位，因为是64位是2的6次方，这里就是6。<br>而<code>BITS_PER_WORD</code>就是一个字占多少位，这里就是<code>1&lt;&lt;6</code>即64位。</p>
 <p><code>initWords</code>的时候，我们传进去的默认容量为<code>BITS_PER_WORD</code>，这里看形参可以知道这个容量的单位是bit，那么也就是说默认构造函数只会创建一个能容纳64位的bitSet。</p>
 <p>而BitSet怎么知道64位需要多少个字(long)呢？就是通过<code>wordIndex</code>去计算，将位值除以64，并向上取整。</p>
 <p>后面<code>wordIndex</code>还会在索引的时候用到。</p>
-<h3 id="public-BitSet-int-nbits">2.2.2 public BitSet(int nbits)</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token function">BitSet</span><span class="token punctuation">(</span><span class="token keyword">int</span> nbits<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">// nbits can't be negative; size 0 is OK</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>nbits <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">NegativeArraySizeException</span><span class="token punctuation">(</span><span class="token string">"nbits &lt; 0: "</span> <span class="token operator">+</span> nbits<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<h3 id="public-BitSet-int-nbits">2.2.2 public BitSet(int nbits)</h3><pre><code class="java">public BitSet(int nbits) {
+    // nbits can&#39;t be negative; size 0 is OK
+    if (nbits &lt; 0)
+        throw new NegativeArraySizeException(&quot;nbits &lt; 0: &quot; + nbits);
 
-    <span class="token function">initWords</span><span class="token punctuation">(</span>nbits<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    sizeIsSticky <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+    initWords(nbits);
+    sizeIsSticky = true;
+}</code></pre>
 <p>这个构造方法就是用户自己指定初始容量了，过程和默认构造方法一样，只是把<code>sizeIsSticky</code>设为了true。</p>
-<h2 id="重要方法">2.3 重要方法</h2><h3 id="set">2.3.1 set</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">set</span><span class="token punctuation">(</span><span class="token keyword">int</span> bitIndex<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>bitIndex <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IndexOutOfBoundsException</span><span class="token punctuation">(</span><span class="token string">"bitIndex &lt; 0: "</span> <span class="token operator">+</span> bitIndex<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//计算出字的下标</span>
-    <span class="token keyword">int</span> wordIndex <span class="token operator">=</span> <span class="token function">wordIndex</span><span class="token punctuation">(</span>bitIndex<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token function">expandTo</span><span class="token punctuation">(</span>wordIndex<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<h2 id="重要方法">2.3 重要方法</h2><h3 id="set">2.3.1 set</h3><pre><code class="java">public void set(int bitIndex) {
+    if (bitIndex &lt; 0)
+        throw new IndexOutOfBoundsException(&quot;bitIndex &lt; 0: &quot; + bitIndex);
+    //计算出字的下标
+    int wordIndex = wordIndex(bitIndex);
+    expandTo(wordIndex);
 
-    words<span class="token punctuation">[</span>wordIndex<span class="token punctuation">]</span> <span class="token operator">|=</span> <span class="token punctuation">(</span>1L <span class="token operator">&lt;&lt;</span> bitIndex<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// Restores invariants</span>
-    <span class="token comment" spellcheck="true">//保证一些条件</span>
-    <span class="token function">checkInvariants</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+    words[wordIndex] |= (1L &lt;&lt; bitIndex); // Restores invariants
+    //保证一些条件
+    checkInvariants();
+}</code></pre>
 <p>这个方法的作用就是把相应的位设置为true（1）。而<code>expandTo()</code>就是扩容了，要保证数组大小要大于这个字的下标。这个扩容方法我们放到后面再看。然后就是<code>words[wordIndex] |= (1L &lt;&lt; bitIndex);</code> ，这里的<code>1L &lt;&lt; bitIndex</code>是什么呢，java当左移超出一定范围的时候，对于long类型就是当左移位数大于等于1000000(64)的时候，只会取最后七位，也就是<code>1L &lt;&lt; bitIndex</code>实际上就是<code>bitIndex%64</code>，算出了该位在字中的位置。然后用位或运算将该位置为1。</p>
-<h3 id="clear">2.3.2 clear</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">clear</span><span class="token punctuation">(</span><span class="token keyword">int</span> bitIndex<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>bitIndex <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IndexOutOfBoundsException</span><span class="token punctuation">(</span><span class="token string">"bitIndex &lt; 0: "</span> <span class="token operator">+</span> bitIndex<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<h3 id="clear">2.3.2 clear</h3><pre><code class="java">public void clear(int bitIndex) {
+    if (bitIndex &lt; 0)
+        throw new IndexOutOfBoundsException(&quot;bitIndex &lt; 0: &quot; + bitIndex);
 
-    <span class="token keyword">int</span> wordIndex <span class="token operator">=</span> <span class="token function">wordIndex</span><span class="token punctuation">(</span>bitIndex<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>wordIndex <span class="token operator">>=</span> wordsInUse<span class="token punctuation">)</span>
-        <span class="token keyword">return</span><span class="token punctuation">;</span>
+    int wordIndex = wordIndex(bitIndex);
+    if (wordIndex &gt;= wordsInUse)
+        return;
 
-    words<span class="token punctuation">[</span>wordIndex<span class="token punctuation">]</span> <span class="token operator">&amp;=</span> <span class="token operator">~</span><span class="token punctuation">(</span>1L <span class="token operator">&lt;&lt;</span> bitIndex<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    words[wordIndex] &amp;= ~(1L &lt;&lt; bitIndex);
 
-    <span class="token function">recalculateWordsInUse</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token function">checkInvariants</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+    recalculateWordsInUse();
+    checkInvariants();
+}</code></pre>
 <p>这个方法的作用就是把相应的位设置为false（0）。和set方法过程很像，用位与运算将对应的位置为0。</p>
-<h3 id="set-int-fromIndex-int-toIndex">2.3.3 set(int fromIndex, int toIndex)</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">set</span><span class="token punctuation">(</span><span class="token keyword">int</span> fromIndex<span class="token punctuation">,</span> <span class="token keyword">int</span> toIndex<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">//检查范围是否有效</span>
-    <span class="token function">checkRange</span><span class="token punctuation">(</span>fromIndex<span class="token punctuation">,</span> toIndex<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<h3 id="set-int-fromIndex-int-toIndex">2.3.3 set(int fromIndex, int toIndex)</h3><pre><code class="java">public void set(int fromIndex, int toIndex) {
+    //检查范围是否有效
+    checkRange(fromIndex, toIndex);
 
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>fromIndex <span class="token operator">==</span> toIndex<span class="token punctuation">)</span>
-        <span class="token keyword">return</span><span class="token punctuation">;</span>
+    if (fromIndex == toIndex)
+        return;
 
-    <span class="token comment" spellcheck="true">// Increase capacity if necessary</span>
-    <span class="token comment" spellcheck="true">// 获取起始位置和结束位置对应的字的下标，必要时扩容</span>
-    <span class="token keyword">int</span> startWordIndex <span class="token operator">=</span> <span class="token function">wordIndex</span><span class="token punctuation">(</span>fromIndex<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">int</span> endWordIndex   <span class="token operator">=</span> <span class="token function">wordIndex</span><span class="token punctuation">(</span>toIndex <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token function">expandTo</span><span class="token punctuation">(</span>endWordIndex<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    // Increase capacity if necessary
+    // 获取起始位置和结束位置对应的字的下标，必要时扩容
+    int startWordIndex = wordIndex(fromIndex);
+    int endWordIndex   = wordIndex(toIndex - 1);
+    expandTo(endWordIndex);
 
-    <span class="token keyword">long</span> firstWordMask <span class="token operator">=</span> WORD_MASK <span class="token operator">&lt;&lt;</span> fromIndex<span class="token punctuation">;</span>
-    <span class="token keyword">long</span> lastWordMask  <span class="token operator">=</span> WORD_MASK <span class="token operator">>>></span> <span class="token operator">-</span>toIndex<span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>startWordIndex <span class="token operator">==</span> endWordIndex<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// Case 1: One word</span>
-        words<span class="token punctuation">[</span>startWordIndex<span class="token punctuation">]</span> <span class="token operator">|=</span> <span class="token punctuation">(</span>firstWordMask <span class="token operator">&amp;</span> lastWordMask<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// Case 2: Multiple words</span>
-        <span class="token comment" spellcheck="true">// Handle first word</span>
-        words<span class="token punctuation">[</span>startWordIndex<span class="token punctuation">]</span> <span class="token operator">|=</span> firstWordMask<span class="token punctuation">;</span>
+    long firstWordMask = WORD_MASK &lt;&lt; fromIndex;
+    long lastWordMask  = WORD_MASK &gt;&gt;&gt; -toIndex;
+    if (startWordIndex == endWordIndex) {
+        // Case 1: One word
+        words[startWordIndex] |= (firstWordMask &amp; lastWordMask);
+    } else {
+        // Case 2: Multiple words
+        // Handle first word
+        words[startWordIndex] |= firstWordMask;
 
-        <span class="token comment" spellcheck="true">// Handle intermediate words, if any</span>
-        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> startWordIndex<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> endWordIndex<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
-            words<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> WORD_MASK<span class="token punctuation">;</span>
+        // Handle intermediate words, if any
+        for (int i = startWordIndex+1; i &lt; endWordIndex; i++)
+            words[i] = WORD_MASK;
 
-        <span class="token comment" spellcheck="true">// Handle last word (restores invariants)</span>
-        words<span class="token punctuation">[</span>endWordIndex<span class="token punctuation">]</span> <span class="token operator">|=</span> lastWordMask<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+        // Handle last word (restores invariants)
+        words[endWordIndex] |= lastWordMask;
+    }
 
-    <span class="token function">checkInvariants</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+    checkInvariants();
+}</code></pre>
 <p>WORD_MASK是什么呢：</p>
-<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/* Used to shift left or right for a partial word mask */</span>
-<span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">long</span> WORD_MASK <span class="token operator">=</span> 0xffffffffffffffffL<span class="token punctuation">;</span></code></pre>
+<pre><code class="java">/* Used to shift left or right for a partial word mask */
+private static final long WORD_MASK = 0xffffffffffffffffL;</code></pre>
 <p>就是一个全1的long型，这个函数先将起始位置中的起始位往后的位置1，然后将中间的字全部设为全1的，最后将结束位置中的结束位往前的位置置1。</p>
 <h3 id="intersects">2.3.4 intersects</h3><p>有了上面那些基础方法，就可以进行一些逻辑判断了：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">intersects</span><span class="token punctuation">(</span>BitSet set<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span>wordsInUse<span class="token punctuation">,</span> set<span class="token punctuation">.</span>wordsInUse<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span> i <span class="token operator">>=</span> <span class="token number">0</span><span class="token punctuation">;</span> i<span class="token operator">--</span><span class="token punctuation">)</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>words<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">&amp;</span> set<span class="token punctuation">.</span>words<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">)</span>
-            <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public boolean intersects(BitSet set) {
+    for (int i = Math.min(wordsInUse, set.wordsInUse) - 1; i &gt;= 0; i--)
+        if ((words[i] &amp; set.words[i]) != 0)
+            return true;
+    return false;
+}</code></pre>
 <p>比较两个BitSet是否有相同的位被置1了。</p>
-<h3 id="and">2.3.5 and</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">and</span><span class="token punctuation">(</span>BitSet set<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span> <span class="token operator">==</span> set<span class="token punctuation">)</span>
-        <span class="token keyword">return</span><span class="token punctuation">;</span>
+<h3 id="and">2.3.5 and</h3><pre><code class="java">public void and(BitSet set) {
+    if (this == set)
+        return;
 
-    <span class="token keyword">while</span> <span class="token punctuation">(</span>wordsInUse <span class="token operator">></span> set<span class="token punctuation">.</span>wordsInUse<span class="token punctuation">)</span>
-        words<span class="token punctuation">[</span><span class="token operator">--</span>wordsInUse<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    while (wordsInUse &gt; set.wordsInUse)
+        words[--wordsInUse] = 0;
 
-    <span class="token comment" spellcheck="true">// Perform logical AND on words in common</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> wordsInUse<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
-        words<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">&amp;=</span> set<span class="token punctuation">.</span>words<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    // Perform logical AND on words in common
+    for (int i = 0; i &lt; wordsInUse; i++)
+        words[i] &amp;= set.words[i];
 
-    <span class="token function">recalculateWordsInUse</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token function">checkInvariants</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+    recalculateWordsInUse();
+    checkInvariants();
+}</code></pre>
 <p>非常常用的与运算，求两个集合的交集，需要两个bitset中对应的位都被置1。这里就是逐字做与运算。</p>
-<h3 id="or">2.3.6 or</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">or</span><span class="token punctuation">(</span>BitSet set<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span> <span class="token operator">==</span> set<span class="token punctuation">)</span>
-        <span class="token keyword">return</span><span class="token punctuation">;</span>
+<h3 id="or">2.3.6 or</h3><pre><code class="java">public void or(BitSet set) {
+    if (this == set)
+        return;
 
-    <span class="token keyword">int</span> wordsInCommon <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span>wordsInUse<span class="token punctuation">,</span> set<span class="token punctuation">.</span>wordsInUse<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    int wordsInCommon = Math.min(wordsInUse, set.wordsInUse);
 
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>wordsInUse <span class="token operator">&lt;</span> set<span class="token punctuation">.</span>wordsInUse<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token function">ensureCapacity</span><span class="token punctuation">(</span>set<span class="token punctuation">.</span>wordsInUse<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        wordsInUse <span class="token operator">=</span> set<span class="token punctuation">.</span>wordsInUse<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    if (wordsInUse &lt; set.wordsInUse) {
+        ensureCapacity(set.wordsInUse);
+        wordsInUse = set.wordsInUse;
+    }
 
-    <span class="token comment" spellcheck="true">// Perform logical OR on words in common</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> wordsInCommon<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
-        words<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">|=</span> set<span class="token punctuation">.</span>words<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    // Perform logical OR on words in common
+    for (int i = 0; i &lt; wordsInCommon; i++)
+        words[i] |= set.words[i];
 
-    <span class="token comment" spellcheck="true">// Copy any remaining words</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>wordsInCommon <span class="token operator">&lt;</span> set<span class="token punctuation">.</span>wordsInUse<span class="token punctuation">)</span>
-        System<span class="token punctuation">.</span><span class="token function">arraycopy</span><span class="token punctuation">(</span>set<span class="token punctuation">.</span>words<span class="token punctuation">,</span> wordsInCommon<span class="token punctuation">,</span>
-                            words<span class="token punctuation">,</span> wordsInCommon<span class="token punctuation">,</span>
-                            wordsInUse <span class="token operator">-</span> wordsInCommon<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    // Copy any remaining words
+    if (wordsInCommon &lt; set.wordsInUse)
+        System.arraycopy(set.words, wordsInCommon,
+                            words, wordsInCommon,
+                            wordsInUse - wordsInCommon);
 
-    <span class="token comment" spellcheck="true">// recalculateWordsInUse() is unnecessary</span>
-    <span class="token function">checkInvariants</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+    // recalculateWordsInUse() is unnecessary
+    checkInvariants();
+}</code></pre>
 <p>非常常用的或运算，求两个集合的并集，需要两个bitset中任意一位被置1。这里就是逐字做或运算。</p>
-<h3 id="xor">2.3.7 xor</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">xor</span><span class="token punctuation">(</span>BitSet set<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">int</span> wordsInCommon <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span>wordsInUse<span class="token punctuation">,</span> set<span class="token punctuation">.</span>wordsInUse<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<h3 id="xor">2.3.7 xor</h3><pre><code class="java">public void xor(BitSet set) {
+    int wordsInCommon = Math.min(wordsInUse, set.wordsInUse);
 
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>wordsInUse <span class="token operator">&lt;</span> set<span class="token punctuation">.</span>wordsInUse<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token function">ensureCapacity</span><span class="token punctuation">(</span>set<span class="token punctuation">.</span>wordsInUse<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        wordsInUse <span class="token operator">=</span> set<span class="token punctuation">.</span>wordsInUse<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    if (wordsInUse &lt; set.wordsInUse) {
+        ensureCapacity(set.wordsInUse);
+        wordsInUse = set.wordsInUse;
+    }
 
-    <span class="token comment" spellcheck="true">// Perform logical XOR on words in common</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> wordsInCommon<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
-        words<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">^=</span> set<span class="token punctuation">.</span>words<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    // Perform logical XOR on words in common
+    for (int i = 0; i &lt; wordsInCommon; i++)
+        words[i] ^= set.words[i];
 
-    <span class="token comment" spellcheck="true">// Copy any remaining words</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>wordsInCommon <span class="token operator">&lt;</span> set<span class="token punctuation">.</span>wordsInUse<span class="token punctuation">)</span>
-        System<span class="token punctuation">.</span><span class="token function">arraycopy</span><span class="token punctuation">(</span>set<span class="token punctuation">.</span>words<span class="token punctuation">,</span> wordsInCommon<span class="token punctuation">,</span>
-                            words<span class="token punctuation">,</span> wordsInCommon<span class="token punctuation">,</span>
-                            set<span class="token punctuation">.</span>wordsInUse <span class="token operator">-</span> wordsInCommon<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    // Copy any remaining words
+    if (wordsInCommon &lt; set.wordsInUse)
+        System.arraycopy(set.words, wordsInCommon,
+                            words, wordsInCommon,
+                            set.wordsInUse - wordsInCommon);
 
-    <span class="token function">recalculateWordsInUse</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token function">checkInvariants</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+    recalculateWordsInUse();
+    checkInvariants();
+}</code></pre>
 <p>异或运算。求不同时在两个集合内的元素。</p>
 <h2 id="扩容">2.4 扩容</h2><p>最后来看扩容</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">expandTo</span><span class="token punctuation">(</span><span class="token keyword">int</span> wordIndex<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">int</span> wordsRequired <span class="token operator">=</span> wordIndex<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>wordsInUse <span class="token operator">&lt;</span> wordsRequired<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token function">ensureCapacity</span><span class="token punctuation">(</span>wordsRequired<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        wordsInUse <span class="token operator">=</span> wordsRequired<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">private void expandTo(int wordIndex) {
+    int wordsRequired = wordIndex+1;
+    if (wordsInUse &lt; wordsRequired) {
+        ensureCapacity(wordsRequired);
+        wordsInUse = wordsRequired;
+    }
+}</code></pre>
 <p>expandTo更新了wordsInUse，真正的扩容在ensureCapacity里面</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">ensureCapacity</span><span class="token punctuation">(</span><span class="token keyword">int</span> wordsRequired<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>words<span class="token punctuation">.</span>length <span class="token operator">&lt;</span> wordsRequired<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// 分配两倍数组大小或需要的数组大小中较大的那个。</span>
-        <span class="token keyword">int</span> request <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">2</span> <span class="token operator">*</span> words<span class="token punctuation">.</span>length<span class="token punctuation">,</span> wordsRequired<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        words <span class="token operator">=</span> Arrays<span class="token punctuation">.</span><span class="token function">copyOf</span><span class="token punctuation">(</span>words<span class="token punctuation">,</span> request<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        sizeIsSticky <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">private void ensureCapacity(int wordsRequired) {
+    if (words.length &lt; wordsRequired) {
+        // 分配两倍数组大小或需要的数组大小中较大的那个。
+        int request = Math.max(2 * words.length, wordsRequired);
+        words = Arrays.copyOf(words, request);
+        sizeIsSticky = false;
+    }
+}</code></pre>
 <h1 id="使用实例">3 使用实例</h1><p>这样看来，BitSet好像只能存储数值类型的数据，实际上<strong>非数值类型可以使用哈希码或自定的哈希映射存储，但要保证哈希码只能唯一确定一个元素。</strong></p>
-<h2 id="去重">3.1 去重</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">containChars</span><span class="token punctuation">(</span>String str<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    BitSet used <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BitSet</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> str<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
-        used<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>str<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// set bit for char</span>
-    StringBuilder sb <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StringBuilder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    sb<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token string">"["</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">int</span> size <span class="token operator">=</span> used<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">char</span> i <span class="token operator">=</span> <span class="token string">'a'</span><span class="token punctuation">;</span> i <span class="token operator">&lt;=</span> <span class="token string">'z'</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>used<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            sb<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token punctuation">)</span> i<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    sb<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token string">"]"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>sb<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
-<span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token function">containChars</span><span class="token punctuation">(</span><span class="token string">"abcdfadsaomdosmdfodsingodsbnafgudbgiub"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<h2 id="去重">3.1 去重</h2><pre><code class="java">public static void containChars(String str) {
+    BitSet used = new BitSet();
+    for (int i = 0; i &lt; str.length(); i++)
+        used.set(str.charAt(i)); // set bit for char
+    StringBuilder sb = new StringBuilder();
+    sb.append(&quot;[&quot;);
+    int size = used.size();
+    for (char i = &#39;a&#39;; i &lt;= &#39;z&#39;; i++) {
+        if (used.get(i)) {
+            sb.append((char) i);
+        }
+    }
+    sb.append(&quot;]&quot;);
+    System.out.println(sb.toString());
+}
+public static void main(String[] args) {
+    containChars(&quot;abcdfadsaomdosmdfodsingodsbnafgudbgiub&quot;);
+}</code></pre>
 <p>(通常是遍历bitset中所有的位进行去重，这里因为字母有限可以遍历字母)</p>
 <h2 id="排序">3.2 排序</h2><p>排序也是遍历bitset中所有的位，但是对于哈希码存储的并没有排序作用。实际上就是用空间换时间。</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    BitSet used <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BitSet</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    used<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">45</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    used<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">16</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    used<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">78</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    used<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">23</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    used<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">44</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    used<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">11</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    used<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">98</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>used<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>used<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">)</span> System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">print</span><span class="token punctuation">(</span>i<span class="token operator">+</span><span class="token string">" "</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public static void main(String[] args) {
+    BitSet used = new BitSet();
+    used.set(45);
+    used.set(16);
+    used.set(78);
+    used.set(23);
+    used.set(44);
+    used.set(11);
+    used.set(98);
+    for(int i = 0;i&lt;used.size();i++){
+        if(used.get(i)) System.out.print(i+&quot; &quot;);
+    }
+}</code></pre>
 <h2 id="查询">3.3 查询</h2><p>给40亿个不重复的unsigned int的整数，没有排过序，然后再给一个数，如果快速判断这个数是否在那40亿个数当中？</p>
 <p>一个一个set进去，然后用get判断有没有。</p>
 <p>（set完之后这个数据结构就可复用了）</p>
@@ -1025,8 +1025,8 @@
                     <div class="summary block-with-text">
                         
                             1 转发和重定向除了视图解析器配合返回字符串的方法：
-1.1 使用request和response@RequestMapping("/test")
-public void testRedir(HttpServletRequest reque
+1.1 使用request和response@RequestMapping(&quot;/test&quot;)
+public void testRedir(HttpServletReq
                         
                     </div>
                     <div class="publish-info">
@@ -1248,7 +1248,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1328,6 +1328,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

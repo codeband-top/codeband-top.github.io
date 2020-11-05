@@ -25,10 +25,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -426,213 +426,213 @@
                 <p>之前写的一篇博客<a href="../JUC包下的线程协作计数CountDownLatch及CyclicBarrier">JUC包下的线程协作计数CountDownLatch及CyclicBarrier</a>只是介绍了一下这两个工具类的用法，并没有深入探究源码，然而实现方法也比较简单，所以合为一篇来写了，可以借鉴一下设计思想。</p>
 <h1 id="CountDownLatch-源码分析">1 CountDownLatch 源码分析</h1><p>CountDownLatch 的目的是阻塞等待其他线程执行完成，可能是为了满足前置需求，不使用CountDownLatch的时候可以使用join方法来完成这项任务，但CountDownLatch提供了一种更优雅的实现方式。</p>
 <p>CountDownLatch的实现是非常简单的，内部就一个继承了AQS的内部类：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">class</span> <span class="token class-name">Sync</span> <span class="token keyword">extends</span> <span class="token class-name">AbstractQueuedSynchronizer</span> <span class="token punctuation">{</span>
-    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">long</span> serialVersionUID <span class="token operator">=</span> 4982264981922014374L<span class="token punctuation">;</span>
+<pre><code class="java">private static final class Sync extends AbstractQueuedSynchronizer {
+    private static final long serialVersionUID = 4982264981922014374L;
 
-    <span class="token function">Sync</span><span class="token punctuation">(</span><span class="token keyword">int</span> count<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token function">setState</span><span class="token punctuation">(</span>count<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    Sync(int count) {
+        setState(count);
+    }
 
-    <span class="token keyword">int</span> <span class="token function">getCount</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token function">getState</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">// 只有state为0的时候才能获取资源</span>
-    <span class="token keyword">protected</span> <span class="token keyword">int</span> <span class="token function">tryAcquireShared</span><span class="token punctuation">(</span><span class="token keyword">int</span> acquires<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token function">getState</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token number">1</span> <span class="token operator">:</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">// 释放共享资源，仅是将state通过CAS减1</span>
-    <span class="token keyword">protected</span> <span class="token keyword">boolean</span> <span class="token function">tryReleaseShared</span><span class="token punctuation">(</span><span class="token keyword">int</span> releases<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// Decrement count; signal when transition to zero</span>
-        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token punctuation">;</span><span class="token punctuation">;</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">int</span> c <span class="token operator">=</span> <span class="token function">getState</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>c <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span>
-                <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-            <span class="token keyword">int</span> nextc <span class="token operator">=</span> c<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">compareAndSetState</span><span class="token punctuation">(</span>c<span class="token punctuation">,</span> nextc<span class="token punctuation">)</span><span class="token punctuation">)</span>
-                <span class="token keyword">return</span> nextc <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    int getCount() {
+        return getState();
+    }
+    // 只有state为0的时候才能获取资源
+    protected int tryAcquireShared(int acquires) {
+        return (getState() == 0) ? 1 : -1;
+    }
+    // 释放共享资源，仅是将state通过CAS减1
+    protected boolean tryReleaseShared(int releases) {
+        // Decrement count; signal when transition to zero
+        for (;;) {
+            int c = getState();
+            if (c == 0)
+                return false;
+            int nextc = c-1;
+            if (compareAndSetState(c, nextc))
+                return nextc == 0;
+        }
+    }
+}</code></pre>
 <p>Sync比较特殊的地方在于，一般使用AQS的类都将state抽象为资源的数量，acquire则减一，release则加一。而这里<code>CountDownLatch</code>中的<code>Sync</code>确是调用<code>tryReleaseShared</code>将state减一，调用<code>tryAcquireShared</code>不修改state值，但是如果是0的话就返回1。</p>
 <p>那么我们通常使用构造方法构造一个<code>CountDownLatch</code>对象，作用是：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token function">CountDownLatch</span><span class="token punctuation">(</span><span class="token keyword">int</span> count<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>count <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IllegalArgumentException</span><span class="token punctuation">(</span><span class="token string">"count &lt; 0"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>sync <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Sync</span><span class="token punctuation">(</span>count<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public CountDownLatch(int count) {
+    if (count &lt; 0) throw new IllegalArgumentException(&quot;count &lt; 0&quot;);
+    this.sync = new Sync(count);
+}</code></pre>
 <p>就是将这个值传入<code>Sync</code>的构造方法，然后通过上面<code>Sync</code>的源码可以知道就是将state设置为了<code>count</code>这个值。</p>
 <p>构造完<code>CountDownLatch</code>对象之后，我们在线程中要做的事一般就是调用一次<code>countDown()</code>，然后调用<code>await()</code>进行等待。</p>
 <p>而<code>countDown</code>方法仅是调用了一下<code>releaseShared</code>，将state减一：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">countDown</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    sync<span class="token punctuation">.</span><span class="token function">releaseShared</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public void countDown() {
+    sync.releaseShared(1);
+}</code></pre>
 <p>在<code>Sync</code>类中可以看到，<code>tryReleaseShared</code>这个方法只要不是将资源减为0了，都返回<code>false</code>，因此并不是每次释放资源都会通知共享节点。</p>
 <p>而如果减为0了，根据AQS的逻辑就会进行<code>doReleaseShared</code>：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">final</span> <span class="token keyword">boolean</span> <span class="token function">releaseShared</span><span class="token punctuation">(</span><span class="token keyword">int</span> arg<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">// 如果减为0了，返回true</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">tryReleaseShared</span><span class="token punctuation">(</span>arg<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token function">doReleaseShared</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public final boolean releaseShared(int arg) {
+    // 如果减为0了，返回true
+    if (tryReleaseShared(arg)) {
+        doReleaseShared();
+        return true;
+    }
+    return false;
+}</code></pre>
 <p>而<code>doReleaseShared</code>方法就是从头节点开始向后传播，唤醒共享节点，所以这里就会把所有等待的线程唤醒。</p>
 <p>其实分析到这里就已经看出核心逻辑了，<code>await</code>方法也只是调用了一下<code>acquireSharedInterruptibly</code>：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">await</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> InterruptedException <span class="token punctuation">{</span>
-    sync<span class="token punctuation">.</span><span class="token function">acquireSharedInterruptibly</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public void await() throws InterruptedException {
+    sync.acquireSharedInterruptibly(1);
+}</code></pre>
 <p>这个方法就是AQS的实现，如果没有获取到资源就将线程挂起，而只要state不为0是获取不到资源的。</p>
 <p>不过通过源码分析可以知道的是，<code>CountDownLatch</code>是不能复用的，因为在<code>tryReleaseShared</code>方法中，减到0就不能继续往下减了，而调用<code>await</code>方法时，会尝试获取资源，此时state就是0，能获取到资源，所以线程就不会挂起了。</p>
 <h1 id="CyclicBarrier-源码分析">2 CyclicBarrier 源码分析</h1><p>使用 CyclicBarrier 的目的是，线程必须等待参与协作的线程达到某个个数（这里称为barrier值），才一起开始工作（形象地称为冲破屏障）。</p>
 <p>先看一下它的内部类和字段：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">CyclicBarrier</span> <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">//内部类Generation，用来维护屏障是否打破的信息</span>
-    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">class</span> <span class="token class-name">Generation</span> <span class="token punctuation">{</span>
-        <span class="token keyword">boolean</span> broken <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+<pre><code class="java">public class CyclicBarrier {
+    //内部类Generation，用来维护屏障是否打破的信息
+    private static class Generation {
+        boolean broken = false;
+    }
 
-    <span class="token comment" spellcheck="true">// 用来互斥进入屏障</span>
-    <span class="token keyword">private</span> <span class="token keyword">final</span> ReentrantLock lock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ReentrantLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 用来挂起线程，直到到达屏障被冲破</span>
-    <span class="token keyword">private</span> <span class="token keyword">final</span> Condition trip <span class="token operator">=</span> lock<span class="token punctuation">.</span><span class="token function">newCondition</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 屏障值，构造之后就不会变</span>
-    <span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token keyword">int</span> parties<span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 当冲破屏障时需要做的任务</span>
-    <span class="token keyword">private</span> <span class="token keyword">final</span> Runnable barrierCommand<span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 当前的Generation</span>
-    <span class="token keyword">private</span> Generation generation <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Generation</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    // 用来互斥进入屏障
+    private final ReentrantLock lock = new ReentrantLock();
+    // 用来挂起线程，直到到达屏障被冲破
+    private final Condition trip = lock.newCondition();
+    // 屏障值，构造之后就不会变
+    private final int parties;
+    // 当冲破屏障时需要做的任务
+    private final Runnable barrierCommand;
+    // 当前的Generation
+    private Generation generation = new Generation();
 
-    <span class="token comment" spellcheck="true">// 当前值，从屏障值开始递减，减为0则冲破屏障，然后又恢复屏障值，等待复用</span>
-    <span class="token keyword">private</span> <span class="token keyword">int</span> count<span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//...</span>
-<span class="token punctuation">}</span></code></pre>
+    // 当前值，从屏障值开始递减，减为0则冲破屏障，然后又恢复屏障值，等待复用
+    private int count;
+    //...
+}</code></pre>
 <ul>
 <li><code>parties</code>是构造时赋予的屏障值，之后不会改变，只要等待的线程到达这个个数就能冲破屏障。</li>
 <li><code>count</code>，我这里称为当前值，一开始就是屏障值，每等待一个线程就会减一，可以理解为还差多少个线程可以冲破屏障。</li>
 </ul>
 <p>看一下构造方法验证一下：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token function">CyclicBarrier</span><span class="token punctuation">(</span><span class="token keyword">int</span> parties<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">this</span><span class="token punctuation">(</span>parties<span class="token punctuation">,</span> null<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+<pre><code class="java">public CyclicBarrier(int parties) {
+    this(parties, null);
+}
 
-<span class="token keyword">public</span> <span class="token function">CyclicBarrier</span><span class="token punctuation">(</span><span class="token keyword">int</span> parties<span class="token punctuation">,</span> Runnable barrierAction<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>parties <span class="token operator">&lt;=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IllegalArgumentException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>parties <span class="token operator">=</span> parties<span class="token punctuation">;</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>count <span class="token operator">=</span> parties<span class="token punctuation">;</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>barrierCommand <span class="token operator">=</span> barrierAction<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+public CyclicBarrier(int parties, Runnable barrierAction) {
+    if (parties &lt;= 0) throw new IllegalArgumentException();
+    this.parties = parties;
+    this.count = parties;
+    this.barrierCommand = barrierAction;
+}</code></pre>
 <p>后面这个版本就是还需要传入一个任务，冲破屏障时会执行这个任务。</p>
 <p>然后直接看<code>await</code>方法，因为<code>CyclicBarrier</code>除了构造方法基本上就只会用到这个方法：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">await</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> InterruptedException<span class="token punctuation">,</span> BrokenBarrierException <span class="token punctuation">{</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token function">dowait</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">,</span> 0L<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">TimeoutException</span> toe<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span>toe<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// cannot happen</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public int await() throws InterruptedException, BrokenBarrierException {
+    try {
+        return dowait(false, 0L);
+    } catch (TimeoutException toe) {
+        throw new Error(toe); // cannot happen
+    }
+}</code></pre>
 <p><code>await</code>方法还有一个带超时时间的版本，不过最终都是会调用<code>dowait</code>:</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">int</span> <span class="token function">dowait</span><span class="token punctuation">(</span><span class="token keyword">boolean</span> timed<span class="token punctuation">,</span> <span class="token keyword">long</span> nanos<span class="token punctuation">)</span>
-    <span class="token keyword">throws</span> InterruptedException<span class="token punctuation">,</span> BrokenBarrierException<span class="token punctuation">,</span>
-            TimeoutException <span class="token punctuation">{</span>
-    <span class="token keyword">final</span> ReentrantLock lock <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>lock<span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 锁上，进入屏障</span>
-    lock<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// 获取当前的Generation，看看屏障有没有问题</span>
-        <span class="token keyword">final</span> Generation g <span class="token operator">=</span> generation<span class="token punctuation">;</span>
+<pre><code class="java">private int dowait(boolean timed, long nanos)
+    throws InterruptedException, BrokenBarrierException,
+            TimeoutException {
+    final ReentrantLock lock = this.lock;
+    // 锁上，进入屏障
+    lock.lock();
+    try {
+        // 获取当前的Generation，看看屏障有没有问题
+        final Generation g = generation;
 
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>g<span class="token punctuation">.</span>broken<span class="token punctuation">)</span>
-            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">BrokenBarrierException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        if (g.broken)
+            throw new BrokenBarrierException();
 
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>Thread<span class="token punctuation">.</span><span class="token function">interrupted</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token function">breakBarrier</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">InterruptedException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token comment" spellcheck="true">// 将count值减一</span>
-        <span class="token keyword">int</span> index <span class="token operator">=</span> <span class="token operator">--</span>count<span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">// 如果count值减为0，可以冲破屏障了</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>index <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>  
-            <span class="token keyword">boolean</span> ranAction <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-            <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                <span class="token comment" spellcheck="true">// 如果有command，执行这个任务</span>
-                <span class="token keyword">final</span> Runnable command <span class="token operator">=</span> barrierCommand<span class="token punctuation">;</span>
-                <span class="token keyword">if</span> <span class="token punctuation">(</span>command <span class="token operator">!=</span> null<span class="token punctuation">)</span>
-                    command<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                ranAction <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
-                <span class="token comment" spellcheck="true">// 产生一个新的屏障，并唤醒所有等待的线程</span>
-                <span class="token function">nextGeneration</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-                <span class="token comment" spellcheck="true">// 如果任务执行错误，需要打破屏障，禁止使用</span>
-                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>ranAction<span class="token punctuation">)</span>
-                    <span class="token function">breakBarrier</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
+        if (Thread.interrupted()) {
+            breakBarrier();
+            throw new InterruptedException();
+        }
+        // 将count值减一
+        int index = --count;
+        // 如果count值减为0，可以冲破屏障了
+        if (index == 0) {  
+            boolean ranAction = false;
+            try {
+                // 如果有command，执行这个任务
+                final Runnable command = barrierCommand;
+                if (command != null)
+                    command.run();
+                ranAction = true;
+                // 产生一个新的屏障，并唤醒所有等待的线程
+                nextGeneration();
+                return 0;
+            } finally {
+                // 如果任务执行错误，需要打破屏障，禁止使用
+                if (!ranAction)
+                    breakBarrier();
+            }
+        }
 
-        <span class="token comment" spellcheck="true">// 如果count值没有减为0</span>
-        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token punctuation">;</span><span class="token punctuation">;</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                <span class="token comment" spellcheck="true">// 如果不带超时</span>
-                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>timed<span class="token punctuation">)</span>
-                    <span class="token comment" spellcheck="true">// 使用条件变量挂起</span>
-                    trip<span class="token punctuation">.</span><span class="token function">await</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>nanos <span class="token operator">></span> 0L<span class="token punctuation">)</span>
-                    <span class="token comment" spellcheck="true">// 否则带超时的挂起</span>
-                    nanos <span class="token operator">=</span> trip<span class="token punctuation">.</span><span class="token function">awaitNanos</span><span class="token punctuation">(</span>nanos<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> ie<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">if</span> <span class="token punctuation">(</span>g <span class="token operator">==</span> generation <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span> g<span class="token punctuation">.</span>broken<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    <span class="token function">breakBarrier</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                    <span class="token keyword">throw</span> ie<span class="token punctuation">;</span>
-                <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
-                    <span class="token comment" spellcheck="true">// We're about to finish waiting even if we had not</span>
-                    <span class="token comment" spellcheck="true">// been interrupted, so this interrupt is deemed to</span>
-                    <span class="token comment" spellcheck="true">// "belong" to subsequent execution.</span>
-                    Thread<span class="token punctuation">.</span><span class="token function">currentThread</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">interrupt</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
+        // 如果count值没有减为0
+        for (;;) {
+            try {
+                // 如果不带超时
+                if (!timed)
+                    // 使用条件变量挂起
+                    trip.await();
+                else if (nanos &gt; 0L)
+                    // 否则带超时的挂起
+                    nanos = trip.awaitNanos(nanos);
+            } catch (InterruptedException ie) {
+                if (g == generation &amp;&amp; ! g.broken) {
+                    breakBarrier();
+                    throw ie;
+                } else {
+                    // We&#39;re about to finish waiting even if we had not
+                    // been interrupted, so this interrupt is deemed to
+                    // &quot;belong&quot; to subsequent execution.
+                    Thread.currentThread().interrupt();
+                }
+            }
 
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>g<span class="token punctuation">.</span>broken<span class="token punctuation">)</span>
-                <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">BrokenBarrierException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            if (g.broken)
+                throw new BrokenBarrierException();
 
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>g <span class="token operator">!=</span> generation<span class="token punctuation">)</span>
-                <span class="token keyword">return</span> index<span class="token punctuation">;</span>
+            if (g != generation)
+                return index;
 
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>timed <span class="token operator">&amp;&amp;</span> nanos <span class="token operator">&lt;=</span> 0L<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token function">breakBarrier</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">TimeoutException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-        lock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+            if (timed &amp;&amp; nanos &lt;= 0L) {
+                breakBarrier();
+                throw new TimeoutException();
+            }
+        }
+    } finally {
+        lock.unlock();
+    }
+}</code></pre>
 <p>如果count值减为0，在<code>nextGeneration</code>这个方法中线程会调用条件变量的<code>signalAll</code>唤醒所有等待的线程：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">nextGeneration</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">// signal completion of last generation</span>
-    trip<span class="token punctuation">.</span><span class="token function">signalAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// set up next generation</span>
-    count <span class="token operator">=</span> parties<span class="token punctuation">;</span>
-    generation <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Generation</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">private void nextGeneration() {
+    // signal completion of last generation
+    trip.signalAll();
+    // set up next generation
+    count = parties;
+    generation = new Generation();
+}</code></pre>
 <p>这就是<code>CyclicBarrier</code>的原理。</p>
 <p>并且在<code>dowait</code>这个方法中可以注意到，<code>Generation</code>在每次打破屏障后都会产生一个新的实例替换原有的实例，也就是说，通常获取到的<code>Generation</code>对象中的<code>broken</code>都是false。</p>
 <p>而什么情况下会导致<code>Generation</code>对象的<code>broken</code>变为true而不会被替换呢？通过<code>dowait</code>方法发现，若执行command任务期间发生异常，是不会生成新的<code>Generation</code>对象的，也就是说屏障被打破且不会更新。</p>
 <p>来个例子验证一下：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> InterruptedException <span class="token punctuation">{</span>
-    CyclicBarrier cb <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CyclicBarrier</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">,</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-</span><span class="token operator">></span><span class="token punctuation">{</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">1</span><span class="token operator">/</span><span class="token number">0</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// 个数为2时才会继续执行</span>
-    Runnable runnable <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-</span><span class="token operator">></span><span class="token punctuation">{</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            cb<span class="token punctuation">.</span><span class="token function">await</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"线程"</span><span class="token operator">+</span>Thread<span class="token punctuation">.</span><span class="token function">currentThread</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">+</span><span class="token string">"开始执行……"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> <span class="token operator">|</span> BrokenBarrierException e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span><span class="token punctuation">;</span>
-    <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span>runnable<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    Thread<span class="token punctuation">.</span><span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">3000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span>runnable<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    Thread<span class="token punctuation">.</span><span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">3000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span>runnable<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public static void main(String[] args) throws InterruptedException {
+    CyclicBarrier cb = new CyclicBarrier(2,()-&gt;{int i = 1/0;}); // 个数为2时才会继续执行
+    Runnable runnable = ()-&gt;{
+        try {
+            cb.await();
+            System.out.println(&quot;线程&quot;+Thread.currentThread().getName()+&quot;开始执行……&quot;);
+        } catch (InterruptedException | BrokenBarrierException e) {
+            e.printStackTrace();
+        }
+    };
+    new Thread(runnable).start();
+    Thread.sleep(3000);
+    new Thread(runnable).start();
+    Thread.sleep(3000);
+    new Thread(runnable).start();
+}</code></pre>
 <p>运行这个方法，在3秒之后有两个线程启动，完成了<code>CyclicBarrier</code>的目标，但是由于要求执行的任务会产生一个运行时异常，导致Barrier被打破且不会被还原，产生<code>BrokenBarrierException</code>异常。</p>
 <p>输出：</p>
 <pre><code>Exception in thread &quot;Thread-1&quot; java.lang.ArithmeticException: / by zero
@@ -1281,7 +1281,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1361,6 +1361,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

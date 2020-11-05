@@ -26,10 +26,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -435,242 +435,242 @@
 <li>key-&gt;ThreadLocal对象是弱引用，代表ThreadLocal对象一旦只剩下线程中ThreadLocalMap中key的引用，下一次GC的时候就会被回收。但该Entry和内部的value仍会占用空间，ThreadLocalMap中的许多方法都在操作前后检查了数组内部是否有无用的Entry，如果有就清除掉，算是防止内存泄漏的一个措施。</li>
 </ol>
 <h1 id="ThreadLocal概述">2 ThreadLocal概述</h1><p>为共享变量在每个线程中创建一个副本，每个线程可以访问自己内部的副本变量</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">static</span> Integer num <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<pre><code class="java">private static Integer num = 0;
 
-<span class="token keyword">private</span> <span class="token keyword">static</span> ThreadLocal<span class="token operator">&lt;</span>Integer<span class="token operator">></span> numLocal <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ThreadLocal</span><span class="token operator">&lt;</span>Integer<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">protected</span> Integer <span class="token function">initialValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
+private static ThreadLocal&lt;Integer&gt; numLocal = new ThreadLocal&lt;Integer&gt;(){
+    @Override
+    protected Integer initialValue() {
+        return 0;
+    }
+};
 
-<span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    Thread<span class="token punctuation">[</span><span class="token punctuation">]</span> threads <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">[</span><span class="token number">5</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>threads<span class="token punctuation">.</span>length<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        threads<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-</span><span class="token operator">></span><span class="token punctuation">{</span>
-            <span class="token keyword">int</span> x <span class="token operator">=</span> numLocal<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">intValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            x<span class="token operator">+=</span><span class="token number">5</span><span class="token punctuation">;</span>
-            numLocal<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>Thread<span class="token punctuation">.</span><span class="token function">currentThread</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">+</span><span class="token string">":"</span><span class="token operator">+</span>numLocal<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span><span class="token punctuation">,</span><span class="token string">"Thread-"</span><span class="token operator">+</span>i<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>threads<span class="token punctuation">.</span>length<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        threads<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
-<h1 id="重要方法">3 重要方法</h1><h2 id="set">3.1 set</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">set</span><span class="token punctuation">(</span>T value<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    Thread t <span class="token operator">=</span> Thread<span class="token punctuation">.</span><span class="token function">currentThread</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//通过当前线程获取一个ThreadLocalMap对象</span>
-    ThreadLocalMap map <span class="token operator">=</span> <span class="token function">getMap</span><span class="token punctuation">(</span>t<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//如果该对象不为空调用set方法，可以猜测类似map接口的set</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>map <span class="token operator">!=</span> null<span class="token punctuation">)</span>
-        map<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> value<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//如果该对象是空则调用createMap方法，可以猜测能创建一个ThreadLocalMap对象</span>
-    <span class="token keyword">else</span>
-        <span class="token function">createMap</span><span class="token punctuation">(</span>t<span class="token punctuation">,</span> value<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+public static void main(String[] args) {
+    Thread[] threads = new Thread[5];
+    for (int i = 0;i&lt;threads.length;i++){
+        threads[i] = new Thread(()-&gt;{
+            int x = numLocal.get().intValue();
+            x+=5;
+            numLocal.set(x);
+            System.out.println(Thread.currentThread().getName()+&quot;:&quot;+numLocal.get());
+        },&quot;Thread-&quot;+i);
+    }
+    for (int i = 0;i&lt;threads.length;i++){
+        threads[i].start();
+    }
+}</code></pre>
+<h1 id="重要方法">3 重要方法</h1><h2 id="set">3.1 set</h2><pre><code class="java">public void set(T value) {
+    Thread t = Thread.currentThread();
+    //通过当前线程获取一个ThreadLocalMap对象
+    ThreadLocalMap map = getMap(t);
+    //如果该对象不为空调用set方法，可以猜测类似map接口的set
+    if (map != null)
+        map.set(this, value);
+    //如果该对象是空则调用createMap方法，可以猜测能创建一个ThreadLocalMap对象
+    else
+        createMap(t, value);
+}</code></pre>
 <h3 id="ThreadLocalMap">3.1.1 ThreadLocalMap</h3><p>先来看这个叫做<code>ThreadLocalMap</code>的内部类：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">static</span> <span class="token keyword">class</span> <span class="token class-name">ThreadLocalMap</span> <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">/**
+<pre><code class="java">static class ThreadLocalMap {
+    /**
     * Entry采用弱引用指向一个ThreadLocal对象，这个ThreadLocal始终
     * 是这个ThreadLocalMap的键（key）
-    */</span>
-    <span class="token keyword">static</span> <span class="token keyword">class</span> <span class="token class-name">Entry</span> <span class="token keyword">extends</span> <span class="token class-name">WeakReference</span><span class="token operator">&lt;</span>ThreadLocal<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">>></span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">/** 这个值代表ThreadLocal关联的值. */</span>
-        Object value<span class="token punctuation">;</span>
+    */
+    static class Entry extends WeakReference&lt;ThreadLocal&lt;?&gt;&gt; {
+        /** 这个值代表ThreadLocal关联的值. */
+        Object value;
 
-        <span class="token function">Entry</span><span class="token punctuation">(</span>ThreadLocal<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> k<span class="token punctuation">,</span> Object v<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">super</span><span class="token punctuation">(</span>k<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            value <span class="token operator">=</span> v<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+        Entry(ThreadLocal&lt;?&gt; k, Object v) {
+            super(k);
+            value = v;
+        }
+    }
 
 
-    <span class="token comment" spellcheck="true">//初始容量，容量必须是2的整数次幂</span>
-    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">int</span> INITIAL_CAPACITY <span class="token operator">=</span> <span class="token number">16</span><span class="token punctuation">;</span>
+    //初始容量，容量必须是2的整数次幂
+    private static final int INITIAL_CAPACITY = 16;
 
-    <span class="token comment" spellcheck="true">//存放数据的Entry数组，类似于HashMap的Node数组</span>
-    <span class="token keyword">private</span> Entry<span class="token punctuation">[</span><span class="token punctuation">]</span> table<span class="token punctuation">;</span>
+    //存放数据的Entry数组，类似于HashMap的Node数组
+    private Entry[] table;
 
-    <span class="token comment" spellcheck="true">//Entry的个数</span>
-    <span class="token keyword">private</span> <span class="token keyword">int</span> size <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    //Entry的个数
+    private int size = 0;
 
-    <span class="token comment" spellcheck="true">//类似于HashMap的threshold，size大于这个值则扩容</span>
-    <span class="token keyword">private</span> <span class="token keyword">int</span> threshold<span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// Default to 0</span>
-    <span class="token comment" spellcheck="true">//...</span>
-<span class="token punctuation">}</span></code></pre>
+    //类似于HashMap的threshold，size大于这个值则扩容
+    private int threshold; // Default to 0
+    //...
+}</code></pre>
 <p>从这里可以看出，ThreadLocalMap和HashMap很大的区别是，Entry没有next属性，至少说明不会以链表形式存储。</p>
 <p>我们通过<code>getMap()</code>方法发现，一个Thread对象的内部有一个threadLocals字段，是一个ThreadLocalMap的对象，并且线程创建并不会给这个字段初始化。</p>
 <p>那么我们假设第一次在一个线程上调用set方法，此时<code>map==null</code>，调用createMap()创建一个ThreadLocalMap对象：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">void</span> <span class="token function">createMap</span><span class="token punctuation">(</span>Thread t<span class="token punctuation">,</span> T firstValue<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    t<span class="token punctuation">.</span>threadLocals <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ThreadLocalMap</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> firstValue<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">void createMap(Thread t, T firstValue) {
+    t.threadLocals = new ThreadLocalMap(this, firstValue);
+}</code></pre>
 <p>可以看到这个方法还顺便把这次要添加的数据添加了进去。</p>
 <p>我们返回来看ThreadLocalMap的set方法，看看是否和HashMap类似：</p>
-<h4 id="ThreadLocalMap-set">3.1.1.1 ThreadLocalMap.set</h4><pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">set</span><span class="token punctuation">(</span>ThreadLocal<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> key<span class="token punctuation">,</span> Object value<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+<h4 id="ThreadLocalMap-set">3.1.1.1 ThreadLocalMap.set</h4><pre><code class="java">private void set(ThreadLocal&lt;?&gt; key, Object value) {
 
-    Entry<span class="token punctuation">[</span><span class="token punctuation">]</span> tab <span class="token operator">=</span> table<span class="token punctuation">;</span>
-    <span class="token keyword">int</span> len <span class="token operator">=</span> tab<span class="token punctuation">.</span>length<span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 非常类似HashMap的数组下标计算方法，下文我们将一个数组位置称为slot</span>
-    <span class="token keyword">int</span> i <span class="token operator">=</span> key<span class="token punctuation">.</span>threadLocalHashCode <span class="token operator">&amp;</span> <span class="token punctuation">(</span>len<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    Entry[] tab = table;
+    int len = tab.length;
+    // 非常类似HashMap的数组下标计算方法，下文我们将一个数组位置称为slot
+    int i = key.threadLocalHashCode &amp; (len-1);
 
-    <span class="token comment" spellcheck="true">// 可以发现，这段代码是用线性探测法解决slot冲突</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span>Entry e <span class="token operator">=</span> tab<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
-            e <span class="token operator">!=</span> null<span class="token punctuation">;</span>
-            e <span class="token operator">=</span> tab<span class="token punctuation">[</span>i <span class="token operator">=</span> <span class="token function">nextIndex</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span> len<span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        ThreadLocal<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> k <span class="token operator">=</span> e<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    // 可以发现，这段代码是用线性探测法解决slot冲突
+    for (Entry e = tab[i];
+            e != null;
+            e = tab[i = nextIndex(i, len)]) {
+        ThreadLocal&lt;?&gt; k = e.get();
 
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>k <span class="token operator">==</span> key<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            e<span class="token punctuation">.</span>value <span class="token operator">=</span> value<span class="token punctuation">;</span>
-            <span class="token keyword">return</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token comment" spellcheck="true">// k什么时候为null？因为k是被弱引用的，如果k为null说明中途被回收了，则清理该slot，并把数据放进去</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>k <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token function">replaceStaleEntry</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> value<span class="token punctuation">,</span> i<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">return</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+        if (k == key) {
+            e.value = value;
+            return;
+        }
+        // k什么时候为null？因为k是被弱引用的，如果k为null说明中途被回收了，则清理该slot，并把数据放进去
+        if (k == null) {
+            replaceStaleEntry(key, value, i);
+            return;
+        }
+    }
 
-    tab<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Entry</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> value<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">int</span> sz <span class="token operator">=</span> <span class="token operator">++</span>size<span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//先检查i后面的slot是否有被回收的引用，如果有则清理，否则size大于threshold则扩容</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">cleanSomeSlots</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span> sz<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> sz <span class="token operator">>=</span> threshold<span class="token punctuation">)</span>
-        <span class="token function">rehash</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<h4 id="ThreadLocalMap-cleanSomeSlots">3.1.1.2 ThreadLocalMap.cleanSomeSlots</h4><pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">boolean</span> <span class="token function">cleanSomeSlots</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token punctuation">,</span> <span class="token keyword">int</span> n<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">boolean</span> removed <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-    Entry<span class="token punctuation">[</span><span class="token punctuation">]</span> tab <span class="token operator">=</span> table<span class="token punctuation">;</span>
-    <span class="token keyword">int</span> len <span class="token operator">=</span> tab<span class="token punctuation">.</span>length<span class="token punctuation">;</span>
-    <span class="token keyword">do</span> <span class="token punctuation">{</span>
-        i <span class="token operator">=</span> <span class="token function">nextIndex</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span> len<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        Entry e <span class="token operator">=</span> tab<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//检查是否有被回收的引用</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>e <span class="token operator">!=</span> null <span class="token operator">&amp;&amp;</span> e<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            n <span class="token operator">=</span> len<span class="token punctuation">;</span>
-            removed <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">// 清理该slot</span>
-            i <span class="token operator">=</span> <span class="token function">expungeStaleEntry</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span> <span class="token keyword">while</span> <span class="token punctuation">(</span> <span class="token punctuation">(</span>n <span class="token operator">>>>=</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> removed<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<h4 id="ThreadLocalMap-expungeStaleEntry">3.1.1.3 ThreadLocalMap.expungeStaleEntry</h4><pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">int</span> <span class="token function">expungeStaleEntry</span><span class="token punctuation">(</span><span class="token keyword">int</span> staleSlot<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    Entry<span class="token punctuation">[</span><span class="token punctuation">]</span> tab <span class="token operator">=</span> table<span class="token punctuation">;</span>
-    <span class="token keyword">int</span> len <span class="token operator">=</span> tab<span class="token punctuation">.</span>length<span class="token punctuation">;</span>
+    tab[i] = new Entry(key, value);
+    int sz = ++size;
+    //先检查i后面的slot是否有被回收的引用，如果有则清理，否则size大于threshold则扩容
+    if (!cleanSomeSlots(i, sz) &amp;&amp; sz &gt;= threshold)
+        rehash();
+}</code></pre>
+<h4 id="ThreadLocalMap-cleanSomeSlots">3.1.1.2 ThreadLocalMap.cleanSomeSlots</h4><pre><code class="java">private boolean cleanSomeSlots(int i, int n) {
+    boolean removed = false;
+    Entry[] tab = table;
+    int len = tab.length;
+    do {
+        i = nextIndex(i, len);
+        Entry e = tab[i];
+        //检查是否有被回收的引用
+        if (e != null &amp;&amp; e.get() == null) {
+            n = len;
+            removed = true;
+            // 清理该slot
+            i = expungeStaleEntry(i);
+        }
+    } while ( (n &gt;&gt;&gt;= 1) != 0);
+    return removed;
+}</code></pre>
+<h4 id="ThreadLocalMap-expungeStaleEntry">3.1.1.3 ThreadLocalMap.expungeStaleEntry</h4><pre><code class="java">private int expungeStaleEntry(int staleSlot) {
+    Entry[] tab = table;
+    int len = tab.length;
 
-    <span class="token comment" spellcheck="true">// 先清理</span>
-    tab<span class="token punctuation">[</span>staleSlot<span class="token punctuation">]</span><span class="token punctuation">.</span>value <span class="token operator">=</span> null<span class="token punctuation">;</span>
-    tab<span class="token punctuation">[</span>staleSlot<span class="token punctuation">]</span> <span class="token operator">=</span> null<span class="token punctuation">;</span>
-    size<span class="token operator">--</span><span class="token punctuation">;</span>
+    // 先清理
+    tab[staleSlot].value = null;
+    tab[staleSlot] = null;
+    size--;
 
-    <span class="token comment" spellcheck="true">// Rehash until we encounter null</span>
-    Entry e<span class="token punctuation">;</span>
-    <span class="token keyword">int</span> i<span class="token punctuation">;</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token function">nextIndex</span><span class="token punctuation">(</span>staleSlot<span class="token punctuation">,</span> len<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">(</span>e <span class="token operator">=</span> tab<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">!=</span> null<span class="token punctuation">;</span>
-            i <span class="token operator">=</span> <span class="token function">nextIndex</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span> len<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        ThreadLocal<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> k <span class="token operator">=</span> e<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>k <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            e<span class="token punctuation">.</span>value <span class="token operator">=</span> null<span class="token punctuation">;</span>
-            tab<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> null<span class="token punctuation">;</span>
-            size<span class="token operator">--</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// 对于还没有被回收的情况，需要做一次 rehash。</span>
-            <span class="token comment" spellcheck="true">//如果对应的 ThreadLocal 的 ID 对 len 取模出来的索引 h 不为当前位置 i，</span>
-            <span class="token comment" spellcheck="true">//则从 h 向后线性探测到第一个空的 slot，把当前的 entry 给挪过去。</span>
-            <span class="token keyword">int</span> h <span class="token operator">=</span> k<span class="token punctuation">.</span>threadLocalHashCode <span class="token operator">&amp;</span> <span class="token punctuation">(</span>len <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>h <span class="token operator">!=</span> i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                tab<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> null<span class="token punctuation">;</span>
+    // Rehash until we encounter null
+    Entry e;
+    int i;
+    for (i = nextIndex(staleSlot, len);
+            (e = tab[i]) != null;
+            i = nextIndex(i, len)) {
+        ThreadLocal&lt;?&gt; k = e.get();
+        if (k == null) {
+            e.value = null;
+            tab[i] = null;
+            size--;
+        } else {
+            // 对于还没有被回收的情况，需要做一次 rehash。
+            //如果对应的 ThreadLocal 的 ID 对 len 取模出来的索引 h 不为当前位置 i，
+            //则从 h 向后线性探测到第一个空的 slot，把当前的 entry 给挪过去。
+            int h = k.threadLocalHashCode &amp; (len - 1);
+            if (h != i) {
+                tab[i] = null;
 
-                <span class="token comment" spellcheck="true">// Unlike Knuth 6.4 Algorithm R, we must scan until</span>
-                <span class="token comment" spellcheck="true">// null because multiple entries could have been stale.</span>
-                <span class="token keyword">while</span> <span class="token punctuation">(</span>tab<span class="token punctuation">[</span>h<span class="token punctuation">]</span> <span class="token operator">!=</span> null<span class="token punctuation">)</span>
-                    h <span class="token operator">=</span> <span class="token function">nextIndex</span><span class="token punctuation">(</span>h<span class="token punctuation">,</span> len<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                tab<span class="token punctuation">[</span>h<span class="token punctuation">]</span> <span class="token operator">=</span> e<span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> i<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<h4 id="ThreadLocalMap-rehash">3.1.1.4 ThreadLocalMap.rehash</h4><pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">rehash</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token function">expungeStaleEntries</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                // Unlike Knuth 6.4 Algorithm R, we must scan until
+                // null because multiple entries could have been stale.
+                while (tab[h] != null)
+                    h = nextIndex(h, len);
+                tab[h] = e;
+            }
+        }
+    }
+    return i;
+}</code></pre>
+<h4 id="ThreadLocalMap-rehash">3.1.1.4 ThreadLocalMap.rehash</h4><pre><code class="java">private void rehash() {
+    expungeStaleEntries();
 
-    <span class="token comment" spellcheck="true">// 如果清理完所有的slot，size仍然大于3/4的threshold，立即扩容防止滞后现象</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>size <span class="token operator">>=</span> threshold <span class="token operator">-</span> threshold <span class="token operator">/</span> <span class="token number">4</span><span class="token punctuation">)</span>
-        <span class="token function">resize</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+    // 如果清理完所有的slot，size仍然大于3/4的threshold，立即扩容防止滞后现象
+    if (size &gt;= threshold - threshold / 4)
+        resize();
+}</code></pre>
 <h3 id="threadLocalHashCode">3.1.2 threadLocalHashCode</h3><p>再来看看这个threadLocalHashCode是怎么计算的：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token keyword">int</span> threadLocalHashCode <span class="token operator">=</span> <span class="token function">nextHashCode</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre><code class="java">private final int threadLocalHashCode = nextHashCode();
 
-<span class="token keyword">private</span> <span class="token keyword">static</span> AtomicInteger nextHashCode <span class="token operator">=</span>
-    <span class="token keyword">new</span> <span class="token class-name">AtomicInteger</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+private static AtomicInteger nextHashCode =
+    new AtomicInteger();
 
-<span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">int</span> HASH_INCREMENT <span class="token operator">=</span> <span class="token number">0x61c88647</span><span class="token punctuation">;</span>
+private static final int HASH_INCREMENT = 0x61c88647;
 
-<span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">nextHashCode</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">return</span> nextHashCode<span class="token punctuation">.</span><span class="token function">getAndAdd</span><span class="token punctuation">(</span>HASH_INCREMENT<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+private static int nextHashCode() {
+    return nextHashCode.getAndAdd(HASH_INCREMENT);
+}</code></pre>
 <p>每个 ThreadLocal 对象都有一个 hash 值 threadLocalHashCode，每初始化一个 ThreadLocal对象，hash 值就增加一个固定的大小 <code>0x61c88647</code>。</p>
-<h2 id="get">3.2 get</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> T <span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    Thread t <span class="token operator">=</span> Thread<span class="token punctuation">.</span><span class="token function">currentThread</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    ThreadLocalMap map <span class="token operator">=</span> <span class="token function">getMap</span><span class="token punctuation">(</span>t<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>map <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">//getEntry来查找是否有这个元素</span>
-        ThreadLocalMap<span class="token punctuation">.</span>Entry e <span class="token operator">=</span> map<span class="token punctuation">.</span><span class="token function">getEntry</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//如果map中存在该值，返回</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>e <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token annotation punctuation">@SuppressWarnings</span><span class="token punctuation">(</span><span class="token string">"unchecked"</span><span class="token punctuation">)</span>
-            T result <span class="token operator">=</span> <span class="token punctuation">(</span>T<span class="token punctuation">)</span>e<span class="token punctuation">.</span>value<span class="token punctuation">;</span>
-            <span class="token keyword">return</span> result<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">//否则setInitialValue，并将结果返回</span>
-    <span class="token keyword">return</span> <span class="token function">setInitialValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<h3 id="getEntry">3.2.1 getEntry</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> Entry <span class="token function">getEntry</span><span class="token punctuation">(</span>ThreadLocal<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> key<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">int</span> i <span class="token operator">=</span> key<span class="token punctuation">.</span>threadLocalHashCode <span class="token operator">&amp;</span> <span class="token punctuation">(</span>table<span class="token punctuation">.</span>length <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    Entry e <span class="token operator">=</span> table<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>e <span class="token operator">!=</span> null <span class="token operator">&amp;&amp;</span> e<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> key<span class="token punctuation">)</span>
-        <span class="token keyword">return</span> e<span class="token punctuation">;</span>
-    <span class="token keyword">else</span>
-        <span class="token comment" spellcheck="true">//由于采用线性探测法，如果没有找到需要继续向后查找</span>
-        <span class="token keyword">return</span> <span class="token function">getEntryAfterMiss</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> i<span class="token punctuation">,</span> e<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<h3 id="setInitialValue">3.2.2 setInitialValue</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> T <span class="token function">setInitialValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">//从initialValue方法获取初始值</span>
-    T value <span class="token operator">=</span> <span class="token function">initialValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    Thread t <span class="token operator">=</span> Thread<span class="token punctuation">.</span><span class="token function">currentThread</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    ThreadLocalMap map <span class="token operator">=</span> <span class="token function">getMap</span><span class="token punctuation">(</span>t<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//set到map中</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>map <span class="token operator">!=</span> null<span class="token punctuation">)</span>
-        map<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> value<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">else</span>
-        <span class="token function">createMap</span><span class="token punctuation">(</span>t<span class="token punctuation">,</span> value<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> value<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<h2 id="get">3.2 get</h2><pre><code class="java">public T get() {
+    Thread t = Thread.currentThread();
+    ThreadLocalMap map = getMap(t);
+    if (map != null) {
+        //getEntry来查找是否有这个元素
+        ThreadLocalMap.Entry e = map.getEntry(this);
+        //如果map中存在该值，返回
+        if (e != null) {
+            @SuppressWarnings(&quot;unchecked&quot;)
+            T result = (T)e.value;
+            return result;
+        }
+    }
+    //否则setInitialValue，并将结果返回
+    return setInitialValue();
+}</code></pre>
+<h3 id="getEntry">3.2.1 getEntry</h3><pre><code class="java">private Entry getEntry(ThreadLocal&lt;?&gt; key) {
+    int i = key.threadLocalHashCode &amp; (table.length - 1);
+    Entry e = table[i];
+    if (e != null &amp;&amp; e.get() == key)
+        return e;
+    else
+        //由于采用线性探测法，如果没有找到需要继续向后查找
+        return getEntryAfterMiss(key, i, e);
+}</code></pre>
+<h3 id="setInitialValue">3.2.2 setInitialValue</h3><pre><code class="java">private T setInitialValue() {
+    //从initialValue方法获取初始值
+    T value = initialValue();
+    Thread t = Thread.currentThread();
+    ThreadLocalMap map = getMap(t);
+    //set到map中
+    if (map != null)
+        map.set(this, value);
+    else
+        createMap(t, value);
+    return value;
+}</code></pre>
 <p>而initialValue默认返回null，我们可以在创建ThreadLocal对象时重写initialValue方法来指定第一次调用get获取的值。</p>
-<h2 id="remove">3.3 remove</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">remove</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    ThreadLocalMap m <span class="token operator">=</span> <span class="token function">getMap</span><span class="token punctuation">(</span>Thread<span class="token punctuation">.</span><span class="token function">currentThread</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>m <span class="token operator">!=</span> null<span class="token punctuation">)</span>
-        <span class="token comment" spellcheck="true">//直接调用ThreadLocalMap的remove方法移除</span>
-        m<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<h3 id="ThreadLocalMap-remove">3.3.1 ThreadLocalMap.remove</h3><pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">remove</span><span class="token punctuation">(</span>ThreadLocal<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> key<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    Entry<span class="token punctuation">[</span><span class="token punctuation">]</span> tab <span class="token operator">=</span> table<span class="token punctuation">;</span>
-    <span class="token keyword">int</span> len <span class="token operator">=</span> tab<span class="token punctuation">.</span>length<span class="token punctuation">;</span>
-    <span class="token keyword">int</span> i <span class="token operator">=</span> key<span class="token punctuation">.</span>threadLocalHashCode <span class="token operator">&amp;</span> <span class="token punctuation">(</span>len<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span>Entry e <span class="token operator">=</span> tab<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
-            e <span class="token operator">!=</span> null<span class="token punctuation">;</span>
-            e <span class="token operator">=</span> tab<span class="token punctuation">[</span>i <span class="token operator">=</span> <span class="token function">nextIndex</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span> len<span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>e<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> key<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">//在Entry上调用clear</span>
-            e<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">//清理后面的slot</span>
-            <span class="token function">expungeStaleEntry</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">return</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<h2 id="remove">3.3 remove</h2><pre><code class="java">public void remove() {
+    ThreadLocalMap m = getMap(Thread.currentThread());
+    if (m != null)
+        //直接调用ThreadLocalMap的remove方法移除
+        m.remove(this);
+}</code></pre>
+<h3 id="ThreadLocalMap-remove">3.3.1 ThreadLocalMap.remove</h3><pre><code class="java">private void remove(ThreadLocal&lt;?&gt; key) {
+    Entry[] tab = table;
+    int len = tab.length;
+    int i = key.threadLocalHashCode &amp; (len-1);
+    for (Entry e = tab[i];
+            e != null;
+            e = tab[i = nextIndex(i, len)]) {
+        if (e.get() == key) {
+            //在Entry上调用clear
+            e.clear();
+            //清理后面的slot
+            expungeStaleEntry(i);
+            return;
+        }
+    }
+}</code></pre>
 <h1 id="问题">4 问题</h1><h2 id="为什么-ThreadLocalMap-的-Key-是弱引用">4.1 为什么 ThreadLocalMap 的 Key 是弱引用</h2><p>如果是强引用，ThreadLocal 将无法被释放内存。</p>
 <p>因为如果这里使用普通的 key-value 形式来定义存储结构，实质上就会造成节点的生命周期与线程强绑定，只要线程没有销毁，那么节点在 GC 分析中一直处于可达状态，没办法被回收，而程序本身也无法判断是否可以清理节点。弱引用是 Java 中四档引用的第三档，比软引用更加弱一些，如果一个对象没有强引用链可达，那么一般活不过下一次 GC。当某个ThreadLocal 已经没有强引用可达，则随着它被垃圾回收，在 ThreadLocalMap 里对应的 Entry的键值会失效，这为 ThreadLocalMap 本身的垃圾清理提供了便利。</p>
 <h2 id="听说-ThreadLocalMap-还是会造成内存泄漏？">4.2 听说 ThreadLocalMap 还是会造成内存泄漏？</h2><p>发生内存泄漏的情况：</p>
@@ -1098,12 +1098,12 @@
                         <span class="chip bg-color">JDK</span>
                     </a>
                     
-                    <a href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">
-                        <span class="chip bg-color">基础知识</span>
-                    </a>
-                    
                     <a href="/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
                         <span class="chip bg-color">源码分析</span>
+                    </a>
+                    
+                    <a href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">
+                        <span class="chip bg-color">基础知识</span>
                     </a>
                     
                 </div>
@@ -1314,7 +1314,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1394,6 +1394,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

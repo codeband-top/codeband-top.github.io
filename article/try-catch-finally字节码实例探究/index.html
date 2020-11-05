@@ -26,10 +26,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -424,15 +424,15 @@
 <h1 id="概述">1 概述</h1><p>java是怎么处理try-catch-finally的？</p>
 <p>我们在<a href="../深入理解java虚拟机第三版读书笔记06">深入理解java虚拟机第三版读书笔记06</a>学习过，在class字节码中的属性表中，存在<code>code</code>属性，它用于存放各方法的字节码、属性等。其中就包括<code>exception_info</code>，即异常表，它记录了当一个异常发生后，应跳转到哪一行继续执行，而finally里面的代码块编译成字节码后则是被复制成许多份分别附在try和各catch块的后面。这篇文章，我们就通过一些实例来看看，java中的try-catch-finally引申出的一些问题。</p>
 <h1 id="普通的例子">2 普通的例子</h1><h2 id="普通中的普通例子">2.1 普通中的普通例子</h2><p>我们先来一个普通的例子</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">normal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"try-"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"catch"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token keyword">finally</span> <span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"finally"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public static void normal(){
+    try {
+        System.out.print(&quot;try-&quot;);
+    }catch (Exception e){
+        System.out.print(&quot;catch&quot;);
+    }finally {
+        System.out.print(&quot;finally&quot;);
+    }
+}</code></pre>
 <p>这个相信大家都知道是输出try-finally，因为没有异常出现，那么它的字节码是：</p>
 <pre><code> 0 getstatic #4 &lt;java/lang/System.out&gt;
  3 ldc #5 &lt;try-&gt;
@@ -470,13 +470,13 @@
 <li>19-28行的语句出现异常（类型为any，代表任何异常），交由39行处理。为什么这里会有这一项呢？原因和上面一样，<strong>如果执行catch代码块又出现了异常，也要保证finally代码块的执行。</strong></li>
 </ul>
 <h2 id="普通例子举一反三">2.2 普通例子举一反三</h2><p>有了上面这个例子，我们就来思考一下，如果没有finally代码块，字节码会是什么样子的呢？</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">normal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"try-"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"catch"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public static void normal(){
+    try {
+        System.out.print(&quot;try-&quot;);
+    }catch (Exception e){
+        System.out.print(&quot;catch&quot;);
+    }
+}</code></pre>
 <p>首先能想到的是，正常流程执行完try中的内容就应该直接返回。而出现异常就应该跳转至中间一段用于处理异常的代码块。因为没有finally代码块，应该也不会有那么多冗余代码块被复制。</p>
 <p>验证：</p>
 <pre><code> 0 getstatic #4 &lt;java/lang/System.out&gt;
@@ -493,28 +493,28 @@
 20 return</code></pre><p>这么一看确实清爽多了，再看看异常表：</p>
 <p><img src="https://api.codetool.top/img/15863612854501.png" alt></p>
 <p>确实异常表也清爽多了，因为不必保证finally代码块的执行，这里只有我们显式catch的一种异常。</p>
-<h1 id="没事自己抛出异常玩玩，会发生什么？">3 没事自己抛出异常玩玩，会发生什么？</h1><h2 id="try抛出异常">3.1 try抛出异常</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">throwAndCatch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Exception</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"骚一下"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"抓住了"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"我在外面"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<h1 id="没事自己抛出异常玩玩，会发生什么？">3 没事自己抛出异常玩玩，会发生什么？</h1><h2 id="try抛出异常">3.1 try抛出异常</h2><pre><code class="java">public static void throwAndCatch(){
+    try {
+        throw new Exception();
+        System.out.println(&quot;骚一下&quot;);
+    }catch (Exception e){
+        System.out.println(&quot;抓住了&quot;);
+    }
+    System.out.println(&quot;我在外面&quot;);
+}</code></pre>
 <p>这段代码的原型来自牛客网一道题，输出是什么？</p>
 <p>答案应该是<code>抓住了</code>和<code>我在外面</code>，catch是可以捕获在try中手动抛出的异常的，但因为部分编译器优化程度过高知道<code>System.out.println(&quot;骚一下&quot;);</code>是不可达语句，会报编译错误。我没找到怎么关闭这个异常检查 TT_TT</p>
 <h2 id="catch抛出异常">3.2 catch抛出异常</h2><p>catch中抛出异常的情况，我们把上面那段代码改成：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">throwAndCatch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">1</span><span class="token operator">/</span><span class="token number">0</span><span class="token punctuation">;</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"出现异常了"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"抓住了"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">RuntimeException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"我在外面"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public static void throwAndCatch(){
+    try {
+        int i = 1/0;
+        System.out.println(&quot;出现异常了&quot;);
+    }catch (Exception e){
+        System.out.println(&quot;抓住了&quot;);
+        throw new RuntimeException();
+    }
+    System.out.println(&quot;我在外面&quot;);
+}</code></pre>
 <p>为什么要抛RuntimeException？因为RuntimeException是非受查异常，可以不用catch，否则即使是在catch中抛出异常还是需要再嵌套一层catch。</p>
 <p>那么这段代码会输出什么？我相信这里可能就有人猜不准了，正确答案应该是<code>抓住了</code>，并接着抛出运行时异常。</p>
 <p>来看一下字节码：</p>
@@ -551,39 +551,39 @@
 <li>15-21行，输出”抓住了”，继续执行。</li>
 <li>24-31行，new了一个<code>RuntimeException</code>，并抛出，因为没有该异常没有对应的处理，程序终止，后面的”我在外面”也不会输出。</li>
 </ul>
-<h2 id="举一反三">3.3 举一反三</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">throwAndCatch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">1</span><span class="token operator">/</span><span class="token number">0</span><span class="token punctuation">;</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"出现异常了"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"抓住了"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">RuntimeException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token keyword">finally</span> <span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"必须执行"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"我在外面"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<h2 id="举一反三">3.3 举一反三</h2><pre><code class="java">public static void throwAndCatch(){
+    try {
+        int i = 1/0;
+        System.out.println(&quot;出现异常了&quot;);
+    }catch (Exception e){
+        System.out.println(&quot;抓住了&quot;);
+        throw new RuntimeException();
+    }finally {
+        System.out.println(&quot;必须执行&quot;);
+    }
+    System.out.println(&quot;我在外面&quot;);
+}</code></pre>
 <p>来看看这段代码，增加了一个finally语句块会输出什么呢？这里就不研究字节码了，因为原因之前在普通例子的时候就提到过了，如果catch代码块中出现异常，并且存在finally代码块，会先把异常信息存起来，执行完finally之后再抛出异常。</p>
 <p>那么相信你也知道了，这里的输出应该是：<code>抓住了</code>和<code>必须执行</code>。</p>
-<h1 id="我都要return了，finally还会执行吗？">4 我都要return了，finally还会执行吗？</h1><h2 id="普通例子">4.1 普通例子</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">var</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-    <span class="token keyword">int</span> i<span class="token punctuation">;</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        i <span class="token operator">=</span> <span class="token number">10</span><span class="token punctuation">;</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"修改成10了哦"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> i<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        i <span class="token operator">=</span> <span class="token number">20</span><span class="token punctuation">;</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"修改成20了哦"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token keyword">finally</span> <span class="token punctuation">{</span>
-        i <span class="token operator">=</span> <span class="token number">30</span><span class="token punctuation">;</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"修改成30了哦"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> i<span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+<h1 id="我都要return了，finally还会执行吗？">4 我都要return了，finally还会执行吗？</h1><h2 id="普通例子">4.1 普通例子</h2><pre><code class="java">public static int var(){
+    int i;
+    try {
+        i = 10;
+        System.out.println(&quot;修改成10了哦&quot;);
+        return i;
+    }catch (Exception e){
+        i = 20;
+        System.out.println(&quot;修改成20了哦&quot;);
+    }finally {
+        i = 30;
+        System.out.println(&quot;修改成30了哦&quot;);
+    }
+    return i;
+}
 
-<span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token function">var</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+public static void main(String[] args) {
+    System.out.println(var());
+}</code></pre>
 <p>这个例子开始有一点难度了，你能告诉我它会输出什么吗？</p>
 <p>首先catch内的代码是不会执行的，因为没有异常抛出，你觉得finally中的代码会执行吗？</p>
 <p>答案是会的，看看输出：</p>
@@ -650,44 +650,44 @@
 </ul>
 <p>牛的！其实执行的流程就这么点，注意到finally执行前后，程序分别将10存入局部变量表和从局部变量表中取出，实现了finally中对变量的修改不影响即将return的结果。</p>
 <p>为什么会出现这种情况，<strong>因为编译器知道try中即将return数据，但是finally还是得执行，所以为了保护即将返回的数据，会先将该数据存起来，等finally执行完再取出并返回。</strong></p>
-<h2 id="举一反三-1">4.2 举一反三</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">var</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-    <span class="token keyword">int</span> i<span class="token punctuation">;</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        i <span class="token operator">=</span> <span class="token number">10</span><span class="token punctuation">;</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"修改成10了哦"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">int</span> a <span class="token operator">=</span> <span class="token number">1</span><span class="token operator">/</span><span class="token number">0</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> i<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        i <span class="token operator">=</span> <span class="token number">20</span><span class="token punctuation">;</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"修改成20了哦"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> i<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token keyword">finally</span> <span class="token punctuation">{</span>
-        i <span class="token operator">=</span> <span class="token number">30</span><span class="token punctuation">;</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"修改成30了哦"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
+<h2 id="举一反三-1">4.2 举一反三</h2><pre><code class="java">public static int var(){
+    int i;
+    try {
+        i = 10;
+        System.out.println(&quot;修改成10了哦&quot;);
+        int a = 1/0;
+        return i;
+    }catch (Exception e){
+        i = 20;
+        System.out.println(&quot;修改成20了哦&quot;);
+        return i;
+    }finally {
+        i = 30;
+        System.out.println(&quot;修改成30了哦&quot;);
+    }
+}
 
-<span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token function">var</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+public static void main(String[] args) {
+    System.out.println(var());
+}</code></pre>
 <p>这个例子稍微更复杂点了，执行到catch中去了，那么输出是什么呢？</p>
 <p>如果你有好好得跟着我看下来，应该不难猜到，try中异常前的语句、catch和finally中得语句都会执行，实际上，finally也不会影响catch返回的结果：</p>
 <pre><code>修改成10了哦
 修改成20了哦
 修改成30了哦
-20</code></pre><h1 id="抢着return，谁优先？">5 抢着return，谁优先？</h1><h2 id="普通例子-1">5.1 普通例子</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">num</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token number">10</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token number">20</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token keyword">finally</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token number">30</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
+20</code></pre><h1 id="抢着return，谁优先？">5 抢着return，谁优先？</h1><h2 id="普通例子-1">5.1 普通例子</h2><pre><code class="java">public static int num(){
+    try {
+        return 10;
+    }catch (Exception e){
+        return 20;
+    }finally {
+        return 30;
+    }
+}
 
-<span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token function">num</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+public static void main(String[] args) {
+    System.out.println(num());
+}</code></pre>
 <p>这个例子不复杂吧，经过了这么多历练，你能猜到结果吗？</p>
 <p>答案其实是30，注意finally中如果出现了return语句，由于finally必会执行，总是finally中的return语句生效。</p>
 <p>字节码也不难：</p>
@@ -704,31 +704,31 @@
 13 astore_2
 14 bipush 30
 16 ireturn</code></pre><h2 id="举一反三-2">5.2 举一反三</h2><p>稍微修改一下上面的例子：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">num</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">1</span><span class="token operator">/</span><span class="token number">0</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> <span class="token number">10</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token number">20</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token keyword">finally</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token number">30</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
+<pre><code class="java">public static int num(){
+    try {
+        int i = 1/0;
+        return 10;
+    }catch (Exception e){
+        return 20;
+    }finally {
+        return 30;
+    }
+}
 
-<span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token function">num</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+public static void main(String[] args) {
+    System.out.println(num());
+}</code></pre>
 <p>输出是什么？如果你能很快给出答案，我觉得你对try-catch-finally的理解已经差不多了</p>
 <p><button onclick="document.getElementById('ans').style.display='inline';">点击查看答案</button></p>
 <p><span id="ans" style="display:none">这道题的答案依然是30，因为编译器知道catch中即将要return了，再不执行finally来不及了，于是保存现场去执行finally，结果在finally中就return掉了。所以我们一般推荐不要在finally代码块中使用return语句，因为它会覆盖掉其他地方的return语句，程序的可读性不好，如果你不是看了我这篇文章，也想不到这段代码返回30吧？</span></p>
 <p><span style="color:gray">有人可能要问了，学习这些是为了什么呢？谁写代码会这么写呢？那不都是为了应付面试吗😀</span></p>
 <h1 id="finally不会执行的例外情况">6 finally不会执行的例外情况</h1><p>有人看了全文就要说了，懂了！反正finally必执行，记住这个就万无一失了！</p>
 <p>其实finally也不是那么的保险，比如我给你举个例子：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">try</span><span class="token punctuation">{</span>
-    System<span class="token punctuation">.</span><span class="token function">exit</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span class="token keyword">finally</span><span class="token punctuation">{</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"finally执行了"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">try{
+    System.exit(1);
+}finally{
+    System.out.println(&quot;finally执行了&quot;);
+}</code></pre>
 <p>这段代码中，finally就不会执行了，遇到<code>System.exit</code>，程序会直接退出，相当于杀进程了。</p>
 <p>其他情况例如你外部杀进程，断电脑电源（手动滑稽），finally也是不会执行的。</p>
 <p>OK，那么这篇文章就写到这了，长篇原创好文希望大家支持(<em>^_^</em>)</p>
@@ -1348,7 +1348,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1428,6 +1428,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

@@ -26,10 +26,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -421,22 +421,22 @@
 <p>对于分词来说，不同的语言，分词规则不同。Lucene作为一个工具包提供不同语言的分词器。</p>
 <p>不论是建立索引还是查询的时候都要使用分词器，而且最好是使用同一个分词器。</p>
 <h1 id="Lucene原生分词器">2 Lucene原生分词器</h1><h2 id="StandardAnalyzer">2.1 StandardAnalyzer</h2><p><strong>特点:</strong> Lucene提供的标准分词器, 可以对用英文进行分词, 对中文是单字分词, 也就是一个字就认为是一个词。</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Override</span>
-<span class="token keyword">protected</span> TokenStreamComponents <span class="token function">createComponents</span><span class="token punctuation">(</span><span class="token keyword">final</span> String fieldName<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">final</span> StandardTokenizer src <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StandardTokenizer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    src<span class="token punctuation">.</span><span class="token function">setMaxTokenLength</span><span class="token punctuation">(</span>maxTokenLength<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    TokenStream tok <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">LowerCaseFilter</span><span class="token punctuation">(</span>src<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    tok <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StopFilter</span><span class="token punctuation">(</span>tok<span class="token punctuation">,</span> stopwords<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">TokenStreamComponents</span><span class="token punctuation">(</span>src<span class="token punctuation">,</span> tok<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token annotation punctuation">@Override</span>
-        <span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">setReader</span><span class="token punctuation">(</span><span class="token keyword">final</span> Reader reader<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// So that if maxTokenLength was changed, the change takes</span>
-            <span class="token comment" spellcheck="true">// effect next time tokenStream is called:</span>
-            src<span class="token punctuation">.</span><span class="token function">setMaxTokenLength</span><span class="token punctuation">(</span>StandardAnalyzer<span class="token punctuation">.</span><span class="token keyword">this</span><span class="token punctuation">.</span>maxTokenLength<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">super</span><span class="token punctuation">.</span><span class="token function">setReader</span><span class="token punctuation">(</span>reader<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">@Override
+protected TokenStreamComponents createComponents(final String fieldName) {
+    final StandardTokenizer src = new StandardTokenizer();
+    src.setMaxTokenLength(maxTokenLength);
+    TokenStream tok = new LowerCaseFilter(src);
+    tok = new StopFilter(tok, stopwords);
+    return new TokenStreamComponents(src, tok) {
+        @Override
+        protected void setReader(final Reader reader) {
+            // So that if maxTokenLength was changed, the change takes
+            // effect next time tokenStream is called:
+            src.setMaxTokenLength(StandardAnalyzer.this.maxTokenLength);
+            super.setReader(reader);
+        }
+    };
+}</code></pre>
 <p>Tokenizer 就是分词器，负责将reader转换为语汇单元即进行分词处理，Lucene提供了很多的分词器，也可以使用第三方的分词，比如IKAnalyzer一个中文分词器。</p>
 <p>TokenFilter是分词过滤器，负责对语汇单元进行过滤，TokenFilter可以是一个过滤器链，Lucene提供了很多的分词器过滤器，比如大小写转换、去除停用词等。</p>
 <p>如下图是语汇单元的生成过程：</p>
@@ -459,17 +459,17 @@
 <li>停用词典:<br>凡是出现在停用词典中的词，都会被过滤掉.</li>
 </ul>
 <p>先建立配置文件<code>IKAnalyzer.cfg.xml</code>：</p>
-<pre class=" language-xml"><code class="language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8"?></span>
-<span class="token doctype">&lt;!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd"></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>properties</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>comment</span><span class="token punctuation">></span></span>IK Analyzer 扩展配置<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>comment</span><span class="token punctuation">></span></span>
-    <span class="token comment" spellcheck="true">&lt;!--用户可以在这里配置自己的扩展字典 --></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>entry</span> <span class="token attr-name">key</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>ext_dict<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>ext.dic;<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>entry</span><span class="token punctuation">></span></span>
+<pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE properties SYSTEM &quot;http://java.sun.com/dtd/properties.dtd&quot;&gt;
+&lt;properties&gt;
+    &lt;comment&gt;IK Analyzer 扩展配置&lt;/comment&gt;
+    &lt;!--用户可以在这里配置自己的扩展字典 --&gt;
+    &lt;entry key=&quot;ext_dict&quot;&gt;ext.dic;&lt;/entry&gt;
 
-    <span class="token comment" spellcheck="true">&lt;!--用户可以在这里配置自己的扩展停止词字典--></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>entry</span> <span class="token attr-name">key</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>ext_stopwords<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>stopword.dic;<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>entry</span><span class="token punctuation">></span></span>
+    &lt;!--用户可以在这里配置自己的扩展停止词字典--&gt;
+    &lt;entry key=&quot;ext_stopwords&quot;&gt;stopword.dic;&lt;/entry&gt;
 
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>properties</span><span class="token punctuation">></span></span></code></pre>
+&lt;/properties&gt;</code></pre>
 <p><code>ext.dic</code>为拓展词典，每个词单独占一行：</p>
 <pre><code>华为
 手机
@@ -498,24 +498,24 @@ not
 of
 on
 ...</code></pre><p>测试：</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Test</span>
-<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">TestIKAnalyzer</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception<span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">// 1. 创建分词器,分析文档，对文档进行分词</span>
-    Analyzer analyzer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">IKAnalyzer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 2. 创建Directory对象,声明索引库的位置</span>
-    Directory directory <span class="token operator">=</span> FSDirectory<span class="token punctuation">.</span><span class="token function">open</span><span class="token punctuation">(</span>Paths<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"E:\\dir"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 3. 创建IndexWriteConfig对象，写入索引需要的配置</span>
-    IndexWriterConfig config <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">IndexWriterConfig</span><span class="token punctuation">(</span>analyzer<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 4.创建IndexWriter写入对象</span>
-    IndexWriter indexWriter <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">IndexWriter</span><span class="token punctuation">(</span>directory<span class="token punctuation">,</span> config<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 5.写入到索引库，通过IndexWriter添加文档对象document</span>
-    Document doc <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Document</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    doc<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">TextField</span><span class="token punctuation">(</span><span class="token string">"name"</span><span class="token punctuation">,</span> "vivo X23 8GB<span class="token operator">+</span>128GB 幻夜蓝<span class="token punctuation">,</span>水滴屏全面屏<span class="token punctuation">,</span>游戏手机<span class="token punctuation">.</span>移
-    动联通电信全网通4G手机"<span class="token punctuation">,</span> Field<span class="token punctuation">.</span>Store<span class="token punctuation">.</span>YES<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    indexWriter<span class="token punctuation">.</span><span class="token function">addDocument</span><span class="token punctuation">(</span>doc<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 6.释放资源</span>
-    indexWriter<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">@Test
+public void TestIKAnalyzer() throws Exception{
+    // 1. 创建分词器,分析文档，对文档进行分词
+    Analyzer analyzer = new IKAnalyzer();
+    // 2. 创建Directory对象,声明索引库的位置
+    Directory directory = FSDirectory.open(Paths.get(&quot;E:\\dir&quot;));
+    // 3. 创建IndexWriteConfig对象，写入索引需要的配置
+    IndexWriterConfig config = new IndexWriterConfig(analyzer);
+    // 4.创建IndexWriter写入对象
+    IndexWriter indexWriter = new IndexWriter(directory, config);
+    // 5.写入到索引库，通过IndexWriter添加文档对象document
+    Document doc = new Document();
+    doc.add(new TextField(&quot;name&quot;, &quot;vivo X23 8GB+128GB 幻夜蓝,水滴屏全面屏,游戏手机.移
+    动联通电信全网通4G手机&quot;, Field.Store.YES));
+    indexWriter.addDocument(doc);
+    // 6.释放资源
+    indexWriter.close();
+}</code></pre>
 
             </div>
             <hr/>
@@ -1115,7 +1115,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1195,6 +1195,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

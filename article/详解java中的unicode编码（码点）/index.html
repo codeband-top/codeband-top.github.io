@@ -26,10 +26,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -475,39 +475,39 @@
 <iframe src="https://run.codetool.top/?id=31" frameborder="0" height="500" style="width:100%;border:1px solid #ccc;"></iframe>
 
 <p>可见，如果String中存在非bmp中的字符，String会将它算成两个字符长度。看String.length()的源码也可知道这点：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">return</span> value<span class="token punctuation">.</span>length<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public int length() {
+    return value.length;
+}</code></pre>
 <p><code>value</code>是String内部的一个字符数组。</p>
 <h2 id="java对码点计算的支持">2.3 java对码点计算的支持</h2><p>其实String中也提供了计算码点的方法：<code>String.codePointCount(int beginIndex, int endIndex)</code></p>
 <iframe src="https://run.codetool.top/?id=32" frameborder="0" height="500" style="width:100%;border:1px solid #ccc;"></iframe>
 
 
 <p>利用的是<code>Character</code>类能判断一个码点是否为代理码点：<br><code>Character.isHighSurrogate</code>：是否为高位代理码点</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">boolean</span> <span class="token function">isHighSurrogate</span><span class="token punctuation">(</span><span class="token keyword">char</span> ch<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">// Help VM constant-fold; MAX_HIGH_SURROGATE + 1 == MIN_LOW_SURROGATE</span>
-    <span class="token keyword">return</span> ch <span class="token operator">>=</span> MIN_HIGH_SURROGATE <span class="token operator">&amp;&amp;</span> ch <span class="token operator">&lt;</span> <span class="token punctuation">(</span>MAX_HIGH_SURROGATE <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public static boolean isHighSurrogate(char ch) {
+    // Help VM constant-fold; MAX_HIGH_SURROGATE + 1 == MIN_LOW_SURROGATE
+    return ch &gt;= MIN_HIGH_SURROGATE &amp;&amp; ch &lt; (MAX_HIGH_SURROGATE + 1);
+}</code></pre>
 <p>其中<code>MIN_HIGH_SURROGATE=\uD800</code>和<code>MAX_HIGH_SURROGATE=\uDBFF</code>，注明了高位代理码点的值边界。</p>
 <p><code>Character.isLowSurrogate</code>：是否为低位代理码点</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">boolean</span> <span class="token function">isLowSurrogate</span><span class="token punctuation">(</span><span class="token keyword">char</span> ch<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">return</span> ch <span class="token operator">>=</span> MIN_LOW_SURROGATE <span class="token operator">&amp;&amp;</span> ch <span class="token operator">&lt;</span> <span class="token punctuation">(</span>MAX_LOW_SURROGATE <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public static boolean isLowSurrogate(char ch) {
+    return ch &gt;= MIN_LOW_SURROGATE &amp;&amp; ch &lt; (MAX_LOW_SURROGATE + 1);
+}</code></pre>
 <p>其中<code>MIN_HIGH_SURROGATE=\uDC00</code>和<code>MAX_HIGH_SURROGATE=\uDFFF</code>，注明了高位代理码点的值边界。</p>
 <p>要判断字符串内有没有代理码点，只需确定连续的两个码点一个是高位代理码点一个是低位代理码点就行了。</p>
 <p><code>String.codePointCount</code>依赖的方法<code>Character.codePointCountImpl</code>源码：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">codePointCountImpl</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token punctuation">[</span><span class="token punctuation">]</span> a<span class="token punctuation">,</span> <span class="token keyword">int</span> offset<span class="token punctuation">,</span> <span class="token keyword">int</span> count<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">int</span> endIndex <span class="token operator">=</span> offset <span class="token operator">+</span> count<span class="token punctuation">;</span>
-    <span class="token keyword">int</span> n <span class="token operator">=</span> count<span class="token punctuation">;</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> offset<span class="token punctuation">;</span> i <span class="token operator">&lt;</span> endIndex<span class="token punctuation">;</span> <span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">isHighSurrogate</span><span class="token punctuation">(</span>a<span class="token punctuation">[</span>i<span class="token operator">++</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> i <span class="token operator">&lt;</span> endIndex <span class="token operator">&amp;&amp;</span>
-            <span class="token function">isLowSurrogate</span><span class="token punctuation">(</span>a<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            n<span class="token operator">--</span><span class="token punctuation">;</span>
-            i<span class="token operator">++</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> n<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">static int codePointCountImpl(char[] a, int offset, int count) {
+    int endIndex = offset + count;
+    int n = count;
+    for (int i = offset; i &lt; endIndex; ) {
+        if (isHighSurrogate(a[i++]) &amp;&amp; i &lt; endIndex &amp;&amp;
+            isLowSurrogate(a[i])) {
+            n--;
+            i++;
+        }
+    }
+    return n;
+}</code></pre>
 <p>如果要遍历一个字符串中的字符，可能需要考虑是否有非kmp中的字符的情况。那么就需要用码点为单位来处理：</p>
 <p><strong>反例：</strong></p>
 <iframe src="https://run.codetool.top/?id=33" frameborder="0" height="500" style="width:100%;border:1px solid #ccc;"></iframe>
@@ -1120,7 +1120,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1200,6 +1200,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

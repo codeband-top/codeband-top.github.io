@@ -25,10 +25,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -415,115 +415,115 @@
 <p>这个内容是在《Redis深度历险：核心原理与应用实践》这本书里面看到的，众所周知List类型可以用来实现一个异步队列，不过只能实现一个即时的生产与消费。而使用Sorted_set（下面称Zset）这个类型可以实现一个延时消费的队列。</p>
 <p>思想是通过将消息序列化成一个字符串作为Zset的value，到期处理时间作为score，然后用多个线程轮询Zset获取到期的任务（使用<code>zrem</code>命令）进行处理。之所以使用多个线程轮询是保证一个线程挂了还有其他线程可以处理，<strong>而redis的单线程模型决定了<code>zrem</code>要么成功，要么失败，在多线程环境下是安全的，避免多个线程同时获取消息而导致消息重复消费。</strong></p>
 <p>下面直接上代码，来源是书上的代码，我做了一点修改：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">import</span> com<span class="token punctuation">.</span>alibaba<span class="token punctuation">.</span>fastjson<span class="token punctuation">.</span>JSON<span class="token punctuation">;</span>
-<span class="token keyword">import</span> com<span class="token punctuation">.</span>alibaba<span class="token punctuation">.</span>fastjson<span class="token punctuation">.</span>TypeReference<span class="token punctuation">;</span>
-<span class="token keyword">import</span> lombok<span class="token punctuation">.</span>extern<span class="token punctuation">.</span>slf4j<span class="token punctuation">.</span>Slf4j<span class="token punctuation">;</span>
-<span class="token keyword">import</span> redis<span class="token punctuation">.</span>clients<span class="token punctuation">.</span>jedis<span class="token punctuation">.</span>Jedis<span class="token punctuation">;</span>
+<pre><code class="java">import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+import lombok.extern.slf4j.Slf4j;
+import redis.clients.jedis.Jedis;
 
-<span class="token keyword">import</span> java<span class="token punctuation">.</span>lang<span class="token punctuation">.</span>reflect<span class="token punctuation">.</span>Type<span class="token punctuation">;</span>
-<span class="token keyword">import</span> java<span class="token punctuation">.</span>util<span class="token punctuation">.</span>Random<span class="token punctuation">;</span>
-<span class="token keyword">import</span> java<span class="token punctuation">.</span>util<span class="token punctuation">.</span>Set<span class="token punctuation">;</span>
-<span class="token keyword">import</span> java<span class="token punctuation">.</span>util<span class="token punctuation">.</span>UUID<span class="token punctuation">;</span>
+import java.lang.reflect.Type;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
 
-<span class="token annotation punctuation">@Slf4j</span>
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">RedisDelayingQueue</span><span class="token operator">&lt;</span>T<span class="token operator">></span> <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">//消息</span>
-    <span class="token keyword">static</span> <span class="token keyword">class</span> <span class="token class-name">TaskItem</span><span class="token operator">&lt;</span>T<span class="token operator">></span><span class="token punctuation">{</span>
-        <span class="token keyword">public</span> String id<span class="token punctuation">;</span>
-        <span class="token keyword">public</span> T msg<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">//JSON转对象需要泛型Type</span>
-    <span class="token keyword">private</span> Type TaskType <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">TypeReference</span><span class="token operator">&lt;</span>TaskItem<span class="token operator">&lt;</span>T<span class="token operator">>></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">.</span><span class="token function">getType</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">private</span> Jedis jedis<span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//队列的键</span>
-    <span class="token keyword">private</span> String queueKey<span class="token punctuation">;</span>
+@Slf4j
+public class RedisDelayingQueue&lt;T&gt; {
+    //消息
+    static class TaskItem&lt;T&gt;{
+        public String id;
+        public T msg;
+    }
+    //JSON转对象需要泛型Type
+    private Type TaskType = new TypeReference&lt;TaskItem&lt;T&gt;&gt;(){}.getType();
+    private Jedis jedis;
+    //队列的键
+    private String queueKey;
 
-    <span class="token keyword">public</span> <span class="token function">RedisDelayingQueue</span><span class="token punctuation">(</span>Jedis jedis<span class="token punctuation">,</span>String queueKey<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>jedis <span class="token operator">=</span> jedis<span class="token punctuation">;</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>queueKey <span class="token operator">=</span> queueKey<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    public RedisDelayingQueue(Jedis jedis,String queueKey){
+        this.jedis = jedis;
+        this.queueKey = queueKey;
+    }
 
-    <span class="token comment" spellcheck="true">//产生一条消息</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">delay</span><span class="token punctuation">(</span>T msg<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        TaskItem<span class="token operator">&lt;</span>T<span class="token operator">></span> task <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">TaskItem</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        task<span class="token punctuation">.</span>id <span class="token operator">=</span> UUID<span class="token punctuation">.</span><span class="token function">randomUUID</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        task<span class="token punctuation">.</span>msg <span class="token operator">=</span> msg<span class="token punctuation">;</span>
-        String s <span class="token operator">=</span> JSON<span class="token punctuation">.</span><span class="token function">toJSONString</span><span class="token punctuation">(</span>task<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//随机产生延迟时间，在2s~10s的范围内</span>
-        Random random <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Random</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">int</span> i <span class="token operator">=</span> random<span class="token punctuation">.</span><span class="token function">nextInt</span><span class="token punctuation">(</span><span class="token number">8000</span><span class="token punctuation">)</span><span class="token operator">+</span><span class="token number">2000</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//使用zadd添加消息，第二个参数score为到期时间，第三个参数为value</span>
-        jedis<span class="token punctuation">.</span><span class="token function">zadd</span><span class="token punctuation">(</span>queueKey<span class="token punctuation">,</span>System<span class="token punctuation">.</span><span class="token function">currentTimeMillis</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">+</span>i<span class="token punctuation">,</span>s<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        log<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"产生消息：{}，延迟时间：{}"</span><span class="token punctuation">,</span>msg<span class="token punctuation">,</span>i<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    //产生一条消息
+    public void delay(T msg){
+        TaskItem&lt;T&gt; task = new TaskItem&lt;&gt;();
+        task.id = UUID.randomUUID().toString();
+        task.msg = msg;
+        String s = JSON.toJSONString(task);
+        //随机产生延迟时间，在2s~10s的范围内
+        Random random = new Random();
+        int i = random.nextInt(8000)+2000;
+        //使用zadd添加消息，第二个参数score为到期时间，第三个参数为value
+        jedis.zadd(queueKey,System.currentTimeMillis()+i,s);
+        log.info(&quot;产生消息：{}，延迟时间：{}&quot;,msg,i);
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">loop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">//轮询检查是否有到期的消息</span>
-        <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token operator">!</span>Thread<span class="token punctuation">.</span><span class="token function">interrupted</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">//zrangeByScore按score进行排序</span>
-            <span class="token comment" spellcheck="true">//后面两个参数offset=0和count=1代表只取出第一条到期时间最小的数据</span>
-            Set<span class="token operator">&lt;</span>String<span class="token operator">></span> values <span class="token operator">=</span> jedis<span class="token punctuation">.</span><span class="token function">zrangeByScore</span><span class="token punctuation">(</span>queueKey<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> System<span class="token punctuation">.</span><span class="token function">currentTimeMillis</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">,</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">if</span><span class="token punctuation">(</span>values<span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-                <span class="token comment" spellcheck="true">//如果没有到期的消息，等待0.1秒后再进行轮询</span>
-                <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                    Thread<span class="token punctuation">.</span><span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span><span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span><span class="token punctuation">{</span>
-                    <span class="token keyword">break</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-                <span class="token keyword">continue</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-            String s <span class="token operator">=</span> values<span class="token punctuation">.</span><span class="token function">iterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">//如果抢到了消息，进行消费</span>
-            <span class="token keyword">if</span><span class="token punctuation">(</span>jedis<span class="token punctuation">.</span><span class="token function">zrem</span><span class="token punctuation">(</span>queueKey<span class="token punctuation">,</span> s<span class="token punctuation">)</span><span class="token operator">></span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-                TaskItem<span class="token operator">&lt;</span>T<span class="token operator">></span> task <span class="token operator">=</span> JSON<span class="token punctuation">.</span><span class="token function">parseObject</span><span class="token punctuation">(</span>s<span class="token punctuation">,</span>TaskType<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">handleMsg</span><span class="token punctuation">(</span>task<span class="token punctuation">.</span>msg<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+    public void loop(){
+        //轮询检查是否有到期的消息
+        while (!Thread.interrupted()){
+            //zrangeByScore按score进行排序
+            //后面两个参数offset=0和count=1代表只取出第一条到期时间最小的数据
+            Set&lt;String&gt; values = jedis.zrangeByScore(queueKey, 0, System.currentTimeMillis(),0,1);
+            if(values.isEmpty()){
+                //如果没有到期的消息，等待0.1秒后再进行轮询
+                try {
+                    Thread.sleep(100);
+                }catch (InterruptedException e){
+                    break;
+                }
+                continue;
+            }
+            String s = values.iterator().next();
+            //如果抢到了消息，进行消费
+            if(jedis.zrem(queueKey, s)&gt;0){
+                TaskItem&lt;T&gt; task = JSON.parseObject(s,TaskType);
+                this.handleMsg(task.msg);
+            }
+        }
+    }
 
-    <span class="token comment" spellcheck="true">//消费消息</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">handleMsg</span><span class="token punctuation">(</span>T msg<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        log<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"消息被消费：{}"</span><span class="token punctuation">,</span>msg<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    //消费消息
+    public void handleMsg(T msg) {
+        log.info(&quot;消息被消费：{}&quot;,msg);
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">//建立两个连接，防止两个comsumer争用一个jedis对象轮询，会产生read time out错误</span>
-        Jedis jedis1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Jedis</span><span class="token punctuation">(</span><span class="token string">"192.168.176.128"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        Jedis jedis2 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Jedis</span><span class="token punctuation">(</span><span class="token string">"192.168.176.128"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        RedisDelayingQueue<span class="token operator">&lt;</span>String<span class="token operator">></span> queue1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RedisDelayingQueue</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span>jedis1<span class="token punctuation">,</span> <span class="token string">"q-demo"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        RedisDelayingQueue<span class="token operator">&lt;</span>String<span class="token operator">></span> queue2 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RedisDelayingQueue</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span>jedis2<span class="token punctuation">,</span> <span class="token string">"q-demo"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    public static void main(String[] args) {
+        //建立两个连接，防止两个comsumer争用一个jedis对象轮询，会产生read time out错误
+        Jedis jedis1 = new Jedis(&quot;192.168.176.128&quot;);
+        Jedis jedis2 = new Jedis(&quot;192.168.176.128&quot;);
+        RedisDelayingQueue&lt;String&gt; queue1 = new RedisDelayingQueue&lt;&gt;(jedis1, &quot;q-demo&quot;);
+        RedisDelayingQueue&lt;String&gt; queue2 = new RedisDelayingQueue&lt;&gt;(jedis2, &quot;q-demo&quot;);
 
-        <span class="token comment" spellcheck="true">//消息生产者</span>
-        Thread producer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-</span><span class="token operator">></span><span class="token punctuation">{</span>
-            <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span><span class="token number">10</span><span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-                queue1<span class="token punctuation">.</span><span class="token function">delay</span><span class="token punctuation">(</span><span class="token string">"codehole"</span><span class="token operator">+</span>i<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span><span class="token punctuation">,</span><span class="token string">"producer"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        //消息生产者
+        Thread producer = new Thread(()-&gt;{
+            for(int i = 0;i&lt;10;i++){
+                queue1.delay(&quot;codehole&quot;+i);
+            }
+        },&quot;producer&quot;);
 
-        <span class="token comment" spellcheck="true">//消息消费者</span>
-        Thread consumer1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-</span><span class="token operator">></span> queue1<span class="token punctuation">.</span><span class="token function">loop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token string">"consumer1"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        Thread consumer2 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-</span><span class="token operator">></span> queue2<span class="token punctuation">.</span><span class="token function">loop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token string">"consumer2"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        //消息消费者
+        Thread consumer1 = new Thread(()-&gt; queue1.loop(),&quot;consumer1&quot;);
+        Thread consumer2 = new Thread(()-&gt; queue2.loop(),&quot;consumer2&quot;);
 
-        producer<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        consumer1<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        consumer2<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        producer.start();
+        consumer1.start();
+        consumer2.start();
 
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">//等待消息生产完成</span>
-            producer<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">//主线程休眠11000毫秒，保证消息全部过期</span>
-            Thread<span class="token punctuation">.</span><span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">11000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">//设置两个消费者线程打断标记位，让它们在下一个循环结束退出</span>
-            consumer1<span class="token punctuation">.</span><span class="token function">interrupt</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            consumer2<span class="token punctuation">.</span><span class="token function">interrupt</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">//等待两个消费者线程完成</span>
-            consumer1<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            consumer2<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span><span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span><span class="token punctuation">{</span>
+        try {
+            //等待消息生产完成
+            producer.join();
+            //主线程休眠11000毫秒，保证消息全部过期
+            Thread.sleep(11000);
+            //设置两个消费者线程打断标记位，让它们在下一个循环结束退出
+            consumer1.interrupt();
+            consumer2.interrupt();
+            //等待两个消费者线程完成
+            consumer1.join();
+            consumer2.join();
+        }catch (InterruptedException e){
 
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+        }
+    }
+}</code></pre>
 <p>运行程序，观察结果（不要在意时间，睡了一觉半夜起来补的博客）：</p>
 <pre><code>01:54:38.587 [producer] INFO com.rhett.test.RedisDelayingQueue - 产生消息：codehole0，延迟时间：8532
 01:54:38.591 [producer] INFO com.rhett.test.RedisDelayingQueue - 产生消息：codehole1，延迟时间：8939
@@ -1151,7 +1151,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1231,6 +1231,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

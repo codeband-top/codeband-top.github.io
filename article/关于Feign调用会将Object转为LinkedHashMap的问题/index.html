@@ -7,8 +7,7 @@
     <meta name="keywords" content="关于Feign调用会将对象嵌套的Map转为LinkedHashMap的问题, 代码段小站">
     <meta name="description" content="又踩到Feign坑了←_←（冷笑话）
 1 问题复现方法提供者，返回一个Result对象，并将一个MemberVo对象封装到了Result对象中的一个哈希表中：
-@ApiOperation(value = &#34;根据用户id获取信息&#34;)
-@Get">
+@ApiOperation(value = &amp;quot;根据用户id获取信息&amp;q">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -27,10 +26,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -404,7 +403,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    576
+                    590
                 </div>
                 
 
@@ -419,31 +418,31 @@
             <div id="articleContent">
                 <p>又踩到Feign坑了←_←（冷笑话）</p>
 <h1 id="问题复现">1 问题复现</h1><p>方法提供者，返回一个<code>Result</code>对象，并将一个<code>MemberVo</code>对象封装到了Result对象中的一个哈希表中：</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@ApiOperation</span><span class="token punctuation">(</span>value <span class="token operator">=</span> <span class="token string">"根据用户id获取信息"</span><span class="token punctuation">)</span>
-<span class="token annotation punctuation">@GetMapping</span><span class="token punctuation">(</span><span class="token string">"/member/{id}"</span><span class="token punctuation">)</span>
-<span class="token keyword">public</span> Result <span class="token function">getUserInfo</span><span class="token punctuation">(</span><span class="token annotation punctuation">@PathVariable</span> String id<span class="token punctuation">)</span><span class="token punctuation">{</span>
-    MemberVo loginInfoVo <span class="token operator">=</span> memberService<span class="token punctuation">.</span><span class="token function">getLoginInfo</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> Result<span class="token punctuation">.</span><span class="token function">ok</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">data</span><span class="token punctuation">(</span><span class="token string">"item"</span><span class="token punctuation">,</span> loginInfoVo<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">@ApiOperation(value = &quot;根据用户id获取信息&quot;)
+@GetMapping(&quot;/member/{id}&quot;)
+public Result getUserInfo(@PathVariable String id){
+    MemberVo loginInfoVo = memberService.getLoginInfo(id);
+    return Result.ok().data(&quot;item&quot;, loginInfoVo);
+}</code></pre>
 <p>Result的结构：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Result</span> <span class="token punctuation">{</span>
-    <span class="token keyword">private</span> <span class="token keyword">boolean</span> flag<span class="token punctuation">;</span><span class="token comment" spellcheck="true">//是否成功</span>
-    <span class="token keyword">private</span> Integer code<span class="token punctuation">;</span><span class="token comment" spellcheck="true">//返回码</span>
-    <span class="token keyword">private</span> String message<span class="token punctuation">;</span><span class="token comment" spellcheck="true">//返回消息</span>
-    <span class="token keyword">private</span> Map<span class="token operator">&lt;</span>String<span class="token punctuation">,</span>Object<span class="token operator">></span> data <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//返回数据</span>
-    <span class="token comment" spellcheck="true">//...</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public class Result {
+    private boolean flag;//是否成功
+    private Integer code;//返回码
+    private String message;//返回消息
+    private Map&lt;String,Object&gt; data = new HashMap&lt;&gt;();//返回数据
+    //...
+}</code></pre>
 <p>Feign客户端：</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Component</span>
-<span class="token annotation punctuation">@FeignClient</span><span class="token punctuation">(</span>value <span class="token operator">=</span> <span class="token string">"service-ucenter"</span><span class="token punctuation">,</span>fallback <span class="token operator">=</span> MemberFallback<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span>
-<span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">MemberFeign</span> <span class="token punctuation">{</span>
+<pre><code class="java">@Component
+@FeignClient(value = &quot;service-ucenter&quot;,fallback = MemberFallback.class)
+public interface MemberFeign {
 
-    <span class="token annotation punctuation">@GetMapping</span><span class="token punctuation">(</span><span class="token string">"/ucenter/member/{id}"</span><span class="token punctuation">)</span>
-    <span class="token keyword">public</span> Result <span class="token function">getUserInfo</span><span class="token punctuation">(</span><span class="token annotation punctuation">@PathVariable</span> String id<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+    @GetMapping(&quot;/ucenter/member/{id}&quot;)
+    public Result getUserInfo(@PathVariable String id);
+}</code></pre>
 <p>Feign调用该方法，想从Result对象的哈希表中取出<code>MemberVo</code>对象：</p>
-<pre class=" language-java"><code class="language-java">Result userInfo <span class="token operator">=</span> memberFeign<span class="token punctuation">.</span><span class="token function">getUserInfo</span><span class="token punctuation">(</span>memberId<span class="token punctuation">)</span><span class="token punctuation">;</span>
-MemberVo memberVo <span class="token operator">=</span> <span class="token punctuation">(</span>MemberVo<span class="token punctuation">)</span> userInfo<span class="token punctuation">.</span><span class="token function">getData</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"item"</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="java">Result userInfo = memberFeign.getUserInfo(memberId);
+MemberVo memberVo = (MemberVo) userInfo.getData().get(&quot;item&quot;);</code></pre>
 <p>就这两句话，看起来合情合理，我一开始也觉得应该没问题，结果报错：</p>
 <pre><code>java.util.LinkedHashMap cannot be cast to com.guli.ucenter.entity.vo.MemberVo</code></pre><h1 id="问题分析">2 问题分析</h1><p><img src="https://api.codetool.top/img/15885189465959.png" alt></p>
 <p>调试发现，Feign调用后取到的Result对象的data已经不是一个HashMap了，而是一个<code>LinkedHashMap</code>，里面存放的item对应的value，也变成了一个<code>LinkedHashMap</code>，保留了原来<code>MemberVo</code>对象的属性，但并不是一个<code>MemberVo</code>对象。</p>
@@ -1065,7 +1064,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1145,6 +1144,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

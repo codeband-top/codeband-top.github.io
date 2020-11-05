@@ -27,10 +27,10 @@ public class Foo {
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -404,7 +404,7 @@ public class Foo {
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    403
+                    409
                 </div>
                 
 
@@ -440,42 +440,42 @@ public class Foo {
 <p>尽管输入中的数字似乎暗示了顺序，但是我们并不保证线程在操作系统中的调度顺序。</p>
 <p>你看到的输入格式主要是为了确保测试的全面性。</p>
 <h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>wait_notify</p>
-<h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Foo</span> <span class="token punctuation">{</span>
-    <span class="token keyword">boolean</span> first <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-    <span class="token keyword">boolean</span> second <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-    <span class="token keyword">public</span> <span class="token function">Foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+<h2 id="代码">2.2 代码</h2><pre><code class="java">class Foo {
+    boolean first = false;
+    boolean second = false;
+    public Foo() {
 
-    <span class="token punctuation">}</span>
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">first</span><span class="token punctuation">(</span>Runnable printFirst<span class="token punctuation">)</span> <span class="token keyword">throws</span> InterruptedException <span class="token punctuation">{</span>
-        <span class="token keyword">synchronized</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// printFirst.run() outputs "first". Do not change or remove this line.</span>
-            printFirst<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            first <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
-            <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">notifyAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+    public void first(Runnable printFirst) throws InterruptedException {
+        synchronized(this){
+            // printFirst.run() outputs &quot;first&quot;. Do not change or remove this line.
+            printFirst.run();
+            first = true;
+            this.notifyAll();
+        }
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">second</span><span class="token punctuation">(</span>Runnable printSecond<span class="token punctuation">)</span> <span class="token keyword">throws</span> InterruptedException <span class="token punctuation">{</span>
-        <span class="token keyword">synchronized</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-            <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token operator">!</span>first<span class="token punctuation">)</span>
-                <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">wait</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">// printSecond.run() outputs "second". Do not change or remove this line.</span>
-            printSecond<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            second <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
-            <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">notifyAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+    public void second(Runnable printSecond) throws InterruptedException {
+        synchronized(this){
+            while(!first)
+                this.wait();
+            // printSecond.run() outputs &quot;second&quot;. Do not change or remove this line.
+            printSecond.run();
+            second = true;
+            this.notifyAll();
+        }
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">third</span><span class="token punctuation">(</span>Runnable printThird<span class="token punctuation">)</span> <span class="token keyword">throws</span> InterruptedException <span class="token punctuation">{</span>
-        <span class="token keyword">synchronized</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-            <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token operator">!</span>second<span class="token punctuation">)</span>
-                <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">wait</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">// printThird.run() outputs "third". Do not change or remove this line.</span>
-            printThird<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    public void third(Runnable printThird) throws InterruptedException {
+        synchronized(this){
+            while(!second)
+                this.wait();
+            // printThird.run() outputs &quot;third&quot;. Do not change or remove this line.
+            printThird.run();
+        }
+    }
+}</code></pre>
 
             </div>
             <hr/>
@@ -1087,7 +1087,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1167,6 +1167,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

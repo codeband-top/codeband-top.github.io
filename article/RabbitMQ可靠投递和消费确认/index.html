@@ -30,10 +30,10 @@ RabbitMQ学习(五)——消息确认机制(AMQP事务)_大数据_Anumbrella-CSD
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -445,31 +445,31 @@ RabbitMQ学习(五)——消息确认机制(AMQP事务)_大数据_Anumbrella-CSD
 <li><code>waitForConfirms()</code>：阻塞等待Broker确认</li>
 <li><code>addConfirmListener()</code>：这是支持异步确认的关键，可以让发送方在收到确认消息后调用接口内的回调方法。</li>
 </ul>
-<pre class=" language-java"><code class="language-java">channel<span class="token punctuation">.</span><span class="token function">addConfirmListener</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ConfirmListener</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token comment" spellcheck="true">//收到确认后的回调，deliveryTag每发送一条消息+1（id）</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">handleAck</span><span class="token punctuation">(</span><span class="token keyword">long</span> deliveryTag<span class="token punctuation">,</span> <span class="token keyword">boolean</span> multiple<span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>
+<pre><code class="java">channel.addConfirmListener(new ConfirmListener() {
+    @Override
+    //收到确认后的回调，deliveryTag每发送一条消息+1（id）
+    public void handleAck(long deliveryTag, boolean multiple) throws IOException {
 
-    <span class="token punctuation">}</span>
+    }
 
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token comment" spellcheck="true">//收到NACK后的回调</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">handleNack</span><span class="token punctuation">(</span><span class="token keyword">long</span> deliveryTag<span class="token punctuation">,</span> <span class="token keyword">boolean</span> multiple<span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>
+    @Override
+    //收到NACK后的回调
+    public void handleNack(long deliveryTag, boolean multiple) throws IOException {
 
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+    }
+});</code></pre>
 <p>需要注意 <code>handleNack</code> 方法只在比如磁盘写满了，MQ出现了一些异常，或者Queue容量到达上限了这类情况下调用，如果因为网络或宕机原因消息传递过程中丢失等情况不会受到NACK，这个时候就得考虑发送端这边定时判断是否收到ACK从而判断Broker是否收到消息。</p>
 <h2 id="路由退回">1.2 路由退回</h2><p>如果Broker收到了消息，但没有可路由的队列，或是队列已满，也不能实现可靠投递。针对这个情况RabbitMQ提供了ReturnListener，和ConfirmListener差不多的用法。但是发消息的时候使用</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">void</span> <span class="token function">basicPublish</span><span class="token punctuation">(</span>String exchange<span class="token punctuation">,</span> String routingKey<span class="token punctuation">,</span> <span class="token keyword">boolean</span> mandatory<span class="token punctuation">,</span> BasicProperties props<span class="token punctuation">,</span> <span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> body<span class="token punctuation">)</span>
-            <span class="token keyword">throws</span> IOException<span class="token punctuation">;</span></code></pre>
+<pre><code class="java">void basicPublish(String exchange, String routingKey, boolean mandatory, BasicProperties props, byte[] body)
+            throws IOException;</code></pre>
 <p>重载，其中Mandotory这个属性如果为true代表如果没有路由成功，则退回给生产段，如果为false则直接删除，这里必须设置为true。</p>
-<pre class=" language-java"><code class="language-java">channel<span class="token punctuation">.</span><span class="token function">addReturnListener</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ReturnListener</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token comment" spellcheck="true">//如果无法路由，退回</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">handleReturn</span><span class="token punctuation">(</span><span class="token keyword">int</span> replyCode<span class="token punctuation">,</span> String replyText<span class="token punctuation">,</span> String exchange<span class="token punctuation">,</span> String routingKey<span class="token punctuation">,</span> AMQP<span class="token punctuation">.</span>BasicProperties properties<span class="token punctuation">,</span> <span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> body<span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>
+<pre><code class="java">channel.addReturnListener(new ReturnListener() {
+    @Override
+    //如果无法路由，退回
+    public void handleReturn(int replyCode, String replyText, String exchange, String routingKey, AMQP.BasicProperties properties, byte[] body) throws IOException {
 
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+    }
+});</code></pre>
 <h1 id="消费确认">2 消费确认</h1><h2 id="消费者ACK">2.1 消费者ACK</h2><p>有的时候不仅要保证发送端100%将消息发送到了Broker，还需要确认消费端是否收到消息或是是否消费了消息。</p>
 <p>RabbitMQ支持消费端的两种消息回执机制：</p>
 <ul>
@@ -477,36 +477,36 @@ RabbitMQ学习(五)——消息确认机制(AMQP事务)_大数据_Anumbrella-CSD
 <li>手动回执：Broker发送消息给接收端后暂不删除该消息，等待消费端回执后再删除。如果没有等到消费者的ACK，会将消息转发给其他消费者。</li>
 </ul>
 <p>是否开启自动回执模式由消费端的basicConsume方法的autoAck参数决定，手动回执需要在自定义消费者中实现：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">handleDelivery</span><span class="token punctuation">(</span>String consumerTag<span class="token punctuation">,</span>
-                            Envelope envelope<span class="token punctuation">,</span>
-                            AMQP<span class="token punctuation">.</span>BasicProperties properties<span class="token punctuation">,</span>
-                            <span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> body<span class="token punctuation">)</span>
-        <span class="token keyword">throws</span> IOException
-<span class="token punctuation">{</span>
-    String routingKey <span class="token operator">=</span> envelope<span class="token punctuation">.</span><span class="token function">getRoutingKey</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    String contentType <span class="token operator">=</span> properties<span class="token punctuation">.</span><span class="token function">getContentType</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"消费的路由键："</span><span class="token operator">+</span>routingKey<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"消费的内容类型："</span><span class="token operator">+</span>contentType<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">long</span> deliveryTag <span class="token operator">=</span> envelope<span class="token punctuation">.</span><span class="token function">getDeliveryTag</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 手动回执</span>
-    channel<span class="token punctuation">.</span><span class="token function">basicAck</span><span class="token punctuation">(</span>deliveryTag<span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"消费的消息体内容："</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    String bodyStr <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">String</span><span class="token punctuation">(</span>body<span class="token punctuation">,</span><span class="token string">"UTF-8"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>bodyStr<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public void handleDelivery(String consumerTag,
+                            Envelope envelope,
+                            AMQP.BasicProperties properties,
+                            byte[] body)
+        throws IOException
+{
+    String routingKey = envelope.getRoutingKey();
+    String contentType = properties.getContentType();
+    System.out.println(&quot;消费的路由键：&quot;+routingKey);
+    System.out.println(&quot;消费的内容类型：&quot;+contentType);
+    long deliveryTag = envelope.getDeliveryTag();
+    // 手动回执
+    channel.basicAck(deliveryTag, false);
+    System.out.println(&quot;消费的消息体内容：&quot;);
+    String bodyStr = new String(body,&quot;UTF-8&quot;);
+    System.out.println(bodyStr);
+}</code></pre>
 <h2 id="拒绝消息">2.2 拒绝消息</h2><p>当消费者目前不能处理该消息时，可以选择给Broker发送一个拒绝消息的指令，并且可以要求Broker将该消息丢弃或重新放入队列中。对应channel中的两个方法：</p>
-<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">//退回一条消息，deliveryTag指定消息的deliveryTag，requeue为true重新放入队列，否则销毁</span>
-<span class="token keyword">void</span> <span class="token function">basicReject</span><span class="token punctuation">(</span><span class="token keyword">long</span> deliveryTag<span class="token punctuation">,</span> <span class="token keyword">boolean</span> requeue<span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException<span class="token punctuation">;</span>
+<pre><code class="java">//退回一条消息，deliveryTag指定消息的deliveryTag，requeue为true重新放入队列，否则销毁
+void basicReject(long deliveryTag, boolean requeue) throws IOException;
 
-<span class="token comment" spellcheck="true">//退回多条消息，如果multiple为true代表除了已应答的消息，否则比当前deliveryTag小的消息全部拒绝</span>
-<span class="token keyword">void</span> <span class="token function">basicNack</span><span class="token punctuation">(</span><span class="token keyword">long</span> deliveryTag<span class="token punctuation">,</span> <span class="token keyword">boolean</span> multiple<span class="token punctuation">,</span> <span class="token keyword">boolean</span> requeue<span class="token punctuation">)</span>
-            <span class="token keyword">throws</span> IOException<span class="token punctuation">;</span></code></pre>
+//退回多条消息，如果multiple为true代表除了已应答的消息，否则比当前deliveryTag小的消息全部拒绝
+void basicNack(long deliveryTag, boolean multiple, boolean requeue)
+            throws IOException;</code></pre>
 <h2 id="消息预取（消费端限流）">2.3 消息预取（消费端限流）</h2><p>在实际场景中，如果对每条消息的处理时间不同，则可能导致有些消费者一直很忙，而有些消费者处理很快并一直空闲。这时可通过设置预取数量(PrefetchCount)限制每个消费者在收到下一个确认回执前一次最多可以接收多少条消息。例如，设置prefetchCount为1，则表示RabbitMQ服务器每次给每个消费者发送一条消息，在收到该消息的消费者ACK指令之前RabbitMQ不会再向该消费者发送新的消息。可以通过channel中的<code>basicQos</code>方法设置预取数量：</p>
 <p>要使用这个策略，必须使用手动回执，否则Broker不会等待ACK消息。</p>
-<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">//prefetchSize指的是以字节度量的最大大小，0代表不限制，通常不用这个参数</span>
-<span class="token keyword">void</span> <span class="token function">basicQos</span><span class="token punctuation">(</span><span class="token keyword">int</span> prefetchSize<span class="token punctuation">,</span> <span class="token keyword">int</span> prefetchCount<span class="token punctuation">,</span> <span class="token keyword">boolean</span> global<span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException<span class="token punctuation">;</span>
-<span class="token comment" spellcheck="true">//常用版本，global决定是生效于Channel还是Consumer</span>
-<span class="token keyword">void</span> <span class="token function">basicQos</span><span class="token punctuation">(</span><span class="token keyword">int</span> prefetchCount<span class="token punctuation">,</span> <span class="token keyword">boolean</span> global<span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException<span class="token punctuation">;</span></code></pre>
+<pre><code class="java">//prefetchSize指的是以字节度量的最大大小，0代表不限制，通常不用这个参数
+void basicQos(int prefetchSize, int prefetchCount, boolean global) throws IOException;
+//常用版本，global决定是生效于Channel还是Consumer
+void basicQos(int prefetchCount, boolean global) throws IOException;</code></pre>
 <h1 id="总结">3 总结</h1><p>有了以上技术支撑，就可以通过一系列的措施来实现消息100%能从生产端到达消费端，具体业务解决方案可以参考：</p>
 <p><a href="https://blog.csdn.net/eluanshi12/article/details/88959856" target="_blank" rel="noopener">RabbitMQ消息100%可靠性投递的解决方案实现(一)_大数据_eluanshi12的博客-CSDN博客</a></p>
 
@@ -1117,7 +1117,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1197,6 +1197,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

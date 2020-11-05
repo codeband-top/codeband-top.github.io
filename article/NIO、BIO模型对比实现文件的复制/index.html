@@ -29,10 +29,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -410,7 +410,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    667
+                    677
                 </div>
                 
 
@@ -449,136 +449,136 @@
 <li>SocketChannel</li>
 </ul>
 <h1 id="NIO和BIO实现文件的复制">3 NIO和BIO实现文件的复制</h1><p>声明接口：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">interface</span> <span class="token class-name">FileCopyRunner</span><span class="token punctuation">{</span>
-    <span class="token keyword">void</span> <span class="token function">copyFile</span><span class="token punctuation">(</span>File source<span class="token punctuation">,</span> File target<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">interface FileCopyRunner{
+    void copyFile(File source, File target);
+}</code></pre>
 <p>关闭资源方法：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">close</span><span class="token punctuation">(</span>Closeable<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> closeable<span class="token punctuation">)</span><span class="token punctuation">{</span>
-    <span class="token keyword">for</span><span class="token punctuation">(</span>Closeable c<span class="token operator">:</span>closeable<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            c<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">private static void close(Closeable... closeable){
+    for(Closeable c:closeable){
+        try {
+            c.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
 <p>BIO，不使用缓冲流：</p>
-<pre class=" language-java"><code class="language-java">FileCopyRunner noBufferStreamCopy <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">FileCopyRunner</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">copyFile</span><span class="token punctuation">(</span>File source<span class="token punctuation">,</span> File target<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        InputStream fin <span class="token operator">=</span> null<span class="token punctuation">;</span>
-        OutputStream fout <span class="token operator">=</span> null<span class="token punctuation">;</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            fin <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">FileInputStream</span><span class="token punctuation">(</span>source<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            fout <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">FileOutputStream</span><span class="token punctuation">(</span>target<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">int</span> result<span class="token punctuation">;</span>
-            <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token punctuation">(</span>result <span class="token operator">=</span> fin<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token operator">!=</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-                fout<span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span>result<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            <span class="token function">close</span><span class="token punctuation">(</span>fin<span class="token punctuation">,</span>fout<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+<pre><code class="java">FileCopyRunner noBufferStreamCopy = new FileCopyRunner() {
+    @Override
+    public void copyFile(File source, File target) {
+        InputStream fin = null;
+        OutputStream fout = null;
+        try {
+            fin = new FileInputStream(source);
+            fout = new FileOutputStream(target);
+            int result;
+            while((result = fin.read())!=-1){
+                fout.write(result);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            close(fin,fout);
+        }
+    }
 
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> String <span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token string">"noBufferStreamCopy"</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+    @Override
+    public String toString() {
+        return &quot;noBufferStreamCopy&quot;;
+    }
+};</code></pre>
 <p>BIO，使用缓冲流：</p>
-<pre class=" language-java"><code class="language-java">FileCopyRunner bufferedStreamCopy <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">FileCopyRunner</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">copyFile</span><span class="token punctuation">(</span>File source<span class="token punctuation">,</span> File target<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        InputStream fin <span class="token operator">=</span> null<span class="token punctuation">;</span>
-        OutputStream fout <span class="token operator">=</span> null<span class="token punctuation">;</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            fin <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BufferedInputStream</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">FileInputStream</span><span class="token punctuation">(</span>source<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            fout <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BufferedOutputStream</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">FileOutputStream</span><span class="token punctuation">(</span>target<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre><code class="java">FileCopyRunner bufferedStreamCopy = new FileCopyRunner() {
+    @Override
+    public void copyFile(File source, File target) {
+        InputStream fin = null;
+        OutputStream fout = null;
+        try {
+            fin = new BufferedInputStream(new FileInputStream(source));
+            fout = new BufferedOutputStream(new FileOutputStream(target));
 
-            <span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> buffer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">byte</span><span class="token punctuation">[</span><span class="token number">1024</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-            <span class="token keyword">int</span> result<span class="token punctuation">;</span>
-            <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token punctuation">(</span>result <span class="token operator">=</span> fin<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span>buffer<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token operator">!=</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-                fout<span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span>buffer<span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">,</span>result<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            <span class="token function">close</span><span class="token punctuation">(</span>fin<span class="token punctuation">,</span>fout<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> String <span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token string">"bufferedStreamCopy"</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+            byte[] buffer = new byte[1024];
+            int result;
+            while((result = fin.read(buffer))!=-1){
+                fout.write(buffer,0,result);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            close(fin,fout);
+        }
+    }
+    @Override
+    public String toString() {
+        return &quot;bufferedStreamCopy&quot;;
+    }
+};</code></pre>
 <p>NIO，经过Buffer：</p>
-<pre class=" language-java"><code class="language-java">FileCopyRunner nioBufferCopy <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">FileCopyRunner</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">copyFile</span><span class="token punctuation">(</span>File source<span class="token punctuation">,</span> File target<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        FileChannel fin <span class="token operator">=</span> null<span class="token punctuation">;</span>
-        FileChannel fout <span class="token operator">=</span> null<span class="token punctuation">;</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            fin <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">FileInputStream</span><span class="token punctuation">(</span>source<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getChannel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            fout <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">FileOutputStream</span><span class="token punctuation">(</span>target<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getChannel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            ByteBuffer buffer <span class="token operator">=</span> ByteBuffer<span class="token punctuation">.</span><span class="token function">allocate</span><span class="token punctuation">(</span><span class="token number">1024</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">while</span> <span class="token punctuation">(</span>fin<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span>buffer<span class="token punctuation">)</span><span class="token operator">!=</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-                buffer<span class="token punctuation">.</span><span class="token function">flip</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token keyword">while</span> <span class="token punctuation">(</span>buffer<span class="token punctuation">.</span><span class="token function">hasRemaining</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-                    fout<span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span>buffer<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-                buffer<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            <span class="token function">close</span><span class="token punctuation">(</span>fin<span class="token punctuation">,</span>fout<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> String <span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token string">"nioBufferCopy"</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="java">FileCopyRunner nioBufferCopy = new FileCopyRunner() {
+    @Override
+    public void copyFile(File source, File target) {
+        FileChannel fin = null;
+        FileChannel fout = null;
+        try {
+            fin = new FileInputStream(source).getChannel();
+            fout = new FileOutputStream(target).getChannel();
+            ByteBuffer buffer = ByteBuffer.allocate(1024);
+            while (fin.read(buffer)!=-1){
+                buffer.flip();
+                while (buffer.hasRemaining()){
+                    fout.write(buffer);
+                }
+                buffer.clear();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            close(fin,fout);
+        }
+    }
+    @Override
+    public String toString() {
+        return &quot;nioBufferCopy&quot;;
+    }
+};</code></pre>
 <p>NIO，不经过Buffer：</p>
-<pre class=" language-java"><code class="language-java">FileCopyRunner nioTransferCopy <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">FileCopyRunner</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">copyFile</span><span class="token punctuation">(</span>File source<span class="token punctuation">,</span> File target<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        FileChannel fin <span class="token operator">=</span> null<span class="token punctuation">;</span>
-        FileChannel fout <span class="token operator">=</span> null<span class="token punctuation">;</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            fin <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">FileInputStream</span><span class="token punctuation">(</span>source<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getChannel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            fout <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">FileOutputStream</span><span class="token punctuation">(</span>target<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getChannel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">long</span> transferred <span class="token operator">=</span> 0L<span class="token punctuation">;</span>
-            <span class="token keyword">long</span> size <span class="token operator">=</span> fin<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">while</span> <span class="token punctuation">(</span>transferred<span class="token operator">!=</span>size<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                transferred <span class="token operator">+=</span> fin<span class="token punctuation">.</span><span class="token function">transferTo</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span>size<span class="token punctuation">,</span>fout<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            <span class="token function">close</span><span class="token punctuation">(</span>fin<span class="token punctuation">,</span>fout<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> String <span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token string">"nioTransferCopy"</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="java">FileCopyRunner nioTransferCopy = new FileCopyRunner() {
+    @Override
+    public void copyFile(File source, File target) {
+        FileChannel fin = null;
+        FileChannel fout = null;
+        try {
+            fin = new FileInputStream(source).getChannel();
+            fout = new FileOutputStream(target).getChannel();
+            long transferred = 0L;
+            long size = fin.size();
+            while (transferred!=size) {
+                transferred += fin.transferTo(0,size,fout);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            close(fin,fout);
+        }
+    }
+    @Override
+    public String toString() {
+        return &quot;nioTransferCopy&quot;;
+    }
+};</code></pre>
 <p>可以编写函数进行性能测试：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">int</span> ROUNDS <span class="token operator">=</span> <span class="token number">5</span><span class="token punctuation">;</span>
+<pre><code class="java">private static final int ROUNDS = 5;
 
-<span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">benchmark</span><span class="token punctuation">(</span>FileCopyRunner test<span class="token punctuation">,</span>File source<span class="token punctuation">,</span>File target<span class="token punctuation">)</span><span class="token punctuation">{</span>
-    <span class="token keyword">long</span> elapsed <span class="token operator">=</span> 0L<span class="token punctuation">;</span>
-    <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>ROUNDS<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">long</span> startTime <span class="token operator">=</span> System<span class="token punctuation">.</span><span class="token function">currentTimeMillis</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        test<span class="token punctuation">.</span><span class="token function">copyFile</span><span class="token punctuation">(</span>source<span class="token punctuation">,</span>target<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        elapsed <span class="token operator">+=</span> System<span class="token punctuation">.</span><span class="token function">currentTimeMillis</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> startTime<span class="token punctuation">;</span>
-        target<span class="token punctuation">.</span><span class="token function">delete</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>test<span class="token operator">+</span><span class="token string">":"</span><span class="token operator">+</span>elapsed<span class="token operator">/</span>ROUNDS<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+private static void benchmark(FileCopyRunner test,File source,File target){
+    long elapsed = 0L;
+    for(int i = 0;i&lt;ROUNDS;i++){
+        long startTime = System.currentTimeMillis();
+        test.copyFile(source,target);
+        elapsed += System.currentTimeMillis() - startTime;
+        target.delete();
+    }
+    System.out.println(test+&quot;:&quot;+elapsed/ROUNDS);
+}</code></pre>
 
             </div>
             <hr/>
@@ -1201,7 +1201,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1281,6 +1281,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

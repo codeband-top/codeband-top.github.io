@@ -6,9 +6,9 @@
     <meta charset="utf-8">
     <meta name="keywords" content="Spring整合RabbitMQ及其各组件介绍, 代码段小站">
     <meta name="description" content="1 Spring-rabbit使用Spring-rabbit，maven依赖：
-&amp;lt;dependency&gt;
-    &amp;lt;groupId&gt;org.springframework.amqp&amp;lt;/groupId&gt;
-    &amp;lt;ar">
+&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;org.springframework.amqp&amp;lt;/groupId&amp;gt;
+ ">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -27,10 +27,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -418,145 +418,145 @@
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <h1 id="Spring-rabbit">1 Spring-rabbit</h1><p>使用Spring-rabbit，maven依赖：</p>
-<pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework.amqp<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-rabbit<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>2.2.5.RELEASE<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span></code></pre>
+<pre><code class="xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.amqp&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-rabbit&lt;/artifactId&gt;
+    &lt;version&gt;2.2.5.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
 <p>各组件介绍：</p>
 <h2 id="RabbitAdmin">1.1 RabbitAdmin</h2><p>编写配置类，RabbitAdmin为核心操作RabbitMQ的类，我们要注入一个它的bean：</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Configuration</span>
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">RabbitMQConfig</span> <span class="token punctuation">{</span>
-    <span class="token annotation punctuation">@Bean</span>
-    <span class="token keyword">public</span> ConnectionFactory <span class="token function">connectionFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        CachingConnectionFactory connectionFactory <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CachingConnectionFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        connectionFactory<span class="token punctuation">.</span><span class="token function">setAddresses</span><span class="token punctuation">(</span><span class="token string">"127.0.0.1"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        connectionFactory<span class="token punctuation">.</span><span class="token function">setUsername</span><span class="token punctuation">(</span><span class="token string">"guest"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        connectionFactory<span class="token punctuation">.</span><span class="token function">setPassword</span><span class="token punctuation">(</span><span class="token string">"guest"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        connectionFactory<span class="token punctuation">.</span><span class="token function">setVirtualHost</span><span class="token punctuation">(</span><span class="token string">"/"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> connectionFactory<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+<pre><code class="java">@Configuration
+public class RabbitMQConfig {
+    @Bean
+    public ConnectionFactory connectionFactory(){
+        CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
+        connectionFactory.setAddresses(&quot;127.0.0.1&quot;);
+        connectionFactory.setUsername(&quot;guest&quot;);
+        connectionFactory.setPassword(&quot;guest&quot;);
+        connectionFactory.setVirtualHost(&quot;/&quot;);
+        return connectionFactory;
+    }
 
-    <span class="token annotation punctuation">@Bean</span>
-    <span class="token keyword">public</span> RabbitAdmin <span class="token function">rabbitAdmin</span><span class="token punctuation">(</span>ConnectionFactory connectionFactory<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        RabbitAdmin rabbitAdmin <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RabbitAdmin</span><span class="token punctuation">(</span>connectionFactory<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        rabbitAdmin<span class="token punctuation">.</span><span class="token function">setAutoStartup</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//必须设置为true</span>
-        <span class="token keyword">return</span> rabbitAdmin<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    @Bean
+    public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory){
+        RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
+        rabbitAdmin.setAutoStartup(true);//必须设置为true
+        return rabbitAdmin;
+    }
+}</code></pre>
 <p>RabbitAdmin可以声明队列、交换器、绑定等。</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@RunWith</span><span class="token punctuation">(</span>SpringJUnit4ClassRunner<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span>
-<span class="token annotation punctuation">@ContextConfiguration</span><span class="token punctuation">(</span>classes <span class="token operator">=</span> SpringConfiguration<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span>
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">RabbitTest</span> <span class="token punctuation">{</span>
-    <span class="token annotation punctuation">@Autowired</span>
-    <span class="token keyword">private</span> RabbitAdmin rabbitAdmin<span class="token punctuation">;</span>
+<pre><code class="java">@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = SpringConfiguration.class)
+public class RabbitTest {
+    @Autowired
+    private RabbitAdmin rabbitAdmin;
 
-    <span class="token annotation punctuation">@Test</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">testAdmin</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception<span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">//声明</span>
-        rabbitAdmin<span class="token punctuation">.</span><span class="token function">declareExchange</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">DirectExchange</span><span class="token punctuation">(</span><span class="token string">"test.direct"</span><span class="token punctuation">,</span><span class="token boolean">false</span><span class="token punctuation">,</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        rabbitAdmin<span class="token punctuation">.</span><span class="token function">declareExchange</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">TopicExchange</span><span class="token punctuation">(</span><span class="token string">"test.topic"</span><span class="token punctuation">,</span><span class="token boolean">false</span><span class="token punctuation">,</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        rabbitAdmin<span class="token punctuation">.</span><span class="token function">declareQueue</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Queue</span><span class="token punctuation">(</span><span class="token string">"test.direct.queue"</span><span class="token punctuation">,</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        rabbitAdmin<span class="token punctuation">.</span><span class="token function">declareQueue</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Queue</span><span class="token punctuation">(</span><span class="token string">"test.topic.queue"</span><span class="token punctuation">,</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        rabbitAdmin<span class="token punctuation">.</span><span class="token function">declareBinding</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Binding</span><span class="token punctuation">(</span><span class="token string">"test.direct.queue"</span><span class="token punctuation">,</span>Binding<span class="token punctuation">.</span>DestinationType<span class="token punctuation">.</span>QUEUE<span class="token punctuation">,</span>
-                <span class="token string">"test.direct"</span><span class="token punctuation">,</span><span class="token string">"direct"</span><span class="token punctuation">,</span><span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        rabbitAdmin<span class="token punctuation">.</span><span class="token function">declareBinding</span><span class="token punctuation">(</span>
+    @Test
+    public void testAdmin() throws Exception{
+        //声明
+        rabbitAdmin.declareExchange(new DirectExchange(&quot;test.direct&quot;,false,false));
+        rabbitAdmin.declareExchange(new TopicExchange(&quot;test.topic&quot;,false,false));
+        rabbitAdmin.declareQueue(new Queue(&quot;test.direct.queue&quot;,false));
+        rabbitAdmin.declareQueue(new Queue(&quot;test.topic.queue&quot;,false));
+        rabbitAdmin.declareBinding(new Binding(&quot;test.direct.queue&quot;,Binding.DestinationType.QUEUE,
+                &quot;test.direct&quot;,&quot;direct&quot;,new HashMap&lt;&gt;()));
+        rabbitAdmin.declareBinding(
                 BindingBuilder
-                        <span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Queue</span><span class="token punctuation">(</span><span class="token string">"test.topic.queue"</span><span class="token punctuation">,</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment" spellcheck="true">//队列</span>
-                        <span class="token punctuation">.</span><span class="token function">to</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">TopicExchange</span><span class="token punctuation">(</span><span class="token string">"test.topic"</span><span class="token punctuation">,</span><span class="token boolean">false</span><span class="token punctuation">,</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment" spellcheck="true">//交换机</span>
-                        <span class="token punctuation">.</span><span class="token function">with</span><span class="token punctuation">(</span><span class="token string">"user.#"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//指定路由key</span>
-        <span class="token comment" spellcheck="true">//清空队列数据</span>
-        rabbitAdmin<span class="token punctuation">.</span><span class="token function">purgeQueue</span><span class="token punctuation">(</span><span class="token string">"test.topic.queue"</span><span class="token punctuation">,</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+                        .bind(new Queue(&quot;test.topic.queue&quot;,false)) //队列
+                        .to(new TopicExchange(&quot;test.topic&quot;,false,false)) //交换机
+                        .with(&quot;user.#&quot;)); //指定路由key
+        //清空队列数据
+        rabbitAdmin.purgeQueue(&quot;test.topic.queue&quot;,false);
+    }
+}</code></pre>
 <p>也可以把Queue、Exchange、Binding注入到IoC容器中，再使用。</p>
 <h2 id="RabbitTemplate">1.2 RabbitTemplate</h2><p>该类提供了丰富的发送消息方法，包括可靠性投递消息方法、回调监听消息接口ConfirmCallback、返回值确认接口ReturnCallback等等。 同样我们需要进行注入到Spring容器中，然后直接使用。</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Configuration</span>
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">RabbitMQConfig</span> <span class="token punctuation">{</span>
-    <span class="token annotation punctuation">@Bean</span>
-    <span class="token keyword">public</span> ConnectionFactory <span class="token function">connectionFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        CachingConnectionFactory connectionFactory <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CachingConnectionFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        connectionFactory<span class="token punctuation">.</span><span class="token function">setAddresses</span><span class="token punctuation">(</span><span class="token string">"127.0.0.1"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        connectionFactory<span class="token punctuation">.</span><span class="token function">setUsername</span><span class="token punctuation">(</span><span class="token string">"guest"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        connectionFactory<span class="token punctuation">.</span><span class="token function">setPassword</span><span class="token punctuation">(</span><span class="token string">"guest"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        connectionFactory<span class="token punctuation">.</span><span class="token function">setVirtualHost</span><span class="token punctuation">(</span><span class="token string">"/"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> connectionFactory<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+<pre><code class="java">@Configuration
+public class RabbitMQConfig {
+    @Bean
+    public ConnectionFactory connectionFactory(){
+        CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
+        connectionFactory.setAddresses(&quot;127.0.0.1&quot;);
+        connectionFactory.setUsername(&quot;guest&quot;);
+        connectionFactory.setPassword(&quot;guest&quot;);
+        connectionFactory.setVirtualHost(&quot;/&quot;);
+        return connectionFactory;
+    }
 
-    <span class="token annotation punctuation">@Bean</span>
-    <span class="token keyword">public</span> RabbitAdmin <span class="token function">rabbitAdmin</span><span class="token punctuation">(</span>ConnectionFactory connectionFactory<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        RabbitAdmin rabbitAdmin <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RabbitAdmin</span><span class="token punctuation">(</span>connectionFactory<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        rabbitAdmin<span class="token punctuation">.</span><span class="token function">setAutoStartup</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//必须设置为true</span>
-        <span class="token keyword">return</span> rabbitAdmin<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    @Bean
+    public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory){
+        RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
+        rabbitAdmin.setAutoStartup(true);//必须设置为true
+        return rabbitAdmin;
+    }
 
-    <span class="token annotation punctuation">@Bean</span>
-    <span class="token keyword">public</span> RabbitTemplate <span class="token function">rabbitTemplate</span><span class="token punctuation">(</span>ConnectionFactory connectionFactory<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        RabbitTemplate rabbitTemplate <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RabbitTemplate</span><span class="token punctuation">(</span>connectionFactory<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> rabbitTemplate<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Test</span>
-<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">testSendMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception<span class="token punctuation">{</span>
-    MessageProperties messageProperties <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">MessageProperties</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    messageProperties<span class="token punctuation">.</span><span class="token function">getHeaders</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span><span class="token string">"desc"</span><span class="token punctuation">,</span> <span class="token string">"信息描述.."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    messageProperties<span class="token punctuation">.</span><span class="token function">getHeaders</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span><span class="token string">"type"</span><span class="token punctuation">,</span> <span class="token string">"自定义消息类型.."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    Message message <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Message</span><span class="token punctuation">(</span><span class="token string">"Hello RabbitMQ"</span><span class="token punctuation">.</span><span class="token function">getBytes</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> messageProperties<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    @Bean
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory){
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        return rabbitTemplate;
+    }
+}</code></pre>
+<pre><code class="java">@Test
+public void testSendMessage() throws Exception{
+    MessageProperties messageProperties = new MessageProperties();
+    messageProperties.getHeaders().put(&quot;desc&quot;, &quot;信息描述..&quot;);
+    messageProperties.getHeaders().put(&quot;type&quot;, &quot;自定义消息类型..&quot;);
+    Message message = new Message(&quot;Hello RabbitMQ&quot;.getBytes(), messageProperties);
 
-    rabbitTemplate<span class="token punctuation">.</span><span class="token function">convertAndSend</span><span class="token punctuation">(</span><span class="token string">"test.topic"</span><span class="token punctuation">,</span><span class="token string">"user.template"</span><span class="token punctuation">,</span>message<span class="token punctuation">,</span><span class="token keyword">new</span> <span class="token class-name">MessagePostProcessor</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token annotation punctuation">@Override</span>
-        <span class="token keyword">public</span> Message <span class="token function">postProcessMessage</span><span class="token punctuation">(</span>Message message<span class="token punctuation">)</span> <span class="token keyword">throws</span> AmqpException <span class="token punctuation">{</span>
-            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"-----添加额外的设置------"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            message<span class="token punctuation">.</span><span class="token function">getMessageProperties</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getHeaders</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span><span class="token string">"desc"</span><span class="token punctuation">,</span> <span class="token string">"额外修改的信息描述"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            message<span class="token punctuation">.</span><span class="token function">getMessageProperties</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getHeaders</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span><span class="token string">"attr"</span><span class="token punctuation">,</span> <span class="token string">"额外新加的信息描述"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">return</span> message<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+    rabbitTemplate.convertAndSend(&quot;test.topic&quot;,&quot;user.template&quot;,message,new MessagePostProcessor(){
+        @Override
+        public Message postProcessMessage(Message message) throws AmqpException {
+            System.out.println(&quot;-----添加额外的设置------&quot;);
+            message.getMessageProperties().getHeaders().put(&quot;desc&quot;, &quot;额外修改的信息描述&quot;);
+            message.getMessageProperties().getHeaders().put(&quot;attr&quot;, &quot;额外新加的信息描述&quot;);
+            return message;
+        }
+    });
+}</code></pre>
 <p>send或convertAndSend用来发送消息，MessagePostProcessor可以帮我们在消息发送前再对消息做一些处理。</p>
 <p><img src="https://api.codetool.top/img/1584107981686.png" alt></p>
 <p>convertAndSend可以传的消息是一个Object对象，如果不是Message类型，会帮我们用转换器转换成消息对象，默认的Converter是<code>SimpleMessageConverter</code>，可以自定义Converter然后使用setMessageConverter设置转换器。</p>
 <p>其他自带可用的Converter还有<code>Jackson2MessageConvertor</code>、<code>SerializerMessageConverter</code>等等。</p>
 <p>SimpleMessageConverter如何将Java对象转成消息：</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Override</span>
-<span class="token keyword">protected</span> Message <span class="token function">createMessage</span><span class="token punctuation">(</span>Object object<span class="token punctuation">,</span> MessageProperties messageProperties<span class="token punctuation">)</span> <span class="token keyword">throws</span> MessageConversionException <span class="token punctuation">{</span>
-    <span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> bytes <span class="token operator">=</span> null<span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//如果是字节数组，直接设置成消息体</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>object <span class="token keyword">instanceof</span> <span class="token class-name">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        bytes <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> object<span class="token punctuation">;</span>
-        messageProperties<span class="token punctuation">.</span><span class="token function">setContentType</span><span class="token punctuation">(</span>MessageProperties<span class="token punctuation">.</span>CONTENT_TYPE_BYTES<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">//如果是String，转成字节数组设置消息体，默认以UTF-8编码</span>
-    <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>object <span class="token keyword">instanceof</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            bytes <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>String<span class="token punctuation">)</span> object<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getBytes</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>defaultCharset<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">UnsupportedEncodingException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">MessageConversionException</span><span class="token punctuation">(</span>
-                    <span class="token string">"failed to convert to Message content"</span><span class="token punctuation">,</span> e<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        messageProperties<span class="token punctuation">.</span><span class="token function">setContentType</span><span class="token punctuation">(</span>MessageProperties<span class="token punctuation">.</span>CONTENT_TYPE_TEXT_PLAIN<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        messageProperties<span class="token punctuation">.</span><span class="token function">setContentEncoding</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>defaultCharset<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">//如果是可序列化的，就将对象序列化</span>
-    <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>object <span class="token keyword">instanceof</span> <span class="token class-name">Serializable</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            bytes <span class="token operator">=</span> SerializationUtils<span class="token punctuation">.</span><span class="token function">serialize</span><span class="token punctuation">(</span>object<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IllegalArgumentException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">MessageConversionException</span><span class="token punctuation">(</span>
-                    <span class="token string">"failed to convert to serialized Message content"</span><span class="token punctuation">,</span> e<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        messageProperties<span class="token punctuation">.</span><span class="token function">setContentType</span><span class="token punctuation">(</span>MessageProperties<span class="token punctuation">.</span>CONTENT_TYPE_SERIALIZED_OBJECT<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>bytes <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        messageProperties<span class="token punctuation">.</span><span class="token function">setContentLength</span><span class="token punctuation">(</span>bytes<span class="token punctuation">.</span>length<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Message</span><span class="token punctuation">(</span>bytes<span class="token punctuation">,</span> messageProperties<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">//否则就是不支持的类型</span>
-    <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IllegalArgumentException</span><span class="token punctuation">(</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getSimpleName</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-            <span class="token operator">+</span> <span class="token string">" only supports String, byte[] and Serializable payloads, received: "</span> <span class="token operator">+</span> object<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">@Override
+protected Message createMessage(Object object, MessageProperties messageProperties) throws MessageConversionException {
+    byte[] bytes = null;
+    //如果是字节数组，直接设置成消息体
+    if (object instanceof byte[]) {
+        bytes = (byte[]) object;
+        messageProperties.setContentType(MessageProperties.CONTENT_TYPE_BYTES);
+    }
+    //如果是String，转成字节数组设置消息体，默认以UTF-8编码
+    else if (object instanceof String) {
+        try {
+            bytes = ((String) object).getBytes(this.defaultCharset);
+        }
+        catch (UnsupportedEncodingException e) {
+            throw new MessageConversionException(
+                    &quot;failed to convert to Message content&quot;, e);
+        }
+        messageProperties.setContentType(MessageProperties.CONTENT_TYPE_TEXT_PLAIN);
+        messageProperties.setContentEncoding(this.defaultCharset);
+    }
+    //如果是可序列化的，就将对象序列化
+    else if (object instanceof Serializable) {
+        try {
+            bytes = SerializationUtils.serialize(object);
+        }
+        catch (IllegalArgumentException e) {
+            throw new MessageConversionException(
+                    &quot;failed to convert to serialized Message content&quot;, e);
+        }
+        messageProperties.setContentType(MessageProperties.CONTENT_TYPE_SERIALIZED_OBJECT);
+    }
+    if (bytes != null) {
+        messageProperties.setContentLength(bytes.length);
+        return new Message(bytes, messageProperties);
+    }
+    //否则就是不支持的类型
+    throw new IllegalArgumentException(getClass().getSimpleName()
+            + &quot; only supports String, byte[] and Serializable payloads, received: &quot; + object.getClass().getName());
+}</code></pre>
 <h2 id="SimpleMessageListenerContainer">1.3 SimpleMessageListenerContainer</h2><p>SimpleMessageListenerContainer是一个消息监听容器（就是消费者的容器，可以监听多个队列上的消息）</p>
 <ul>
 <li>这个类非常的强大，我们可以对它进行很多设置，对于消费者的配置项，这个类都可以满足</li>
@@ -569,42 +569,42 @@
 </ul>
 <p>注意: <code>SimpleMessageListenerContainer</code>可以进行动态设置， 比如在运行中的应用可以动态的修改其消费者数量的大小、接收消息的模式等。</p>
 <p>很多基于RabbitMQ的自制定化后端管控台在进行动态设置的时候，也是根据这一特性去实现的。可以看出SpringAMQP非常的强大。</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Configuration</span>
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">RabbitMQConfig</span> <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">//略。。。</span>
-    <span class="token annotation punctuation">@Bean</span>
-    <span class="token keyword">public</span> Queue <span class="token function">directQueue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Queue</span><span class="token punctuation">(</span><span class="token string">"test.direct.queue"</span><span class="token punctuation">,</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token annotation punctuation">@Bean</span>
-    <span class="token keyword">public</span> Queue <span class="token function">topicQueue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Queue</span><span class="token punctuation">(</span><span class="token string">"test.topic.queue"</span><span class="token punctuation">,</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+<pre><code class="java">@Configuration
+public class RabbitMQConfig {
+    //略。。。
+    @Bean
+    public Queue directQueue(){
+        return new Queue(&quot;test.direct.queue&quot;,false);
+    }
+    @Bean
+    public Queue topicQueue(){
+        return new Queue(&quot;test.topic.queue&quot;,false);
+    }
 
-    <span class="token annotation punctuation">@Bean</span>
-    <span class="token keyword">public</span> SimpleMessageListenerContainer <span class="token function">simpleMessageListenerContainer</span><span class="token punctuation">(</span>ConnectionFactory connectionFactory<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        SimpleMessageListenerContainer container <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SimpleMessageListenerContainer</span><span class="token punctuation">(</span>connectionFactory<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        container<span class="token punctuation">.</span><span class="token function">setQueues</span><span class="token punctuation">(</span><span class="token function">directQueue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token function">topicQueue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        container<span class="token punctuation">.</span><span class="token function">setConcurrentConsumers</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        container<span class="token punctuation">.</span><span class="token function">setDefaultRequeueRejected</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        container<span class="token punctuation">.</span><span class="token function">setAcknowledgeMode</span><span class="token punctuation">(</span>AcknowledgeMode<span class="token punctuation">.</span>AUTO<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        container<span class="token punctuation">.</span><span class="token function">setConsumerTagStrategy</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ConsumerTagStrategy</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token annotation punctuation">@Override</span>
-            <span class="token keyword">public</span> String <span class="token function">createConsumerTag</span><span class="token punctuation">(</span>String queue<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">return</span> queue<span class="token operator">+</span><span class="token string">"_"</span><span class="token operator">+</span> UUID<span class="token punctuation">.</span><span class="token function">randomUUID</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        container<span class="token punctuation">.</span><span class="token function">setMessageListener</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ChannelAwareMessageListener</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token annotation punctuation">@Override</span>
-            <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">onMessage</span><span class="token punctuation">(</span>Message message<span class="token punctuation">,</span> Channel channel<span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception <span class="token punctuation">{</span>
-                String msg <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">String</span><span class="token punctuation">(</span>message<span class="token punctuation">.</span><span class="token function">getBody</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"----------消费者："</span> <span class="token operator">+</span>msg<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    @Bean
+    public SimpleMessageListenerContainer simpleMessageListenerContainer(ConnectionFactory connectionFactory){
+        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory);
+        container.setQueues(directQueue(),topicQueue());
+        container.setConcurrentConsumers(2);
+        container.setDefaultRequeueRejected(false);
+        container.setAcknowledgeMode(AcknowledgeMode.AUTO);
+        container.setConsumerTagStrategy(new ConsumerTagStrategy() {
+            @Override
+            public String createConsumerTag(String queue) {
+                return queue+&quot;_&quot;+ UUID.randomUUID().toString();
+            }
+        });
+        container.setMessageListener(new ChannelAwareMessageListener() {
+            @Override
+            public void onMessage(Message message, Channel channel) throws Exception {
+                String msg = new String(message.getBody());
+                System.out.println(&quot;----------消费者：&quot; +msg);
+            }
+        });
 
-        <span class="token keyword">return</span> container<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+        return container;
+    }
+}</code></pre>
 <p>只要它在IoC容器中，就保持监听注册队列上的消息，监听到消息就可以通过内部的MessageListener来处理消息。如果收到的消息是序列化的、json等其他类型，可以使用Converter转换。或写一个MessageListenerAdapter，它可以注册Converter。</p>
 <h2 id="MessageListenerAdapter">1.4 MessageListenerAdapter</h2><p>MessageListenerAdapter</p>
 <ol>
@@ -617,28 +617,28 @@
 </blockquote>
 <p>MessageListenerAdapter还可以通过MessageConverter将收到的消息转换成其他类型的数据，从而给Delegate中的方法处理。</p>
 <h2 id="MessageConverter">1.5 MessageConverter</h2><p>Java对象和Message互转。</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">MessageConverter</span> <span class="token punctuation">{</span>
-    Message <span class="token function">toMessage</span><span class="token punctuation">(</span>Object object<span class="token punctuation">,</span> MessageProperties messageProperties<span class="token punctuation">)</span> <span class="token keyword">throws</span> MessageConversionException<span class="token punctuation">;</span>
+<pre><code class="java">public interface MessageConverter {
+    Message toMessage(Object object, MessageProperties messageProperties) throws MessageConversionException;
 
-    Object <span class="token function">fromMessage</span><span class="token punctuation">(</span>Message message<span class="token punctuation">)</span> <span class="token keyword">throws</span> MessageConversionException<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+    Object fromMessage(Message message) throws MessageConversionException;
+}</code></pre>
 <h1 id="SpringBoot整合RabbitMQ">2 SpringBoot整合RabbitMQ</h1><p>maven依赖：</p>
-<pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework.boot<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-boot-starter-amqp<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span></code></pre>
+<pre><code class="xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-amqp&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
 <p>使用SpringBoot就不用我们手动去注入组件了，显然这些本来是应该在ConnectionFactory中配置的东西现在都可以拿出来，SpringBoot预先帮我们注入各种组件bean。</p>
-<pre class=" language-properties"><code class="language-properties"><span class="token comment" spellcheck="true">#RABBITMQ START</span>
-<span class="token attr-name">spring.rabbitmq.host</span><span class="token punctuation">=</span><span class="token attr-value">127.0.0.1</span>
-<span class="token attr-name">spring.rabbitmq.port</span><span class="token punctuation">=</span><span class="token attr-value">5672</span>
-<span class="token attr-name">spring.rabbitmq.username</span><span class="token punctuation">=</span><span class="token attr-value">guest</span>
-<span class="token attr-name">spring.rabbitmq.password</span><span class="token punctuation">=</span><span class="token attr-value">guest</span>
-<span class="token comment" spellcheck="true"># 消息确认机制：none不启用，simple使用waitForConfirms，correlated使用CorrelationData</span>
-<span class="token attr-name">spring.rabbitmq.publisher-confirm-type</span><span class="token punctuation">=</span><span class="token attr-value">none</span>
-<span class="token comment" spellcheck="true"># 自定义的属性，定义了两个队列的名称</span>
-<span class="token attr-name">rabbitmq.queue.msg</span><span class="token punctuation">=</span><span class="token attr-value">spring-boot-queue-msg</span>
-<span class="token attr-name">rabbitmq.queue.user</span><span class="token punctuation">=</span><span class="token attr-value">spring-boot-queue-user</span>
-<span class="token comment" spellcheck="true">#RABBITMQ END</span></code></pre>
+<pre><code class="properties">#RABBITMQ START
+spring.rabbitmq.host=127.0.0.1
+spring.rabbitmq.port=5672
+spring.rabbitmq.username=guest
+spring.rabbitmq.password=guest
+# 消息确认机制：none不启用，simple使用waitForConfirms，correlated使用CorrelationData
+spring.rabbitmq.publisher-confirm-type=none
+# 自定义的属性，定义了两个队列的名称
+rabbitmq.queue.msg=spring-boot-queue-msg
+rabbitmq.queue.user=spring-boot-queue-user
+#RABBITMQ END</code></pre>
 <p>先配置<code>@EnableRabbit</code>，可以使用<code>@RabbitListener(queues={})</code>来给方法注册一个<code>MessageListenerContainer</code>，这个<code>MessageListenerContainer</code>是从SpringBoot默认注入的<code>MessageListenerContainerFactory</code>获取的，如果要修改默认的Converter，就要自己注入<code>MessageListenerContainerFactory</code>，然后更改converter。</p>
 <p>更多的注解相关见：<a href="https://blog.csdn.net/u012129558/article/details/85099861" target="_blank" rel="noopener">使用@RabbitListener注解消费消息_Java_思考、总结、专注-CSDN博客</a></p>
 <p>其他的用法就没有很大区别了。</p>
@@ -1256,7 +1256,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1336,6 +1336,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

@@ -25,10 +25,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -402,7 +402,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    691
+                    696
                 </div>
                 
 
@@ -422,26 +422,26 @@
 <h1 id="安全失败">2 安全失败</h1><p>采用安全失败机制的集合容器，<strong>在遍历时不是直接在集合内容上访问的，而是先复制原有集合内容，在拷贝的集合上进行遍历。</strong> 这点和CopyOnWriteArrayList在修改上的的机制很一致。</p>
 <p>原理：由于迭代时是对原集合的拷贝进行遍历，所以在遍历过程中对原集合所作的修改并不能被迭代器检测到，所以不会触发 Concurrent Modification Exception。</p>
 <p>比如我们来看ConcurrentHashMap的迭代器：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">static</span> <span class="token keyword">class</span> <span class="token class-name">Traverser</span><span class="token operator">&lt;</span>K<span class="token punctuation">,</span>V<span class="token operator">></span> <span class="token punctuation">{</span>
-    Node<span class="token operator">&lt;</span>K<span class="token punctuation">,</span>V<span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span> tab<span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// current table; updated if resized</span>
-    Node<span class="token operator">&lt;</span>K<span class="token punctuation">,</span>V<span class="token operator">></span> next<span class="token punctuation">;</span>         <span class="token comment" spellcheck="true">// the next entry to use</span>
-    TableStack<span class="token operator">&lt;</span>K<span class="token punctuation">,</span>V<span class="token operator">></span> stack<span class="token punctuation">,</span> spare<span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// to save/restore on ForwardingNodes</span>
-    <span class="token keyword">int</span> index<span class="token punctuation">;</span>              <span class="token comment" spellcheck="true">// index of bin to use next</span>
-    <span class="token keyword">int</span> baseIndex<span class="token punctuation">;</span>          <span class="token comment" spellcheck="true">// current index of initial table</span>
-    <span class="token keyword">int</span> baseLimit<span class="token punctuation">;</span>          <span class="token comment" spellcheck="true">// index bound for initial table</span>
-    <span class="token keyword">final</span> <span class="token keyword">int</span> baseSize<span class="token punctuation">;</span>     <span class="token comment" spellcheck="true">// initial table size</span>
+<pre><code class="java">static class Traverser&lt;K,V&gt; {
+    Node&lt;K,V&gt;[] tab;        // current table; updated if resized
+    Node&lt;K,V&gt; next;         // the next entry to use
+    TableStack&lt;K,V&gt; stack, spare; // to save/restore on ForwardingNodes
+    int index;              // index of bin to use next
+    int baseIndex;          // current index of initial table
+    int baseLimit;          // index bound for initial table
+    final int baseSize;     // initial table size
 
-    <span class="token function">Traverser</span><span class="token punctuation">(</span>Node<span class="token operator">&lt;</span>K<span class="token punctuation">,</span>V<span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span> tab<span class="token punctuation">,</span> <span class="token keyword">int</span> size<span class="token punctuation">,</span> <span class="token keyword">int</span> index<span class="token punctuation">,</span> <span class="token keyword">int</span> limit<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">//在这里复制tab</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>tab <span class="token operator">=</span> tab<span class="token punctuation">;</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>baseSize <span class="token operator">=</span> size<span class="token punctuation">;</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>baseIndex <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>index <span class="token operator">=</span> index<span class="token punctuation">;</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>baseLimit <span class="token operator">=</span> limit<span class="token punctuation">;</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>next <span class="token operator">=</span> null<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    Traverser(Node&lt;K,V&gt;[] tab, int size, int index, int limit) {
+        //在这里复制tab
+        this.tab = tab;
+        this.baseSize = size;
+        this.baseIndex = this.index = index;
+        this.baseLimit = limit;
+        this.next = null;
+    }
 
-    <span class="token comment" spellcheck="true">//遍历逻辑略</span>
-<span class="token punctuation">}</span></code></pre>
+    //遍历逻辑略
+}</code></pre>
 <p>缺点：基于拷贝内容的优点是避免了 Concurrent Modification Exception，但同样地，迭代器并不能访问到修改后的内容，即：迭代器遍历的是开始遍历那一刻拿到的集合拷贝，<strong>在遍历期间原集合发生的修改迭代器是不知道的。</strong></p>
 <p>场景：java.util.concurrent 包下的容器都是安全失败，可以在多线程下并发使用，并发修改。</p>
 <h1 id="总结">3 总结</h1><p>快速失败和安全失败是对迭代器而言的。</p>
@@ -1057,7 +1057,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1137,6 +1137,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

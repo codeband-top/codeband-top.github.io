@@ -28,10 +28,10 @@ BTree.java
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -401,7 +401,7 @@ BTree.java
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    3.1k
+                    3.2k
                 </div>
                 
 
@@ -510,110 +510,110 @@ BTree.java
 </ol>
 <p>　　B树在提高了IO性能的同时并没有解决元素遍历的时候效率低下的问题，正是为了解决这个问题，B+树应用而生。B+树只需要去遍历叶子节点就可以实现整棵树的遍历。而且在数据库中基于范围的查询是非常频繁的，而B树不支持这样的操作或者说效率太低</p>
 <h1 id="附：Algorithms第四版B树实现">4 附：Algorithms第四版B树实现</h1><p>这个B树实现非叶子节点居然不带信息，把我整懵了</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">BTree</span><span class="token operator">&lt;</span>Key <span class="token keyword">extends</span> <span class="token class-name">Comparable</span><span class="token operator">&lt;</span>Key<span class="token operator">></span><span class="token punctuation">,</span> Value<span class="token operator">></span>  <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">// 度数M，一个结点最多有M-1个关键字</span>
-    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">int</span> M <span class="token operator">=</span> <span class="token number">4</span><span class="token punctuation">;</span>
+<pre><code class="java">public class BTree&lt;Key extends Comparable&lt;Key&gt;, Value&gt;  {
+    // 度数M，一个结点最多有M-1个关键字
+    private static final int M = 4;
 
-    <span class="token keyword">private</span> Node root<span class="token punctuation">;</span>       <span class="token comment" spellcheck="true">// 根节点</span>
-    <span class="token keyword">private</span> <span class="token keyword">int</span> height<span class="token punctuation">;</span>      <span class="token comment" spellcheck="true">// B树的高度</span>
-    <span class="token keyword">private</span> <span class="token keyword">int</span> n<span class="token punctuation">;</span>           <span class="token comment" spellcheck="true">// 该树中一共有多少个key-value对</span>
+    private Node root;       // 根节点
+    private int height;      // B树的高度
+    private int n;           // 该树中一共有多少个key-value对
 
-    <span class="token comment" spellcheck="true">// 节点</span>
-    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">class</span> <span class="token class-name">Node</span> <span class="token punctuation">{</span>
-        <span class="token keyword">private</span> <span class="token keyword">int</span> m<span class="token punctuation">;</span>                             <span class="token comment" spellcheck="true">// 有多少个子节点</span>
-        <span class="token keyword">private</span> Entry<span class="token punctuation">[</span><span class="token punctuation">]</span> children <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Entry</span><span class="token punctuation">[</span>M<span class="token punctuation">]</span><span class="token punctuation">;</span>   <span class="token comment" spellcheck="true">// 子节点的数组</span>
+    // 节点
+    private static final class Node {
+        private int m;                             // 有多少个子节点
+        private Entry[] children = new Entry[M];   // 子节点的数组
 
-        <span class="token comment" spellcheck="true">// create a node with k children</span>
-        <span class="token keyword">private</span> <span class="token function">Node</span><span class="token punctuation">(</span><span class="token keyword">int</span> k<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            m <span class="token operator">=</span> k<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+        // create a node with k children
+        private Node(int k) {
+            m = k;
+        }
+    }
 
-    <span class="token comment" spellcheck="true">// 一条索引</span>
-    <span class="token comment" spellcheck="true">// 内部节点：只使用key和next</span>
-    <span class="token comment" spellcheck="true">// 叶子节点，只使用key和value</span>
-    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">class</span> <span class="token class-name">Entry</span> <span class="token punctuation">{</span>
-        <span class="token keyword">private</span> Comparable key<span class="token punctuation">;</span>
-        <span class="token keyword">private</span> <span class="token keyword">final</span> Object val<span class="token punctuation">;</span>
-        <span class="token keyword">private</span> Node next<span class="token punctuation">;</span>     <span class="token comment" spellcheck="true">// 指向一个节点</span>
-        <span class="token keyword">public</span> <span class="token function">Entry</span><span class="token punctuation">(</span>Comparable key<span class="token punctuation">,</span> Object val<span class="token punctuation">,</span> Node next<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">this</span><span class="token punctuation">.</span>key  <span class="token operator">=</span> key<span class="token punctuation">;</span>
-            <span class="token keyword">this</span><span class="token punctuation">.</span>val  <span class="token operator">=</span> val<span class="token punctuation">;</span>
-            <span class="token keyword">this</span><span class="token punctuation">.</span>next <span class="token operator">=</span> next<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+    // 一条索引
+    // 内部节点：只使用key和next
+    // 叶子节点，只使用key和value
+    private static class Entry {
+        private Comparable key;
+        private final Object val;
+        private Node next;     // 指向一个节点
+        public Entry(Comparable key, Object val, Node next) {
+            this.key  = key;
+            this.val  = val;
+            this.next = next;
+        }
+    }
 
-    <span class="token comment" spellcheck="true">/**
+    /**
      * Initializes an empty B-tree.
-     */</span>
-    <span class="token keyword">public</span> <span class="token function">BTree</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        root <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Node</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+     */
+    public BTree() {
+        root = new Node(0);
+    }
 
-    <span class="token comment" spellcheck="true">/**
+    /**
      * Returns true if this symbol table is empty.
      * @return {@code true} if this symbol table is empty; {@code false} otherwise
-     */</span>
-    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+     */
+    public boolean isEmpty() {
+        return size() == 0;
+    }
 
-    <span class="token comment" spellcheck="true">/**
+    /**
      * Returns the number of key-value pairs in this symbol table.
      * @return the number of key-value pairs in this symbol table
-     */</span>
-    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> n<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+     */
+    public int size() {
+        return n;
+    }
 
-    <span class="token comment" spellcheck="true">/**
+    /**
      * Returns the height of this B-tree (for debugging).
      *
      * @return the height of this B-tree
-     */</span>
-    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">height</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> height<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+     */
+    public int height() {
+        return height;
+    }
 
 
-    <span class="token comment" spellcheck="true">/**
+    /**
      * Returns the value associated with the given key.
      *
      * @param  key the key
      * @return the value associated with the given key if the key is in the symbol table
      *         and {@code null} if the key is not in the symbol table
      * @throws IllegalArgumentException if {@code key} is {@code null}
-     */</span>
-    <span class="token keyword">public</span> Value <span class="token function">get</span><span class="token punctuation">(</span>Key key<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>key <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IllegalArgumentException</span><span class="token punctuation">(</span><span class="token string">"argument to get() is null"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> <span class="token function">search</span><span class="token punctuation">(</span>root<span class="token punctuation">,</span> key<span class="token punctuation">,</span> height<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+     */
+    public Value get(Key key) {
+        if (key == null) throw new IllegalArgumentException(&quot;argument to get() is null&quot;);
+        return search(root, key, height);
+    }
 
-    <span class="token keyword">private</span> Value <span class="token function">search</span><span class="token punctuation">(</span>Node x<span class="token punctuation">,</span> Key key<span class="token punctuation">,</span> <span class="token keyword">int</span> ht<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        Entry<span class="token punctuation">[</span><span class="token punctuation">]</span> children <span class="token operator">=</span> x<span class="token punctuation">.</span>children<span class="token punctuation">;</span>
+    private Value search(Node x, Key key, int ht) {
+        Entry[] children = x.children;
 
-        <span class="token comment" spellcheck="true">// 如果是叶子节点</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>ht <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">//找到叶子节点中对应的索引项</span>
-            <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> x<span class="token punctuation">.</span>m<span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">eq</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> children<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">.</span>key<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token punctuation">(</span>Value<span class="token punctuation">)</span> children<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">.</span>val<span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
+        // 如果是叶子节点
+        if (ht == 0) {
+            //找到叶子节点中对应的索引项
+            for (int j = 0; j &lt; x.m; j++) {
+                if (eq(key, children[j].key)) return (Value) children[j].val;
+            }
+        }
 
-        <span class="token comment" spellcheck="true">// 如果不是叶子节点</span>
-        <span class="token keyword">else</span> <span class="token punctuation">{</span>
-            <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> x<span class="token punctuation">.</span>m<span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token comment" spellcheck="true">//如果是节点中最后一条索引项或者位于该索引项与下一条索引项之间</span>
-                <span class="token keyword">if</span> <span class="token punctuation">(</span>j<span class="token operator">+</span><span class="token number">1</span> <span class="token operator">==</span> x<span class="token punctuation">.</span>m <span class="token operator">||</span> <span class="token function">less</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> children<span class="token punctuation">[</span>j<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">.</span>key<span class="token punctuation">)</span><span class="token punctuation">)</span>
-                    <span class="token comment" spellcheck="true">//搜索该索引项的next</span>
-                    <span class="token keyword">return</span> <span class="token function">search</span><span class="token punctuation">(</span>children<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">.</span>next<span class="token punctuation">,</span> key<span class="token punctuation">,</span> ht<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">return</span> null<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+        // 如果不是叶子节点
+        else {
+            for (int j = 0; j &lt; x.m; j++) {
+                //如果是节点中最后一条索引项或者位于该索引项与下一条索引项之间
+                if (j+1 == x.m || less(key, children[j+1].key))
+                    //搜索该索引项的next
+                    return search(children[j].next, key, ht-1);
+            }
+        }
+        return null;
+    }
 
 
-    <span class="token comment" spellcheck="true">/**
+    /**
      * Inserts the key-value pair into the symbol table, overwriting the old value
      * with the new value if the key is already in the symbol table.
      * If the value is {@code null}, this effectively deletes the key from the symbol table.
@@ -621,99 +621,99 @@ BTree.java
      * @param  key the key
      * @param  val the value
      * @throws IllegalArgumentException if {@code key} is {@code null}
-     */</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">put</span><span class="token punctuation">(</span>Key key<span class="token punctuation">,</span> Value val<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>key <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IllegalArgumentException</span><span class="token punctuation">(</span><span class="token string">"argument key to put() is null"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        Node u <span class="token operator">=</span> <span class="token function">insert</span><span class="token punctuation">(</span>root<span class="token punctuation">,</span> key<span class="token punctuation">,</span> val<span class="token punctuation">,</span> height<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        n<span class="token operator">++</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>u <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token keyword">return</span><span class="token punctuation">;</span>
+     */
+    public void put(Key key, Value val) {
+        if (key == null) throw new IllegalArgumentException(&quot;argument key to put() is null&quot;);
+        Node u = insert(root, key, val, height);
+        n++;
+        if (u == null) return;
 
-        <span class="token comment" spellcheck="true">// need to split root</span>
-        Node t <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Node</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        t<span class="token punctuation">.</span>children<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Entry</span><span class="token punctuation">(</span>root<span class="token punctuation">.</span>children<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>key<span class="token punctuation">,</span> null<span class="token punctuation">,</span> root<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        t<span class="token punctuation">.</span>children<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Entry</span><span class="token punctuation">(</span>u<span class="token punctuation">.</span>children<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>key<span class="token punctuation">,</span> null<span class="token punctuation">,</span> u<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        root <span class="token operator">=</span> t<span class="token punctuation">;</span>
-        height<span class="token operator">++</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+        // need to split root
+        Node t = new Node(2);
+        t.children[0] = new Entry(root.children[0].key, null, root);
+        t.children[1] = new Entry(u.children[0].key, null, u);
+        root = t;
+        height++;
+    }
 
-    <span class="token keyword">private</span> Node <span class="token function">insert</span><span class="token punctuation">(</span>Node h<span class="token punctuation">,</span> Key key<span class="token punctuation">,</span> Value val<span class="token punctuation">,</span> <span class="token keyword">int</span> ht<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">int</span> j<span class="token punctuation">;</span>
-        Entry t <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Entry</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> val<span class="token punctuation">,</span> null<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    private Node insert(Node h, Key key, Value val, int ht) {
+        int j;
+        Entry t = new Entry(key, val, null);
 
-        <span class="token comment" spellcheck="true">// external node</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>ht <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">for</span> <span class="token punctuation">(</span>j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> h<span class="token punctuation">.</span>m<span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">less</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> h<span class="token punctuation">.</span>children<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">.</span>key<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">break</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
+        // external node
+        if (ht == 0) {
+            for (j = 0; j &lt; h.m; j++) {
+                if (less(key, h.children[j].key)) break;
+            }
+        }
 
-        <span class="token comment" spellcheck="true">// internal node</span>
-        <span class="token keyword">else</span> <span class="token punctuation">{</span>
-            <span class="token keyword">for</span> <span class="token punctuation">(</span>j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> h<span class="token punctuation">.</span>m<span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>j<span class="token operator">+</span><span class="token number">1</span> <span class="token operator">==</span> h<span class="token punctuation">.</span>m<span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token function">less</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> h<span class="token punctuation">.</span>children<span class="token punctuation">[</span>j<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">.</span>key<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    Node u <span class="token operator">=</span> <span class="token function">insert</span><span class="token punctuation">(</span>h<span class="token punctuation">.</span>children<span class="token punctuation">[</span>j<span class="token operator">++</span><span class="token punctuation">]</span><span class="token punctuation">.</span>next<span class="token punctuation">,</span> key<span class="token punctuation">,</span> val<span class="token punctuation">,</span> ht<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                    <span class="token keyword">if</span> <span class="token punctuation">(</span>u <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token keyword">return</span> null<span class="token punctuation">;</span>
-                    t<span class="token punctuation">.</span>key <span class="token operator">=</span> u<span class="token punctuation">.</span>children<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>key<span class="token punctuation">;</span>
-                    t<span class="token punctuation">.</span>next <span class="token operator">=</span> u<span class="token punctuation">;</span>
-                    <span class="token keyword">break</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
+        // internal node
+        else {
+            for (j = 0; j &lt; h.m; j++) {
+                if ((j+1 == h.m) || less(key, h.children[j+1].key)) {
+                    Node u = insert(h.children[j++].next, key, val, ht-1);
+                    if (u == null) return null;
+                    t.key = u.children[0].key;
+                    t.next = u;
+                    break;
+                }
+            }
+        }
 
-        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> h<span class="token punctuation">.</span>m<span class="token punctuation">;</span> i <span class="token operator">></span> j<span class="token punctuation">;</span> i<span class="token operator">--</span><span class="token punctuation">)</span>
-            h<span class="token punctuation">.</span>children<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> h<span class="token punctuation">.</span>children<span class="token punctuation">[</span>i<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-        h<span class="token punctuation">.</span>children<span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">=</span> t<span class="token punctuation">;</span>
-        h<span class="token punctuation">.</span>m<span class="token operator">++</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>h<span class="token punctuation">.</span>m <span class="token operator">&lt;</span> M<span class="token punctuation">)</span> <span class="token keyword">return</span> null<span class="token punctuation">;</span>
-        <span class="token keyword">else</span>         <span class="token keyword">return</span> <span class="token function">split</span><span class="token punctuation">(</span>h<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+        for (int i = h.m; i &gt; j; i--)
+            h.children[i] = h.children[i-1];
+        h.children[j] = t;
+        h.m++;
+        if (h.m &lt; M) return null;
+        else         return split(h);
+    }
 
-    <span class="token comment" spellcheck="true">// split node in half</span>
-    <span class="token keyword">private</span> Node <span class="token function">split</span><span class="token punctuation">(</span>Node h<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        Node t <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Node</span><span class="token punctuation">(</span>M<span class="token operator">/</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        h<span class="token punctuation">.</span>m <span class="token operator">=</span> M<span class="token operator">/</span><span class="token number">2</span><span class="token punctuation">;</span>
-        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> M<span class="token operator">/</span><span class="token number">2</span><span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span>
-            t<span class="token punctuation">.</span>children<span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">=</span> h<span class="token punctuation">.</span>children<span class="token punctuation">[</span>M<span class="token operator">/</span><span class="token number">2</span><span class="token operator">+</span>j<span class="token punctuation">]</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> t<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    // split node in half
+    private Node split(Node h) {
+        Node t = new Node(M/2);
+        h.m = M/2;
+        for (int j = 0; j &lt; M/2; j++)
+            t.children[j] = h.children[M/2+j];
+        return t;
+    }
 
-    <span class="token comment" spellcheck="true">/**
+    /**
      * Returns a string representation of this B-tree (for debugging).
      *
      * @return a string representation of this B-tree.
-     */</span>
-    <span class="token keyword">public</span> String <span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token function">toString</span><span class="token punctuation">(</span>root<span class="token punctuation">,</span> height<span class="token punctuation">,</span> <span class="token string">""</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token string">"\n"</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+     */
+    public String toString() {
+        return toString(root, height, &quot;&quot;) + &quot;\n&quot;;
+    }
 
-    <span class="token keyword">private</span> String <span class="token function">toString</span><span class="token punctuation">(</span>Node h<span class="token punctuation">,</span> <span class="token keyword">int</span> ht<span class="token punctuation">,</span> String indent<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        StringBuilder s <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StringBuilder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        Entry<span class="token punctuation">[</span><span class="token punctuation">]</span> children <span class="token operator">=</span> h<span class="token punctuation">.</span>children<span class="token punctuation">;</span>
+    private String toString(Node h, int ht, String indent) {
+        StringBuilder s = new StringBuilder();
+        Entry[] children = h.children;
 
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>ht <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> h<span class="token punctuation">.</span>m<span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                s<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>indent <span class="token operator">+</span> children<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">.</span>key <span class="token operator">+</span> <span class="token string">" "</span> <span class="token operator">+</span> children<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">.</span>val <span class="token operator">+</span> <span class="token string">"\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">else</span> <span class="token punctuation">{</span>
-            <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> h<span class="token punctuation">.</span>m<span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">if</span> <span class="token punctuation">(</span>j <span class="token operator">></span> <span class="token number">0</span><span class="token punctuation">)</span> s<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>indent <span class="token operator">+</span> <span class="token string">"("</span> <span class="token operator">+</span> children<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">.</span>key <span class="token operator">+</span> <span class="token string">")\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                s<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token function">toString</span><span class="token punctuation">(</span>children<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">.</span>next<span class="token punctuation">,</span> ht<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> indent <span class="token operator">+</span> <span class="token string">"     "</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">return</span> s<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+        if (ht == 0) {
+            for (int j = 0; j &lt; h.m; j++) {
+                s.append(indent + children[j].key + &quot; &quot; + children[j].val + &quot;\n&quot;);
+            }
+        }
+        else {
+            for (int j = 0; j &lt; h.m; j++) {
+                if (j &gt; 0) s.append(indent + &quot;(&quot; + children[j].key + &quot;)\n&quot;);
+                s.append(toString(children[j].next, ht-1, indent + &quot;     &quot;));
+            }
+        }
+        return s.toString();
+    }
 
 
-    <span class="token comment" spellcheck="true">// comparison functions - make Comparable instead of Key to avoid casts</span>
-    <span class="token keyword">private</span> <span class="token keyword">boolean</span> <span class="token function">less</span><span class="token punctuation">(</span>Comparable k1<span class="token punctuation">,</span> Comparable k2<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> k1<span class="token punctuation">.</span><span class="token function">compareTo</span><span class="token punctuation">(</span>k2<span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    // comparison functions - make Comparable instead of Key to avoid casts
+    private boolean less(Comparable k1, Comparable k2) {
+        return k1.compareTo(k2) &lt; 0;
+    }
 
-    <span class="token keyword">private</span> <span class="token keyword">boolean</span> <span class="token function">eq</span><span class="token punctuation">(</span>Comparable k1<span class="token punctuation">,</span> Comparable k2<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> k1<span class="token punctuation">.</span><span class="token function">compareTo</span><span class="token punctuation">(</span>k2<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    private boolean eq(Comparable k1, Comparable k2) {
+        return k1.compareTo(k2) == 0;
+    }
+}</code></pre>
 
             </div>
             <hr/>
@@ -1334,7 +1334,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1414,6 +1414,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

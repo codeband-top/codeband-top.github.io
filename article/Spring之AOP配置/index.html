@@ -25,10 +25,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -398,7 +398,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    2.4k
+                    2.5k
                 </div>
                 
 
@@ -417,215 +417,215 @@
 <h2 id="为什么要使用AOP">1.2 为什么要使用AOP</h2><p>AOP最为典型的应用实际就是数据库事务的管控。例如,当我们需要保存一个用户时,可能要连同它的角色信息一并保存到数据库中，要么一起成功，要么一起失败，这时可能就需要AOP的管控，将具体的数据库操作织入事务中。</p>
 <p>AOP还可以减少大量重复的工作，例如JDBC代码的简化。</p>
 <h1 id="动态代理">2 动态代理</h1><p>动态代理相关知识请移步<a href="../Java反射机制和动态代理详解">Java反射机制和动态代理详解</a></p>
-<h2 id="不使用动态代理的项目">2.1 不使用动态代理的项目</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
+<h2 id="不使用动态代理的项目">2.1 不使用动态代理的项目</h2><pre><code class="java">/**
  * 账户的业务层实现类
- */</span>
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">AccountServiceImpl</span> <span class="token keyword">implements</span> <span class="token class-name">IAccountService</span><span class="token punctuation">{</span>
+ */
+public class AccountServiceImpl implements IAccountService{
 
-    <span class="token keyword">private</span> IAccountDao accountDao<span class="token punctuation">;</span>
-    <span class="token keyword">private</span> TransactionManager txManager<span class="token punctuation">;</span>
+    private IAccountDao accountDao;
+    private TransactionManager txManager;
 
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setTxManager</span><span class="token punctuation">(</span>TransactionManager txManager<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>txManager <span class="token operator">=</span> txManager<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    public void setTxManager(TransactionManager txManager) {
+        this.txManager = txManager;
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setAccountDao</span><span class="token punctuation">(</span>IAccountDao accountDao<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>accountDao <span class="token operator">=</span> accountDao<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    public void setAccountDao(IAccountDao accountDao) {
+        this.accountDao = accountDao;
+    }
 
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> List<span class="token operator">&lt;</span>Account<span class="token operator">></span> <span class="token function">findAllAccount</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            txManager<span class="token punctuation">.</span><span class="token function">beginTransaction</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            List<span class="token operator">&lt;</span>Account<span class="token operator">></span> accounts <span class="token operator">=</span> accountDao<span class="token punctuation">.</span><span class="token function">findAllAccount</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            txManager<span class="token punctuation">.</span><span class="token function">commit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">return</span> accounts<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            txManager<span class="token punctuation">.</span><span class="token function">rollback</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">RuntimeException</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            txManager<span class="token punctuation">.</span><span class="token function">release</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+    @Override
+    public List&lt;Account&gt; findAllAccount() {
+        try {
+            txManager.beginTransaction();
+            List&lt;Account&gt; accounts = accountDao.findAllAccount();
+            txManager.commit();
+            return accounts;
+        } catch (Exception e) {
+            txManager.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            txManager.release();
+        }
+    }
 
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> Account <span class="token function">findAccountById</span><span class="token punctuation">(</span>Integer accountId<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            txManager<span class="token punctuation">.</span><span class="token function">beginTransaction</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            Account account <span class="token operator">=</span> accountDao<span class="token punctuation">.</span><span class="token function">findAccountById</span><span class="token punctuation">(</span>accountId<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            txManager<span class="token punctuation">.</span><span class="token function">commit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">return</span> account<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            txManager<span class="token punctuation">.</span><span class="token function">rollback</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">RuntimeException</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            txManager<span class="token punctuation">.</span><span class="token function">release</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+    @Override
+    public Account findAccountById(Integer accountId) {
+        try {
+            txManager.beginTransaction();
+            Account account = accountDao.findAccountById(accountId);
+            txManager.commit();
+            return account;
+        } catch (Exception e) {
+            txManager.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            txManager.release();
+        }
+    }
 
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">saveAccount</span><span class="token punctuation">(</span>Account account<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            txManager<span class="token punctuation">.</span><span class="token function">beginTransaction</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            accountDao<span class="token punctuation">.</span><span class="token function">saveAccount</span><span class="token punctuation">(</span>account<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            txManager<span class="token punctuation">.</span><span class="token function">commit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            txManager<span class="token punctuation">.</span><span class="token function">rollback</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">RuntimeException</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            txManager<span class="token punctuation">.</span><span class="token function">release</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+    @Override
+    public void saveAccount(Account account) {
+        try {
+            txManager.beginTransaction();
+            accountDao.saveAccount(account);
+            txManager.commit();
+        } catch (Exception e) {
+            txManager.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            txManager.release();
+        }
+    }
 
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">updateAccount</span><span class="token punctuation">(</span>Account account<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            txManager<span class="token punctuation">.</span><span class="token function">beginTransaction</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            accountDao<span class="token punctuation">.</span><span class="token function">updateAccount</span><span class="token punctuation">(</span>account<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            txManager<span class="token punctuation">.</span><span class="token function">commit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            txManager<span class="token punctuation">.</span><span class="token function">rollback</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">RuntimeException</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            txManager<span class="token punctuation">.</span><span class="token function">release</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+    @Override
+    public void updateAccount(Account account) {
+        try {
+            txManager.beginTransaction();
+            accountDao.updateAccount(account);
+            txManager.commit();
+        } catch (Exception e) {
+            txManager.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            txManager.release();
+        }
+    }
 
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">deleteAccount</span><span class="token punctuation">(</span>Integer acccountId<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            txManager<span class="token punctuation">.</span><span class="token function">beginTransaction</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            accountDao<span class="token punctuation">.</span><span class="token function">deleteAccount</span><span class="token punctuation">(</span>acccountId<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            txManager<span class="token punctuation">.</span><span class="token function">commit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            txManager<span class="token punctuation">.</span><span class="token function">rollback</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">RuntimeException</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            txManager<span class="token punctuation">.</span><span class="token function">release</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+    @Override
+    public void deleteAccount(Integer acccountId) {
+        try {
+            txManager.beginTransaction();
+            accountDao.deleteAccount(acccountId);
+            txManager.commit();
+        } catch (Exception e) {
+            txManager.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            txManager.release();
+        }
+    }
 
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">transfer</span><span class="token punctuation">(</span>String sourceName<span class="token punctuation">,</span> String targetName<span class="token punctuation">,</span> Float money<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            txManager<span class="token punctuation">.</span><span class="token function">beginTransaction</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">//1.根据名称查询转出账户</span>
-            Account source <span class="token operator">=</span> accountDao<span class="token punctuation">.</span><span class="token function">findAccountByName</span><span class="token punctuation">(</span>sourceName<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">//2.根据名称查询转入账户</span>
-            Account target <span class="token operator">=</span> accountDao<span class="token punctuation">.</span><span class="token function">findAccountByName</span><span class="token punctuation">(</span>targetName<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">//3.转出减钱</span>
-            source<span class="token punctuation">.</span><span class="token function">setMoney</span><span class="token punctuation">(</span>source<span class="token punctuation">.</span><span class="token function">getMoney</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-</span>money<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">//4.转入加钱</span>
-            target<span class="token punctuation">.</span><span class="token function">setMoney</span><span class="token punctuation">(</span>target<span class="token punctuation">.</span><span class="token function">getMoney</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">+</span>money<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">//5.更新转出账户</span>
-            accountDao<span class="token punctuation">.</span><span class="token function">updateAccount</span><span class="token punctuation">(</span>source<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    @Override
+    public void transfer(String sourceName, String targetName, Float money) {
+        try {
+            txManager.beginTransaction();
+            //1.根据名称查询转出账户
+            Account source = accountDao.findAccountByName(sourceName);
+            //2.根据名称查询转入账户
+            Account target = accountDao.findAccountByName(targetName);
+            //3.转出减钱
+            source.setMoney(source.getMoney()-money);
+            //4.转入加钱
+            target.setMoney(target.getMoney()+money);
+            //5.更新转出账户
+            accountDao.updateAccount(source);
 
-            <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">10</span><span class="token operator">/</span><span class="token number">0</span><span class="token punctuation">;</span>
+            int i = 10/0;
 
-            <span class="token comment" spellcheck="true">//6.更新转入账户</span>
-            accountDao<span class="token punctuation">.</span><span class="token function">updateAccount</span><span class="token punctuation">(</span>target<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            txManager<span class="token punctuation">.</span><span class="token function">commit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            txManager<span class="token punctuation">.</span><span class="token function">rollback</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            txManager<span class="token punctuation">.</span><span class="token function">release</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
-<h2 id="使用动态代理的项目">2.2 使用动态代理的项目</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">BeanFactory</span> <span class="token punctuation">{</span>
-    <span class="token keyword">private</span> IAccountService accountService<span class="token punctuation">;</span>
-    <span class="token keyword">private</span> TransactionManager txManager<span class="token punctuation">;</span>
+            //6.更新转入账户
+            accountDao.updateAccount(target);
+            txManager.commit();
+        } catch (Exception e) {
+            txManager.rollback();
+            e.printStackTrace();
+        } finally {
+            txManager.release();
+        }
+    }
+}</code></pre>
+<h2 id="使用动态代理的项目">2.2 使用动态代理的项目</h2><pre><code class="java">public class BeanFactory {
+    private IAccountService accountService;
+    private TransactionManager txManager;
 
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setTxManager</span><span class="token punctuation">(</span>TransactionManager txManager<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>txManager <span class="token operator">=</span> txManager<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    public void setTxManager(TransactionManager txManager) {
+        this.txManager = txManager;
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">final</span> <span class="token keyword">void</span> <span class="token function">setAccountService</span><span class="token punctuation">(</span>IAccountService accountService<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>accountService <span class="token operator">=</span> accountService<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    public final void setAccountService(IAccountService accountService){
+        this.accountService = accountService;
+    }
 
-    <span class="token comment" spellcheck="true">/**
+    /**
      * 获取Service代理对象
      * @return
-     */</span>
-    <span class="token keyword">public</span> IAccountService <span class="token function">getAccountService</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token punctuation">(</span>IAccountService<span class="token punctuation">)</span> Proxy<span class="token punctuation">.</span><span class="token function">newProxyInstance</span><span class="token punctuation">(</span>accountService<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getClassLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> accountService<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getInterfaces</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-            <span class="token keyword">new</span> <span class="token class-name">InvocationHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token annotation punctuation">@Override</span>
-                <span class="token keyword">public</span> Object <span class="token function">invoke</span><span class="token punctuation">(</span>Object proxy<span class="token punctuation">,</span> Method method<span class="token punctuation">,</span> Object<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> Throwable <span class="token punctuation">{</span>
-                    Object rtValue <span class="token operator">=</span> null<span class="token punctuation">;</span>
-                    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                        txManager<span class="token punctuation">.</span><span class="token function">beginTransaction</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                        method<span class="token punctuation">.</span><span class="token function">invoke</span><span class="token punctuation">(</span>accountService<span class="token punctuation">,</span>args<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                        txManager<span class="token punctuation">.</span><span class="token function">commit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                        <span class="token keyword">return</span> rtValue<span class="token punctuation">;</span>
-                    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                        txManager<span class="token punctuation">.</span><span class="token function">rollback</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">RuntimeException</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                    <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-                        txManager<span class="token punctuation">.</span><span class="token function">release</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                    <span class="token punctuation">}</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
+     */
+    public IAccountService getAccountService(){
+        return (IAccountService) Proxy.newProxyInstance(accountService.getClass().getClassLoader(), accountService.getClass().getInterfaces(),
+            new InvocationHandler() {
+                @Override
+                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                    Object rtValue = null;
+                    try {
+                        txManager.beginTransaction();
+                        method.invoke(accountService,args);
+                        txManager.commit();
+                        return rtValue;
+                    } catch (Exception e) {
+                        txManager.rollback();
+                        throw new RuntimeException(e);
+                    } finally {
+                        txManager.release();
+                    }
+                }
+            });
+    }
+}</code></pre>
+<pre><code class="java">/**
  * 账户的业务层实现类
- */</span>
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">AccountServiceImpl</span> <span class="token keyword">implements</span> <span class="token class-name">IAccountService</span><span class="token punctuation">{</span>
+ */
+public class AccountServiceImpl implements IAccountService{
 
-    <span class="token keyword">private</span> IAccountDao accountDao<span class="token punctuation">;</span>
+    private IAccountDao accountDao;
 
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setAccountDao</span><span class="token punctuation">(</span>IAccountDao accountDao<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>accountDao <span class="token operator">=</span> accountDao<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    public void setAccountDao(IAccountDao accountDao) {
+        this.accountDao = accountDao;
+    }
 
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> List<span class="token operator">&lt;</span>Account<span class="token operator">></span> <span class="token function">findAllAccount</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> accountDao<span class="token punctuation">.</span><span class="token function">findAllAccount</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    @Override
+    public List&lt;Account&gt; findAllAccount() {
+        return accountDao.findAllAccount();
+    }
 
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> Account <span class="token function">findAccountById</span><span class="token punctuation">(</span>Integer accountId<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> accountDao<span class="token punctuation">.</span><span class="token function">findAccountById</span><span class="token punctuation">(</span>accountId<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    @Override
+    public Account findAccountById(Integer accountId) {
+        return accountDao.findAccountById(accountId);
+    }
 
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">saveAccount</span><span class="token punctuation">(</span>Account account<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        accountDao<span class="token punctuation">.</span><span class="token function">saveAccount</span><span class="token punctuation">(</span>account<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    @Override
+    public void saveAccount(Account account) {
+        accountDao.saveAccount(account);
+    }
 
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">updateAccount</span><span class="token punctuation">(</span>Account account<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        accountDao<span class="token punctuation">.</span><span class="token function">updateAccount</span><span class="token punctuation">(</span>account<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    @Override
+    public void updateAccount(Account account) {
+        accountDao.updateAccount(account);
+    }
 
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">deleteAccount</span><span class="token punctuation">(</span>Integer acccountId<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        accountDao<span class="token punctuation">.</span><span class="token function">deleteAccount</span><span class="token punctuation">(</span>acccountId<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    @Override
+    public void deleteAccount(Integer acccountId) {
+        accountDao.deleteAccount(acccountId);
+    }
 
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">transfer</span><span class="token punctuation">(</span>String sourceName<span class="token punctuation">,</span> String targetName<span class="token punctuation">,</span> Float money<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    @Override
+    public void transfer(String sourceName, String targetName, Float money) {
 
-        <span class="token comment" spellcheck="true">//1.根据名称查询转出账户</span>
-        Account source <span class="token operator">=</span> accountDao<span class="token punctuation">.</span><span class="token function">findAccountByName</span><span class="token punctuation">(</span>sourceName<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//2.根据名称查询转入账户</span>
-        Account target <span class="token operator">=</span> accountDao<span class="token punctuation">.</span><span class="token function">findAccountByName</span><span class="token punctuation">(</span>targetName<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//3.转出减钱</span>
-        source<span class="token punctuation">.</span><span class="token function">setMoney</span><span class="token punctuation">(</span>source<span class="token punctuation">.</span><span class="token function">getMoney</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-</span>money<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//4.转入加钱</span>
-        target<span class="token punctuation">.</span><span class="token function">setMoney</span><span class="token punctuation">(</span>target<span class="token punctuation">.</span><span class="token function">getMoney</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">+</span>money<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//5.更新转出账户</span>
-        accountDao<span class="token punctuation">.</span><span class="token function">updateAccount</span><span class="token punctuation">(</span>source<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        //1.根据名称查询转出账户
+        Account source = accountDao.findAccountByName(sourceName);
+        //2.根据名称查询转入账户
+        Account target = accountDao.findAccountByName(targetName);
+        //3.转出减钱
+        source.setMoney(source.getMoney()-money);
+        //4.转入加钱
+        target.setMoney(target.getMoney()+money);
+        //5.更新转出账户
+        accountDao.updateAccount(source);
 
-        <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">10</span><span class="token operator">/</span><span class="token number">0</span><span class="token punctuation">;</span>
+        int i = 10/0;
 
-        <span class="token comment" spellcheck="true">//6.更新转入账户</span>
-        accountDao<span class="token punctuation">.</span><span class="token function">updateAccount</span><span class="token punctuation">(</span>target<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+        //6.更新转入账户
+        accountDao.updateAccount(target);
+    }
+}</code></pre>
 <h1 id="Spring中的AOP">3 Spring中的AOP</h1><h2 id="AOP相关术语">3.1 AOP相关术语</h2><p><strong>JoinPoint（连接点）：</strong></p>
 <p>所谓连接点是指那些被拦截到的点。在 spring 中,这些点指的是方法,因为 spring 只支持方法类型的连接点。</p>
 <p><strong>Pointcut(切入点):</strong></p>
@@ -640,62 +640,62 @@
 <p>一个类被 AOP 织入增强后，就产生一个结果代理类。</p>
 <p><strong>Aspect(切面):</strong></p>
 <p>是切入点和通知（引介）的结合。</p>
-<h2 id="maven配置">3.2 maven配置</h2><pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.aspectj<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>aspectjweaver<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>1.8.13<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-context<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>5.2.3.RELEASE<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span></code></pre>
-<h2 id="编写业务层类">3.3 编写业务层类</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">AccountServiceImpl</span> <span class="token keyword">implements</span> <span class="token class-name">IAccountService</span> <span class="token punctuation">{</span>
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">saveAccount</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"执行了保存"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+<h2 id="maven配置">3.2 maven配置</h2><pre><code class="xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.aspectj&lt;/groupId&gt;
+    &lt;artifactId&gt;aspectjweaver&lt;/artifactId&gt;
+    &lt;version&gt;1.8.13&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+    &lt;version&gt;5.2.3.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+<h2 id="编写业务层类">3.3 编写业务层类</h2><pre><code class="java">public class AccountServiceImpl implements IAccountService {
+    @Override
+    public void saveAccount() {
+        System.out.println(&quot;执行了保存&quot;);
+    }
 
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">updateAccount</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"执行了更新"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    @Override
+    public void updateAccount(int i) {
+        System.out.println(&quot;执行了更新&quot;);
+    }
 
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">deleteAccount</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"执行了删除"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
-<h2 id="编写通知类">3.4 编写通知类</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Logger</span> <span class="token punctuation">{</span>
+    @Override
+    public int deleteAccount() {
+        System.out.println(&quot;执行了删除&quot;);
+        return 0;
+    }
+}</code></pre>
+<h2 id="编写通知类">3.4 编写通知类</h2><pre><code class="java">public class Logger {
 
-    <span class="token comment" spellcheck="true">/**
+    /**
      * 用于打印日志，计划让其在切入点方法执行之前执行
-     */</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">printLog</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"logger类中的printLog方法开始记录 日志"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
-<h2 id="基于XML的Spring配置">3.5 基于XML的Spring配置</h2><h3 id="配置文件">3.5.1 配置文件</h3><pre class=" language-xml"><code class="language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8"?></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>beans</span> <span class="token attr-name">xmlns</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>http://www.springframework.org/schema/beans<span class="token punctuation">"</span></span>
-       <span class="token attr-name"><span class="token namespace">xmlns:</span>xsi</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>http://www.w3.org/2001/XMLSchema-instance<span class="token punctuation">"</span></span>
-       <span class="token attr-name"><span class="token namespace">xmlns:</span>aop</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>http://www.springframework.org/schema/aop<span class="token punctuation">"</span></span>
-       <span class="token attr-name"><span class="token namespace">xsi:</span>schemaLocation</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>http://www.springframework.org/schema/beans
+     */
+    public void printLog(){
+        System.out.println(&quot;logger类中的printLog方法开始记录 日志&quot;);
+    }
+}</code></pre>
+<h2 id="基于XML的Spring配置">3.5 基于XML的Spring配置</h2><h3 id="配置文件">3.5.1 配置文件</h3><pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+       xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+       xmlns:aop=&quot;http://www.springframework.org/schema/aop&quot;
+       xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans
         https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/aop
-        https://www.springframework.org/schema/aop/spring-aop.xsd<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
-    <span class="token comment" spellcheck="true">&lt;!-- 配置Spring的IoC，把Service对象配置进来 --></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>bean</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>accountService<span class="token punctuation">"</span></span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.rhett.service.impl.AccountServiceImpl<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>bean</span><span class="token punctuation">></span></span>
+        https://www.springframework.org/schema/aop/spring-aop.xsd&quot;&gt;
+    &lt;!-- 配置Spring的IoC，把Service对象配置进来 --&gt;
+    &lt;bean id=&quot;accountService&quot; class=&quot;com.rhett.service.impl.AccountServiceImpl&quot;&gt;&lt;/bean&gt;
 
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>bean</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>logger<span class="token punctuation">"</span></span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>com.rhett.utils.Logger<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>bean</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">aop:</span>config</span><span class="token punctuation">></span></span>
-        <span class="token comment" spellcheck="true">&lt;!-- 配置切面 --></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">aop:</span>aspect</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>logAdvice<span class="token punctuation">"</span></span> <span class="token attr-name">ref</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>logger<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
-            <span class="token comment" spellcheck="true">&lt;!-- 配置通知的类型，并且建立通知方法和切入点方法的关联 --></span>
-            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">aop:</span>before</span> <span class="token attr-name">method</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>printLog<span class="token punctuation">"</span></span> <span class="token attr-name">pointcut</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>execution(public void com.rhett.service.impl.AccountServiceImpl.saveAccount())<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token namespace">aop:</span>before</span><span class="token punctuation">></span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token namespace">aop:</span>aspect</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token namespace">aop:</span>config</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>beans</span><span class="token punctuation">></span></span></code></pre>
+    &lt;bean id=&quot;logger&quot; class=&quot;com.rhett.utils.Logger&quot;&gt;&lt;/bean&gt;
+    &lt;aop:config&gt;
+        &lt;!-- 配置切面 --&gt;
+        &lt;aop:aspect id=&quot;logAdvice&quot; ref=&quot;logger&quot;&gt;
+            &lt;!-- 配置通知的类型，并且建立通知方法和切入点方法的关联 --&gt;
+            &lt;aop:before method=&quot;printLog&quot; pointcut=&quot;execution(public void com.rhett.service.impl.AccountServiceImpl.saveAccount())&quot;&gt;&lt;/aop:before&gt;
+        &lt;/aop:aspect&gt;
+    &lt;/aop:config&gt;
+&lt;/beans&gt;</code></pre>
 <p>Spring 中基于XML的AOP配置步骤</p>
 <ol>
 <li>把通知类也交给Spring来管理（配置logger类）</li>
@@ -742,94 +742,94 @@
 </li>
 <li>可以使用<code>aop:pointcut</code>来配置复用表达式，可以写在<code>aop:aspect</code>内部只在该切面生效，也可以写在<code>aop:aspect</code>外面对所有切面生效</li>
 </ul>
-<pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">aop:</span>pointcut</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>pt1<span class="token punctuation">"</span></span> <span class="token attr-name">expression</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>execution(public void com.rhett.service.impl.AccountServiceImpl.saveAccount())<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">aop:</span>after</span> <span class="token attr-name">method</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>afterPrintLog<span class="token punctuation">"</span></span> <span class="token attr-name">pointcut-ref</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>pt1<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token namespace">aop:</span>after</span><span class="token punctuation">></span></span></code></pre>
+<pre><code class="xml">&lt;aop:pointcut id=&quot;pt1&quot; expression=&quot;execution(public void com.rhett.service.impl.AccountServiceImpl.saveAccount())&quot;/&gt;
+&lt;aop:after method=&quot;afterPrintLog&quot; pointcut-ref=&quot;pt1&quot;&gt;&lt;/aop:after&gt;</code></pre>
 <ul>
 <li>环绕通知：</li>
 </ul>
 <p>环绕通知需要显式地调用切入点方法。</p>
 <p>Spring框架为我们提供了一个接口，<code>ProceedingJoinPoint</code>，该接口有一个方法<code>proceed()</code>，此方法就相当于明确调用切入点方法。该接口可以作为环绕通知的方法参数，在程序执行时，spring框架会为我们提供该接口的实现类供我们使用。</p>
 <p>编写通知方法：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> Object <span class="token function">aroundPrintLog</span><span class="token punctuation">(</span>ProceedingJoinPoint pjp<span class="token punctuation">)</span><span class="token punctuation">{</span>
-    Object rtValue <span class="token operator">=</span> null<span class="token punctuation">;</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">//前置通知...</span>
-        Object<span class="token punctuation">[</span><span class="token punctuation">]</span> args <span class="token operator">=</span> pjp<span class="token punctuation">.</span><span class="token function">getArgs</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//得到方法执行所需的参数</span>
-        pjp<span class="token punctuation">.</span><span class="token function">proceed</span><span class="token punctuation">(</span>args<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//后置通知...</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"logger类中的aroundPrintLog方法开始记录日志"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Throwable</span> throwable<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">//异常通知...</span>
-        throwable<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">//最终通知...</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> rtValue<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public Object aroundPrintLog(ProceedingJoinPoint pjp){
+    Object rtValue = null;
+    try {
+        //前置通知...
+        Object[] args = pjp.getArgs();//得到方法执行所需的参数
+        pjp.proceed(args);
+        //后置通知...
+        System.out.println(&quot;logger类中的aroundPrintLog方法开始记录日志&quot;);
+    } catch (Throwable throwable) {
+        //异常通知...
+        throwable.printStackTrace();
+    } finally {
+        //最终通知...
+    }
+    return rtValue;
+}</code></pre>
 <p>配置环绕通知：</p>
-<pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">aop:</span>pointcut</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>pt1<span class="token punctuation">"</span></span> <span class="token attr-name">expression</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>execution(public void com.rhett.service.impl.AccountServiceImpl.saveAccount())<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">aop:</span>around</span> <span class="token attr-name">method</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>aroundPrintLog<span class="token punctuation">"</span></span> <span class="token attr-name">pointcut-ref</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>pt1<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span></code></pre>
+<pre><code class="xml">&lt;aop:pointcut id=&quot;pt1&quot; expression=&quot;execution(public void com.rhett.service.impl.AccountServiceImpl.saveAccount())&quot;/&gt;
+&lt;aop:around method=&quot;aroundPrintLog&quot; pointcut-ref=&quot;pt1&quot;/&gt;</code></pre>
 <h2 id="基于注解的Spring配置">3.6 基于注解的Spring配置</h2><p>开启AOP注解：</p>
-<pre class=" language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">aop:</span>aspectj-autoproxy</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token namespace">aop:</span>aspectj-autoproxy</span><span class="token punctuation">></span></span></code></pre>
+<pre><code class="xml">&lt;aop:aspectj-autoproxy&gt;&lt;/aop:aspectj-autoproxy&gt;</code></pre>
 <p>或在配置类中配置：</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@EnableAspectJAutoProxy</span></code></pre>
+<pre><code class="java">@EnableAspectJAutoProxy</code></pre>
 <p>通知类：</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Component</span>
-<span class="token annotation punctuation">@Aspect</span>
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Logger</span> <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">//配置切入点表达式</span>
-    <span class="token annotation punctuation">@Pointcut</span><span class="token punctuation">(</span><span class="token string">"execution(* com.rhett.service.impl.AccountServiceImpl.saveAccount())"</span><span class="token punctuation">)</span>
-    <span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">pt1</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span><span class="token punctuation">}</span>
+<pre><code class="java">@Component
+@Aspect
+public class Logger {
+    //配置切入点表达式
+    @Pointcut(&quot;execution(* com.rhett.service.impl.AccountServiceImpl.saveAccount())&quot;)
+    private void pt1(){}
 
-    <span class="token comment" spellcheck="true">/**
+    /**
      * 前置通知
-     */</span>
-    <span class="token annotation punctuation">@Before</span><span class="token punctuation">(</span><span class="token string">"pt1()"</span><span class="token punctuation">)</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">beforePrintLog</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"logger类中的beforePrintLog方法开始记录日志"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+     */
+    @Before(&quot;pt1()&quot;)
+    public void beforePrintLog(){
+        System.out.println(&quot;logger类中的beforePrintLog方法开始记录日志&quot;);
+    }
 
-    <span class="token comment" spellcheck="true">/**
+    /**
      * 后置通知
-     */</span>
-    <span class="token annotation punctuation">@AfterReturning</span><span class="token punctuation">(</span><span class="token string">"pt1()"</span><span class="token punctuation">)</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">afterReturningLog</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"logger类中的afterReturningLog方法开始记录日志"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+     */
+    @AfterReturning(&quot;pt1()&quot;)
+    public void afterReturningLog(){
+        System.out.println(&quot;logger类中的afterReturningLog方法开始记录日志&quot;);
+    }
 
-    <span class="token comment" spellcheck="true">/**
+    /**
      * 异常通知
-     */</span>
-    <span class="token annotation punctuation">@AfterThrowing</span><span class="token punctuation">(</span><span class="token string">"pt1()"</span><span class="token punctuation">)</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">afterThrowingPrintLog</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"logger类中的afterThrowingPrintLog方法开始记录日志"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+     */
+    @AfterThrowing(&quot;pt1()&quot;)
+    public void afterThrowingPrintLog(){
+        System.out.println(&quot;logger类中的afterThrowingPrintLog方法开始记录日志&quot;);
+    }
 
-    <span class="token comment" spellcheck="true">/**
+    /**
      * 最终通知
-     */</span>
-    <span class="token annotation punctuation">@After</span><span class="token punctuation">(</span><span class="token string">"pt1()"</span><span class="token punctuation">)</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">afterPrintLog</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"logger类中的afterPrintLog方法开始记录日志"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token annotation punctuation">@Around</span><span class="token punctuation">(</span><span class="token string">"pt1()"</span><span class="token punctuation">)</span>
-    <span class="token keyword">public</span> Object <span class="token function">aroundPrintLog</span><span class="token punctuation">(</span>ProceedingJoinPoint pjp<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        Object rtValue <span class="token operator">=</span> null<span class="token punctuation">;</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">//前置通知...</span>
-            Object<span class="token punctuation">[</span><span class="token punctuation">]</span> args <span class="token operator">=</span> pjp<span class="token punctuation">.</span><span class="token function">getArgs</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//得到方法执行所需的参数</span>
-            pjp<span class="token punctuation">.</span><span class="token function">proceed</span><span class="token punctuation">(</span>args<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">//后置通知...</span>
-            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"logger类中的aroundPrintLog方法开始记录日志"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Throwable</span> throwable<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">//异常通知...</span>
-            throwable<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">//最终通知...</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">return</span> rtValue<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+     */
+    @After(&quot;pt1()&quot;)
+    public void afterPrintLog(){
+        System.out.println(&quot;logger类中的afterPrintLog方法开始记录日志&quot;);
+    }
+    @Around(&quot;pt1()&quot;)
+    public Object aroundPrintLog(ProceedingJoinPoint pjp){
+        Object rtValue = null;
+        try {
+            //前置通知...
+            Object[] args = pjp.getArgs();//得到方法执行所需的参数
+            pjp.proceed(args);
+            //后置通知...
+            System.out.println(&quot;logger类中的aroundPrintLog方法开始记录日志&quot;);
+        } catch (Throwable throwable) {
+            //异常通知...
+            throwable.printStackTrace();
+        } finally {
+            //最终通知...
+        }
+        return rtValue;
+    }
+}</code></pre>
 
             </div>
             <hr/>
@@ -1444,7 +1444,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1524,6 +1524,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

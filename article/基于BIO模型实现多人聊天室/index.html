@@ -8,8 +8,7 @@
     <meta name="description" content="1 第一版服务端实现：
 public class ChatServer {
     private int DEFAULT_PORT = 8888;
-    private final String QUIT = &#34;quit&#34;;
-    p">
+    private final String QUIT = &amp;quot;quit&amp;qu">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -28,10 +27,10 @@ public class ChatServer {
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -409,7 +408,7 @@ public class ChatServer {
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    925
+                    977
                 </div>
                 
 
@@ -423,306 +422,306 @@ public class ChatServer {
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <h1 id="第一版">1 第一版</h1><p>服务端实现：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">ChatServer</span> <span class="token punctuation">{</span>
-    <span class="token keyword">private</span> <span class="token keyword">int</span> DEFAULT_PORT <span class="token operator">=</span> <span class="token number">8888</span><span class="token punctuation">;</span>
-    <span class="token keyword">private</span> <span class="token keyword">final</span> String QUIT <span class="token operator">=</span> <span class="token string">"quit"</span><span class="token punctuation">;</span>
-    <span class="token keyword">private</span> ServerSocket serverSocket<span class="token punctuation">;</span>
-    <span class="token keyword">private</span> Map<span class="token operator">&lt;</span>Integer<span class="token punctuation">,</span> Writer<span class="token operator">></span> connectedClients<span class="token punctuation">;</span>
+<pre><code class="java">public class ChatServer {
+    private int DEFAULT_PORT = 8888;
+    private final String QUIT = &quot;quit&quot;;
+    private ServerSocket serverSocket;
+    private Map&lt;Integer, Writer&gt; connectedClients;
 
-    <span class="token keyword">public</span> <span class="token function">ChatServer</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        connectedClients <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">public</span> <span class="token keyword">synchronized</span> <span class="token keyword">void</span> <span class="token function">addClient</span><span class="token punctuation">(</span>Socket socket<span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>socket<span class="token operator">==</span>null<span class="token punctuation">)</span> <span class="token keyword">return</span><span class="token punctuation">;</span>
-        <span class="token keyword">int</span> port <span class="token operator">=</span> socket<span class="token punctuation">.</span><span class="token function">getPort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        BufferedWriter writer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BufferedWriter</span><span class="token punctuation">(</span>
-                <span class="token keyword">new</span> <span class="token class-name">OutputStreamWriter</span><span class="token punctuation">(</span>socket<span class="token punctuation">.</span><span class="token function">getOutputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-        <span class="token punctuation">)</span><span class="token punctuation">;</span>
-        connectedClients<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>port<span class="token punctuation">,</span>writer<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"客户端["</span><span class="token operator">+</span>port<span class="token operator">+</span><span class="token string">"]已连接到服务器"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">public</span> <span class="token keyword">synchronized</span> <span class="token keyword">void</span> <span class="token function">removeClient</span><span class="token punctuation">(</span>Socket socket<span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>socket<span class="token operator">==</span>null<span class="token punctuation">)</span> <span class="token keyword">return</span><span class="token punctuation">;</span>
-        <span class="token keyword">int</span> port <span class="token operator">=</span> socket<span class="token punctuation">.</span><span class="token function">getPort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>connectedClients<span class="token punctuation">.</span><span class="token function">containsKey</span><span class="token punctuation">(</span>port<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-            connectedClients<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>port<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        connectedClients<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>port<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"客户端["</span><span class="token operator">+</span>port<span class="token operator">+</span><span class="token string">"]已断开连接"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    public ChatServer() {
+        connectedClients = new HashMap&lt;&gt;();
+    }
+    public synchronized void addClient(Socket socket) throws IOException {
+        if(socket==null) return;
+        int port = socket.getPort();
+        BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(socket.getOutputStream())
+        );
+        connectedClients.put(port,writer);
+        System.out.println(&quot;客户端[&quot;+port+&quot;]已连接到服务器&quot;);
+    }
+    public synchronized void removeClient(Socket socket) throws IOException {
+        if(socket==null) return;
+        int port = socket.getPort();
+        if(connectedClients.containsKey(port)){
+            connectedClients.get(port).close();
+        }
+        connectedClients.remove(port);
+        System.out.println(&quot;客户端[&quot;+port+&quot;]已断开连接&quot;);
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">synchronized</span> <span class="token keyword">void</span> <span class="token function">forwardMessage</span><span class="token punctuation">(</span>Socket socket<span class="token punctuation">,</span>String fwdMsg<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        connectedClients<span class="token punctuation">.</span><span class="token function">forEach</span><span class="token punctuation">(</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span>writer<span class="token punctuation">)</span><span class="token operator">-</span><span class="token operator">></span><span class="token punctuation">{</span>
-            <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>id<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span>socket<span class="token punctuation">.</span><span class="token function">getPort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-                <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                    writer<span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span>fwdMsg<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                    writer<span class="token punctuation">.</span><span class="token function">flush</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    public synchronized void forwardMessage(Socket socket,String fwdMsg){
+        connectedClients.forEach((id,writer)-&gt;{
+            if(!id.equals(socket.getPort())){
+                try {
+                    writer.write(fwdMsg);
+                    writer.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">synchronized</span> <span class="token keyword">void</span> <span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>serverSocket<span class="token operator">!=</span>null<span class="token punctuation">)</span><span class="token punctuation">{</span>
-            <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                serverSocket<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"关闭ServerSocket"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+    public synchronized void close(){
+        if(serverSocket!=null){
+            try {
+                serverSocket.close();
+                System.out.println(&quot;关闭ServerSocket&quot;);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">readyToQuit</span><span class="token punctuation">(</span>String msg<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">return</span> msg<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span>QUIT<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    public boolean readyToQuit(String msg){
+        return msg.equals(QUIT);
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// 绑定监听端口</span>
-            serverSocket <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ServerSocket</span><span class="token punctuation">(</span>DEFAULT_PORT<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"启动服务器，监听端口："</span><span class="token operator">+</span>DEFAULT_PORT<span class="token operator">+</span><span class="token string">"..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-                <span class="token comment" spellcheck="true">// 等待客户端连接</span>
-                Socket socket <span class="token operator">=</span> serverSocket<span class="token punctuation">.</span><span class="token function">accept</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token comment" spellcheck="true">// 创建ChatHandler线程</span>
-                <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ChatHandler</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span>socket<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            <span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+    public void start(){
+        try {
+            // 绑定监听端口
+            serverSocket = new ServerSocket(DEFAULT_PORT);
+            System.out.println(&quot;启动服务器，监听端口：&quot;+DEFAULT_PORT+&quot;...&quot;);
+            while(true){
+                // 等待客户端连接
+                Socket socket = serverSocket.accept();
+                // 创建ChatHandler线程
+                new Thread(new ChatHandler(this,socket)).start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            close();
+        }
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        ChatServer server <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ChatServer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        server<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    public static void main(String[] args) {
+        ChatServer server = new ChatServer();
+        server.start();
+    }
+}</code></pre>
 <p>服务端分配线程服务用户：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">ChatHandler</span> <span class="token keyword">implements</span> <span class="token class-name">Runnable</span><span class="token punctuation">{</span>
-    <span class="token keyword">private</span> ChatServer server<span class="token punctuation">;</span>
-    <span class="token keyword">private</span> Socket socket<span class="token punctuation">;</span>
-    <span class="token keyword">public</span> <span class="token function">ChatHandler</span><span class="token punctuation">(</span>ChatServer server<span class="token punctuation">,</span>Socket socket<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>server <span class="token operator">=</span> server<span class="token punctuation">;</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>socket <span class="token operator">=</span> socket<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+<pre><code class="java">public class ChatHandler implements Runnable{
+    private ChatServer server;
+    private Socket socket;
+    public ChatHandler(ChatServer server,Socket socket){
+        this.server = server;
+        this.socket = socket;
+    }
 
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// 存储新上线用户</span>
-            server<span class="token punctuation">.</span><span class="token function">addClient</span><span class="token punctuation">(</span>socket<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    @Override
+    public void run() {
+        try {
+            // 存储新上线用户
+            server.addClient(socket);
 
-            <span class="token comment" spellcheck="true">// 读取用户发送的消息</span>
-            BufferedReader reader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BufferedReader</span><span class="token punctuation">(</span>
-                    <span class="token keyword">new</span> <span class="token class-name">InputStreamReader</span><span class="token punctuation">(</span>socket<span class="token punctuation">.</span><span class="token function">getInputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-            <span class="token punctuation">)</span><span class="token punctuation">;</span>
-            String msg <span class="token operator">=</span> null<span class="token punctuation">;</span>
-            <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>msg <span class="token operator">=</span> reader<span class="token punctuation">.</span><span class="token function">readLine</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token operator">!=</span>null<span class="token punctuation">)</span><span class="token punctuation">{</span>
-                String fwdMsg <span class="token operator">=</span> <span class="token string">"客户端["</span><span class="token operator">+</span>socket<span class="token punctuation">.</span><span class="token function">getPort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">+</span><span class="token string">"]:"</span><span class="token operator">+</span>msg<span class="token punctuation">;</span>
-                System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>fwdMsg<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token keyword">if</span><span class="token punctuation">(</span>server<span class="token punctuation">.</span><span class="token function">readyToQuit</span><span class="token punctuation">(</span>msg<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">break</span><span class="token punctuation">;</span>
-                <span class="token comment" spellcheck="true">// 将消息转发给聊天室里在线的其他用户</span>
-                server<span class="token punctuation">.</span><span class="token function">forwardMessage</span><span class="token punctuation">(</span>socket<span class="token punctuation">,</span>fwdMsg<span class="token operator">+</span><span class="token string">"\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span><span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                server<span class="token punctuation">.</span><span class="token function">removeClient</span><span class="token punctuation">(</span>socket<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+            // 读取用户发送的消息
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(socket.getInputStream())
+            );
+            String msg = null;
+            while ((msg = reader.readLine())!=null){
+                String fwdMsg = &quot;客户端[&quot;+socket.getPort()+&quot;]:&quot;+msg;
+                System.out.println(fwdMsg);
+                if(server.readyToQuit(msg)) break;
+                // 将消息转发给聊天室里在线的其他用户
+                server.forwardMessage(socket,fwdMsg+&quot;\n&quot;);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                server.removeClient(socket);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}</code></pre>
 <p>用户端：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">ChatClient</span> <span class="token punctuation">{</span>
-    <span class="token keyword">private</span> <span class="token keyword">final</span> String DEFAULT_SERVER_HOST <span class="token operator">=</span> <span class="token string">"127.0.0.1"</span><span class="token punctuation">;</span>
-    <span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token keyword">int</span> DEFAULT_SERVER_PORT <span class="token operator">=</span> <span class="token number">8888</span><span class="token punctuation">;</span>
-    <span class="token keyword">private</span> <span class="token keyword">final</span> String QUIT <span class="token operator">=</span> <span class="token string">"quit"</span><span class="token punctuation">;</span>
+<pre><code class="java">public class ChatClient {
+    private final String DEFAULT_SERVER_HOST = &quot;127.0.0.1&quot;;
+    private final int DEFAULT_SERVER_PORT = 8888;
+    private final String QUIT = &quot;quit&quot;;
 
-    <span class="token keyword">private</span> Socket socket<span class="token punctuation">;</span>
-    <span class="token keyword">private</span> BufferedReader reader<span class="token punctuation">;</span>
-    <span class="token keyword">private</span> BufferedWriter writer<span class="token punctuation">;</span>
+    private Socket socket;
+    private BufferedReader reader;
+    private BufferedWriter writer;
 
-    <span class="token comment" spellcheck="true">// 发送消息给服务器</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">send</span><span class="token punctuation">(</span>String msg<span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>socket<span class="token punctuation">.</span><span class="token function">isOutputShutdown</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-            writer<span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span>msg<span class="token operator">+</span><span class="token string">"\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            writer<span class="token punctuation">.</span><span class="token function">flush</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+    // 发送消息给服务器
+    public void send(String msg) throws IOException {
+        if(!socket.isOutputShutdown()){
+            writer.write(msg+&quot;\n&quot;);
+            writer.flush();
+        }
+    }
 
-    <span class="token comment" spellcheck="true">// 从服务器接收消息</span>
-    <span class="token keyword">public</span> String <span class="token function">recieve</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>
-        String msg <span class="token operator">=</span> null<span class="token punctuation">;</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>socket<span class="token punctuation">.</span><span class="token function">isInputShutdown</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-            msg <span class="token operator">=</span> reader<span class="token punctuation">.</span><span class="token function">readLine</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">return</span> msg<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    // 从服务器接收消息
+    public String recieve() throws IOException {
+        String msg = null;
+        if(!socket.isInputShutdown()){
+            msg = reader.readLine();
+        }
+        return msg;
+    }
 
-    <span class="token comment" spellcheck="true">// 检查用户是否准备退出</span>
-    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">readyToQuit</span><span class="token punctuation">(</span>String msg<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">return</span> QUIT<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span>msg<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    // 检查用户是否准备退出
+    public boolean readyToQuit(String msg){
+        return QUIT.equals(msg);
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>writer<span class="token operator">!=</span>null<span class="token punctuation">)</span><span class="token punctuation">{</span>
-            <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"关闭socket"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                writer<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// 创建socket</span>
-            socket <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Socket</span><span class="token punctuation">(</span>DEFAULT_SERVER_HOST<span class="token punctuation">,</span> DEFAULT_SERVER_PORT<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">// 创建IO流</span>
-            reader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BufferedReader</span><span class="token punctuation">(</span>
-                    <span class="token keyword">new</span> <span class="token class-name">InputStreamReader</span><span class="token punctuation">(</span>socket<span class="token punctuation">.</span><span class="token function">getInputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-            <span class="token punctuation">)</span><span class="token punctuation">;</span>
-            writer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BufferedWriter</span><span class="token punctuation">(</span>
-                    <span class="token keyword">new</span> <span class="token class-name">OutputStreamWriter</span><span class="token punctuation">(</span>socket<span class="token punctuation">.</span><span class="token function">getOutputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-            <span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">// 处理用户的输入</span>
-            <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">UserInputHandler</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">// 读取服务器转发的消息</span>
-            String msg <span class="token operator">=</span> null<span class="token punctuation">;</span>
-            <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token punctuation">(</span>msg <span class="token operator">=</span> <span class="token function">recieve</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token operator">!=</span>null<span class="token punctuation">)</span><span class="token punctuation">{</span>
-                System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>msg<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span><span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            <span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+    public void close(){
+        if(writer!=null){
+            try {
+                System.out.println(&quot;关闭socket&quot;);
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    public void start(){
+        try {
+            // 创建socket
+            socket = new Socket(DEFAULT_SERVER_HOST, DEFAULT_SERVER_PORT);
+            // 创建IO流
+            reader = new BufferedReader(
+                    new InputStreamReader(socket.getInputStream())
+            );
+            writer = new BufferedWriter(
+                    new OutputStreamWriter(socket.getOutputStream())
+            );
+            // 处理用户的输入
+            new Thread(new UserInputHandler(this)).start();
+            // 读取服务器转发的消息
+            String msg = null;
+            while((msg = recieve())!=null){
+                System.out.println(msg);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            close();
+        }
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        ChatClient client <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ChatClient</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        client<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    public static void main(String[] args) {
+        ChatClient client = new ChatClient();
+        client.start();
+    }
+}</code></pre>
 <p>用户线程处理IO输入：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">UserInputHandler</span> <span class="token keyword">implements</span> <span class="token class-name">Runnable</span><span class="token punctuation">{</span>
-    <span class="token keyword">private</span> ChatClient chatClient<span class="token punctuation">;</span>
+<pre><code class="java">public class UserInputHandler implements Runnable{
+    private ChatClient chatClient;
 
-    <span class="token keyword">public</span> <span class="token function">UserInputHandler</span><span class="token punctuation">(</span>ChatClient chatClient<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>chatClient <span class="token operator">=</span> chatClient<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    public UserInputHandler(ChatClient chatClient){
+        this.chatClient = chatClient;
+    }
 
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// 等待用户输入消息</span>
-            BufferedReader consoleReader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BufferedReader</span><span class="token punctuation">(</span>
-                    <span class="token keyword">new</span> <span class="token class-name">InputStreamReader</span><span class="token punctuation">(</span>System<span class="token punctuation">.</span>in<span class="token punctuation">)</span>
-            <span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-                String input <span class="token operator">=</span> consoleReader<span class="token punctuation">.</span><span class="token function">readLine</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token comment" spellcheck="true">// 向服务器发送消息</span>
-                chatClient<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span>input<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token comment" spellcheck="true">// 检查用户是否准备退出</span>
-                <span class="token keyword">if</span><span class="token punctuation">(</span>chatClient<span class="token punctuation">.</span><span class="token function">readyToQuit</span><span class="token punctuation">(</span>input<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-                    <span class="token keyword">break</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    @Override
+    public void run() {
+        try {
+            // 等待用户输入消息
+            BufferedReader consoleReader = new BufferedReader(
+                    new InputStreamReader(System.in)
+            );
+            while (true){
+                String input = consoleReader.readLine();
+                // 向服务器发送消息
+                chatClient.send(input);
+                // 检查用户是否准备退出
+                if(chatClient.readyToQuit(input)){
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
 <h1 id="第二版：使用线程池改进">2 第二版：使用线程池改进</h1><p>服务端，创建线程使用线程池：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">ChatServer</span> <span class="token punctuation">{</span>
-    <span class="token keyword">private</span> <span class="token keyword">int</span> DEFAULT_PORT <span class="token operator">=</span> <span class="token number">8888</span><span class="token punctuation">;</span>
-    <span class="token keyword">private</span> <span class="token keyword">final</span> String QUIT <span class="token operator">=</span> <span class="token string">"quit"</span><span class="token punctuation">;</span>
-    <span class="token keyword">private</span> ExecutorService executorService<span class="token punctuation">;</span>
-    <span class="token keyword">private</span> ServerSocket serverSocket<span class="token punctuation">;</span>
-    <span class="token keyword">private</span> Map<span class="token operator">&lt;</span>Integer<span class="token punctuation">,</span> Writer<span class="token operator">></span> connectedClients<span class="token punctuation">;</span>
+<pre><code class="java">public class ChatServer {
+    private int DEFAULT_PORT = 8888;
+    private final String QUIT = &quot;quit&quot;;
+    private ExecutorService executorService;
+    private ServerSocket serverSocket;
+    private Map&lt;Integer, Writer&gt; connectedClients;
 
-    <span class="token keyword">public</span> <span class="token function">ChatServer</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        executorService <span class="token operator">=</span> Executors<span class="token punctuation">.</span><span class="token function">newFixedThreadPool</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        connectedClients <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">public</span> <span class="token keyword">synchronized</span> <span class="token keyword">void</span> <span class="token function">addClient</span><span class="token punctuation">(</span>Socket socket<span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>socket<span class="token operator">==</span>null<span class="token punctuation">)</span> <span class="token keyword">return</span><span class="token punctuation">;</span>
-        <span class="token keyword">int</span> port <span class="token operator">=</span> socket<span class="token punctuation">.</span><span class="token function">getPort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        BufferedWriter writer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BufferedWriter</span><span class="token punctuation">(</span>
-                <span class="token keyword">new</span> <span class="token class-name">OutputStreamWriter</span><span class="token punctuation">(</span>socket<span class="token punctuation">.</span><span class="token function">getOutputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-        <span class="token punctuation">)</span><span class="token punctuation">;</span>
-        connectedClients<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>port<span class="token punctuation">,</span>writer<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"客户端["</span><span class="token operator">+</span>port<span class="token operator">+</span><span class="token string">"]已连接到服务器"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">public</span> <span class="token keyword">synchronized</span> <span class="token keyword">void</span> <span class="token function">removeClient</span><span class="token punctuation">(</span>Socket socket<span class="token punctuation">)</span> <span class="token keyword">throws</span> IOException <span class="token punctuation">{</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>socket<span class="token operator">==</span>null<span class="token punctuation">)</span> <span class="token keyword">return</span><span class="token punctuation">;</span>
-        <span class="token keyword">int</span> port <span class="token operator">=</span> socket<span class="token punctuation">.</span><span class="token function">getPort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>connectedClients<span class="token punctuation">.</span><span class="token function">containsKey</span><span class="token punctuation">(</span>port<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-            connectedClients<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>port<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        connectedClients<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>port<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"客户端["</span><span class="token operator">+</span>port<span class="token operator">+</span><span class="token string">"]已断开连接"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    public ChatServer() {
+        executorService = Executors.newFixedThreadPool(10);
+        connectedClients = new HashMap&lt;&gt;();
+    }
+    public synchronized void addClient(Socket socket) throws IOException {
+        if(socket==null) return;
+        int port = socket.getPort();
+        BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(socket.getOutputStream())
+        );
+        connectedClients.put(port,writer);
+        System.out.println(&quot;客户端[&quot;+port+&quot;]已连接到服务器&quot;);
+    }
+    public synchronized void removeClient(Socket socket) throws IOException {
+        if(socket==null) return;
+        int port = socket.getPort();
+        if(connectedClients.containsKey(port)){
+            connectedClients.get(port).close();
+        }
+        connectedClients.remove(port);
+        System.out.println(&quot;客户端[&quot;+port+&quot;]已断开连接&quot;);
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">synchronized</span> <span class="token keyword">void</span> <span class="token function">forwardMessage</span><span class="token punctuation">(</span>Socket socket<span class="token punctuation">,</span>String fwdMsg<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        connectedClients<span class="token punctuation">.</span><span class="token function">forEach</span><span class="token punctuation">(</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span>writer<span class="token punctuation">)</span><span class="token operator">-</span><span class="token operator">></span><span class="token punctuation">{</span>
-            <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>id<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span>socket<span class="token punctuation">.</span><span class="token function">getPort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-                <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                    writer<span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span>fwdMsg<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                    writer<span class="token punctuation">.</span><span class="token function">flush</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    public synchronized void forwardMessage(Socket socket,String fwdMsg){
+        connectedClients.forEach((id,writer)-&gt;{
+            if(!id.equals(socket.getPort())){
+                try {
+                    writer.write(fwdMsg);
+                    writer.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">synchronized</span> <span class="token keyword">void</span> <span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>serverSocket<span class="token operator">!=</span>null<span class="token punctuation">)</span><span class="token punctuation">{</span>
-            <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                serverSocket<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"关闭ServerSocket"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+    public synchronized void close(){
+        if(serverSocket!=null){
+            try {
+                serverSocket.close();
+                System.out.println(&quot;关闭ServerSocket&quot;);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">readyToQuit</span><span class="token punctuation">(</span>String msg<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">return</span> msg<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span>QUIT<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    public boolean readyToQuit(String msg){
+        return msg.equals(QUIT);
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// 绑定监听端口</span>
-            serverSocket <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ServerSocket</span><span class="token punctuation">(</span>DEFAULT_PORT<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"启动服务器，监听端口："</span><span class="token operator">+</span>DEFAULT_PORT<span class="token operator">+</span><span class="token string">"..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-                <span class="token comment" spellcheck="true">// 等待客户端连接</span>
-                Socket socket <span class="token operator">=</span> serverSocket<span class="token punctuation">.</span><span class="token function">accept</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token comment" spellcheck="true">// 创建ChatHandler线程</span>
-                executorService<span class="token punctuation">.</span><span class="token function">execute</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ChatHandler</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span>socket<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            <span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+    public void start(){
+        try {
+            // 绑定监听端口
+            serverSocket = new ServerSocket(DEFAULT_PORT);
+            System.out.println(&quot;启动服务器，监听端口：&quot;+DEFAULT_PORT+&quot;...&quot;);
+            while(true){
+                // 等待客户端连接
+                Socket socket = serverSocket.accept();
+                // 创建ChatHandler线程
+                executorService.execute(new ChatHandler(this,socket));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            close();
+        }
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        ChatServer server <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ChatServer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        server<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    public static void main(String[] args) {
+        ChatServer server = new ChatServer();
+        server.start();
+    }
+}</code></pre>
 
             </div>
             <hr/>
@@ -1348,7 +1347,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1428,6 +1427,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

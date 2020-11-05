@@ -25,10 +25,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -402,7 +402,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    689
+                    692
                 </div>
                 
 
@@ -440,79 +440,79 @@
 <h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>可以从dfs的角度入手，这是自顶向下的解法，但比较耗时，</p>
 <p>于是可以转换为动态规划。</p>
 <h2 id="代码">2.2 代码</h2><p>未经优化的DFS，计算了很多重复单元：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>
-    <span class="token keyword">int</span> K<span class="token punctuation">;</span>
-    <span class="token keyword">int</span> W<span class="token punctuation">;</span>
-    <span class="token keyword">int</span> N<span class="token punctuation">;</span>
-    <span class="token keyword">public</span> <span class="token keyword">double</span> <span class="token function">new21Game</span><span class="token punctuation">(</span><span class="token keyword">int</span> N<span class="token punctuation">,</span> <span class="token keyword">int</span> K<span class="token punctuation">,</span> <span class="token keyword">int</span> W<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>K <span class="token operator">=</span> K<span class="token punctuation">;</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>W <span class="token operator">=</span> W<span class="token punctuation">;</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>N <span class="token operator">=</span> N<span class="token punctuation">;</span>
-        <span class="token keyword">return</span> <span class="token function">dfs</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span><span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+<pre><code class="java">class Solution {
+    int K;
+    int W;
+    int N;
+    public double new21Game(int N, int K, int W) {
+        this.K = K;
+        this.W = W;
+        this.N = N;
+        return dfs(0,1.0);
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">double</span> <span class="token function">dfs</span><span class="token punctuation">(</span><span class="token keyword">int</span> cur<span class="token punctuation">,</span><span class="token keyword">double</span> p<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>cur<span class="token operator">>=</span>K<span class="token punctuation">)</span><span class="token punctuation">{</span>
-            <span class="token keyword">if</span><span class="token punctuation">(</span>cur<span class="token operator">&lt;=</span>N<span class="token punctuation">)</span><span class="token punctuation">{</span>
-                <span class="token keyword">return</span> p<span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-            <span class="token keyword">return</span> <span class="token number">0.0</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">double</span> ans <span class="token operator">=</span> <span class="token number">0.0</span><span class="token punctuation">;</span>
-        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>i<span class="token operator">&lt;=</span>W<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-            ans <span class="token operator">+=</span> <span class="token function">dfs</span><span class="token punctuation">(</span>cur<span class="token operator">+</span>i<span class="token punctuation">,</span>p<span class="token operator">/</span>W<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">return</span> ans<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    public double dfs(int cur,double p){
+        if(cur&gt;=K){
+            if(cur&lt;=N){
+                return p;
+            }
+            return 0.0;
+        }
+        double ans = 0.0;
+        for(int i = 1;i&lt;=W;i++){
+            ans += dfs(cur+i,p/W);
+        }
+        return ans;
+    }
+}</code></pre>
 <p>加入记忆化后的DFS，仍然超时：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>
-    <span class="token keyword">int</span> K<span class="token punctuation">;</span>
-    <span class="token keyword">int</span> W<span class="token punctuation">;</span>
-    <span class="token keyword">int</span> N<span class="token punctuation">;</span>
-    Double<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span> memory<span class="token punctuation">;</span>
-    <span class="token keyword">public</span> <span class="token keyword">double</span> <span class="token function">new21Game</span><span class="token punctuation">(</span><span class="token keyword">int</span> N<span class="token punctuation">,</span> <span class="token keyword">int</span> K<span class="token punctuation">,</span> <span class="token keyword">int</span> W<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>K <span class="token operator">=</span> K<span class="token punctuation">;</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>W <span class="token operator">=</span> W<span class="token punctuation">;</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>N <span class="token operator">=</span> N<span class="token punctuation">;</span>
-        memory <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Double</span><span class="token punctuation">[</span>K<span class="token punctuation">]</span><span class="token punctuation">[</span>K<span class="token punctuation">]</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> <span class="token function">dfs</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+<pre><code class="java">class Solution {
+    int K;
+    int W;
+    int N;
+    Double[][] memory;
+    public double new21Game(int N, int K, int W) {
+        this.K = K;
+        this.W = W;
+        this.N = N;
+        memory = new Double[K][K];
+        return dfs(0,0);
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">double</span> <span class="token function">dfs</span><span class="token punctuation">(</span><span class="token keyword">int</span> cur<span class="token punctuation">,</span><span class="token keyword">int</span> depth<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>cur<span class="token operator">>=</span>K<span class="token punctuation">)</span><span class="token punctuation">{</span>
-            <span class="token keyword">if</span><span class="token punctuation">(</span>cur<span class="token operator">&lt;=</span>N<span class="token punctuation">)</span><span class="token punctuation">{</span>
-                <span class="token keyword">return</span> Math<span class="token punctuation">.</span><span class="token function">pow</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token operator">/</span>W<span class="token punctuation">,</span>depth<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-            <span class="token keyword">return</span> <span class="token number">0.0</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>memory<span class="token punctuation">[</span>cur<span class="token punctuation">]</span><span class="token punctuation">[</span>depth<span class="token punctuation">]</span><span class="token operator">!=</span>null<span class="token punctuation">)</span> <span class="token keyword">return</span> memory<span class="token punctuation">[</span>cur<span class="token punctuation">]</span><span class="token punctuation">[</span>depth<span class="token punctuation">]</span><span class="token punctuation">;</span>
-        <span class="token keyword">double</span> ans <span class="token operator">=</span> <span class="token number">0.0</span><span class="token punctuation">;</span>
-        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>i<span class="token operator">&lt;=</span>W<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-            ans <span class="token operator">+=</span> <span class="token function">dfs</span><span class="token punctuation">(</span>cur<span class="token operator">+</span>i<span class="token punctuation">,</span>depth<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        memory<span class="token punctuation">[</span>cur<span class="token punctuation">]</span><span class="token punctuation">[</span>depth<span class="token punctuation">]</span> <span class="token operator">=</span> ans<span class="token punctuation">;</span>
-        <span class="token keyword">return</span> ans<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    public double dfs(int cur,int depth){
+        if(cur&gt;=K){
+            if(cur&lt;=N){
+                return Math.pow(1.0/W,depth);
+            }
+            return 0.0;
+        }
+        if(memory[cur][depth]!=null) return memory[cur][depth];
+        double ans = 0.0;
+        for(int i = 1;i&lt;=W;i++){
+            ans += dfs(cur+i,depth+1);
+        }
+        memory[cur][depth] = ans;
+        return ans;
+    }
+}</code></pre>
 <p>那么需要进一步优化，通过分析发现，这里的概率其实仅和<code>cur</code>有关，即<code>memory[cur][depth] == Math.pow(1.0/W,depth) * memory[cur][0]</code>，因此只需要计算出<code>memory[0][0],memory[1][0],memory[2][0]...</code>就能完成大部分计算。</p>
 <p>于是可以使用动态规划来做（用dfs会特别麻烦）：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>
-    <span class="token keyword">public</span> <span class="token keyword">double</span> <span class="token function">new21Game</span><span class="token punctuation">(</span><span class="token keyword">int</span> N<span class="token punctuation">,</span> <span class="token keyword">int</span> K<span class="token punctuation">,</span> <span class="token keyword">int</span> W<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>K <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">return</span> <span class="token number">1.0</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">double</span><span class="token punctuation">[</span><span class="token punctuation">]</span> dp <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">double</span><span class="token punctuation">[</span>K <span class="token operator">+</span> W<span class="token punctuation">]</span><span class="token punctuation">;</span>
-        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> K<span class="token punctuation">;</span> i <span class="token operator">&lt;=</span> N <span class="token operator">&amp;&amp;</span> i <span class="token operator">&lt;</span> K <span class="token operator">+</span> W<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            dp<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">1.0</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        dp<span class="token punctuation">[</span>K <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">1.0</span> <span class="token operator">*</span> Math<span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span>N <span class="token operator">-</span> K <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">,</span> W<span class="token punctuation">)</span> <span class="token operator">/</span> W<span class="token punctuation">;</span>
-        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> K <span class="token operator">-</span> <span class="token number">2</span><span class="token punctuation">;</span> i <span class="token operator">>=</span> <span class="token number">0</span><span class="token punctuation">;</span> i<span class="token operator">--</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            dp<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> dp<span class="token punctuation">[</span>i <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">-</span> <span class="token punctuation">(</span>dp<span class="token punctuation">[</span>i <span class="token operator">+</span> W <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">-</span> dp<span class="token punctuation">[</span>i <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">/</span> W<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">return</span> dp<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">class Solution {
+    public double new21Game(int N, int K, int W) {
+        if (K == 0) {
+            return 1.0;
+        }
+        double[] dp = new double[K + W];
+        for (int i = K; i &lt;= N &amp;&amp; i &lt; K + W; i++) {
+            dp[i] = 1.0;
+        }
+        dp[K - 1] = 1.0 * Math.min(N - K + 1, W) / W;
+        for (int i = K - 2; i &gt;= 0; i--) {
+            dp[i] = dp[i + 1] - (dp[i + W + 1] - dp[i + 1]) / W;
+        }
+        return dp[0];
+    }
+}</code></pre>
 
             </div>
             <hr/>
@@ -1132,7 +1132,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1212,6 +1212,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

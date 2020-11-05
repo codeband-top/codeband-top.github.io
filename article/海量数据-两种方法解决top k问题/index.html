@@ -25,10 +25,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -421,22 +421,22 @@
 <p>那么我们来分析一下它在时间复杂度上优化了多少吧。首先所有数据都要走一遍比较，就是n，其次维护了一个大小为k的堆，也就是说堆化的时间复杂度为<code>O(log k)</code>，那么总的时间复杂度就是<code>O(nlogk)</code> ，乍一看和先排序的时间复杂度<code>O(nlogn)</code>也没差多少，甚至说是一个衡量级别的，但毕竟这里说的是海量数据，n可能很大，k可能比较小，那么时间上就快很多了。</p>
 <p>它的另一个好处是空间复杂度也仅为<code>O(k)</code>，不需要额外维护一个<code>O(n)</code>级别的海量数据存储。</p>
 <p>代码实现：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> List<span class="token operator">&lt;</span>Integer<span class="token operator">></span> <span class="token function">topKByHeap</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> arr<span class="token punctuation">,</span> <span class="token keyword">int</span> k<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>arr <span class="token operator">==</span> null <span class="token operator">||</span> arr<span class="token punctuation">.</span>length <span class="token operator">==</span> <span class="token number">0</span> <span class="token operator">||</span> k <span class="token operator">&lt;=</span> <span class="token number">0</span> <span class="token operator">||</span> k <span class="token operator">></span> arr<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    PriorityQueue<span class="token operator">&lt;</span>Integer<span class="token operator">></span> minHeap <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">PriorityQueue</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> k<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        minHeap<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>arr<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> k<span class="token punctuation">;</span> i <span class="token operator">&lt;</span> arr<span class="token punctuation">.</span>length<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>arr<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">></span> minHeap<span class="token punctuation">.</span><span class="token function">peek</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            minHeap<span class="token punctuation">.</span><span class="token function">poll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            minHeap<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>arr<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span>minHeap<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public static List&lt;Integer&gt; topKByHeap(int[] arr, int k) {
+    if (arr == null || arr.length == 0 || k &lt;= 0 || k &gt; arr.length) {
+        return new ArrayList&lt;&gt;();
+    }
+    PriorityQueue&lt;Integer&gt; minHeap = new PriorityQueue&lt;&gt;();
+    for (int i = 0; i &lt; k; i++) {
+        minHeap.add(arr[i]);
+    }
+    for (int i = k; i &lt; arr.length; i++) {
+        if (arr[i] &gt; minHeap.peek()) {
+            minHeap.poll();
+            minHeap.add(arr[i]);
+        }
+    }
+    return new ArrayList&lt;&gt;(minHeap);
+}</code></pre>
 <h1 id="快排思想">2 快排思想</h1><p><img src="https://api.codetool.top/img/15860045819866.jpg" alt></p>
 <p><code>O(nlogk)</code>好像还是有点不够看，能不能直接优化成<code>O(n)</code>呢？</p>
 <p>我们知道快排的思想是每次随机选取一个pivot把数组划分成相对有序的两部分，那假设第一次随机选取pivot并分区之后，后面这部分的元素数量就正好为k，不就说明后面这部分数据就是最大的k个元素，那最好时间复杂度岂不是<code>O(logn)</code>？</p>
@@ -446,32 +446,32 @@
 <p>如果后面的元素数量分多了，就继续在后面这部分数据中随机选取pivot，重复步骤。如果后面的元素分少了，则往前选取pivot，就形成了一种类似二分查找的步骤。</p>
 <p>那么我们来分析一下它的时间复杂度，我们知道快速排序每次分区的时间复杂度就是<code>log(n)</code>，那么我们假设每次分区前后两部分的数量相近，那么时间复杂度就是<code>log(n)+log(n/2)+log(n/4)+...</code>，取极限为<code>log(2n)</code>，即<code>log(n)</code>级别，是不是比一开始的<code>log(nlogn)</code>快很多？特别是在海量数据的情况下。</p>
 <p>代码实现：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> List<span class="token operator">&lt;</span>Integer<span class="token operator">></span> <span class="token function">topK</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> arr<span class="token punctuation">,</span> <span class="token keyword">int</span> k<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>arr <span class="token operator">==</span> null <span class="token operator">||</span> arr<span class="token punctuation">.</span>length <span class="token operator">==</span> <span class="token number">0</span> <span class="token operator">||</span> k <span class="token operator">&lt;=</span> <span class="token number">0</span> <span class="token operator">||</span> k <span class="token operator">></span> arr<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">// 如果是 BottomK 的话就不需要单独处理 k==n 情况了，因为划分是小于等于放在左</span>
-    <span class="token comment" spellcheck="true">// topK 的话如果是将大于的 k 个放在右边，那么 pivot 就变成了-1，会形成死循环。</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>k <span class="token operator">==</span> arr<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> IntStream<span class="token punctuation">.</span><span class="token function">of</span><span class="token punctuation">(</span>arr<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">boxed</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">collect</span><span class="token punctuation">(</span>Collectors<span class="token punctuation">.</span><span class="token function">toList</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">int</span> low <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
-    <span class="token keyword">int</span> high <span class="token operator">=</span> arr<span class="token punctuation">.</span>length <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span>
-    <span class="token keyword">int</span> index <span class="token operator">=</span> QuickSort<span class="token punctuation">.</span><span class="token function">partition</span><span class="token punctuation">(</span>arr<span class="token punctuation">,</span> low<span class="token punctuation">,</span> high<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">while</span> <span class="token punctuation">(</span>index <span class="token operator">!=</span> arr<span class="token punctuation">.</span>length <span class="token operator">-</span> k <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>index <span class="token operator">></span> arr<span class="token punctuation">.</span>length <span class="token operator">-</span> k <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            index <span class="token operator">=</span> QuickSort<span class="token punctuation">.</span><span class="token function">partition</span><span class="token punctuation">(</span>arr<span class="token punctuation">,</span> low<span class="token punctuation">,</span> index <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
-            index <span class="token operator">=</span> QuickSort<span class="token punctuation">.</span><span class="token function">partition</span><span class="token punctuation">(</span>arr<span class="token punctuation">,</span> index <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">,</span> high<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    List<span class="token operator">&lt;</span>Integer<span class="token operator">></span> list <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span>k<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> index <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> arr<span class="token punctuation">.</span>length<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        list<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>arr<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>Arrays<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span>arr<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> list<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public static List&lt;Integer&gt; topK(int[] arr, int k) {
+    if (arr == null || arr.length == 0 || k &lt;= 0 || k &gt; arr.length) {
+        return new ArrayList&lt;&gt;();
+    }
+    // 如果是 BottomK 的话就不需要单独处理 k==n 情况了，因为划分是小于等于放在左
+    // topK 的话如果是将大于的 k 个放在右边，那么 pivot 就变成了-1，会形成死循环。
+    if (k == arr.length) {
+        return IntStream.of(arr).boxed().collect(Collectors.toList());
+    }
+    int low = 0;
+    int high = arr.length - 1;
+    int index = QuickSort.partition(arr, low, high);
+    while (index != arr.length - k - 1) {
+        if (index &gt; arr.length - k - 1) {
+            index = QuickSort.partition(arr, low, index - 1);
+        } else {
+            index = QuickSort.partition(arr, index + 1, high);
+        }
+    }
+    List&lt;Integer&gt; list = new ArrayList&lt;&gt;(k);
+    for (int i = index + 1; i &lt; arr.length; i++) {
+        list.add(arr[i]);
+    }
+    System.out.println(Arrays.toString(arr));
+    return list;
+}</code></pre>
 <p>这里的Quicksort得自己实现了，这里不作为重点，可以参考<a href="../十大排序算法与Java实现">十大排序算法与Java实现</a></p>
 <h1 id="如果是找第K大的元素呢？">3 如果是找第K大的元素呢？</h1><p>作为拓展，讨论一下如果要找第K大的数据，仍然可以用这两个方法：</p>
 <ul>
@@ -1088,7 +1088,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1168,6 +1168,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

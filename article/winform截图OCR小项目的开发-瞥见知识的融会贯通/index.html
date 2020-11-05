@@ -32,10 +32,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -431,85 +431,85 @@
 <p><img src="https://api.codetool.top/img/15754690358637.png" alt="历史日志"></p>
 <p>谈一谈挺有意思的一些知识点：</p>
 <h1 id="Http请求">1 Http请求</h1><h2 id="Delegate委托回调">1.1 Delegate委托回调</h2><p>我封装了一个POST请求的函数：<br>需要下载一个<code>Newtonsoft.Json</code>用于处理响应的JSON数据<br>这种方式是使用了一个委托回调，类似于JavaScript中的回调函数，C#中叫<strong>Delegate回调</strong></p>
-<pre class=" language-csharp"><code class="language-csharp"><span class="token keyword">delegate</span> <span class="token keyword">void</span> <span class="token function">AfterRequest</span><span class="token punctuation">(</span>JObject data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre><code class="csharp">delegate void AfterRequest(JObject data);
 
-<span class="token keyword">class</span> <span class="token class-name">HttpUtil</span>
-<span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">/// &lt;summary></span>
-    <span class="token comment" spellcheck="true">/// 发出POST请求</span>
-    <span class="token comment" spellcheck="true">/// &lt;/summary></span>
-    <span class="token comment" spellcheck="true">/// &lt;param name="url">请求的url&lt;/param></span>
-    <span class="token comment" spellcheck="true">/// &lt;param name="requestBody">url参数格式的字符串，如"key1=value1&amp;key2=value2",需要经过urlencode处理&lt;/param></span>
-    <span class="token comment" spellcheck="true">/// &lt;param name="function">回调函数,data是一个json转换为的一个JObject对象&lt;/param></span>
-    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">PostAsync</span><span class="token punctuation">(</span>String url<span class="token punctuation">,</span> <span class="token keyword">string</span> requestBody<span class="token punctuation">,</span> AfterRequest function<span class="token punctuation">)</span>
-    <span class="token punctuation">{</span>
-        <span class="token keyword">try</span>
-        <span class="token punctuation">{</span>
-            <span class="token keyword">string</span> responseBody <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
-            HttpClient httpClient <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HttpClient</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">//StringContent content = new StringContent(requestBody,System.Text.Encoding.UTF8, "application/x-www-form-urlencoded");</span>
-            StringContent content <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StringContent</span><span class="token punctuation">(</span>requestBody<span class="token punctuation">)</span><span class="token punctuation">;</span>
+class HttpUtil
+{
+    /// &lt;summary&gt;
+    /// 发出POST请求
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;url&quot;&gt;请求的url&lt;/param&gt;
+    /// &lt;param name=&quot;requestBody&quot;&gt;url参数格式的字符串，如&quot;key1=value1&amp;key2=value2&quot;,需要经过urlencode处理&lt;/param&gt;
+    /// &lt;param name=&quot;function&quot;&gt;回调函数,data是一个json转换为的一个JObject对象&lt;/param&gt;
+    public static void PostAsync(String url, string requestBody, AfterRequest function)
+    {
+        try
+        {
+            string responseBody = null;
+            HttpClient httpClient = new HttpClient();
+            //StringContent content = new StringContent(requestBody,System.Text.Encoding.UTF8, &quot;application/x-www-form-urlencoded&quot;);
+            StringContent content = new StringContent(requestBody);
 
-            content<span class="token punctuation">.</span>Headers<span class="token punctuation">.</span>ContentType <span class="token operator">=</span>
-                <span class="token keyword">new</span> <span class="token class-name">System<span class="token punctuation">.</span>Net<span class="token punctuation">.</span>Http<span class="token punctuation">.</span>Headers<span class="token punctuation">.</span>MediaTypeHeaderValue</span><span class="token punctuation">(</span><span class="token string">"application/x-www-form-urlencoded"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            HttpResponseMessage response <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
-            response <span class="token operator">=</span> httpClient<span class="token punctuation">.</span><span class="token function">PostAsync</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> content<span class="token punctuation">)</span><span class="token punctuation">.</span>Result<span class="token punctuation">;</span>
-            response<span class="token punctuation">.</span><span class="token function">EnsureSuccessStatusCode</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>response<span class="token punctuation">.</span>IsSuccessStatusCode<span class="token punctuation">)</span>
-            <span class="token punctuation">{</span>
-                responseBody <span class="token operator">=</span> response<span class="token punctuation">.</span>Content<span class="token punctuation">.</span><span class="token function">ReadAsStringAsync</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>Result<span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-            JObject data <span class="token operator">=</span> JObject<span class="token punctuation">.</span><span class="token function">Parse</span><span class="token punctuation">(</span>responseBody<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token function">function</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span>
-        <span class="token punctuation">{</span>
-            Console<span class="token punctuation">.</span><span class="token function">WriteLine</span><span class="token punctuation">(</span><span class="token string">"\nException Caught!"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            Console<span class="token punctuation">.</span><span class="token function">WriteLine</span><span class="token punctuation">(</span><span class="token string">"Message :{0} "</span><span class="token punctuation">,</span> e<span class="token punctuation">.</span>Message<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            content.Headers.ContentType =
+                new System.Net.Http.Headers.MediaTypeHeaderValue(&quot;application/x-www-form-urlencoded&quot;);
+            HttpResponseMessage response = null;
+            response = httpClient.PostAsync(url, content).Result;
+            response.EnsureSuccessStatusCode();
+            if (response.IsSuccessStatusCode)
+            {
+                responseBody = response.Content.ReadAsStringAsync().Result;
+            }
+            JObject data = JObject.Parse(responseBody);
+            function(data);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(&quot;\nException Caught!&quot;);
+            Console.WriteLine(&quot;Message :{0} &quot;, e.Message);
 
-        <span class="token punctuation">}</span>
+        }
 
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    }
+}</code></pre>
 <h2 id="Async-Await">1.2 Async/Await</h2><p>实际上还有一种能使代码更清晰、简洁的方法，并且这种方法更受C#推荐：Async/Await</p>
-<pre class=" language-csharp"><code class="language-csharp"><span class="token keyword">class</span> <span class="token class-name">HttpUtil</span>
-<span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">/// &lt;summary></span>
-    <span class="token comment" spellcheck="true">/// 发出POST请求</span>
-    <span class="token comment" spellcheck="true">/// &lt;/summary></span>
-    <span class="token comment" spellcheck="true">/// &lt;param name="url">请求的url&lt;/param></span>
-    <span class="token comment" spellcheck="true">/// &lt;param name="requestBody">url参数格式的字符串，如"key1=value1&amp;key2=value2",需要经过urlencode处理&lt;/param></span>
-    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">async</span> Task<span class="token operator">&lt;</span>JObject<span class="token operator">></span> <span class="token function">PostAsync</span><span class="token punctuation">(</span>String url<span class="token punctuation">,</span> <span class="token keyword">string</span> requestBody<span class="token punctuation">)</span>
-    <span class="token punctuation">{</span>
-        <span class="token keyword">try</span>
-        <span class="token punctuation">{</span>
-            <span class="token keyword">string</span> responseBody <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
-            HttpClient httpClient <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HttpClient</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">//StringContent content = new StringContent(requestBody,System.Text.Encoding.UTF8, "application/x-www-form-urlencoded");</span>
-            StringContent content <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StringContent</span><span class="token punctuation">(</span>requestBody<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre><code class="csharp">class HttpUtil
+{
+    /// &lt;summary&gt;
+    /// 发出POST请求
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;url&quot;&gt;请求的url&lt;/param&gt;
+    /// &lt;param name=&quot;requestBody&quot;&gt;url参数格式的字符串，如&quot;key1=value1&amp;key2=value2&quot;,需要经过urlencode处理&lt;/param&gt;
+    public static async Task&lt;JObject&gt; PostAsync(String url, string requestBody)
+    {
+        try
+        {
+            string responseBody = null;
+            HttpClient httpClient = new HttpClient();
+            //StringContent content = new StringContent(requestBody,System.Text.Encoding.UTF8, &quot;application/x-www-form-urlencoded&quot;);
+            StringContent content = new StringContent(requestBody);
 
-            content<span class="token punctuation">.</span>Headers<span class="token punctuation">.</span>ContentType <span class="token operator">=</span>
-                <span class="token keyword">new</span> <span class="token class-name">System<span class="token punctuation">.</span>Net<span class="token punctuation">.</span>Http<span class="token punctuation">.</span>Headers<span class="token punctuation">.</span>MediaTypeHeaderValue</span><span class="token punctuation">(</span><span class="token string">"application/x-www-form-urlencoded"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            HttpResponseMessage response <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
-            response <span class="token operator">=</span> <span class="token keyword">await</span> httpClient<span class="token punctuation">.</span><span class="token function">PostAsync</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> content<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            response<span class="token punctuation">.</span><span class="token function">EnsureSuccessStatusCode</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>response<span class="token punctuation">.</span>IsSuccessStatusCode<span class="token punctuation">)</span>
-            <span class="token punctuation">{</span>
-                responseBody <span class="token operator">=</span> <span class="token keyword">await</span> response<span class="token punctuation">.</span>Content<span class="token punctuation">.</span><span class="token function">ReadAsStringAsync</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
+            content.Headers.ContentType =
+                new System.Net.Http.Headers.MediaTypeHeaderValue(&quot;application/x-www-form-urlencoded&quot;);
+            HttpResponseMessage response = null;
+            response = await httpClient.PostAsync(url, content);
+            response.EnsureSuccessStatusCode();
+            if (response.IsSuccessStatusCode)
+            {
+                responseBody = await response.Content.ReadAsStringAsync();
+            }
 
-            JObject data <span class="token operator">=</span> JObject<span class="token punctuation">.</span><span class="token function">Parse</span><span class="token punctuation">(</span>responseBody<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">return</span> data<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span>
-        <span class="token punctuation">{</span>
-            Console<span class="token punctuation">.</span><span class="token function">WriteLine</span><span class="token punctuation">(</span><span class="token string">"\nException Caught!"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            Console<span class="token punctuation">.</span><span class="token function">WriteLine</span><span class="token punctuation">(</span><span class="token string">"Message :{0} "</span><span class="token punctuation">,</span> e<span class="token punctuation">.</span>Message<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
+            JObject data = JObject.Parse(responseBody);
+            return data;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(&quot;\nException Caught!&quot;);
+            Console.WriteLine(&quot;Message :{0} &quot;, e.Message);
+        }
 
-        <span class="token keyword">return</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+        return null;
+    }
+}</code></pre>
 <p>使用这种方法，能避免回调地狱，让调用时代码不会多层嵌套。<br>甚至ES7也支持了这种方法，语法和C#类似。</p>
 <p><strong>原理：</strong></p>
 <blockquote>
@@ -1154,7 +1154,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1234,6 +1234,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

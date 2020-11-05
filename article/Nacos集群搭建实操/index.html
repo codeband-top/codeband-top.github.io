@@ -24,10 +24,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -401,7 +401,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1k
+                    1.1k
                 </div>
                 
 
@@ -416,22 +416,22 @@
             <div id="articleContent">
                 <h1 id="将数据存储切换为mysql">1 将数据存储切换为mysql</h1><p>默认Nacos使用嵌入式数据库derby实现数据的存储。所以，如果启动多个默认配置下的Nacos节点，数据存储是存在一致性问题的。<br>为了解决这个问题，Nacos采用了集中式存储的方式来支持集群化部署,目前只支持MySQL的存储。</p>
 <p>在nacos安装目录下的<code>conf/</code>文件夹下有一个<code>nacos-mysql.sql</code>文件，使用mysql执行该sql文件，如果没有建database可以先新建database：</p>
-<pre class=" language-sql"><code class="language-sql"><span class="token keyword">create</span> <span class="token keyword">database</span> nacos_config<span class="token punctuation">;</span>
-<span class="token keyword">use</span> nacos_config<span class="token punctuation">;</span></code></pre>
+<pre><code class="sql">create database nacos_config;
+use nacos_config;</code></pre>
 <p>执行成功之后可以看到下面这些表：</p>
 <p><img src="https://api.codetool.top/img/15849642006561.png" alt></p>
 <p>然后修改<code>conf/application.properties</code>，添加mysql相关配置：</p>
-<pre class=" language-properties"><code class="language-properties"><span class="token attr-name">spring.datasource.platform</span><span class="token punctuation">=</span><span class="token attr-value">mysql</span>
+<pre><code class="properties">spring.datasource.platform=mysql
 
-<span class="token attr-name">db.num</span><span class="token punctuation">=</span><span class="token attr-value">1</span>
-<span class="token attr-name">db.url.0</span><span class="token punctuation">=</span><span class="token attr-value">jdbc:mysql://localhost:3306/nacos_config?characterEncoding=utf8&amp;connectTimeout=1000&amp;socketTimeout=3000&amp;autoReconnect=true</span>
-<span class="token attr-name">db.user</span><span class="token punctuation">=</span><span class="token attr-value">root</span>
-<span class="token attr-name">db.password</span><span class="token punctuation">=</span><span class="token attr-value">123456</span></code></pre>
+db.num=1
+db.url.0=jdbc:mysql://localhost:3306/nacos_config?characterEncoding=utf8&amp;connectTimeout=1000&amp;socketTimeout=3000&amp;autoReconnect=true
+db.user=root
+db.password=123456</code></pre>
 <p>重启nacos，进入控制页面可以看到数据全部没了。。</p>
 <h1 id="集群部署">2 集群部署</h1><p>如果更改完了数据存储到mysql就可以开始部署集群了，这里还是搭建伪集群，但是会很麻烦，有机器条件的可以直接尝试真刀实枪上集群……</p>
 <h2 id="首先让nacos能指定端口启动">2.1 首先让nacos能指定端口启动</h2><p>修改<code>bin/startup.sh</code>中的下面两个地方：</p>
-<pre class=" language-shell"><code class="language-shell">#################添加p:（即可以带-p参数）
-57 while getopts ":m:f:s:p:" opt
+<pre><code class="shell">#################添加p:（即可以带-p参数）
+57 while getopts &quot;:m:f:s:p:&quot; opt
 58 do
 59     case $opt in
 60         m)
@@ -443,19 +443,19 @@
 ################添加下面两行
 66         p)
 67             PORT=$OPTARG;;</code></pre>
-<pre class=" language-shell"><code class="language-shell">83 if [[ "${MODE}" == "standalone" ]]; then
-84     JAVA_OPT="${JAVA_OPT} -Xms512m -Xmx512m -Xmn256m"
-85     JAVA_OPT="${JAVA_OPT} -Dnacos.standalone=true"
+<pre><code class="shell">83 if [[ &quot;${MODE}&quot; == &quot;standalone&quot; ]]; then
+84     JAVA_OPT=&quot;${JAVA_OPT} -Xms512m -Xmx512m -Xmn256m&quot;
+85     JAVA_OPT=&quot;${JAVA_OPT} -Dnacos.standalone=true&quot;
 ### 集群模式添加jvm启动参数
 86 else
-87     JAVA_OPT="${JAVA_OPT} -server -Xms2g -Xmx2g -Xmn1g -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=320m"
-88     JAVA_OPT="${JAVA_OPT} -XX:-OmitStackTraceInFastThrow -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${BASE_DIR    }/logs/java_heapdump.hprof"
-89     JAVA_OPT="${JAVA_OPT} -XX:-UseLargePages"
+87     JAVA_OPT=&quot;${JAVA_OPT} -server -Xms2g -Xmx2g -Xmn1g -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=320m&quot;
+88     JAVA_OPT=&quot;${JAVA_OPT} -XX:-OmitStackTraceInFastThrow -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${BASE_DIR    }/logs/java_heapdump.hprof&quot;
+89     JAVA_OPT=&quot;${JAVA_OPT} -XX:-UseLargePages&quot;
 ### 添加这一行
-90     JAVA_OPT="${JAVA_OPT} -DServer.port=${PORT}"
+90     JAVA_OPT=&quot;${JAVA_OPT} -DServer.port=${PORT}&quot;
 91 fi</code></pre>
 <h2 id="修改集群配置文件">2.2 修改集群配置文件</h2><p>将<code>conf/cluster.conf.example</code>复制出来：</p>
-<pre class=" language-shell"><code class="language-shell">cp cluster.conf.example cluster.conf</code></pre>
+<pre><code class="shell">cp cluster.conf.example cluster.conf</code></pre>
 <p>然后修改<code>cluster.conf</code>文件，添加下面这几行，注意ip不能填写127.0.0.1，必须是<code>hostname -i</code>显示的ip（因为内部raft是通过网卡ip进行通信的）</p>
 <pre><code>192.168.91.1:3333
 192.168.91.1:4444
@@ -479,20 +479,20 @@ root@DESKTOP-TTLFG6F:~/nacos/bin# bash startup.sh -p 5555
 
 root@DESKTOP-TTLFG6F:/usr/sbin# ./nginx -c /etc/nginx/nginx.conf</code></pre><p>访问 <a href="http://192.168.91.1:1111/nacos" target="_blank" rel="noopener">http://192.168.91.1:1111/nacos</a> 即可看到熟悉的nacos界面了……</p>
 <h1 id="微服务注册进nacos集群">3 微服务注册进nacos集群</h1><p>我们以模块<code>cloudalibaba-provider-payment9001</code>为例，直接将配置文件中的<code>spring.cloud.nacos.discovery.addr</code> 修改为nginx代理的vip</p>
-<pre class=" language-yaml"><code class="language-yaml"><span class="token key atrule">server</span><span class="token punctuation">:</span>
-  <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">9001</span>
-<span class="token key atrule">spring</span><span class="token punctuation">:</span>
-  <span class="token key atrule">application</span><span class="token punctuation">:</span>
-    <span class="token key atrule">name</span><span class="token punctuation">:</span> nacos<span class="token punctuation">-</span>payment<span class="token punctuation">-</span>provider
-  <span class="token key atrule">cloud</span><span class="token punctuation">:</span>
-    <span class="token key atrule">nacos</span><span class="token punctuation">:</span>
-      <span class="token key atrule">discovery</span><span class="token punctuation">:</span>
-        <span class="token key atrule">server-addr</span><span class="token punctuation">:</span> localhost<span class="token punctuation">:</span><span class="token number">1111</span>
-<span class="token key atrule">management</span><span class="token punctuation">:</span>
-  <span class="token key atrule">endpoints</span><span class="token punctuation">:</span>
-    <span class="token key atrule">web</span><span class="token punctuation">:</span>
-      <span class="token key atrule">exposure</span><span class="token punctuation">:</span>
-        <span class="token key atrule">include</span><span class="token punctuation">:</span> <span class="token string">'*'</span></code></pre>
+<pre><code class="yaml">server:
+  port: 9001
+spring:
+  application:
+    name: nacos-payment-provider
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:1111
+management:
+  endpoints:
+    web:
+      exposure:
+        include: &#39;*&#39;</code></pre>
 <p>然后启动服务就可以正常注册了。</p>
 <h1 id="伪集群可能会踩的坑">4 伪集群可能会踩的坑</h1><p>因为伪集群的原因，可能造成实例之间无法通信，注册服务的时候就会看到这种情况：</p>
 <pre><code>java.lang.IllegalStateException: failed to req API:/nacos/v1/ns/instance after all servers([192.168.91.1:1111]) tried
@@ -503,16 +503,16 @@ root@DESKTOP-TTLFG6F:/usr/sbin# ./nginx -c /etc/nginx/nginx.conf</code></pre><p>
         at org.springframework.cloud.alibaba.nacos.registry.NacosServiceRegistry.register(NacosServiceRegistry.java:56)
         at org.springframework.cloud.alibaba.nacos.registry.NacosServiceRegistry.register(NacosServiceRegistry.java:29)</code></pre><p>但nacos服务后台三台机器均启动成功，且后台能正常进入，通过URL访问/nacos/v1/ns/instance，也是能正常访问。</p>
 <p>实际上是跟通过主机名获取本机ip地址的原因有关（因为我是用的WSL可能会存在一些问题），这种情况还是修改<code>bin/startup.sh</code>，加一个虚拟机参数：</p>
-<pre class=" language-shell"><code class="language-shell">83 if [[ "${MODE}" == "standalone" ]]; then
-84     JAVA_OPT="${JAVA_OPT} -Xms512m -Xmx512m -Xmn256m"
-85     JAVA_OPT="${JAVA_OPT} -Dnacos.standalone=true"
+<pre><code class="shell">83 if [[ &quot;${MODE}&quot; == &quot;standalone&quot; ]]; then
+84     JAVA_OPT=&quot;${JAVA_OPT} -Xms512m -Xmx512m -Xmn256m&quot;
+85     JAVA_OPT=&quot;${JAVA_OPT} -Dnacos.standalone=true&quot;
 86 else
-87     JAVA_OPT="${JAVA_OPT} -server -Xms2g -Xmx2g -Xmn1g -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=320m"
-88     JAVA_OPT="${JAVA_OPT} -XX:-OmitStackTraceInFastThrow -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${BASE_DIR    }/logs/java_heapdump.hprof"
-89     JAVA_OPT="${JAVA_OPT} -XX:-UseLargePages"
-90     JAVA_OPT="${JAVA_OPT} -DServer.port=${PORT}"
+87     JAVA_OPT=&quot;${JAVA_OPT} -server -Xms2g -Xmx2g -Xmn1g -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=320m&quot;
+88     JAVA_OPT=&quot;${JAVA_OPT} -XX:-OmitStackTraceInFastThrow -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${BASE_DIR    }/logs/java_heapdump.hprof&quot;
+89     JAVA_OPT=&quot;${JAVA_OPT} -XX:-UseLargePages&quot;
+90     JAVA_OPT=&quot;${JAVA_OPT} -DServer.port=${PORT}&quot;
 ### 将cluster.conf中配置的ip地址加上
-91     JAVA_OPT="${JAVA_OPT} -Dnacos.server.ip=192.168.91.1"
+91     JAVA_OPT=&quot;${JAVA_OPT} -Dnacos.server.ip=192.168.91.1&quot;
 92 fi</code></pre>
 
             </div>
@@ -944,9 +944,9 @@ root@DESKTOP-TTLFG6F:/usr/sbin# ./nginx -c /etc/nginx/nginx.conf</code></pre><p>
                     <div class="summary block-with-text">
                         
                             1 简单实例新建模块cloudalibaba-config-nacos-client3377
-1.1 依赖&lt;!-- nacos -->
-&lt;dependency>
-    &lt;groupId>com.alibaba.cloud
+1.1 依赖&lt;!-- nacos --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.alib
                         
                     </div>
                     <div class="publish-info">
@@ -1123,7 +1123,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1203,6 +1203,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

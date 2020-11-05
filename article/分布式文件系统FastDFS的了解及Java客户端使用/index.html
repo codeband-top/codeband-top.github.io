@@ -25,10 +25,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -402,7 +402,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.3k
+                    1.4k
                 </div>
                 
 
@@ -457,71 +457,71 @@
 <pre><code>docker update --restart=always fastdfs-tracker
 docker update --restart=always fastdfs-storage</code></pre><h1 id="fastDFS-client使用">4 fastDFS-client使用</h1><p>我使用的是一个最近还在维护的第三方客户端，个人觉得封装得挺好的，很多操作都简化了。（最好搭配SpringBoot使用）</p>
 <p>github地址： <a href="https://github.com/tobato/FastDFS_Client" target="_blank" rel="noopener">https://github.com/tobato/FastDFS_Client</a></p>
-<pre class=" language-xml"><code class="language-xml"><span class="token comment" spellcheck="true">&lt;!-- https://mvnrepository.com/artifact/com.github.tobato/fastdfs-client --></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>com.github.tobato<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>fastdfs-client<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>1.27.2<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span></code></pre>
+<pre><code class="xml">&lt;!-- https://mvnrepository.com/artifact/com.github.tobato/fastdfs-client --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.github.tobato&lt;/groupId&gt;
+    &lt;artifactId&gt;fastdfs-client&lt;/artifactId&gt;
+    &lt;version&gt;1.27.2&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
 <p>然后直接引入配置：</p>
-<pre class=" language-yaml"><code class="language-yaml"><span class="token key atrule">fdfs</span><span class="token punctuation">:</span>
-  <span class="token key atrule">so-timeout</span><span class="token punctuation">:</span> <span class="token number">1500          </span><span class="token comment" spellcheck="true"># 读取超时时间</span>
-  <span class="token key atrule">connect-timeout</span><span class="token punctuation">:</span> <span class="token number">600      </span><span class="token comment" spellcheck="true"># 连接超时时间</span>
-  <span class="token key atrule">thumb-image</span><span class="token punctuation">:</span>             <span class="token comment" spellcheck="true"># 缩略图生成参数</span>
-    <span class="token key atrule">width</span><span class="token punctuation">:</span> <span class="token number">150</span>
-    <span class="token key atrule">height</span><span class="token punctuation">:</span> <span class="token number">150</span>
-  <span class="token key atrule">tracker-list</span><span class="token punctuation">:</span>            <span class="token comment" spellcheck="true">#TrackerList参数,支持多个</span>
-    <span class="token punctuation">-</span> 192.168.176.129<span class="token punctuation">:</span><span class="token number">22122</span>
-  <span class="token comment" spellcheck="true"># 这个是自定义配置项</span>
-  <span class="token key atrule">nginx-url</span><span class="token punctuation">:</span> http<span class="token punctuation">:</span>//192.168.176.129<span class="token punctuation">:</span><span class="token number">8080</span></code></pre>
+<pre><code class="yaml">fdfs:
+  so-timeout: 1500          # 读取超时时间
+  connect-timeout: 600      # 连接超时时间
+  thumb-image:             # 缩略图生成参数
+    width: 150
+    height: 150
+  tracker-list:            #TrackerList参数,支持多个
+    - 192.168.176.129:22122
+  # 这个是自定义配置项
+  nginx-url: http://192.168.176.129:8080</code></pre>
 <p>就可以使用了</p>
 <p>例，文件上传：</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Service</span>
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">FileService</span> <span class="token punctuation">{</span>
-    <span class="token annotation punctuation">@Resource</span>
-    <span class="token keyword">private</span> FastFileStorageClient storageClient<span class="token punctuation">;</span>
+<pre><code class="java">@Service
+public class FileService {
+    @Resource
+    private FastFileStorageClient storageClient;
 
-    <span class="token annotation punctuation">@Value</span><span class="token punctuation">(</span><span class="token string">"${fdfs.nginx-url}"</span><span class="token punctuation">)</span>
-    <span class="token keyword">private</span> String trackerUrl<span class="token punctuation">;</span>
+    @Value(&quot;${fdfs.nginx-url}&quot;)
+    private String trackerUrl;
 
-    <span class="token comment" spellcheck="true">/**
+    /**
      * 上传文件，返回资源url
      * @param file
      * @return
-     */</span>
-    <span class="token keyword">public</span> String <span class="token function">upload</span><span class="token punctuation">(</span>FastFile file<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        StorePath storePath <span class="token operator">=</span> storageClient<span class="token punctuation">.</span><span class="token function">uploadFile</span><span class="token punctuation">(</span>file<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> trackerUrl<span class="token operator">+</span><span class="token string">"/"</span><span class="token operator">+</span>storePath<span class="token punctuation">.</span><span class="token function">getFullPath</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+     */
+    public String upload(FastFile file){
+        StorePath storePath = storageClient.uploadFile(file);
+        return trackerUrl+&quot;/&quot;+storePath.getFullPath();
+    }
 
-    <span class="token keyword">public</span> String <span class="token function">getTrackerUrl</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">return</span> trackerUrl<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@RestController</span>
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">FileController</span> <span class="token punctuation">{</span>
-    <span class="token annotation punctuation">@Resource</span>
-    FileService fileService<span class="token punctuation">;</span>
+    public String getTrackerUrl(){
+        return trackerUrl;
+    }
+}</code></pre>
+<pre><code class="java">@RestController
+public class FileController {
+    @Resource
+    FileService fileService;
 
-    <span class="token comment" spellcheck="true">/**
+    /**
      * 文件上传
      * @param file
      * @return 资源url
      * @throws Exception
-     */</span>
-    <span class="token annotation punctuation">@PostMapping</span><span class="token punctuation">(</span>value <span class="token operator">=</span> <span class="token string">"/upload"</span><span class="token punctuation">)</span>
-    <span class="token keyword">public</span> Result<span class="token operator">&lt;</span>String<span class="token operator">></span> <span class="token function">upload</span><span class="token punctuation">(</span><span class="token annotation punctuation">@RequestParam</span><span class="token punctuation">(</span><span class="token string">"file"</span><span class="token punctuation">)</span> MultipartFile file<span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">//获取后缀名</span>
-        String suffix <span class="token operator">=</span> file<span class="token punctuation">.</span><span class="token function">getOriginalFilename</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">substring</span><span class="token punctuation">(</span>file<span class="token punctuation">.</span><span class="token function">getOriginalFilename</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">lastIndexOf</span><span class="token punctuation">(</span><span class="token string">"."</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        Set<span class="token operator">&lt;</span>MetaData<span class="token operator">></span> metaDataSet <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashSet</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//附带文件名元信息上传</span>
-        metaDataSet<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">MetaData</span><span class="token punctuation">(</span><span class="token string">"originName"</span><span class="token punctuation">,</span>file<span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        FastFile fastFile <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">FastFile</span><span class="token punctuation">(</span>file<span class="token punctuation">.</span><span class="token function">getInputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>file<span class="token punctuation">.</span><span class="token function">getSize</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>suffix<span class="token punctuation">,</span>null<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//文件上传</span>
-        String path <span class="token operator">=</span> fileService<span class="token punctuation">.</span><span class="token function">upload</span><span class="token punctuation">(</span>fastFile<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Result</span><span class="token operator">&lt;</span>String<span class="token operator">></span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">,</span> StatusCode<span class="token punctuation">.</span>OK<span class="token punctuation">,</span><span class="token string">"文件上传成功！"</span><span class="token punctuation">,</span>path<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+     */
+    @PostMapping(value = &quot;/upload&quot;)
+    public Result&lt;String&gt; upload(@RequestParam(&quot;file&quot;) MultipartFile file) throws Exception {
+        //获取后缀名
+        String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(&quot;.&quot;) + 1);
+        Set&lt;MetaData&gt; metaDataSet = new HashSet&lt;&gt;();
+        //附带文件名元信息上传
+        metaDataSet.add(new MetaData(&quot;originName&quot;,file.getName()));
+        FastFile fastFile = new FastFile(file.getInputStream(),file.getSize(),suffix,null);
+        //文件上传
+        String path = fileService.upload(fastFile);
+        return new Result&lt;String&gt;(true, StatusCode.OK,&quot;文件上传成功！&quot;,path);
+    }
+}</code></pre>
 <p><img src="https://api.codetool.top/img/1585641988416.png" alt></p>
 
             </div>
@@ -1138,7 +1138,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1218,6 +1218,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

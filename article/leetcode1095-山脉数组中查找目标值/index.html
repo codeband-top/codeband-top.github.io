@@ -26,10 +26,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -403,7 +403,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    805
+                    806
                 </div>
                 
 
@@ -450,69 +450,69 @@
 </ul>
 <h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>超过 <code>100</code> 次调用的提交将被视为错误答案，数据规模又小于等于一万，很明显是要用<code>logn</code>的时间复杂度求解，因为是有序数组，也很容易想到二分查找。由于这个数组不是完全有序的，可以分成升序和降序的两部分，则可以先找出峰顶值，然后对两部分进行二分查找。</p>
 <h2 id="代码">2.2 代码</h2><p>（作者：liweiwei1419）</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>
-    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">findInMountainArray</span><span class="token punctuation">(</span><span class="token keyword">int</span> target<span class="token punctuation">,</span> MountainArray mountainArr<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">int</span> size <span class="token operator">=</span> mountainArr<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">// 步骤 1：先找到山顶元素所在的索引</span>
-        <span class="token keyword">int</span> mountaintop <span class="token operator">=</span> <span class="token function">findMountaintop</span><span class="token punctuation">(</span>mountainArr<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> size <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">// 步骤 2：在前有序且升序数组中找 target 所在的索引</span>
-        <span class="token keyword">int</span> res <span class="token operator">=</span> <span class="token function">findFromSortedArr</span><span class="token punctuation">(</span>mountainArr<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> mountaintop<span class="token punctuation">,</span> target<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>res <span class="token operator">!=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">return</span> res<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token comment" spellcheck="true">// 步骤 3：如果步骤 2 找不到，就在后有序且降序数组中找 target 所在的索引</span>
-        <span class="token keyword">return</span> <span class="token function">findFromInversedArr</span><span class="token punctuation">(</span>mountainArr<span class="token punctuation">,</span> mountaintop <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">,</span> size <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">,</span> target<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+<pre><code class="java">class Solution {
+    public int findInMountainArray(int target, MountainArray mountainArr) {
+        int size = mountainArr.length();
+        // 步骤 1：先找到山顶元素所在的索引
+        int mountaintop = findMountaintop(mountainArr, 0, size - 1);
+        // 步骤 2：在前有序且升序数组中找 target 所在的索引
+        int res = findFromSortedArr(mountainArr, 0, mountaintop, target);
+        if (res != -1) {
+            return res;
+        }
+        // 步骤 3：如果步骤 2 找不到，就在后有序且降序数组中找 target 所在的索引
+        return findFromInversedArr(mountainArr, mountaintop + 1, size - 1, target);
+    }
 
-    <span class="token comment" spellcheck="true">// 返回山顶元素</span>
-    <span class="token keyword">private</span> <span class="token keyword">int</span> <span class="token function">findMountaintop</span><span class="token punctuation">(</span>MountainArray mountainArr<span class="token punctuation">,</span> <span class="token keyword">int</span> l<span class="token punctuation">,</span> <span class="token keyword">int</span> r<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    // 返回山顶元素
+    private int findMountaintop(MountainArray mountainArr, int l, int r) {
 
-        <span class="token keyword">while</span> <span class="token punctuation">(</span>l <span class="token operator">&lt;</span> r<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">int</span> mid <span class="token operator">=</span> l <span class="token operator">+</span> <span class="token punctuation">(</span>r <span class="token operator">-</span> l<span class="token punctuation">)</span> <span class="token operator">/</span> <span class="token number">2</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">// 取左中位数，因为进入循环，数组一定至少有 2 个元素</span>
-            <span class="token comment" spellcheck="true">// 因此，左中位数一定有右边元素，数组下标不会发生越界</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>mountainArr<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>mid<span class="token punctuation">)</span> <span class="token operator">&lt;</span> mountainArr<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>mid <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token comment" spellcheck="true">// 如果当前的数比右边的数小，它一定不是山顶</span>
-                l <span class="token operator">=</span> mid <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
-                r <span class="token operator">=</span> mid<span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">return</span> l<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+        while (l &lt; r) {
+            int mid = l + (r - l) / 2;
+            // 取左中位数，因为进入循环，数组一定至少有 2 个元素
+            // 因此，左中位数一定有右边元素，数组下标不会发生越界
+            if (mountainArr.get(mid) &lt; mountainArr.get(mid + 1)) {
+                // 如果当前的数比右边的数小，它一定不是山顶
+                l = mid + 1;
+            } else {
+                r = mid;
+            }
+        }
+        return l;
+    }
 
-    <span class="token keyword">private</span> <span class="token keyword">int</span> <span class="token function">findFromSortedArr</span><span class="token punctuation">(</span>MountainArray mountainArr<span class="token punctuation">,</span> <span class="token keyword">int</span> l<span class="token punctuation">,</span> <span class="token keyword">int</span> r<span class="token punctuation">,</span> <span class="token keyword">int</span> target<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">while</span> <span class="token punctuation">(</span>l <span class="token operator">&lt;</span> r<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">int</span> mid <span class="token operator">=</span> l <span class="token operator">+</span> <span class="token punctuation">(</span>r <span class="token operator">-</span> l<span class="token punctuation">)</span> <span class="token operator">/</span> <span class="token number">2</span><span class="token punctuation">;</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>mountainArr<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>mid<span class="token punctuation">)</span> <span class="token operator">&lt;</span> target<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                l <span class="token operator">=</span> mid <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
-                r <span class="token operator">=</span> mid<span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
+    private int findFromSortedArr(MountainArray mountainArr, int l, int r, int target) {
+        while (l &lt; r) {
+            int mid = l + (r - l) / 2;
+            if (mountainArr.get(mid) &lt; target) {
+                l = mid + 1;
+            } else {
+                r = mid;
+            }
 
-        <span class="token punctuation">}</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>mountainArr<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>l<span class="token punctuation">)</span> <span class="token operator">==</span> target<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">return</span> l<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+        }
+        if (mountainArr.get(l) == target) {
+            return l;
+        }
+        return -1;
+    }
 
-    <span class="token keyword">private</span> <span class="token keyword">int</span> <span class="token function">findFromInversedArr</span><span class="token punctuation">(</span>MountainArray mountainArr<span class="token punctuation">,</span> <span class="token keyword">int</span> l<span class="token punctuation">,</span> <span class="token keyword">int</span> r<span class="token punctuation">,</span> <span class="token keyword">int</span> target<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">while</span> <span class="token punctuation">(</span>l <span class="token operator">&lt;</span> r<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">int</span> mid <span class="token operator">=</span> l <span class="token operator">+</span> <span class="token punctuation">(</span>r <span class="token operator">-</span> l<span class="token punctuation">)</span> <span class="token operator">/</span> <span class="token number">2</span><span class="token punctuation">;</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>mountainArr<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>mid<span class="token punctuation">)</span> <span class="token operator">></span> target<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                l <span class="token operator">=</span> mid <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
-                r <span class="token operator">=</span> mid<span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
+    private int findFromInversedArr(MountainArray mountainArr, int l, int r, int target) {
+        while (l &lt; r) {
+            int mid = l + (r - l) / 2;
+            if (mountainArr.get(mid) &gt; target) {
+                l = mid + 1;
+            } else {
+                r = mid;
+            }
 
-        <span class="token punctuation">}</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>mountainArr<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>l<span class="token punctuation">)</span> <span class="token operator">==</span> target<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">return</span> l<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+        }
+        if (mountainArr.get(l) == target) {
+            return l;
+        }
+        return -1;
+    }
+}</code></pre>
 
             </div>
             <hr/>
@@ -1132,7 +1132,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1212,6 +1212,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

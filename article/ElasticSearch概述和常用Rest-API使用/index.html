@@ -24,10 +24,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -397,7 +397,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    2.2k
+                    2.4k
                 </div>
                 
 
@@ -438,21 +438,21 @@ chown -R elk:elk /opt/elk/</code></pre><p>将下载后的压缩包解压</p>
 tar -xvf elasticsearch-7.6.1-linux-x86_64.tar.gz
 mv elasticsearch-7.6.1 elasticsearch
 chown -R elk:elk /opt/elasticsearch/</code></pre><p>修改安装目录下的<code>/conf/elasticsearch.yml</code></p>
-<pre class=" language-yml"><code class="language-yml">network.host: 0.0.0.0
+<pre><code class="yml">network.host: 0.0.0.0
 
 path.data: /opt/elk/data
 
 path.logs: /opt/elk/logs
 
-discovery.seed_hosts: ["127.0.0.1","[::1]"]
-cluster.initial_master_nodes: ["node-1"]</code></pre>
+discovery.seed_hosts: [&quot;127.0.0.1&quot;,&quot;[::1]&quot;]
+cluster.initial_master_nodes: [&quot;node-1&quot;]</code></pre>
 <p>在Elasticsearch中如果，network.host不是localhost或者127.0.0.1的话，就会认为是生产环境，会对环境的要求比较高，我们的测试环境不一定能够满足，一般情况下需要修改几处配置：</p>
 <p>修改<code>jvm.options</code></p>
 <pre><code># -Xms1g 
 # -Xmx1g
 -Xms128m
 -Xmx128m</code></pre><p>修改<code>/etc/sysctl.conf</code>，添加一行，目的是确保系统有足够的资源启动Elasticsearch：</p>
-<pre class=" language-conf"><code class="language-conf">vm.max_map_count=655360</code></pre>
+<pre><code class="conf">vm.max_map_count=655360</code></pre>
 <p>执行以下命令确保配置生效：</p>
 <pre><code>sysctl -p</code></pre><p>修改<code>/etc/security/limits.conf</code>，在文件末尾添加下面内容：</p>
 <pre><code>* soft nofile 65536
@@ -487,150 +487,150 @@ cd ../bin
 </ul>
 <h1 id="RESTful-API使用">3 RESTful API使用</h1><p>在Elasticsearch中，提供了功能丰富的RESTful API的操作，包括基本的CRUD、创建索引、删除索引等操作。</p>
 <h2 id="创建索引库">3.1 创建索引库</h2><p>创建空索引库：</p>
-<pre class=" language-json"><code class="language-json">PUT /haoke
+<pre><code class="json">PUT /haoke
 
-<span class="token punctuation">{</span>
-    <span class="token property">"settings"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-        <span class="token property">"index"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-            <span class="token property">"number_of_shards"</span><span class="token operator">:</span> <span class="token string">"2"</span><span class="token punctuation">,</span> #分片数
-            <span class="token property">"number_of_replicas"</span><span class="token operator">:</span> <span class="token string">"0"</span> #副本数
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
+{
+    &quot;settings&quot;: {
+        &quot;index&quot;: {
+            &quot;number_of_shards&quot;: &quot;2&quot;, #分片数
+            &quot;number_of_replicas&quot;: &quot;0&quot; #副本数
+        }
+    }
+}
 
 #删除索引
 DELETE /haoke
 
-<span class="token punctuation">{</span>
-    <span class="token property">"acknowledged"</span><span class="token operator">:</span> <span class="token boolean">true</span>
-<span class="token punctuation">}</span></code></pre>
+{
+    &quot;acknowledged&quot;: true
+}</code></pre>
 <h2 id="插入文档">3.2 插入文档</h2><p>在Lucene中，创建索引是需要定义字段名称以及字段的类型的，在Elasticsearch中提供了非结构化的索引，就是不需要创建索引结构，即可写入数据到索引中，实际上在Elasticsearch底层会进行结构化操作，此操作对用户是透明的。</p>
 <p><code>POST /{索引库}/{类型}/{id}</code></p>
 <p>这里的id是手动指定文档的id，如果不写会分配一个随机的文档id。</p>
-<pre class=" language-json"><code class="language-json">POST /haoke/user/<span class="token number">1001</span>
+<pre><code class="json">POST /haoke/user/1001
 #数据
-<span class="token punctuation">{</span>
-    <span class="token property">"id"</span><span class="token operator">:</span><span class="token number">1001</span><span class="token punctuation">,</span>
-    <span class="token property">"name"</span><span class="token operator">:</span><span class="token string">"张三"</span><span class="token punctuation">,</span>
-    <span class="token property">"age"</span><span class="token operator">:</span><span class="token number">20</span><span class="token punctuation">,</span>
-    <span class="token property">"sex"</span><span class="token operator">:</span><span class="token string">"男"</span>
-<span class="token punctuation">}</span>
+{
+    &quot;id&quot;:1001,
+    &quot;name&quot;:&quot;张三&quot;,
+    &quot;age&quot;:20,
+    &quot;sex&quot;:&quot;男&quot;
+}
 
 #响应
-<span class="token punctuation">{</span>
-    <span class="token property">"_index"</span><span class="token operator">:</span> <span class="token string">"haoke"</span><span class="token punctuation">,</span>
-    <span class="token property">"_type"</span><span class="token operator">:</span> <span class="token string">"user"</span><span class="token punctuation">,</span>
-    <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token string">"1"</span><span class="token punctuation">,</span>
-    <span class="token property">"_version"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
-    <span class="token property">"result"</span><span class="token operator">:</span> <span class="token string">"created"</span><span class="token punctuation">,</span>
-    <span class="token property">"_shards"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-        <span class="token property">"total"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
-        <span class="token property">"successful"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
-        <span class="token property">"failed"</span><span class="token operator">:</span> <span class="token number">0</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token property">"_seq_no"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
-    <span class="token property">"_primary_term"</span><span class="token operator">:</span> <span class="token number">1</span>
-<span class="token punctuation">}</span></code></pre>
+{
+    &quot;_index&quot;: &quot;haoke&quot;,
+    &quot;_type&quot;: &quot;user&quot;,
+    &quot;_id&quot;: &quot;1&quot;,
+    &quot;_version&quot;: 1,
+    &quot;result&quot;: &quot;created&quot;,
+    &quot;_shards&quot;: {
+        &quot;total&quot;: 1,
+        &quot;successful&quot;: 1,
+        &quot;failed&quot;: 0
+    },
+    &quot;_seq_no&quot;: 0,
+    &quot;_primary_term&quot;: 1
+}</code></pre>
 <h2 id="更新数据">3.3 更新数据</h2><p>也就是lucene的先删除再创建</p>
-<pre class=" language-json"><code class="language-json">PUT /haoke/user/<span class="token number">1001</span>
+<pre><code class="json">PUT /haoke/user/1001
 
-<span class="token punctuation">{</span>
-    <span class="token property">"id"</span><span class="token operator">:</span><span class="token number">1001</span><span class="token punctuation">,</span>
-    <span class="token property">"name"</span><span class="token operator">:</span><span class="token string">"张三"</span><span class="token punctuation">,</span>
-    <span class="token property">"age"</span><span class="token operator">:</span><span class="token number">21</span><span class="token punctuation">,</span>
-    <span class="token property">"sex"</span><span class="token operator">:</span><span class="token string">"女"</span>
-<span class="token punctuation">}</span></code></pre>
+{
+    &quot;id&quot;:1001,
+    &quot;name&quot;:&quot;张三&quot;,
+    &quot;age&quot;:21,
+    &quot;sex&quot;:&quot;女&quot;
+}</code></pre>
 <p>可以通过在url后面附上/_update来局部更新</p>
-<pre class=" language-json"><code class="language-json">#注意：这里多了_update标识
-POST /haoke/user/<span class="token number">1001</span>/_update
-<span class="token punctuation">{</span>
-    <span class="token property">"doc"</span><span class="token operator">:</span><span class="token punctuation">{</span>
-        <span class="token property">"age"</span><span class="token operator">:</span><span class="token number">23</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="json">#注意：这里多了_update标识
+POST /haoke/user/1001/_update
+{
+    &quot;doc&quot;:{
+        &quot;age&quot;:23
+    }
+}</code></pre>
 <p>响应的<code>_version</code>会加一。</p>
 <h2 id="删除文档">3.4 删除文档</h2><p>在Elasticsearch中，删除文档数据，只需要发起DELETE请求即可。</p>
 <pre><code>DELETE /haoke/user/1001</code></pre><p>删除一个文档也不会立即从磁盘上移除，它只是被标记成已删除。Elasticsearch将会在你之后添加更多索引的时候才会在后台进行删除内容的清理。</p>
 <p>响应的<code>_version</code>会加一。</p>
 <h2 id="普通搜索">3.5 普通搜索</h2><h3 id="根据文档id查询">3.5.1 根据文档id查询</h3><p><code>GET /_index/_type/{id}</code></p>
-<pre class=" language-json"><code class="language-json">GET /haoke/user/BbPe_WcB9cFOnF3uebvr
+<pre><code class="json">GET /haoke/user/BbPe_WcB9cFOnF3uebvr
 
 #返回的数据如下
-<span class="token punctuation">{</span>
-    <span class="token property">"_index"</span><span class="token operator">:</span> <span class="token string">"haoke"</span><span class="token punctuation">,</span>
-    <span class="token property">"_type"</span><span class="token operator">:</span> <span class="token string">"user"</span><span class="token punctuation">,</span>
-    <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token string">"BbPe_WcB9cFOnF3uebvr"</span><span class="token punctuation">,</span>
-    <span class="token property">"_version"</span><span class="token operator">:</span> <span class="token number">8</span><span class="token punctuation">,</span>
-    <span class="token property">"found"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
-    <span class="token property">"_source"</span><span class="token operator">:</span> <span class="token punctuation">{</span>  #原始数据在这里
-        <span class="token property">"id"</span><span class="token operator">:</span> <span class="token number">1002</span><span class="token punctuation">,</span>
-        <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"李四"</span><span class="token punctuation">,</span>
-        <span class="token property">"age"</span><span class="token operator">:</span> <span class="token number">40</span><span class="token punctuation">,</span>
-        <span class="token property">"sex"</span><span class="token operator">:</span> <span class="token string">"男"</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+{
+    &quot;_index&quot;: &quot;haoke&quot;,
+    &quot;_type&quot;: &quot;user&quot;,
+    &quot;_id&quot;: &quot;BbPe_WcB9cFOnF3uebvr&quot;,
+    &quot;_version&quot;: 8,
+    &quot;found&quot;: true,
+    &quot;_source&quot;: {  #原始数据在这里
+        &quot;id&quot;: 1002,
+        &quot;name&quot;: &quot;李四&quot;,
+        &quot;age&quot;: 40,
+        &quot;sex&quot;: &quot;男&quot;
+    }
+}</code></pre>
 <h3 id="获取全部数据">3.5.2 获取全部数据</h3><p>默认返回10条数据</p>
 <pre><code>GET /haoke/user/_search</code></pre><h3 id="关键词搜索">3.5.3 关键词搜索</h3><pre><code>#查询年龄等于20的用户
 GET /haoke/user/_search?q=age:20</code></pre><h2 id="高级搜索DSL">3.6 高级搜索DSL</h2><p>Elasticsearch提供丰富且灵活的查询语言叫做DSL查询(Query DSL),它允许你构建更加复杂、强大的查询。</p>
 <p>DSL(Domain Specific Language特定领域语言)以JSON请求体的形式出现。</p>
-<h3 id="标准查询">3.6.1 标准查询</h3><pre class=" language-json"><code class="language-json">POST /haoke/user/_search
+<h3 id="标准查询">3.6.1 标准查询</h3><pre><code class="json">POST /haoke/user/_search
 
 #请求体
-<span class="token punctuation">{</span>
-    <span class="token property">"query"</span> <span class="token operator">:</span> <span class="token punctuation">{</span>
-        <span class="token property">"match"</span> <span class="token operator">:</span> <span class="token punctuation">{</span>  #match只是查询的一种
-            <span class="token property">"age"</span> <span class="token operator">:</span> <span class="token number">20</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
-<h3 id="范围查询">3.6.2 范围查询</h3><pre class=" language-json"><code class="language-json">POST /haoke/user/_search
+{
+    &quot;query&quot; : {
+        &quot;match&quot; : {  #match只是查询的一种
+            &quot;age&quot; : 20
+        }
+    }
+}</code></pre>
+<h3 id="范围查询">3.6.2 范围查询</h3><pre><code class="json">POST /haoke/user/_search
 
 #请求数据
-<span class="token punctuation">{</span>
-    <span class="token property">"query"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-        <span class="token property">"bool"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-            <span class="token property">"must"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-                <span class="token property">"range"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-                    <span class="token property">"age"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-                        <span class="token property">"gt"</span><span class="token operator">:</span> <span class="token number">30</span>
-                    <span class="token punctuation">}</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span><span class="token punctuation">,</span>
-            <span class="token property">"must"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-                <span class="token property">"match"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-                    <span class="token property">"sex"</span><span class="token operator">:</span> <span class="token string">"男"</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+{
+    &quot;query&quot;: {
+        &quot;bool&quot;: {
+            &quot;must&quot;: {
+                &quot;range&quot;: {
+                    &quot;age&quot;: {
+                        &quot;gt&quot;: 30
+                    }
+                }
+            },
+            &quot;must&quot;: {
+                &quot;match&quot;: {
+                    &quot;sex&quot;: &quot;男&quot;
+                }
+            }
+        }
+    }
+}</code></pre>
 <p><code>bool</code>又是一个组合查询，对应lucene里面的<code>BooleanQuery</code></p>
 <h3 id="精确匹配">3.6.3 精确匹配</h3><p>使用term或terms</p>
 <h3 id="高亮显示">3.6.4 高亮显示</h3><p>field指定要匹配的域，可以填写要高亮的词。</p>
-<pre class=" language-json"><code class="language-json">POST /haoke/user/_search
-<span class="token punctuation">{</span>
-    <span class="token property">"query"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-        <span class="token property">"match"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-            <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"张三 李四"</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token property">"highlight"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-        <span class="token property">"fields"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-            <span class="token property">"name"</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="json">POST /haoke/user/_search
+{
+    &quot;query&quot;: {
+        &quot;match&quot;: {
+            &quot;name&quot;: &quot;张三 李四&quot;
+        }
+    },
+    &quot;highlight&quot;: {
+        &quot;fields&quot;: {
+            &quot;name&quot;: {}
+        }
+    }
+}</code></pre>
 <h3 id="聚合">3.6.5 聚合</h3><p>在Elasticsearch中，支持聚合操作，类似SQL中的group by操作。</p>
-<pre class=" language-json"><code class="language-json">POST /haoke/user/_search
-<span class="token punctuation">{</span>
-    <span class="token property">"aggs"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-        <span class="token property">"all_interests"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-            <span class="token property">"terms"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-                <span class="token property">"field"</span><span class="token operator">:</span> <span class="token string">"age"</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="json">POST /haoke/user/_search
+{
+    &quot;aggs&quot;: {
+        &quot;all_interests&quot;: {
+            &quot;terms&quot;: {
+                &quot;field&quot;: &quot;age&quot;
+            }
+        }
+    }
+}</code></pre>
 <p>这表示使用”age”域进行聚合。</p>
 
             </div>
@@ -1230,7 +1230,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1310,6 +1310,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

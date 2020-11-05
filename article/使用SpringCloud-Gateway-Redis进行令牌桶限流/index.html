@@ -25,10 +25,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -402,7 +402,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    986
+                    1k
                 </div>
                 
 
@@ -421,138 +421,138 @@
 <p><a href="https://github.com/spring-cloud/spring-cloud-gateway/blob/e61028a8b79f66a3a907b8f199454f49a10fea80/spring-cloud-gateway-core/src/main/java/org/springframework/cloud/gateway/filter/ratelimit/RedisRateLimiter.java" target="_blank" rel="noopener">filter/ratelimit/RedisRateLimiter.java</a></p>
 <p><a href="https://github.com/spring-cloud/spring-cloud-gateway/blob/e61028a8b79f66a3a907b8f199454f49a10fea80/spring-cloud-gateway-core/src/main/resources/META-INF/scripts/request_rate_limiter.lua" target="_blank" rel="noopener">resources/META-INF/scripts/request_rate_limiter.lua</a></p>
 <p><code>RedisRateLimiter.java</code>的核心内容在<code>isAllowed</code>方法中，关键内容：</p>
-<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// 为不同的用户生成在redis中不同的键</span>
-List<span class="token operator">&lt;</span>String<span class="token operator">></span> keys <span class="token operator">=</span> <span class="token function">getKeys</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token comment" spellcheck="true">// 设置调用lua脚本的参数</span>
-List<span class="token operator">&lt;</span>String<span class="token operator">></span> scriptArgs <span class="token operator">=</span> Arrays<span class="token punctuation">.</span><span class="token function">asList</span><span class="token punctuation">(</span>replenishRate <span class="token operator">+</span> <span class="token string">""</span><span class="token punctuation">,</span>
-        burstCapacity <span class="token operator">+</span> <span class="token string">""</span><span class="token punctuation">,</span> Instant<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getEpochSecond</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token string">""</span><span class="token punctuation">,</span>
-        requestedTokens <span class="token operator">+</span> <span class="token string">""</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token comment" spellcheck="true">// 调用lua脚本</span>
-Flux<span class="token operator">&lt;</span>List<span class="token operator">&lt;</span>Long<span class="token operator">>></span> flux <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>redisTemplate<span class="token punctuation">.</span><span class="token function">execute</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>script<span class="token punctuation">,</span> keys<span class="token punctuation">,</span>
-        scriptArgs<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre><code class="java">// 为不同的用户生成在redis中不同的键
+List&lt;String&gt; keys = getKeys(id);
+// 设置调用lua脚本的参数
+List&lt;String&gt; scriptArgs = Arrays.asList(replenishRate + &quot;&quot;,
+        burstCapacity + &quot;&quot;, Instant.now().getEpochSecond() + &quot;&quot;,
+        requestedTokens + &quot;&quot;);
+// 调用lua脚本
+Flux&lt;List&lt;Long&gt;&gt; flux = this.redisTemplate.execute(this.script, keys,
+        scriptArgs);
 
-<span class="token keyword">return</span> flux<span class="token punctuation">.</span><span class="token function">onErrorResume</span><span class="token punctuation">(</span>throwable <span class="token operator">-</span><span class="token operator">></span> Flux<span class="token punctuation">.</span><span class="token function">just</span><span class="token punctuation">(</span>Arrays<span class="token punctuation">.</span><span class="token function">asList</span><span class="token punctuation">(</span>1L<span class="token punctuation">,</span> <span class="token operator">-</span>1L<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-    <span class="token punctuation">.</span><span class="token function">reduce</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token operator">&lt;</span>Long<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>longs<span class="token punctuation">,</span> l<span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> <span class="token punctuation">{</span>
-        longs<span class="token punctuation">.</span><span class="token function">addAll</span><span class="token punctuation">(</span>l<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> longs<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>results <span class="token operator">-</span><span class="token operator">></span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// 如果返回的第一个结果是1，允许放行，0则不允许</span>
-        <span class="token keyword">boolean</span> allowed <span class="token operator">=</span> results<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">==</span> 1L<span class="token punctuation">;</span>
-        Long tokensLeft <span class="token operator">=</span> results<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+return flux.onErrorResume(throwable -&gt; Flux.just(Arrays.asList(1L, -1L)))
+    .reduce(new ArrayList&lt;Long&gt;(), (longs, l) -&gt; {
+        longs.addAll(l);
+        return longs;
+    }).map(results -&gt; {
+        // 如果返回的第一个结果是1，允许放行，0则不允许
+        boolean allowed = results.get(0) == 1L;
+        Long tokensLeft = results.get(1);
 
-        Response response <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Response</span><span class="token punctuation">(</span>allowed<span class="token punctuation">,</span>
-                <span class="token function">getHeaders</span><span class="token punctuation">(</span>routeConfig<span class="token punctuation">,</span> tokensLeft<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        Response response = new Response(allowed,
+                getHeaders(routeConfig, tokensLeft));
 
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>log<span class="token punctuation">.</span><span class="token function">isDebugEnabled</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"response: "</span> <span class="token operator">+</span> response<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">return</span> response<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+        if (log.isDebugEnabled()) {
+            log.debug(&quot;response: &quot; + response);
+        }
+        return response;
+    });</code></pre>
 <p>可以看出关键逻辑还是在lua脚本中的：</p>
-<pre class=" language-lua"><code class="language-lua"><span class="token keyword">local</span> tokens_key <span class="token operator">=</span> KEYS<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>
-<span class="token keyword">local</span> timestamp_key <span class="token operator">=</span> KEYS<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span>
+<pre><code class="lua">local tokens_key = KEYS[1]
+local timestamp_key = KEYS[2]
 
-<span class="token comment" spellcheck="true">-- 令牌产生速率</span>
-<span class="token keyword">local</span> rate <span class="token operator">=</span> <span class="token function">tonumber</span><span class="token punctuation">(</span>ARGV<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-<span class="token comment" spellcheck="true">-- 令牌容量</span>
-<span class="token keyword">local</span> capacity <span class="token operator">=</span> <span class="token function">tonumber</span><span class="token punctuation">(</span>ARGV<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-<span class="token comment" spellcheck="true">-- 当前时间戳</span>
-<span class="token keyword">local</span> now <span class="token operator">=</span> <span class="token function">tonumber</span><span class="token punctuation">(</span>ARGV<span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-<span class="token comment" spellcheck="true">-- 请求的令牌数量</span>
-<span class="token keyword">local</span> requested <span class="token operator">=</span> <span class="token function">tonumber</span><span class="token punctuation">(</span>ARGV<span class="token punctuation">[</span><span class="token number">4</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+-- 令牌产生速率
+local rate = tonumber(ARGV[1])
+-- 令牌容量
+local capacity = tonumber(ARGV[2])
+-- 当前时间戳
+local now = tonumber(ARGV[3])
+-- 请求的令牌数量
+local requested = tonumber(ARGV[4])
 
-<span class="token keyword">local</span> fill_time <span class="token operator">=</span> capacity<span class="token operator">/</span>rate
-<span class="token keyword">local</span> ttl <span class="token operator">=</span> math<span class="token punctuation">.</span><span class="token function">floor</span><span class="token punctuation">(</span>fill_time<span class="token operator">*</span><span class="token number">2</span><span class="token punctuation">)</span>
+local fill_time = capacity/rate
+local ttl = math.floor(fill_time*2)
 
-<span class="token comment" spellcheck="true">-- 上一次请求剩余的令牌数</span>
-<span class="token keyword">local</span> last_tokens <span class="token operator">=</span> <span class="token function">tonumber</span><span class="token punctuation">(</span>redis<span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">"get"</span><span class="token punctuation">,</span> tokens_key<span class="token punctuation">)</span><span class="token punctuation">)</span>
-<span class="token keyword">if</span> last_tokens <span class="token operator">==</span> <span class="token keyword">nil</span> <span class="token keyword">then</span>
-  last_tokens <span class="token operator">=</span> capacity
-<span class="token keyword">end</span>
+-- 上一次请求剩余的令牌数
+local last_tokens = tonumber(redis.call(&quot;get&quot;, tokens_key))
+if last_tokens == nil then
+  last_tokens = capacity
+end
 
-<span class="token comment" spellcheck="true">-- 上一次请求的时间戳</span>
-<span class="token keyword">local</span> last_refreshed <span class="token operator">=</span> <span class="token function">tonumber</span><span class="token punctuation">(</span>redis<span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">"get"</span><span class="token punctuation">,</span> timestamp_key<span class="token punctuation">)</span><span class="token punctuation">)</span>
-<span class="token keyword">if</span> last_refreshed <span class="token operator">==</span> <span class="token keyword">nil</span> <span class="token keyword">then</span>
-  last_refreshed <span class="token operator">=</span> <span class="token number">0</span>
-<span class="token keyword">end</span>
+-- 上一次请求的时间戳
+local last_refreshed = tonumber(redis.call(&quot;get&quot;, timestamp_key))
+if last_refreshed == nil then
+  last_refreshed = 0
+end
 
-<span class="token comment" spellcheck="true">-- 时间戳的差值</span>
-<span class="token keyword">local</span> delta <span class="token operator">=</span> math<span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> now<span class="token operator">-</span>last_refreshed<span class="token punctuation">)</span>
-<span class="token comment" spellcheck="true">-- 目前令牌桶中有多少个令牌 = 距离上一次请求时间间隔内产生的令牌数+原有的令牌数</span>
-<span class="token keyword">local</span> filled_tokens <span class="token operator">=</span> math<span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span>capacity<span class="token punctuation">,</span> last_tokens<span class="token operator">+</span><span class="token punctuation">(</span>delta<span class="token operator">*</span>rate<span class="token punctuation">)</span><span class="token punctuation">)</span>
-<span class="token comment" spellcheck="true">-- 如果当前令牌数不少于请求的令牌数，则放行</span>
-<span class="token keyword">local</span> allowed <span class="token operator">=</span> filled_tokens <span class="token operator">>=</span> requested
+-- 时间戳的差值
+local delta = math.max(0, now-last_refreshed)
+-- 目前令牌桶中有多少个令牌 = 距离上一次请求时间间隔内产生的令牌数+原有的令牌数
+local filled_tokens = math.min(capacity, last_tokens+(delta*rate))
+-- 如果当前令牌数不少于请求的令牌数，则放行
+local allowed = filled_tokens &gt;= requested
 
-<span class="token keyword">local</span> new_tokens <span class="token operator">=</span> filled_tokens
-<span class="token keyword">local</span> allowed_num <span class="token operator">=</span> <span class="token number">0</span>
-<span class="token comment" spellcheck="true">-- 新的令牌数</span>
-<span class="token keyword">if</span> allowed <span class="token keyword">then</span>
-  new_tokens <span class="token operator">=</span> filled_tokens <span class="token operator">-</span> requested
-  allowed_num <span class="token operator">=</span> <span class="token number">1</span>
-<span class="token keyword">end</span>
+local new_tokens = filled_tokens
+local allowed_num = 0
+-- 新的令牌数
+if allowed then
+  new_tokens = filled_tokens - requested
+  allowed_num = 1
+end
 
-<span class="token comment" spellcheck="true">-- 将新的令牌数和时间戳存入redis</span>
-redis<span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">"setex"</span><span class="token punctuation">,</span> tokens_key<span class="token punctuation">,</span> ttl<span class="token punctuation">,</span> new_tokens<span class="token punctuation">)</span>
-redis<span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">"setex"</span><span class="token punctuation">,</span> timestamp_key<span class="token punctuation">,</span> ttl<span class="token punctuation">,</span> now<span class="token punctuation">)</span>
+-- 将新的令牌数和时间戳存入redis
+redis.call(&quot;setex&quot;, tokens_key, ttl, new_tokens)
+redis.call(&quot;setex&quot;, timestamp_key, ttl, now)
 
-<span class="token keyword">return</span> <span class="token punctuation">{</span> allowed_num<span class="token punctuation">,</span> new_tokens <span class="token punctuation">}</span></code></pre>
+return { allowed_num, new_tokens }</code></pre>
 <p>其实lua脚本的逻辑还是挺清晰的，主要是通过redis存储了每个用户上一次请求剩余的令牌数和上一次请求的时间戳，并通过时间的差值计算令牌桶中的令牌数量。</p>
 <p>存储两个内容的键分别是：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">static</span> List<span class="token operator">&lt;</span>String<span class="token operator">></span> <span class="token function">getKeys</span><span class="token punctuation">(</span>String id<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">// use `{}` around keys to use Redis Key hash tags</span>
-    <span class="token comment" spellcheck="true">// this allows for using redis cluster</span>
+<pre><code class="java">static List&lt;String&gt; getKeys(String id) {
+    // use `{}` around keys to use Redis Key hash tags
+    // this allows for using redis cluster
 
-    <span class="token comment" spellcheck="true">// Make a unique key per user.</span>
-    String prefix <span class="token operator">=</span> <span class="token string">"request_rate_limiter.{"</span> <span class="token operator">+</span> id<span class="token punctuation">;</span>
+    // Make a unique key per user.
+    String prefix = &quot;request_rate_limiter.{&quot; + id;
 
-    <span class="token comment" spellcheck="true">// You need two Redis keys for Token Bucket.</span>
-    String tokenKey <span class="token operator">=</span> prefix <span class="token operator">+</span> <span class="token string">"}.tokens"</span><span class="token punctuation">;</span>
-    String timestampKey <span class="token operator">=</span> prefix <span class="token operator">+</span> <span class="token string">"}.timestamp"</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> Arrays<span class="token punctuation">.</span><span class="token function">asList</span><span class="token punctuation">(</span>tokenKey<span class="token punctuation">,</span> timestampKey<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+    // You need two Redis keys for Token Bucket.
+    String tokenKey = prefix + &quot;}.tokens&quot;;
+    String timestampKey = prefix + &quot;}.timestamp&quot;;
+    return Arrays.asList(tokenKey, timestampKey);
+}</code></pre>
 <p>即存储令牌数的键为<code>request_rate_limiter.{userId}.tokens</code>，存储时间戳的键为<code>request_rate_limiter.{userId}.timestamp</code>。</p>
 <h1 id="使用">2 使用</h1><p>看完了原理我们就来看怎么使用，我就拿我已有的项目做实验。</p>
 <p>引入依赖：</p>
-<pre class=" language-xml"><code class="language-xml"><span class="token comment" spellcheck="true">&lt;!-- gateway--></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework.cloud<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-cloud-starter-gateway<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
-<span class="token comment" spellcheck="true">&lt;!--redis--></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework.boot<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-boot-starter-data-redis-reactive<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span></code></pre>
+<pre><code class="xml">&lt;!-- gateway--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-gateway&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;!--redis--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-data-redis-reactive&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
 <p>在网关微服务中进行配置：</p>
 <p>配置一个<code>KeyResolver</code>的Bean对象，用于解析用户id，这里就把用户的IP地址作为id。</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Bean</span><span class="token punctuation">(</span>name<span class="token operator">=</span><span class="token string">"ipKeyResolver"</span><span class="token punctuation">)</span>
-<span class="token keyword">public</span> KeyResolver <span class="token function">userKeyResolver</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">KeyResolver</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token annotation punctuation">@Override</span>
-        <span class="token keyword">public</span> Mono<span class="token operator">&lt;</span>String<span class="token operator">></span> <span class="token function">resolve</span><span class="token punctuation">(</span>ServerWebExchange exchange<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">//获取远程客户端IP</span>
-            String hostName <span class="token operator">=</span> exchange<span class="token punctuation">.</span><span class="token function">getRequest</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getRemoteAddress</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getAddress</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getHostAddress</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"hostName:"</span><span class="token operator">+</span>hostName<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">return</span> Mono<span class="token punctuation">.</span><span class="token function">just</span><span class="token punctuation">(</span>hostName<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">@Bean(name=&quot;ipKeyResolver&quot;)
+public KeyResolver userKeyResolver() {
+    return new KeyResolver() {
+        @Override
+        public Mono&lt;String&gt; resolve(ServerWebExchange exchange) {
+            //获取远程客户端IP
+            String hostName = exchange.getRequest().getRemoteAddress().getAddress().getHostAddress();
+            System.out.println(&quot;hostName:&quot;+hostName);
+            return Mono.just(hostName);
+        }
+    };
+}</code></pre>
 <p>在yaml文件中进行配置：</p>
-<pre class=" language-yaml"><code class="language-yaml"><span class="token punctuation">-</span> <span class="token key atrule">id</span><span class="token punctuation">:</span> service<span class="token punctuation">-</span>edu
-    <span class="token key atrule">uri</span><span class="token punctuation">:</span> lb<span class="token punctuation">:</span>//service<span class="token punctuation">-</span>edu
-    <span class="token key atrule">predicates</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> Path=/api/edu/**
-    <span class="token key atrule">filters</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> StripPrefix=1
-    <span class="token comment" spellcheck="true">## 这部分是限流的配置</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> RequestRateLimiter
-      <span class="token key atrule">args</span><span class="token punctuation">:</span>
-        <span class="token comment" spellcheck="true"># 这个参数就是配置的KeyResolver的bean</span>
-        <span class="token key atrule">key-resolver</span><span class="token punctuation">:</span> "<span class="token comment" spellcheck="true">#{@ipKeyResolver}"</span>
-        <span class="token comment" spellcheck="true"># 指的是令牌产生速度</span>
-        <span class="token key atrule">redis-rate-limiter.replenishRate</span><span class="token punctuation">:</span> <span class="token number">1</span>
-        <span class="token comment" spellcheck="true"># 指的是令牌桶容量</span>
-        <span class="token key atrule">redis-rate-limiter.burstCapacity</span><span class="token punctuation">:</span> <span class="token number">1</span></code></pre>
+<pre><code class="yaml">- id: service-edu
+    uri: lb://service-edu
+    predicates:
+    - Path=/api/edu/**
+    filters:
+    - StripPrefix=1
+    ## 这部分是限流的配置
+    - name: RequestRateLimiter
+      args:
+        # 这个参数就是配置的KeyResolver的bean
+        key-resolver: &quot;#{@ipKeyResolver}&quot;
+        # 指的是令牌产生速度
+        redis-rate-limiter.replenishRate: 1
+        # 指的是令牌桶容量
+        redis-rate-limiter.burstCapacity: 1</code></pre>
 <p>为了做验证我们把这两个参数都先设为1，下面进行测试：</p>
 <p><img src="https://api.codetool.top/img/15891611962901.png" alt="正常访问"></p>
 <p><img src="https://api.codetool.top/img/15891612214442.png" alt="快速连点访问"></p>
@@ -1186,7 +1186,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1266,6 +1266,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

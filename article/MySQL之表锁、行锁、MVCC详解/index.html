@@ -26,10 +26,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -497,16 +497,16 @@
 <p>在特定的场景中，表锁也可能有良好的性能。比如，READ LOCAL 表锁支持某些类型的并发写操作；另外，写锁也比读锁有更高的优先级，因此一个写锁请求可以会被插入到读锁队列的前面。</p>
 <p>尽管存储引擎可以管理自己的锁，服务器还是会使用各种有效的表锁来实现不同的目的。比如<strong>服务器在 ALTER TABLE 时使用表锁，而忽略存储引擎的锁机制。MyISAM 在读表前自动对表加读锁，在写表前自动对表加写锁。</strong></p>
 <h2 id="SQL语法">2.1 SQL语法</h2><p>添加表锁：</p>
-<pre class=" language-sql"><code class="language-sql"><span class="token keyword">lock</span> <span class="token keyword">table</span> table1 <span class="token keyword">read</span><span class="token operator">/</span><span class="token keyword">write</span> <span class="token punctuation">,</span> table2 <span class="token keyword">read</span><span class="token operator">/</span><span class="token keyword">write</span> <span class="token punctuation">,</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span></code></pre>
+<pre><code class="sql">lock table table1 read/write , table2 read/write ,...</code></pre>
 <p>read为读锁，共享锁；write为写锁，独占锁。</p>
 <p>显示加过锁的表：</p>
-<pre class=" language-sql"><code class="language-sql"><span class="token keyword">show</span> <span class="token keyword">open</span> <span class="token keyword">tables</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="sql">show open tables;</code></pre>
 <ul>
 <li><code>In_use</code> : 表当前被查询使用的次数。如果该数为零，则表是打开的，但是当前没有被使用。为1代表已加锁。</li>
 <li><code>Name_locked</code>：表名称是否被锁定。名称锁定用于取消表或对表进行重命名等操作。</li>
 </ul>
 <p>释放表锁：</p>
-<pre class=" language-sql"><code class="language-sql">unlock <span class="token keyword">tables</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="sql">unlock tables;</code></pre>
 <h2 id="总结">2.2 总结</h2><ol>
 <li>对 MyISAM 表的读操作（加读锁），不会阻塞其他进程对同一表的读请求，但会阻塞对同一表的写请求。只有当读锁释放后，才会执行其它进程的写操作。</li>
 <li>对 MyISAM 表的写操作（加写锁），会阻塞其他进程对同一表的读和写操作，只有当写锁释放后，才会执行其它进程的读写操作。</li>
@@ -531,11 +531,11 @@
 </ul>
 <p><strong>一致性非锁定读是InnoDB默认的读取方式，不会占用和等待表上的锁。</strong></p>
 <h2 id="一致性锁定读">3.2 一致性锁定读</h2><p>某些情况下，用户需要显式地对数据库读取操作进行加锁以保证数据逻辑的一致性。可以通过以下语句显示给记录集加共享锁或排他锁（一致性锁定读）。</p>
-<pre class=" language-sql"><code class="language-sql">共享锁（S）：
-<span class="token keyword">SELECT</span> <span class="token operator">*</span> <span class="token keyword">FROM</span> table_name <span class="token keyword">WHERE</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token keyword">LOCK</span> <span class="token operator">IN</span> <span class="token keyword">SHARE MODE</span>
+<pre><code class="sql">共享锁（S）：
+SELECT * FROM table_name WHERE ... LOCK IN SHARE MODE
 
-排他锁（X<span class="token punctuation">)</span> ：
-<span class="token keyword">SELECT</span> <span class="token operator">*</span> <span class="token keyword">FROM</span> table_name <span class="token keyword">WHERE</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token keyword">FOR</span> <span class="token keyword">UPDATE</span></code></pre>
+排他锁（X) ：
+SELECT * FROM table_name WHERE ... FOR UPDATE</code></pre>
 <p>当事务提交了，锁就释放了。</p>
 <p>可以使用<code>show status like &#39;innodb_row_lock%&#39;;</code>查看innodb行锁的争用情况</p>
 <ul>
@@ -568,7 +568,7 @@
 <h3 id="如何理解三种算法">3.3.4 如何理解三种算法</h3><p>我这里谈谈我自己的理解：</p>
 <p>对于唯一索引（比如主键），只要保证锁住该索引记录，就不可能出现幻读，这对应的就是Record Lock</p>
 <p>比如对于sql查询</p>
-<pre class=" language-sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> t_user <span class="token keyword">where</span> id <span class="token operator">=</span> <span class="token number">5</span> <span class="token keyword">for</span> <span class="token keyword">update</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="sql">select * from t_user where id = 5 for update;</code></pre>
 <p>这种情况就只会加一个Record Lock，第一次查询数据之后锁住了该记录，此后在同一事务内一直到第二次查询不可能会出现其他事务也将其他记录插入到id = 5这个位置。</p>
 <p>而如果不是唯一索引，第一次查询数据之后即使所住了该记录，但可能还会有记录被插到id = 5这个位置，所以此时需要范围索引，锁住索引为5这个值，对于范围查询，范围索引更重要。</p>
 
@@ -1182,7 +1182,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1262,6 +1262,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

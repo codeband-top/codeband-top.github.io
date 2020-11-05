@@ -25,10 +25,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -398,7 +398,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.3k
+                    1.4k
                 </div>
                 
 
@@ -516,30 +516,30 @@
 <p><strong>对于数值类型的数据，分词可以实现范围查询。</strong></p>
 <h1 id="索引维护">2 索引维护</h1><h2 id="更新">2.1 更新</h2><p>管理人员通过电商系统更改图书信息，这时更新的是关系数据库，如果使用lucene搜索图书信息，<strong>需要在数据库表book信息变化时及时更新lucene索引库。</strong></p>
 <p>示例：</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Test</span>
-<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">updateIndexTest</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception<span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">// 创建更改目标对象</span>
-    Document document <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Document</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    document<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">StringField</span><span class="token punctuation">(</span><span class="token string">"id"</span><span class="token punctuation">,</span><span class="token string">"100000003145"</span><span class="token punctuation">,</span> Field<span class="token punctuation">.</span>Store<span class="token punctuation">.</span>YES<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    document<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">TextField</span><span class="token punctuation">(</span><span class="token string">"name"</span><span class="token punctuation">,</span> <span class="token string">"xxx"</span><span class="token punctuation">,</span>Field<span class="token punctuation">.</span>Store<span class="token punctuation">.</span>YES<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    document<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">IntPoint</span><span class="token punctuation">(</span><span class="token string">"price"</span><span class="token punctuation">,</span> <span class="token number">123</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    document<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">StoredField</span><span class="token punctuation">(</span><span class="token string">"price"</span><span class="token punctuation">,</span> <span class="token number">123</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    document<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">StoredField</span><span class="token punctuation">(</span><span class="token string">"image"</span><span class="token punctuation">,</span> <span class="token string">"xxx.jpg"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    document<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">StringField</span><span class="token punctuation">(</span><span class="token string">"categoryName"</span><span class="token punctuation">,</span> <span class="token string">"手机"</span><span class="token punctuation">,</span>Field<span class="token punctuation">.</span>Store<span class="token punctuation">.</span>YES<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    document<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">StringField</span><span class="token punctuation">(</span><span class="token string">"brandName"</span><span class="token punctuation">,</span> <span class="token string">"华为"</span><span class="token punctuation">,</span>Field<span class="token punctuation">.</span>Store<span class="token punctuation">.</span>YES<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 创建分词器</span>
-    Analyzer analyzer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StandardAnalyzer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 创建Directory目录对象，表示索引库的位置</span>
-    Directory dir <span class="token operator">=</span> FSDirectory<span class="token punctuation">.</span><span class="token function">open</span><span class="token punctuation">(</span>Paths<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"D:\\dir"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 创建IndexWriterConfig对象，指定切分词使用的分词器</span>
-    IndexWriterConfig config <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">IndexWriterConfig</span><span class="token punctuation">(</span>analyzer<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 创建IndexWriter输出流对象，指定输出的位置和使用的config初始化对象</span>
-    IndexWriter indexWriter <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">IndexWriter</span><span class="token punctuation">(</span>dir<span class="token punctuation">,</span>config<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 修改，第一个参数：修改条件，第二个参数：修改成的内容</span>
-    indexWriter<span class="token punctuation">.</span><span class="token function">updateDocument</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Term</span><span class="token punctuation">(</span><span class="token string">"id"</span><span class="token punctuation">,</span><span class="token string">"100000003145"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>document<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 释放资源</span>
-    indexWriter<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">@Test
+public void updateIndexTest() throws Exception{
+    // 创建更改目标对象
+    Document document = new Document();
+    document.add(new StringField(&quot;id&quot;,&quot;100000003145&quot;, Field.Store.YES));
+    document.add(new TextField(&quot;name&quot;, &quot;xxx&quot;,Field.Store.YES));
+    document.add(new IntPoint(&quot;price&quot;, 123));
+    document.add(new StoredField(&quot;price&quot;, 123));
+    document.add(new StoredField(&quot;image&quot;, &quot;xxx.jpg&quot;));
+    document.add(new StringField(&quot;categoryName&quot;, &quot;手机&quot;,Field.Store.YES));
+    document.add(new StringField(&quot;brandName&quot;, &quot;华为&quot;,Field.Store.YES));
+    // 创建分词器
+    Analyzer analyzer = new StandardAnalyzer();
+    // 创建Directory目录对象，表示索引库的位置
+    Directory dir = FSDirectory.open(Paths.get(&quot;D:\\dir&quot;));
+    // 创建IndexWriterConfig对象，指定切分词使用的分词器
+    IndexWriterConfig config = new IndexWriterConfig(analyzer);
+    // 创建IndexWriter输出流对象，指定输出的位置和使用的config初始化对象
+    IndexWriter indexWriter = new IndexWriter(dir,config);
+    // 修改，第一个参数：修改条件，第二个参数：修改成的内容
+    indexWriter.updateDocument(new Term(&quot;id&quot;,&quot;100000003145&quot;),document);
+    // 释放资源
+    indexWriter.close();
+}</code></pre>
 <p>Lucene的修改实际是将对应的文档删除然后新建文档。</p>
 <p>注意，不能添加一个域类型和其他文档的域不一样的文档，否则打开索引库会报错：</p>
 <pre><code>java.lang.IllegalArgumentException: cannot change field &quot;brandName&quot; from index options=DOCS to inconsistent index options=DOCS_AND_FREQS_AND_POSITIONS
@@ -550,21 +550,21 @@
     at org.apache.lucene.index.FieldInfos$Builder.add(FieldInfos.java:480) ~[luke-swing-with-deps.jar:?]
     at org.apache.lucene.index.FieldInfos.getMergedFieldInfos(FieldInfos.java:154) ~[luke-swing-with-deps.jar:?]
     at org.apache.lucene.luke.models.util.IndexUtils.getFieldInfos(IndexUtils.java:379) ~[luke-swing-with-deps.jar:?]
-    ......</code></pre><h2 id="删除">2.2 删除</h2><pre class=" language-java"><code class="language-java"> <span class="token annotation punctuation">@Test</span>
-<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">deleteIndexTest</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception<span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">// 创建分词器，StandardAnalyzer对英文分词效果好，对中文是单字分词</span>
-    Analyzer analyzer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StandardAnalyzer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 创建Directory目录对象，表示索引库的位置</span>
-    Directory dir <span class="token operator">=</span> FSDirectory<span class="token punctuation">.</span><span class="token function">open</span><span class="token punctuation">(</span>Paths<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"D:\\dir"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 创建IndexWriterConfig对象，指定切分词使用的分词器</span>
-    IndexWriterConfig config <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">IndexWriterConfig</span><span class="token punctuation">(</span>analyzer<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 创建IndexWriter输出流对象，指定输出的位置和使用的config初始化对象</span>
-    IndexWriter indexWriter <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">IndexWriter</span><span class="token punctuation">(</span>dir<span class="token punctuation">,</span>config<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 删除</span>
-    indexWriter<span class="token punctuation">.</span><span class="token function">deleteDocuments</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Term</span><span class="token punctuation">(</span><span class="token string">"id"</span><span class="token punctuation">,</span><span class="token string">"100000003145"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 释放资源</span>
-    indexWriter<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+    ......</code></pre><h2 id="删除">2.2 删除</h2><pre><code class="java"> @Test
+public void deleteIndexTest() throws Exception{
+    // 创建分词器，StandardAnalyzer对英文分词效果好，对中文是单字分词
+    Analyzer analyzer = new StandardAnalyzer();
+    // 创建Directory目录对象，表示索引库的位置
+    Directory dir = FSDirectory.open(Paths.get(&quot;D:\\dir&quot;));
+    // 创建IndexWriterConfig对象，指定切分词使用的分词器
+    IndexWriterConfig config = new IndexWriterConfig(analyzer);
+    // 创建IndexWriter输出流对象，指定输出的位置和使用的config初始化对象
+    IndexWriter indexWriter = new IndexWriter(dir,config);
+    // 删除
+    indexWriter.deleteDocuments(new Term(&quot;id&quot;,&quot;100000003145&quot;));
+    // 释放资源
+    indexWriter.close();
+}</code></pre>
 
             </div>
             <hr/>
@@ -1014,12 +1014,12 @@ Session黏贴：当用户访问集群中某台服务器后，强制指定后续�
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">
-                        <span class="chip bg-color">分布式</span>
-                    </a>
-                    
                     <a href="/tags/%E5%AE%89%E5%85%A8/">
                         <span class="chip bg-color">安全</span>
+                    </a>
+                    
+                    <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">
+                        <span class="chip bg-color">分布式</span>
                     </a>
                     
                 </div>
@@ -1169,7 +1169,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1249,6 +1249,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

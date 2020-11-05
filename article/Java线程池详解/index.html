@@ -9,8 +9,8 @@
 1 动手实现线程池
 步骤1：自定义拒绝策略接口
 @FunctionalInterface // 拒绝策略
-interface RejectPolicy&amp;lt;T&gt; {
-    void rejec">
+interface RejectPolicy&amp;lt;T&amp;gt; {
+    void re">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -29,10 +29,10 @@ interface RejectPolicy&amp;lt;T&gt; {
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -406,7 +406,7 @@ interface RejectPolicy&amp;lt;T&gt; {
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    4.3k
+                    4.4k
                 </div>
                 
 
@@ -422,203 +422,203 @@ interface RejectPolicy&amp;lt;T&gt; {
                 <p>线程池就是享元模式和生产者消费者模式的应用</p>
 <h1 id="动手实现线程池">1 动手实现线程池</h1><p><img src="https://api.codetool.top/img/15806378799887.png" alt></p>
 <p>步骤1：自定义拒绝策略接口</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@FunctionalInterface</span> <span class="token comment" spellcheck="true">// 拒绝策略</span>
-<span class="token keyword">interface</span> <span class="token class-name">RejectPolicy</span><span class="token operator">&lt;</span>T<span class="token operator">></span> <span class="token punctuation">{</span>
-    <span class="token keyword">void</span> <span class="token function">reject</span><span class="token punctuation">(</span>BlockingQueue<span class="token operator">&lt;</span>T<span class="token operator">></span> queue<span class="token punctuation">,</span> T task<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">@FunctionalInterface // 拒绝策略
+interface RejectPolicy&lt;T&gt; {
+    void reject(BlockingQueue&lt;T&gt; queue, T task);
+}</code></pre>
 <p>步骤2：自定义任务队列</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">BlockingQueue</span><span class="token operator">&lt;</span>T<span class="token operator">></span> <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">// 1. 任务队列</span>
-    <span class="token keyword">private</span> Deque<span class="token operator">&lt;</span>T<span class="token operator">></span> queue <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayDeque</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 2. 锁</span>
-    <span class="token keyword">private</span> ReentrantLock lock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ReentrantLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 3. 生产者条件变量</span>
-    <span class="token keyword">private</span> Condition fullWaitSet <span class="token operator">=</span> lock<span class="token punctuation">.</span><span class="token function">newCondition</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 4. 消费者条件变量</span>
-    <span class="token keyword">private</span> Condition emptyWaitSet <span class="token operator">=</span> lock<span class="token punctuation">.</span><span class="token function">newCondition</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 5. 容量</span>
-    <span class="token keyword">private</span> <span class="token keyword">int</span> capcity<span class="token punctuation">;</span>
-    <span class="token keyword">public</span> <span class="token function">BlockingQueue</span><span class="token punctuation">(</span><span class="token keyword">int</span> capcity<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>capcity <span class="token operator">=</span> capcity<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">// 带超时阻塞获取</span>
-    <span class="token keyword">public</span> T <span class="token function">poll</span><span class="token punctuation">(</span><span class="token keyword">long</span> timeout<span class="token punctuation">,</span> TimeUnit unit<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        lock<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// 将 timeout 统一转换为 纳秒</span>
-            <span class="token keyword">long</span> nanos <span class="token operator">=</span> unit<span class="token punctuation">.</span><span class="token function">toNanos</span><span class="token punctuation">(</span>timeout<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">while</span> <span class="token punctuation">(</span>queue<span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                    <span class="token comment" spellcheck="true">// 返回值是剩余时间</span>
-                    <span class="token keyword">if</span> <span class="token punctuation">(</span>nanos <span class="token operator">&lt;=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                        <span class="token keyword">return</span> null<span class="token punctuation">;</span>
-                    <span class="token punctuation">}</span>
-                    nanos <span class="token operator">=</span> emptyWaitSet<span class="token punctuation">.</span><span class="token function">awaitNanos</span><span class="token punctuation">(</span>nanos<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-            T t <span class="token operator">=</span> queue<span class="token punctuation">.</span><span class="token function">removeFirst</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            fullWaitSet<span class="token punctuation">.</span><span class="token function">signal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">return</span> t<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            lock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">// 阻塞获取</span>
-    <span class="token keyword">public</span> T <span class="token function">take</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        lock<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            <span class="token keyword">while</span> <span class="token punctuation">(</span>queue<span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                    emptyWaitSet<span class="token punctuation">.</span><span class="token function">await</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-            T t <span class="token operator">=</span> queue<span class="token punctuation">.</span><span class="token function">removeFirst</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            fullWaitSet<span class="token punctuation">.</span><span class="token function">signal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">return</span> t<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            lock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">// 阻塞添加</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">put</span><span class="token punctuation">(</span>T task<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        lock<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            <span class="token keyword">while</span> <span class="token punctuation">(</span>queue<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> capcity<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                    log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"等待加入任务队列 {} ..."</span><span class="token punctuation">,</span> task<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                    fullWaitSet<span class="token punctuation">.</span><span class="token function">await</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"加入任务队列 {}"</span><span class="token punctuation">,</span> task<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            queue<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span>task<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            emptyWaitSet<span class="token punctuation">.</span><span class="token function">signal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            lock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">// 带超时时间阻塞添加</span>
-    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">offer</span><span class="token punctuation">(</span>T task<span class="token punctuation">,</span> <span class="token keyword">long</span> timeout<span class="token punctuation">,</span> TimeUnit timeUnit<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        lock<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            <span class="token keyword">long</span> nanos <span class="token operator">=</span> timeUnit<span class="token punctuation">.</span><span class="token function">toNanos</span><span class="token punctuation">(</span>timeout<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">while</span> <span class="token punctuation">(</span>queue<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> capcity<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                    <span class="token keyword">if</span><span class="token punctuation">(</span>nanos <span class="token operator">&lt;=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                        <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-                    <span class="token punctuation">}</span>
-                    log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"等待加入任务队列 {} ..."</span><span class="token punctuation">,</span> task<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                    nanos <span class="token operator">=</span> fullWaitSet<span class="token punctuation">.</span><span class="token function">awaitNanos</span><span class="token punctuation">(</span>nanos<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"加入任务队列 {}"</span><span class="token punctuation">,</span> task<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            queue<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span>task<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            emptyWaitSet<span class="token punctuation">.</span><span class="token function">signal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            lock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        lock<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            <span class="token keyword">return</span> queue<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            lock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">tryPut</span><span class="token punctuation">(</span>RejectPolicy<span class="token operator">&lt;</span>T<span class="token operator">></span> rejectPolicy<span class="token punctuation">,</span> T task<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        lock<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// 判断队列是否满</span>
-            <span class="token keyword">if</span><span class="token punctuation">(</span>queue<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> capcity<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                rejectPolicy<span class="token punctuation">.</span><span class="token function">reject</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> task<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span> <span class="token comment" spellcheck="true">// 有空闲</span>
-                log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"加入任务队列 {}"</span><span class="token punctuation">,</span> task<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                queue<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span>task<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                emptyWaitSet<span class="token punctuation">.</span><span class="token function">signal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            lock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">class BlockingQueue&lt;T&gt; {
+    // 1. 任务队列
+    private Deque&lt;T&gt; queue = new ArrayDeque&lt;&gt;();
+    // 2. 锁
+    private ReentrantLock lock = new ReentrantLock();
+    // 3. 生产者条件变量
+    private Condition fullWaitSet = lock.newCondition();
+    // 4. 消费者条件变量
+    private Condition emptyWaitSet = lock.newCondition();
+    // 5. 容量
+    private int capcity;
+    public BlockingQueue(int capcity) {
+        this.capcity = capcity;
+    }
+    // 带超时阻塞获取
+    public T poll(long timeout, TimeUnit unit) {
+        lock.lock();
+        try {
+            // 将 timeout 统一转换为 纳秒
+            long nanos = unit.toNanos(timeout);
+            while (queue.isEmpty()) {
+                try {
+                    // 返回值是剩余时间
+                    if (nanos &lt;= 0) {
+                        return null;
+                    }
+                    nanos = emptyWaitSet.awaitNanos(nanos);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            T t = queue.removeFirst();
+            fullWaitSet.signal();
+            return t;
+        } finally {
+            lock.unlock();
+        }
+    }
+    // 阻塞获取
+    public T take() {
+        lock.lock();
+        try {
+            while (queue.isEmpty()) {
+                try {
+                    emptyWaitSet.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            T t = queue.removeFirst();
+            fullWaitSet.signal();
+            return t;
+        } finally {
+            lock.unlock();
+        }
+    }
+    // 阻塞添加
+    public void put(T task) {
+        lock.lock();
+        try {
+            while (queue.size() == capcity) {
+                try {
+                    log.debug(&quot;等待加入任务队列 {} ...&quot;, task);
+                    fullWaitSet.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            log.debug(&quot;加入任务队列 {}&quot;, task);
+            queue.addLast(task);
+            emptyWaitSet.signal();
+        } finally {
+            lock.unlock();
+        }
+    }
+    // 带超时时间阻塞添加
+    public boolean offer(T task, long timeout, TimeUnit timeUnit) {
+        lock.lock();
+        try {
+            long nanos = timeUnit.toNanos(timeout);
+            while (queue.size() == capcity) {
+                try {
+                    if(nanos &lt;= 0) {
+                        return false;
+                    }
+                    log.debug(&quot;等待加入任务队列 {} ...&quot;, task);
+                    nanos = fullWaitSet.awaitNanos(nanos);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            log.debug(&quot;加入任务队列 {}&quot;, task);
+            queue.addLast(task);
+            emptyWaitSet.signal();
+            return true;
+        } finally {
+            lock.unlock();
+        }
+    }
+    public int size() {
+        lock.lock();
+        try {
+            return queue.size();
+        } finally {
+            lock.unlock();
+        }
+    }
+    public void tryPut(RejectPolicy&lt;T&gt; rejectPolicy, T task) {
+        lock.lock();
+        try {
+            // 判断队列是否满
+            if(queue.size() == capcity) {
+                rejectPolicy.reject(this, task);
+            } else { // 有空闲
+                log.debug(&quot;加入任务队列 {}&quot;, task);
+                queue.addLast(task);
+                emptyWaitSet.signal();
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+}</code></pre>
 <p>步骤3：自定义线程池</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">ThreadPool</span> <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">// 任务队列</span>
-    <span class="token keyword">private</span> BlockingQueue<span class="token operator">&lt;</span>Runnable<span class="token operator">></span> taskQueue<span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 线程集合</span>
-    <span class="token keyword">private</span> HashSet<span class="token operator">&lt;</span>Worker<span class="token operator">></span> workers <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashSet</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 核心线程数</span>
-    <span class="token keyword">private</span> <span class="token keyword">int</span> coreSize<span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 获取任务时的超时时间</span>
-    <span class="token keyword">private</span> <span class="token keyword">long</span> timeout<span class="token punctuation">;</span>
-    <span class="token keyword">private</span> TimeUnit timeUnit<span class="token punctuation">;</span>
-    <span class="token keyword">private</span> RejectPolicy<span class="token operator">&lt;</span>Runnable<span class="token operator">></span> rejectPolicy<span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 执行任务</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">execute</span><span class="token punctuation">(</span>Runnable task<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// 当任务数没有超过 coreSize 时，直接交给 worker 对象执行</span>
-        <span class="token comment" spellcheck="true">// 如果任务数超过 coreSize 时，加入任务队列暂存</span>
-        <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>workers<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">if</span><span class="token punctuation">(</span>workers<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span> coreSize<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                Worker worker <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Worker</span><span class="token punctuation">(</span>task<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"新增 worker{}, {}"</span><span class="token punctuation">,</span> worker<span class="token punctuation">,</span> task<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                workers<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>worker<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                worker<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
-                <span class="token comment" spellcheck="true">// taskQueue.put(task);</span>
-                <span class="token comment" spellcheck="true">// 1) 死等</span>
-                <span class="token comment" spellcheck="true">// 2) 带超时等待</span>
-                <span class="token comment" spellcheck="true">// 3) 让调用者放弃任务执行</span>
-                <span class="token comment" spellcheck="true">// 4) 让调用者抛出异常</span>
-                <span class="token comment" spellcheck="true">// 5) 让调用者自己执行任务</span>
-                taskQueue<span class="token punctuation">.</span><span class="token function">tryPut</span><span class="token punctuation">(</span>rejectPolicy<span class="token punctuation">,</span> task<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">public</span> <span class="token function">ThreadPool</span><span class="token punctuation">(</span><span class="token keyword">int</span> coreSize<span class="token punctuation">,</span> <span class="token keyword">long</span> timeout<span class="token punctuation">,</span> TimeUnit timeUnit<span class="token punctuation">,</span> <span class="token keyword">int</span> queueCapcity<span class="token punctuation">,</span>
-    RejectPolicy<span class="token operator">&lt;</span>Runnable<span class="token operator">></span> rejectPolicy<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>coreSize <span class="token operator">=</span> coreSize<span class="token punctuation">;</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>timeout <span class="token operator">=</span> timeout<span class="token punctuation">;</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>timeUnit <span class="token operator">=</span> timeUnit<span class="token punctuation">;</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>taskQueue <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BlockingQueue</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span>queueCapcity<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>rejectPolicy <span class="token operator">=</span> rejectPolicy<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">class</span> <span class="token class-name">Worker</span> <span class="token keyword">extends</span> <span class="token class-name">Thread</span><span class="token punctuation">{</span>
-        <span class="token keyword">private</span> Runnable task<span class="token punctuation">;</span>
-        <span class="token keyword">public</span> <span class="token function">Worker</span><span class="token punctuation">(</span>Runnable task<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>task <span class="token operator">=</span> task<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token annotation punctuation">@Override</span>
-        <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// 执行任务</span>
-            <span class="token comment" spellcheck="true">// 1) 当 task 不为空，执行任务</span>
-            <span class="token comment" spellcheck="true">// 2) 当 task 执行完毕，再接着从任务队列获取任务并执行</span>
-            <span class="token comment" spellcheck="true">// while(task != null || (task = taskQueue.take()) != null) {</span>
-            <span class="token keyword">while</span><span class="token punctuation">(</span>task <span class="token operator">!=</span> null <span class="token operator">||</span> <span class="token punctuation">(</span>task <span class="token operator">=</span> taskQueue<span class="token punctuation">.</span><span class="token function">poll</span><span class="token punctuation">(</span>timeout<span class="token punctuation">,</span> timeUnit<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                    log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"正在执行...{}"</span><span class="token punctuation">,</span> task<span class="token punctuation">)</span><span class="token punctuation">;</span>
-                    task<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-                    task <span class="token operator">=</span> null<span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-            <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>workers<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"worker 被移除{}"</span><span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                workers<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">class ThreadPool {
+    // 任务队列
+    private BlockingQueue&lt;Runnable&gt; taskQueue;
+    // 线程集合
+    private HashSet&lt;Worker&gt; workers = new HashSet&lt;&gt;();
+    // 核心线程数
+    private int coreSize;
+    // 获取任务时的超时时间
+    private long timeout;
+    private TimeUnit timeUnit;
+    private RejectPolicy&lt;Runnable&gt; rejectPolicy;
+    // 执行任务
+    public void execute(Runnable task) {
+        // 当任务数没有超过 coreSize 时，直接交给 worker 对象执行
+        // 如果任务数超过 coreSize 时，加入任务队列暂存
+        synchronized (workers) {
+            if(workers.size() &lt; coreSize) {
+                Worker worker = new Worker(task);
+                log.debug(&quot;新增 worker{}, {}&quot;, worker, task);
+                workers.add(worker);
+                worker.start();
+            } else {
+                // taskQueue.put(task);
+                // 1) 死等
+                // 2) 带超时等待
+                // 3) 让调用者放弃任务执行
+                // 4) 让调用者抛出异常
+                // 5) 让调用者自己执行任务
+                taskQueue.tryPut(rejectPolicy, task);
+            }
+        }
+    }
+    public ThreadPool(int coreSize, long timeout, TimeUnit timeUnit, int queueCapcity,
+    RejectPolicy&lt;Runnable&gt; rejectPolicy) {
+        this.coreSize = coreSize;
+        this.timeout = timeout;
+        this.timeUnit = timeUnit;
+        this.taskQueue = new BlockingQueue&lt;&gt;(queueCapcity);
+        this.rejectPolicy = rejectPolicy;
+    }
+    class Worker extends Thread{
+        private Runnable task;
+        public Worker(Runnable task) {
+        this.task = task;
+        }
+        @Override
+        public void run() {
+            // 执行任务
+            // 1) 当 task 不为空，执行任务
+            // 2) 当 task 执行完毕，再接着从任务队列获取任务并执行
+            // while(task != null || (task = taskQueue.take()) != null) {
+            while(task != null || (task = taskQueue.poll(timeout, timeUnit)) != null) {
+                try {
+                    log.debug(&quot;正在执行...{}&quot;, task);
+                    task.run();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    task = null;
+                }
+            }
+            synchronized (workers) {
+                log.debug(&quot;worker 被移除{}&quot;, this);
+                workers.remove(this);
+            }
+        }
+    }
+}</code></pre>
 <h1 id="ThreadPoolExecutor">2 ThreadPoolExecutor</h1><p><img src="https://api.codetool.top/img/15806590783582.png" alt></p>
 <h2 id="线程池状态">2.1 线程池状态</h2><p>ThreadPoolExecutor 使用 int 的高 3 位来表示线程池状态，低 29 位表示线程数量</p>
 <table>
@@ -669,20 +669,20 @@ interface RejectPolicy&amp;lt;T&gt; {
 </tbody></table>
 <p>从数字上比较，TERMINATED &gt; TIDYING &gt; STOP &gt; SHUTDOWN &gt; RUNNING</p>
 <p>这些信息存储在一个原子变量 ctl 中，目的是将线程池状态与线程个数合二为一，这样就可以用一次 cas 原子操作进行赋值</p>
-<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// c 为旧值， ctlOf 返回结果为新值</span>
-ctl<span class="token punctuation">.</span><span class="token function">compareAndSet</span><span class="token punctuation">(</span>c<span class="token punctuation">,</span> <span class="token function">ctlOf</span><span class="token punctuation">(</span>targetState<span class="token punctuation">,</span> <span class="token function">workerCountOf</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre><code class="java">// c 为旧值， ctlOf 返回结果为新值
+ctl.compareAndSet(c, ctlOf(targetState, workerCountOf(c))));
 
-<span class="token comment" spellcheck="true">// rs 为高 3 位代表线程池状态， wc 为低 29 位代表线程个数，ctl 是合并它们</span>
-<span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">ctlOf</span><span class="token punctuation">(</span><span class="token keyword">int</span> rs<span class="token punctuation">,</span> <span class="token keyword">int</span> wc<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> rs <span class="token operator">|</span> wc<span class="token punctuation">;</span> <span class="token punctuation">}</span></code></pre>
-<h2 id="构造方法">2.2 构造方法</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token function">ThreadPoolExecutor</span><span class="token punctuation">(</span>
-    <span class="token keyword">int</span> corePoolSize<span class="token punctuation">,</span>
-    <span class="token keyword">int</span> maximumPoolSize<span class="token punctuation">,</span>
-    <span class="token keyword">long</span> keepAliveTime<span class="token punctuation">,</span>
-    TimeUnit unit<span class="token punctuation">,</span>
-    BlockingQueue<span class="token operator">&lt;</span>Runnable<span class="token operator">></span> workQueue<span class="token punctuation">,</span>
-    ThreadFactory threadFactory<span class="token punctuation">,</span>
+// rs 为高 3 位代表线程池状态， wc 为低 29 位代表线程个数，ctl 是合并它们
+private static int ctlOf(int rs, int wc) { return rs | wc; }</code></pre>
+<h2 id="构造方法">2.2 构造方法</h2><pre><code class="java">public ThreadPoolExecutor(
+    int corePoolSize,
+    int maximumPoolSize,
+    long keepAliveTime,
+    TimeUnit unit,
+    BlockingQueue&lt;Runnable&gt; workQueue,
+    ThreadFactory threadFactory,
     RejectedExecutionHandler handler
-<span class="token punctuation">)</span></code></pre>
+)</code></pre>
 <ul>
 <li>corePoolSize 核心线程数目 (最多保留的线程数)</li>
 <li>maximumPoolSize 最大线程数目</li>
@@ -737,22 +737,22 @@ ctl<span class="token punctuation">.</span><span class="token function">compareA
 </li>
 </ul>
 <p>根据这个构造方法，JDK Executors 类中提供了众多工厂方法来创建各种用途的线程池。</p>
-<h2 id="newFixedThreadPool固定大小线程池">2.3 newFixedThreadPool固定大小线程池</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> ExecutorService <span class="token function">newFixedThreadPool</span><span class="token punctuation">(</span><span class="token keyword">int</span> nThreads<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">ThreadPoolExecutor</span><span class="token punctuation">(</span>nThreads<span class="token punctuation">,</span> nThreads<span class="token punctuation">,</span>
-    0L<span class="token punctuation">,</span> TimeUnit<span class="token punctuation">.</span>MILLISECONDS<span class="token punctuation">,</span>
-    <span class="token keyword">new</span> <span class="token class-name">LinkedBlockingQueue</span><span class="token operator">&lt;</span>Runnable<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<h2 id="newFixedThreadPool固定大小线程池">2.3 newFixedThreadPool固定大小线程池</h2><pre><code class="java">public static ExecutorService newFixedThreadPool(int nThreads) {
+    return new ThreadPoolExecutor(nThreads, nThreads,
+    0L, TimeUnit.MILLISECONDS,
+    new LinkedBlockingQueue&lt;Runnable&gt;());
+}</code></pre>
 <p><strong>特点</strong></p>
 <ul>
 <li>核心线程数 == 最大线程数（没有救急线程被创建），因此也无需超时时间</li>
 <li>阻塞队列是无界的，可以放任意数量的任务</li>
 </ul>
 <p><strong>评价</strong> 适用于任务量已知，相对耗时的任务</p>
-<h2 id="newCachedThreadPool带缓冲线程池">2.4 newCachedThreadPool带缓冲线程池</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> ExecutorService <span class="token function">newCachedThreadPool</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">ThreadPoolExecutor</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> Integer<span class="token punctuation">.</span>MAX_VALUE<span class="token punctuation">,</span>
-    60L<span class="token punctuation">,</span> TimeUnit<span class="token punctuation">.</span>SECONDS<span class="token punctuation">,</span>
-    <span class="token keyword">new</span> <span class="token class-name">SynchronousQueue</span><span class="token operator">&lt;</span>Runnable<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<h2 id="newCachedThreadPool带缓冲线程池">2.4 newCachedThreadPool带缓冲线程池</h2><pre><code class="java">public static ExecutorService newCachedThreadPool() {
+    return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+    60L, TimeUnit.SECONDS,
+    new SynchronousQueue&lt;Runnable&gt;());
+}</code></pre>
 <p><strong>特点</strong></p>
 <ul>
 <li>核心线程数是 0， 最大线程数是 Integer.MAX_VALUE，救急线程的空闲生存时间是 60s，意味着<ul>
@@ -763,12 +763,12 @@ ctl<span class="token punctuation">.</span><span class="token function">compareA
 <li>队列采用了 SynchronousQueue 实现特点是，它没有容量，没有线程来取是放不进去的（一手交钱、一手交货）</li>
 </ul>
 <p><strong>评价</strong> 整个线程池表现为线程数会根据任务量不断增长，没有上限，当任务执行完毕，空闲 1分钟后释放线程。 适合任务数比较密集，但每个任务执行时间较短的情况。</p>
-<h2 id="newSingleThreadExecutor单线程线程池">2.5 newSingleThreadExecutor单线程线程池</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> ExecutorService <span class="token function">newSingleThreadExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">FinalizableDelegatedExecutorService</span>
-    <span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ThreadPoolExecutor</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span>
-    0L<span class="token punctuation">,</span> TimeUnit<span class="token punctuation">.</span>MILLISECONDS<span class="token punctuation">,</span>
-    <span class="token keyword">new</span> <span class="token class-name">LinkedBlockingQueue</span><span class="token operator">&lt;</span>Runnable<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<h2 id="newSingleThreadExecutor单线程线程池">2.5 newSingleThreadExecutor单线程线程池</h2><pre><code class="java">public static ExecutorService newSingleThreadExecutor() {
+    return new FinalizableDelegatedExecutorService
+    (new ThreadPoolExecutor(1, 1,
+    0L, TimeUnit.MILLISECONDS,
+    new LinkedBlockingQueue&lt;Runnable&gt;()));
+}</code></pre>
 <p><strong>使用场景：</strong><br>希望多个任务排队执行。线程数固定为 1，任务数多于 1 时，会放入无界队列排队。任务执行完毕，这唯一的线程也不会被释放。</p>
 <p><strong>区别：</strong></p>
 <ul>
@@ -782,90 +782,90 @@ ctl<span class="token punctuation">.</span><span class="token function">compareA
 </ul>
 </li>
 </ul>
-<h2 id="提交任务">2.6 提交任务</h2><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// 执行任务</span>
-<span class="token keyword">void</span> <span class="token function">execute</span><span class="token punctuation">(</span>Runnable command<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<h2 id="提交任务">2.6 提交任务</h2><pre><code class="java">// 执行任务
+void execute(Runnable command);
 
-<span class="token comment" spellcheck="true">// 提交任务 task，用返回值 Future 获得任务执行结果</span>
-<span class="token operator">&lt;</span>T<span class="token operator">></span> Future<span class="token operator">&lt;</span>T<span class="token operator">></span> <span class="token function">submit</span><span class="token punctuation">(</span>Callable<span class="token operator">&lt;</span>T<span class="token operator">></span> task<span class="token punctuation">)</span><span class="token punctuation">;</span>
+// 提交任务 task，用返回值 Future 获得任务执行结果
+&lt;T&gt; Future&lt;T&gt; submit(Callable&lt;T&gt; task);
 
-Future<span class="token operator">&lt;</span>Integer<span class="token operator">></span> future1 <span class="token operator">=</span> pool<span class="token punctuation">.</span><span class="token function">submit</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> <span class="token punctuation">{</span>
-    <span class="token keyword">return</span> <span class="token number">1</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+Future&lt;Integer&gt; future1 = pool.submit(() -&gt; {
+    return 1;
+});
 
-<span class="token comment" spellcheck="true">// 提交 tasks 中所有任务</span>
-<span class="token operator">&lt;</span>T<span class="token operator">></span> List<span class="token operator">&lt;</span>Future<span class="token operator">&lt;</span>T<span class="token operator">>></span> <span class="token function">invokeAll</span><span class="token punctuation">(</span>Collection<span class="token operator">&lt;</span><span class="token operator">?</span> <span class="token keyword">extends</span> <span class="token class-name">Callable</span><span class="token operator">&lt;</span>T<span class="token operator">>></span> tasks<span class="token punctuation">)</span> <span class="token keyword">throws</span> InterruptedException<span class="token punctuation">;</span>
+// 提交 tasks 中所有任务
+&lt;T&gt; List&lt;Future&lt;T&gt;&gt; invokeAll(Collection&lt;? extends Callable&lt;T&gt;&gt; tasks) throws InterruptedException;
 
-<span class="token comment" spellcheck="true">// 提交 tasks 中所有任务，带超时时间，丢弃超出时间未运行的线程，返回的List中的结果按线程顺序排序</span>
-<span class="token operator">&lt;</span>T<span class="token operator">></span> List<span class="token operator">&lt;</span>Future<span class="token operator">&lt;</span>T<span class="token operator">>></span> <span class="token function">invokeAll</span><span class="token punctuation">(</span>Collection<span class="token operator">&lt;</span><span class="token operator">?</span> <span class="token keyword">extends</span> <span class="token class-name">Callable</span><span class="token operator">&lt;</span>T<span class="token operator">>></span> tasks<span class="token punctuation">,</span>
-    <span class="token keyword">long</span> timeout<span class="token punctuation">,</span> TimeUnit unit<span class="token punctuation">)</span>
-    <span class="token keyword">throws</span> InterruptedException<span class="token punctuation">;</span>
+// 提交 tasks 中所有任务，带超时时间，丢弃超出时间未运行的线程，返回的List中的结果按线程顺序排序
+&lt;T&gt; List&lt;Future&lt;T&gt;&gt; invokeAll(Collection&lt;? extends Callable&lt;T&gt;&gt; tasks,
+    long timeout, TimeUnit unit)
+    throws InterruptedException;
 
-<span class="token comment" spellcheck="true">// 提交 tasks 中所有任务，哪个任务先成功执行完毕，返回此任务执行结果，其它任务取消</span>
-<span class="token operator">&lt;</span>T<span class="token operator">></span> T <span class="token function">invokeAny</span><span class="token punctuation">(</span>Collection<span class="token operator">&lt;</span><span class="token operator">?</span> <span class="token keyword">extends</span> <span class="token class-name">Callable</span><span class="token operator">&lt;</span>T<span class="token operator">>></span> tasks<span class="token punctuation">)</span>
-    <span class="token keyword">throws</span> InterruptedException<span class="token punctuation">,</span> ExecutionException<span class="token punctuation">;</span>
+// 提交 tasks 中所有任务，哪个任务先成功执行完毕，返回此任务执行结果，其它任务取消
+&lt;T&gt; T invokeAny(Collection&lt;? extends Callable&lt;T&gt;&gt; tasks)
+    throws InterruptedException, ExecutionException;
 
-<span class="token comment" spellcheck="true">// 提交 tasks 中所有任务，哪个任务先成功执行完毕，返回此任务执行结果，其它任务取消，带超时时间</span>
-<span class="token operator">&lt;</span>T<span class="token operator">></span> T <span class="token function">invokeAny</span><span class="token punctuation">(</span>Collection<span class="token operator">&lt;</span><span class="token operator">?</span> <span class="token keyword">extends</span> <span class="token class-name">Callable</span><span class="token operator">&lt;</span>T<span class="token operator">>></span> tasks<span class="token punctuation">,</span>
-    <span class="token keyword">long</span> timeout<span class="token punctuation">,</span> TimeUnit unit<span class="token punctuation">)</span>
-    <span class="token keyword">throws</span> InterruptedException<span class="token punctuation">,</span> ExecutionException<span class="token punctuation">,</span> TimeoutException<span class="token punctuation">;</span></code></pre>
-<h2 id="关闭线程池">2.7 关闭线程池</h2><h3 id="shutdown">2.7.1 shutdown</h3><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/*
+// 提交 tasks 中所有任务，哪个任务先成功执行完毕，返回此任务执行结果，其它任务取消，带超时时间
+&lt;T&gt; T invokeAny(Collection&lt;? extends Callable&lt;T&gt;&gt; tasks,
+    long timeout, TimeUnit unit)
+    throws InterruptedException, ExecutionException, TimeoutException;</code></pre>
+<h2 id="关闭线程池">2.7 关闭线程池</h2><h3 id="shutdown">2.7.1 shutdown</h3><pre><code class="java">/*
 线程池状态变为 SHUTDOWN
 - 不会接收新任务
 - 但已提交任务会执行完
 - 此方法不会阻塞调用线程的执行
-*/</span>
-<span class="token keyword">void</span> <span class="token function">shutdown</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">shutdown</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">final</span> ReentrantLock mainLock <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>mainLock<span class="token punctuation">;</span>
-    mainLock<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        <span class="token function">checkShutdownAccess</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">// 修改线程池状态</span>
-        <span class="token function">advanceRunState</span><span class="token punctuation">(</span>SHUTDOWN<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">// 仅会打断空闲线程</span>
-        <span class="token function">interruptIdleWorkers</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token function">onShutdown</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// 扩展点 ScheduledThreadPoolExecutor</span>
-    <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-        mainLock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">// 尝试终结(没有运行的线程可以立刻终结，如果还有运行的线程也不会等)</span>
-    <span class="token function">tryTerminate</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<h3 id="shutdownNow">2.7.2 shutdownNow</h3><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/*
+*/
+void shutdown();</code></pre>
+<pre><code class="java">public void shutdown() {
+    final ReentrantLock mainLock = this.mainLock;
+    mainLock.lock();
+    try {
+        checkShutdownAccess();
+        // 修改线程池状态
+        advanceRunState(SHUTDOWN);
+        // 仅会打断空闲线程
+        interruptIdleWorkers();
+        onShutdown(); // 扩展点 ScheduledThreadPoolExecutor
+    } finally {
+        mainLock.unlock();
+    }
+    // 尝试终结(没有运行的线程可以立刻终结，如果还有运行的线程也不会等)
+    tryTerminate();
+}</code></pre>
+<h3 id="shutdownNow">2.7.2 shutdownNow</h3><pre><code class="java">/*
 线程池状态变为 STOP
 - 不会接收新任务
 - 会将队列中的任务返回
 - 并用 interrupt 的方式中断正在执行的任务
-*/</span>
-List<span class="token operator">&lt;</span>Runnable<span class="token operator">></span> <span class="token function">shutdownNow</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> List<span class="token operator">&lt;</span>Runnable<span class="token operator">></span> <span class="token function">shutdownNow</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    List<span class="token operator">&lt;</span>Runnable<span class="token operator">></span> tasks<span class="token punctuation">;</span>
-    <span class="token keyword">final</span> ReentrantLock mainLock <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>mainLock<span class="token punctuation">;</span>
-    mainLock<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        <span class="token function">checkShutdownAccess</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">// 修改线程池状态</span>
-        <span class="token function">advanceRunState</span><span class="token punctuation">(</span>STOP<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">// 打断所有线程</span>
-        <span class="token function">interruptWorkers</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">// 获取队列中剩余任务</span>
-        tasks <span class="token operator">=</span> <span class="token function">drainQueue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-        mainLock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">// 尝试终结</span>
-    <span class="token function">tryTerminate</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> tasks<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
-<h3 id="其它方法">2.7.3 其它方法</h3><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// 不在 RUNNING 状态的线程池，此方法就返回 true</span>
-<span class="token keyword">boolean</span> <span class="token function">isShutdown</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+*/
+List&lt;Runnable&gt; shutdownNow();</code></pre>
+<pre><code class="java">public List&lt;Runnable&gt; shutdownNow() {
+    List&lt;Runnable&gt; tasks;
+    final ReentrantLock mainLock = this.mainLock;
+    mainLock.lock();
+    try {
+        checkShutdownAccess();
+        // 修改线程池状态
+        advanceRunState(STOP);
+        // 打断所有线程
+        interruptWorkers();
+        // 获取队列中剩余任务
+        tasks = drainQueue();
+    } finally {
+        mainLock.unlock();
+    }
+    // 尝试终结
+    tryTerminate();
+    return tasks;
+}</code></pre>
+<h3 id="其它方法">2.7.3 其它方法</h3><pre><code class="java">// 不在 RUNNING 状态的线程池，此方法就返回 true
+boolean isShutdown();
 
-<span class="token comment" spellcheck="true">// 线程池状态是否是 TERMINATED</span>
-<span class="token keyword">boolean</span> <span class="token function">isTerminated</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+// 线程池状态是否是 TERMINATED
+boolean isTerminated();
 
-<span class="token comment" spellcheck="true">// 调用 shutdown 后，由于调用线程并不会等待所有任务运行结束，因此如果它想在线程池 TERMINATED 后做些事</span>
+// 调用 shutdown 后，由于调用线程并不会等待所有任务运行结束，因此如果它想在线程池 TERMINATED 后做些事
 情，可以利用此方法等待
-<span class="token keyword">boolean</span> <span class="token function">awaitTermination</span><span class="token punctuation">(</span><span class="token keyword">long</span> timeout<span class="token punctuation">,</span> TimeUnit unit<span class="token punctuation">)</span> <span class="token keyword">throws</span> InterruptedException<span class="token punctuation">;</span></code></pre>
+boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException;</code></pre>
 <h2 id="线程池多大合适">2.8 线程池多大合适</h2><h3 id="CPU-密集型运算">2.8.1 CPU 密集型运算</h3><p>通常采用 <code>cpu 核数 + 1</code> 能够实现最优的 CPU 利用率，+1 是保证当线程由于页缺失故障（操作系统）或其它原因导致暂停时，额外的这个线程就能顶上去，保证 CPU 时钟周期不被浪费</p>
 <h3 id="I-O-密集型运算">2.8.2 I/O 密集型运算</h3><p>CPU 不总是处于繁忙状态，例如，当你执行业务计算时，这时候会使用 CPU 资源，但当你执行 I/O 操作时、远程RPC 调用时，包括进行数据库操作时，这时候 CPU 就闲下来了，你可以利用多线程提高它的利用率。</p>
 <p>经验公式如下</p>
@@ -875,77 +875,77 @@ List<span class="token operator">&lt;</span>Runnable<span class="token operator"
 <p>例如 4 核 CPU 计算时间是 10% ，其它等待时间是 90%，期望 cpu 被 100% 利用，套用公式</p>
 <p><code>4 * 100% * 100% / 10% = 40</code></p>
 <h2 id="任务调度线程池">2.9 任务调度线程池</h2><h3 id="使用方法">2.9.1 使用方法</h3><p>在『任务调度线程池』功能加入之前，可以使用 java.util.Timer 来实现定时功能，Timer 的优点在于简单易用，但由于所有任务都是由同一个线程来调度，因此所有任务都是串行执行的，同一时间只能有一个任务在执行，前一个任务的延迟或异常都将会影响到之后的任务。</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    Timer timer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Timer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    TimerTask task1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">TimerTask</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token annotation punctuation">@Override</span>
-        <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"task 1"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span><span class="token punctuation">;</span>
-    TimerTask task2 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">TimerTask</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token annotation punctuation">@Override</span>
-        <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"task 2"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 使用 timer 添加两个任务，希望它们都在 1s 后执行</span>
-    <span class="token comment" spellcheck="true">// 但由于 timer 内只有一个线程来顺序执行队列中的任务，因此『任务1』的延时，影响了『任务2』的执行</span>
-    timer<span class="token punctuation">.</span><span class="token function">schedule</span><span class="token punctuation">(</span>task1<span class="token punctuation">,</span> <span class="token number">1000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    timer<span class="token punctuation">.</span><span class="token function">schedule</span><span class="token punctuation">(</span>task2<span class="token punctuation">,</span> <span class="token number">1000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public static void main(String[] args) {
+    Timer timer = new Timer();
+    TimerTask task1 = new TimerTask() {
+        @Override
+        public void run() {
+            log.debug(&quot;task 1&quot;);
+            sleep(2);
+        }
+    };
+    TimerTask task2 = new TimerTask() {
+        @Override
+        public void run() {
+            log.debug(&quot;task 2&quot;);
+        }
+    };
+    // 使用 timer 添加两个任务，希望它们都在 1s 后执行
+    // 但由于 timer 内只有一个线程来顺序执行队列中的任务，因此『任务1』的延时，影响了『任务2』的执行
+    timer.schedule(task1, 1000);
+    timer.schedule(task2, 1000);
+}</code></pre>
 <p>使用 ScheduledExecutorService 改写：</p>
-<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// 构造方法只是设置corePoolSize</span>
-ScheduledExecutorService executor <span class="token operator">=</span> Executors<span class="token punctuation">.</span><span class="token function">newScheduledThreadPool</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token comment" spellcheck="true">// 添加两个任务，希望它们都在 1s 后执行</span>
-executor<span class="token punctuation">.</span><span class="token function">schedule</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> <span class="token punctuation">{</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"任务1，执行时间："</span> <span class="token operator">+</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span> Thread<span class="token punctuation">.</span><span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">2000</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
-<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">1000</span><span class="token punctuation">,</span> TimeUnit<span class="token punctuation">.</span>MILLISECONDS<span class="token punctuation">)</span><span class="token punctuation">;</span>
-executor<span class="token punctuation">.</span><span class="token function">schedule</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> <span class="token punctuation">{</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"任务2，执行时间："</span> <span class="token operator">+</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">1000</span><span class="token punctuation">,</span> TimeUnit<span class="token punctuation">.</span>MILLISECONDS<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="java">// 构造方法只是设置corePoolSize
+ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
+// 添加两个任务，希望它们都在 1s 后执行
+executor.schedule(() -&gt; {
+    System.out.println(&quot;任务1，执行时间：&quot; + new Date());
+    try { Thread.sleep(2000); } catch (InterruptedException e) { }
+}, 1000, TimeUnit.MILLISECONDS);
+executor.schedule(() -&gt; {
+    System.out.println(&quot;任务2，执行时间：&quot; + new Date());
+}, 1000, TimeUnit.MILLISECONDS);</code></pre>
 <p>构造方法源码：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token function">ScheduledThreadPoolExecutor</span><span class="token punctuation">(</span><span class="token keyword">int</span> corePoolSize<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">super</span><span class="token punctuation">(</span>corePoolSize<span class="token punctuation">,</span> Integer<span class="token punctuation">.</span>MAX_VALUE<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> NANOSECONDS<span class="token punctuation">,</span>
-            <span class="token keyword">new</span> <span class="token class-name">DelayedWorkQueue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public ScheduledThreadPoolExecutor(int corePoolSize) {
+    super(corePoolSize, Integer.MAX_VALUE, 0, NANOSECONDS,
+            new DelayedWorkQueue());
+}</code></pre>
 <p>方法：</p>
-<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/* 
+<pre><code class="java">/* 
  * 每间隔一段时间提交执行一次任务
  * command 待执行的任务
  * initialDelay 第一次执行任务的延迟
  * period 每次执行任务之间的延迟
  * unit 时间单位
- */</span>
-executor<span class="token punctuation">.</span><span class="token function">scheduleAtFixedRate</span><span class="token punctuation">(</span>Runnable command<span class="token punctuation">,</span><span class="token keyword">long</span> initialDelay<span class="token punctuation">,</span><span class="token keyword">long</span> period<span class="token punctuation">,</span>TimeUnit unit<span class="token punctuation">)</span>
+ */
+executor.scheduleAtFixedRate(Runnable command,long initialDelay,long period,TimeUnit unit)
 
-<span class="token comment" spellcheck="true">/*
+/*
  * 按一定间隔在上一次任务执行结束之后提交执行下一次任务
- */</span>
-executor<span class="token punctuation">.</span><span class="token function">scheduleWithFixedDelay</span><span class="token punctuation">(</span>Runnable command<span class="token punctuation">,</span><span class="token keyword">long</span> initialDelay<span class="token punctuation">,</span><span class="token keyword">long</span> period<span class="token punctuation">,</span>TimeUnit unit<span class="token punctuation">)</span></code></pre>
+ */
+executor.scheduleWithFixedDelay(Runnable command,long initialDelay,long period,TimeUnit unit)</code></pre>
 <h3 id="应用">2.9.2 应用</h3><p>让每周四 18:00:00 定时执行任务</p>
-<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// 获得当前时间</span>
-LocalDateTime now <span class="token operator">=</span> LocalDateTime<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token comment" spellcheck="true">// 获取本周四 18:00:00.000</span>
-LocalDateTime thursday <span class="token operator">=</span>
-now<span class="token punctuation">.</span><span class="token function">with</span><span class="token punctuation">(</span>DayOfWeek<span class="token punctuation">.</span>THURSDAY<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">withHour</span><span class="token punctuation">(</span><span class="token number">18</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">withMinute</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">withSecond</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">withNano</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token comment" spellcheck="true">// 如果当前时间已经超过 本周四 18:00:00.000， 那么找下周四 18:00:00.000</span>
-<span class="token keyword">if</span><span class="token punctuation">(</span>now<span class="token punctuation">.</span><span class="token function">compareTo</span><span class="token punctuation">(</span>thursday<span class="token punctuation">)</span> <span class="token operator">>=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    thursday <span class="token operator">=</span> thursday<span class="token punctuation">.</span><span class="token function">plusWeeks</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+<pre><code class="java">// 获得当前时间
+LocalDateTime now = LocalDateTime.now();
+// 获取本周四 18:00:00.000
+LocalDateTime thursday =
+now.with(DayOfWeek.THURSDAY).withHour(18).withMinute(0).withSecond(0).withNano(0);
+// 如果当前时间已经超过 本周四 18:00:00.000， 那么找下周四 18:00:00.000
+if(now.compareTo(thursday) &gt;= 0) {
+    thursday = thursday.plusWeeks(1);
+}
 
-<span class="token comment" spellcheck="true">// 计算时间差，即延时执行时间</span>
-<span class="token keyword">long</span> initialDelay <span class="token operator">=</span> Duration<span class="token punctuation">.</span><span class="token function">between</span><span class="token punctuation">(</span>now<span class="token punctuation">,</span> thursday<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toMillis</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token comment" spellcheck="true">// 计算间隔时间，即 1 周的毫秒值</span>
-<span class="token keyword">long</span> oneWeek <span class="token operator">=</span> <span class="token number">7</span> <span class="token operator">*</span> <span class="token number">24</span> <span class="token operator">*</span> <span class="token number">3600</span> <span class="token operator">*</span> <span class="token number">1000</span><span class="token punctuation">;</span>
+// 计算时间差，即延时执行时间
+long initialDelay = Duration.between(now, thursday).toMillis();
+// 计算间隔时间，即 1 周的毫秒值
+long oneWeek = 7 * 24 * 3600 * 1000;
 
-ScheduledExecutorService executor <span class="token operator">=</span> Executors<span class="token punctuation">.</span><span class="token function">newScheduledThreadPool</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"开始时间："</span> <span class="token operator">+</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-executor<span class="token punctuation">.</span><span class="token function">scheduleAtFixedRate</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> <span class="token punctuation">{</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"执行时间："</span> <span class="token operator">+</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span class="token punctuation">,</span> initialDelay<span class="token punctuation">,</span> oneWeek<span class="token punctuation">,</span> TimeUnit<span class="token punctuation">.</span>MILLISECONDS<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
+System.out.println(&quot;开始时间：&quot; + new Date());
+executor.scheduleAtFixedRate(() -&gt; {
+    System.out.println(&quot;执行时间：&quot; + new Date());
+}, initialDelay, oneWeek, TimeUnit.MILLISECONDS);</code></pre>
 <h2 id="处理线程中的异常">2.10 处理线程中的异常</h2><p>应该在线程内部捕获并处理异常，否则其他线程和主线程完全感知不到某个线程抛出的异常。</p>
 <p>使用线程池的submit方法时，如果callable中发生异常，返回<code>Future.get()</code>会出现异常信息。</p>
 <h1 id="fork-join">3 fork/join</h1><h2 id="概念">3.1 概念</h2><p>Fork/Join 是 JDK 1.7 加入的新的线程池实现，它体现的是一种分治思想，适用于能够进行任务拆分的 cpu 密集型运算</p>
@@ -953,39 +953,39 @@ executor<span class="token punctuation">.</span><span class="token function">sch
 <p>Fork/Join 在分治的基础上加入了多线程，可以把每个任务的分解和合并交给不同的线程来完成，进一步提升了运算效率</p>
 <p>Fork/Join 默认会创建与 cpu 核心数大小相同的线程池</p>
 <h2 id="使用">3.2 使用</h2><p>提交给 Fork/Join 线程池的任务需要继承 <code>RecursiveTask</code>（有返回值）或 <code>RecursiveAction</code>（没有返回值），例如下面定义了一个对 1~n 之间的整数求和的任务</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">AddTask1</span> <span class="token keyword">extends</span> <span class="token class-name">RecursiveTask</span><span class="token operator">&lt;</span>Integer<span class="token operator">></span> <span class="token punctuation">{</span>
-    <span class="token keyword">int</span> n<span class="token punctuation">;</span>
-    <span class="token keyword">public</span> <span class="token function">AddTask1</span><span class="token punctuation">(</span><span class="token keyword">int</span> n<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>n <span class="token operator">=</span> n<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> String <span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token string">"{"</span> <span class="token operator">+</span> n <span class="token operator">+</span> <span class="token string">'}'</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">protected</span> Integer <span class="token function">compute</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// 如果 n 已经为 1，可以求得结果了</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>n <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"join() {}"</span><span class="token punctuation">,</span> n<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">return</span> n<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
+<pre><code class="java">class AddTask1 extends RecursiveTask&lt;Integer&gt; {
+    int n;
+    public AddTask1(int n) {
+        this.n = n;
+    }
+    @Override
+    public String toString() {
+        return &quot;{&quot; + n + &#39;}&#39;;
+    }
+    @Override
+    protected Integer compute() {
+        // 如果 n 已经为 1，可以求得结果了
+        if (n == 1) {
+            log.debug(&quot;join() {}&quot;, n);
+            return n;
+        }
 
-        <span class="token comment" spellcheck="true">// 将任务进行拆分(fork)</span>
-        AddTask1 t1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AddTask1</span><span class="token punctuation">(</span>n <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        t1<span class="token punctuation">.</span><span class="token function">fork</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"fork() {} + {}"</span><span class="token punctuation">,</span> n<span class="token punctuation">,</span> t1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        // 将任务进行拆分(fork)
+        AddTask1 t1 = new AddTask1(n - 1);
+        t1.fork();
+        log.debug(&quot;fork() {} + {}&quot;, n, t1);
 
-        <span class="token comment" spellcheck="true">// 合并(join)结果</span>
-        <span class="token keyword">int</span> result <span class="token operator">=</span> n <span class="token operator">+</span> t1<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"join() {} + {} = {}"</span><span class="token punctuation">,</span> n<span class="token punctuation">,</span> t1<span class="token punctuation">,</span> result<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> result<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+        // 合并(join)结果
+        int result = n + t1.join();
+        log.debug(&quot;join() {} + {} = {}&quot;, n, t1, result);
+        return result;
+    }
+}</code></pre>
 <p>然后提交给 ForkJoinPool 来执行</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    ForkJoinPool pool <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ForkJoinPool</span><span class="token punctuation">(</span><span class="token number">4</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>pool<span class="token punctuation">.</span><span class="token function">invoke</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">AddTask1</span><span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public static void main(String[] args) {
+    ForkJoinPool pool = new ForkJoinPool(4);
+    System.out.println(pool.invoke(new AddTask1(5)));
+}</code></pre>
 
             </div>
             <hr/>
@@ -1598,7 +1598,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1678,6 +1678,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

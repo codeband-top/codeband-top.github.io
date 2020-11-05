@@ -24,10 +24,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -397,7 +397,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    962
+                    1.1k
                 </div>
                 
 
@@ -411,33 +411,33 @@
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <h1 id="心跳检测">1 心跳检测</h1><p>在 TCP 长连接中，Netty服务端感知客户端（或是客户端感知服务端）断开连接的其中一个方法是handler的channelInactive。但可能会有一些情况，比如线路出现问题，让客户端和服务端虽然是连接状态但事实无法通信。这种情况就通过心跳检测对方是否有响应，心跳检测（心跳包的发送）需要编程人员在客户端和服务端层面实现，而Netty中提供了IdleStateHandler用于处理通道空闲的情况（在心跳机制启用的情况下就代表连接断开）。</p>
-<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">//第一个参数没有读事件的时间，第二个参数没有写事件的时间</span>
-<span class="token comment" spellcheck="true">//第三个参数既没有读事件也没有写事件的时间</span>
-<span class="token comment" spellcheck="true">//设置为0代表不限制</span>
-<span class="token comment" spellcheck="true">//满足任意一个则触发IdleStateEvent，可以在userEventTriggered中处理</span>
-pipeline<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">IdleStateHandler</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">,</span><span class="token number">10</span><span class="token punctuation">,</span><span class="token number">6</span><span class="token punctuation">,</span> TimeUnit<span class="token punctuation">.</span>SECONDS<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="java">//第一个参数没有读事件的时间，第二个参数没有写事件的时间
+//第三个参数既没有读事件也没有写事件的时间
+//设置为0代表不限制
+//满足任意一个则触发IdleStateEvent，可以在userEventTriggered中处理
+pipeline.addLast(new IdleStateHandler(10,10,6, TimeUnit.SECONDS));</code></pre>
 <p>handler中：</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Override</span>
-<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">userEventTriggered</span><span class="token punctuation">(</span>ChannelHandlerContext ctx<span class="token punctuation">,</span> Object evt<span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception <span class="token punctuation">{</span>
-    <span class="token keyword">if</span><span class="token punctuation">(</span>evt <span class="token keyword">instanceof</span> <span class="token class-name">IdleStateEvent</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        IdleStateEvent event <span class="token operator">=</span> <span class="token punctuation">(</span>IdleStateEvent<span class="token punctuation">)</span>evt<span class="token punctuation">;</span>
-        String eventType <span class="token operator">=</span> null<span class="token punctuation">;</span>
-        <span class="token keyword">switch</span> <span class="token punctuation">(</span>event<span class="token punctuation">.</span><span class="token function">state</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-            <span class="token keyword">case</span> ALL_IDLE<span class="token operator">:</span>
-                eventType <span class="token operator">=</span> <span class="token string">"读写空闲"</span><span class="token punctuation">;</span>
-                <span class="token keyword">break</span><span class="token punctuation">;</span>
-            <span class="token keyword">case</span> READER_IDLE<span class="token operator">:</span>
-                eventType <span class="token operator">=</span> <span class="token string">"读空闲"</span><span class="token punctuation">;</span>
-                <span class="token keyword">break</span><span class="token punctuation">;</span>
-            <span class="token keyword">case</span> WRITER_IDLE<span class="token operator">:</span>
-                eventType <span class="token operator">=</span> <span class="token string">"写空闲"</span><span class="token punctuation">;</span>
-                <span class="token keyword">break</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>ctx<span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">remoteAddress</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">+</span><span class="token string">"--超时时间--"</span><span class="token operator">+</span>eventType<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//服务器可以断开该channel连接</span>
-        <span class="token comment" spellcheck="true">//ctx.channel.close();</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">@Override
+public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+    if(evt instanceof IdleStateEvent){
+        IdleStateEvent event = (IdleStateEvent)evt;
+        String eventType = null;
+        switch (event.state()){
+            case ALL_IDLE:
+                eventType = &quot;读写空闲&quot;;
+                break;
+            case READER_IDLE:
+                eventType = &quot;读空闲&quot;;
+                break;
+            case WRITER_IDLE:
+                eventType = &quot;写空闲&quot;;
+                break;
+        }
+        System.out.println(ctx.channel().remoteAddress()+&quot;--超时时间--&quot;+eventType);
+        //服务器可以断开该channel连接
+        //ctx.channel.close();
+    }
+}</code></pre>
 <h1 id="基于Websocket的服务端开发">2 基于Websocket的服务端开发</h1><p>首先Websocket协议是基于Http协议的，它借用了HTTP协议来完成一部分握手，所以连接的请求看起来可能是这样的：</p>
 <pre><code>GET /chat HTTP/1.1
 Host: server.example.com
@@ -447,122 +447,122 @@ Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==
 Sec-WebSocket-Protocol: chat, superchat
 Sec-WebSocket-Version: 13
 Origin: http://example.com</code></pre><p>所以首先要给pipeline加一个<code>HttpServerCodec</code>：</p>
-<pre class=" language-java"><code class="language-java">pipeline<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token string">"MyHttpServerCodec"</span><span class="token punctuation">,</span><span class="token keyword">new</span> <span class="token class-name">HttpServerCodec</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="java">pipeline.addLast(&quot;MyHttpServerCodec&quot;,new HttpServerCodec());</code></pre>
 <p>然后是Http相关的handler</p>
-<pre class=" language-java"><code class="language-java">pipeline<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ChunkedWriteHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-pipeline<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">HttpObjectAggregator</span><span class="token punctuation">(</span><span class="token number">8192</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="java">pipeline.addLast(new ChunkedWriteHandler());
+pipeline.addLast(new HttpObjectAggregator(8192));</code></pre>
 <p>然后是websocket核心handler：</p>
-<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">//将http协议升级为websocket协议，参数代表请求的uri</span>
-pipeline<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">WebSocketServerProtocolHandler</span><span class="token punctuation">(</span><span class="token string">"/ws"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="java">//将http协议升级为websocket协议，参数代表请求的uri
+pipeline.addLast(new WebSocketServerProtocolHandler(&quot;/ws&quot;));</code></pre>
 <p>然后写一个处理消息的处理器：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">TextWebsocketFrameHandler</span> <span class="token keyword">extends</span> <span class="token class-name">SimpleChannelInboundHandler</span><span class="token operator">&lt;</span>TextWebSocketFrame<span class="token operator">></span> <span class="token punctuation">{</span>
-    <span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">channelRead0</span><span class="token punctuation">(</span>ChannelHandlerContext ctx<span class="token punctuation">,</span> TextWebSocketFrame msg<span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception <span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"服务端收到消息："</span><span class="token operator">+</span>msg<span class="token punctuation">.</span><span class="token function">text</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//回复消息</span>
-        ctx<span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">writeAndFlush</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">TextWebSocketFrame</span><span class="token punctuation">(</span><span class="token string">"服务器时间【"</span><span class="token operator">+</span> LocalDateTime<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">+</span><span class="token string">"】:"</span><span class="token operator">+</span>msg<span class="token punctuation">.</span><span class="token function">text</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+<pre><code class="java">public class TextWebsocketFrameHandler extends SimpleChannelInboundHandler&lt;TextWebSocketFrame&gt; {
+    protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
+        System.out.println(&quot;服务端收到消息：&quot;+msg.text());
+        //回复消息
+        ctx.channel().writeAndFlush(new TextWebSocketFrame(&quot;服务器时间【&quot;+ LocalDateTime.now()+&quot;】:&quot;+msg.text()));
+    }
 
-    <span class="token comment" spellcheck="true">//连接建立时，handlerAdded被调用</span>
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">handlerAdded</span><span class="token punctuation">(</span>ChannelHandlerContext ctx<span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception <span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"handlerAdded被调用"</span><span class="token operator">+</span>ctx<span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">id</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">asLongText</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    //连接建立时，handlerAdded被调用
+    @Override
+    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+        System.out.println(&quot;handlerAdded被调用&quot;+ctx.channel().id().asLongText());
+    }
 
-    <span class="token comment" spellcheck="true">//连接断开时，handlerRemoved被调用</span>
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">handlerRemoved</span><span class="token punctuation">(</span>ChannelHandlerContext ctx<span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception <span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"handlerRemoved被调用"</span><span class="token operator">+</span>ctx<span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">id</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">asLongText</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    //连接断开时，handlerRemoved被调用
+    @Override
+    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+        System.out.println(&quot;handlerRemoved被调用&quot;+ctx.channel().id().asLongText());
+    }
 
-    <span class="token annotation punctuation">@Override</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">exceptionCaught</span><span class="token punctuation">(</span>ChannelHandlerContext ctx<span class="token punctuation">,</span> Throwable cause<span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception <span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"异常发生"</span><span class="token operator">+</span>cause<span class="token punctuation">.</span><span class="token function">getMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        ctx<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//关闭连接</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        System.out.println(&quot;异常发生&quot;+cause.getMessage());
+        ctx.close();//关闭连接
+    }
+}</code></pre>
 <p>这个处理器中的<code>channelRead0</code>可以将客户端发来的消息加上服务器时间返回给客户端</p>
 <p>服务器启动类总体看起来是这样的：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">WebsocketServer</span> <span class="token punctuation">{</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">int</span> port<span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception<span class="token punctuation">{</span>
-        EventLoopGroup bossGroup <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">NioEventLoopGroup</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        EventLoopGroup workerGroup <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">NioEventLoopGroup</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">try</span><span class="token punctuation">{</span>
-            ServerBootstrap serverBootstrap <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ServerBootstrap</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            serverBootstrap<span class="token punctuation">.</span><span class="token function">group</span><span class="token punctuation">(</span>bossGroup<span class="token punctuation">,</span>workerGroup<span class="token punctuation">)</span>
-                    <span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span>NioServerSocketChannel<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span>
-                    <span class="token punctuation">.</span><span class="token function">option</span><span class="token punctuation">(</span>ChannelOption<span class="token punctuation">.</span>SO_BACKLOG<span class="token punctuation">,</span> <span class="token number">1024</span><span class="token punctuation">)</span>
-                    <span class="token punctuation">.</span><span class="token function">childHandler</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ChannelInitializer</span><span class="token operator">&lt;</span>SocketChannel<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                        <span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">initChannel</span><span class="token punctuation">(</span>SocketChannel ch<span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception <span class="token punctuation">{</span>
-                            ChannelPipeline pipeline <span class="token operator">=</span> ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                            pipeline<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">HttpServerCodec</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                            pipeline<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ChunkedWriteHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                            pipeline<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">HttpObjectAggregator</span><span class="token punctuation">(</span><span class="token number">8192</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                            pipeline<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">WebSocketServerProtocolHandler</span><span class="token punctuation">(</span><span class="token string">"/ws"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                            pipeline<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">TextWebsocketFrameHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                        <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"---------服务器正在启动---------"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            ChannelFuture future <span class="token operator">=</span> serverBootstrap<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span>port<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">sync</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            future<span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">closeFuture</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">sync</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span><span class="token keyword">finally</span> <span class="token punctuation">{</span>
-            bossGroup<span class="token punctuation">.</span><span class="token function">shutdownGracefully</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            workerGroup<span class="token punctuation">.</span><span class="token function">shutdownGracefully</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> Exception <span class="token punctuation">{</span>
-        <span class="token keyword">int</span> port <span class="token operator">=</span> <span class="token number">7000</span><span class="token punctuation">;</span>
-        <span class="token keyword">new</span> <span class="token class-name">WebsocketServer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span>port<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public class WebsocketServer {
+    public void bind(int port) throws Exception{
+        EventLoopGroup bossGroup = new NioEventLoopGroup();
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        try{
+            ServerBootstrap serverBootstrap = new ServerBootstrap();
+            serverBootstrap.group(bossGroup,workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .option(ChannelOption.SO_BACKLOG, 1024)
+                    .childHandler(new ChannelInitializer&lt;SocketChannel&gt;() {
+                        protected void initChannel(SocketChannel ch) throws Exception {
+                            ChannelPipeline pipeline = ch.pipeline();
+                            pipeline.addLast(new HttpServerCodec());
+                            pipeline.addLast(new ChunkedWriteHandler());
+                            pipeline.addLast(new HttpObjectAggregator(8192));
+                            pipeline.addLast(new WebSocketServerProtocolHandler(&quot;/ws&quot;));
+                            pipeline.addLast(new TextWebsocketFrameHandler());
+                        }
+            });
+            System.out.println(&quot;---------服务器正在启动---------&quot;);
+            ChannelFuture future = serverBootstrap.bind(port).sync();
+            future.channel().closeFuture().sync();
+        }finally {
+            bossGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
+        }
+    }
+    public static void main(String[] args) throws Exception {
+        int port = 7000;
+        new WebsocketServer().bind(port);
+    }
+}</code></pre>
 <p>编写网页进行测试：</p>
-<pre class=" language-html"><code class="language-html"><span class="token doctype">&lt;!DOCTYPE html></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>html</span> <span class="token attr-name">lang</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>en<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>head</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">charset</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>UTF-8<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>title</span><span class="token punctuation">></span></span>Title<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>title</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>head</span><span class="token punctuation">></span></span>
+<pre><code class="html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;Title&lt;/title&gt;
+&lt;/head&gt;
 
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>body</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">onsubmit</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>return false<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>textarea</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>message<span class="token punctuation">"</span></span><span class="token style-attr language-css"><span class="token attr-name"> <span class="token attr-name">style</span></span><span class="token punctuation">="</span><span class="token attr-value"><span class="token property">height</span><span class="token punctuation">:</span> <span class="token number">300</span>px<span class="token punctuation">;</span><span class="token property">width</span><span class="token punctuation">:</span> <span class="token number">300</span>px</span><span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>textarea</span><span class="token punctuation">></span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>button<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>发送消息<span class="token punctuation">"</span></span> <span class="token attr-name">onclick</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>send(this.form.message.value)<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>textarea</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>responseText<span class="token punctuation">"</span></span><span class="token style-attr language-css"><span class="token attr-name"> <span class="token attr-name">style</span></span><span class="token punctuation">="</span><span class="token attr-value"><span class="token property">height</span><span class="token punctuation">:</span> <span class="token number">300</span>px<span class="token punctuation">;</span><span class="token property">width</span><span class="token punctuation">:</span> <span class="token number">300</span>px</span><span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>textarea</span><span class="token punctuation">></span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>button<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>清空内容<span class="token punctuation">"</span></span> <span class="token attr-name">onclick</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>document.getElementById(<span class="token punctuation">'</span>responseText<span class="token punctuation">'</span>).value<span class="token punctuation">=</span><span class="token punctuation">'</span><span class="token punctuation">'</span><span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span><span class="token punctuation">></span></span><span class="token script language-javascript">
-    <span class="token keyword">let</span> socket<span class="token punctuation">;</span>
-    <span class="token keyword">if</span><span class="token punctuation">(</span>window<span class="token punctuation">.</span>WebSocket<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">let</span> rt <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">getElementById</span><span class="token punctuation">(</span><span class="token string">"responseText"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        socket <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">WebSocket</span><span class="token punctuation">(</span><span class="token string">"ws://localhost:7000/ws"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//收到消息</span>
-        socket<span class="token punctuation">.</span>onmessage <span class="token operator">=</span> <span class="token keyword">function</span> <span class="token punctuation">(</span>ev<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            rt<span class="token punctuation">.</span>value <span class="token operator">+</span><span class="token operator">=</span> <span class="token string">"\n"</span> <span class="token operator">+</span> ev<span class="token punctuation">.</span>data<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token comment" spellcheck="true">//连接开启</span>
-        socket<span class="token punctuation">.</span>onopen <span class="token operator">=</span> <span class="token keyword">function</span> <span class="token punctuation">(</span>ev<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            rt<span class="token punctuation">.</span>value <span class="token operator">=</span> <span class="token string">"--------连接开启了---------"</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        socket<span class="token punctuation">.</span>onclose <span class="token operator">=</span> <span class="token keyword">function</span> <span class="token punctuation">(</span>ev<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            rt<span class="token punctuation">.</span>value <span class="token operator">+</span><span class="token operator">=</span> <span class="token string">"\n"</span> <span class="token operator">+</span> <span class="token string">"-------连接关闭了-------"</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span><span class="token keyword">else</span> <span class="token punctuation">{</span>
-        <span class="token function">alert</span><span class="token punctuation">(</span><span class="token string">"当前浏览器不支持websocket"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">//发送消息</span>
-    <span class="token keyword">function</span> <span class="token function">send</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>socket<span class="token punctuation">)</span><span class="token punctuation">{</span><span class="token comment" spellcheck="true">//先判断socket是否创建好</span>
-            <span class="token keyword">return</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span>socket<span class="token punctuation">.</span>readyState <span class="token operator">==</span> WebSocket<span class="token punctuation">.</span>OPEN<span class="token punctuation">)</span><span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">//发送消息</span>
-            socket<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
-            <span class="token function">alert</span><span class="token punctuation">(</span><span class="token string">"连接没有开启"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>html</span><span class="token punctuation">></span></span></code></pre>
+&lt;body&gt;
+    &lt;form onsubmit=&quot;return false&quot;&gt;
+        &lt;textarea name=&quot;message&quot; style=&quot;height: 300px;width: 300px&quot;&gt;&lt;/textarea&gt;
+        &lt;input type=&quot;button&quot; value=&quot;发送消息&quot; onclick=&quot;send(this.form.message.value)&quot;&gt;
+        &lt;textarea id=&quot;responseText&quot; style=&quot;height: 300px;width: 300px&quot;&gt;&lt;/textarea&gt;
+        &lt;input type=&quot;button&quot; value=&quot;清空内容&quot; onclick=&quot;document.getElementById(&#39;responseText&#39;).value=&#39;&#39;&quot;&gt;
+    &lt;/form&gt;
+&lt;/body&gt;
+&lt;script&gt;
+    let socket;
+    if(window.WebSocket){
+        let rt = document.getElementById(&quot;responseText&quot;);
+        socket = new WebSocket(&quot;ws://localhost:7000/ws&quot;);
+        //收到消息
+        socket.onmessage = function (ev) {
+            rt.value += &quot;\n&quot; + ev.data;
+        }
+        //连接开启
+        socket.onopen = function (ev) {
+            rt.value = &quot;--------连接开启了---------&quot;;
+        }
+        socket.onclose = function (ev) {
+            rt.value += &quot;\n&quot; + &quot;-------连接关闭了-------&quot;;
+        }
+    }else {
+        alert(&quot;当前浏览器不支持websocket&quot;);
+    }
+    //发送消息
+    function send(message) {
+        if(!socket){//先判断socket是否创建好
+            return;
+        }
+        if(socket.readyState == WebSocket.OPEN){
+            //发送消息
+            socket.send(message);
+        }else{
+            alert(&quot;连接没有开启&quot;);
+        }
+    }
+&lt;/script&gt;
+&lt;/html&gt;</code></pre>
 <p>测试：</p>
 <p><img src="https://api.codetool.top/img/15842934886547.png" alt></p>
 
@@ -1164,7 +1164,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1244,6 +1244,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

@@ -27,10 +27,10 @@ ByteBuffer不止可以存取byte类型的数据，它支持类型化的put和get
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -412,7 +412,7 @@ ByteBuffer不止可以存取byte类型的数据，它支持类型化的put和get
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    2.6k
+                    2.7k
                 </div>
                 
 
@@ -468,231 +468,231 @@ ByteBuffer不止可以存取byte类型的数据，它支持类型化的put和get
 <p>Linux 在 2.4 版本中，做了一些修改，避免了从内核缓冲区拷贝到 Socket buffer 的操作，直接拷贝到协议栈，从而再一次减少了数据拷贝。</p>
 <p><img src="https://api.codetool.top/img/15841728116351.png" alt="sendfile改进"></p>
 <h1 id="NIO中的零拷贝">3 NIO中的零拷贝</h1><p>NIO中有一个transferTo，它可以在两个FileChannel直接传递数据而不需要经过buffer，这对大文件的读写帮助是很大的，那它究竟使用了什么方法实现呢？我在openjdk1.8下找到了它的源码：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">long</span> <span class="token function">transferTo</span><span class="token punctuation">(</span><span class="token keyword">long</span> position<span class="token punctuation">,</span> <span class="token keyword">long</span> count<span class="token punctuation">,</span>
-                        WritableByteChannel target<span class="token punctuation">)</span>
-    <span class="token keyword">throws</span> IOException
-<span class="token punctuation">{</span>
-    <span class="token function">ensureOpen</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>target<span class="token punctuation">.</span><span class="token function">isOpen</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">ClosedChannelException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>readable<span class="token punctuation">)</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">NonReadableChannelException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>target <span class="token keyword">instanceof</span> <span class="token class-name">FileChannelImpl</span> <span class="token operator">&amp;&amp;</span>
-        <span class="token operator">!</span><span class="token punctuation">(</span><span class="token punctuation">(</span>FileChannelImpl<span class="token punctuation">)</span>target<span class="token punctuation">)</span><span class="token punctuation">.</span>writable<span class="token punctuation">)</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">NonWritableChannelException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>position <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token punctuation">(</span>count <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IllegalArgumentException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">long</span> sz <span class="token operator">=</span> <span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>position <span class="token operator">></span> sz<span class="token punctuation">)</span>
-        <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
-    <span class="token keyword">int</span> icount <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span>Math<span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span>count<span class="token punctuation">,</span> Integer<span class="token punctuation">.</span>MAX_VALUE<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>sz <span class="token operator">-</span> position<span class="token punctuation">)</span> <span class="token operator">&lt;</span> icount<span class="token punctuation">)</span>
-        icount <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span><span class="token punctuation">(</span>sz <span class="token operator">-</span> position<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre><code class="java">public long transferTo(long position, long count,
+                        WritableByteChannel target)
+    throws IOException
+{
+    ensureOpen();
+    if (!target.isOpen())
+        throw new ClosedChannelException();
+    if (!readable)
+        throw new NonReadableChannelException();
+    if (target instanceof FileChannelImpl &amp;&amp;
+        !((FileChannelImpl)target).writable)
+        throw new NonWritableChannelException();
+    if ((position &lt; 0) || (count &lt; 0))
+        throw new IllegalArgumentException();
+    long sz = size();
+    if (position &gt; sz)
+        return 0;
+    int icount = (int)Math.min(count, Integer.MAX_VALUE);
+    if ((sz - position) &lt; icount)
+        icount = (int)(sz - position);
 
-    <span class="token keyword">long</span> n<span class="token punctuation">;</span>
+    long n;
 
-    <span class="token comment" spellcheck="true">//注意这个部分------------------------------------------</span>
-    <span class="token comment" spellcheck="true">// Attempt a direct transfer, if the kernel supports it</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>n <span class="token operator">=</span> <span class="token function">transferToDirectly</span><span class="token punctuation">(</span>position<span class="token punctuation">,</span> icount<span class="token punctuation">,</span> target<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">>=</span> <span class="token number">0</span><span class="token punctuation">)</span>
-        <span class="token keyword">return</span> n<span class="token punctuation">;</span>
+    //注意这个部分------------------------------------------
+    // Attempt a direct transfer, if the kernel supports it
+    if ((n = transferToDirectly(position, icount, target)) &gt;= 0)
+        return n;
 
-    <span class="token comment" spellcheck="true">// Attempt a mapped transfer, but only to trusted channel types</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>n <span class="token operator">=</span> <span class="token function">transferToTrustedChannel</span><span class="token punctuation">(</span>position<span class="token punctuation">,</span> icount<span class="token punctuation">,</span> target<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">>=</span> <span class="token number">0</span><span class="token punctuation">)</span>
-        <span class="token keyword">return</span> n<span class="token punctuation">;</span>
+    // Attempt a mapped transfer, but only to trusted channel types
+    if ((n = transferToTrustedChannel(position, icount, target)) &gt;= 0)
+        return n;
 
-    <span class="token comment" spellcheck="true">// Slow path for untrusted targets</span>
-    <span class="token keyword">return</span> <span class="token function">transferToArbitraryChannel</span><span class="token punctuation">(</span>position<span class="token punctuation">,</span> icount<span class="token punctuation">,</span> target<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//注意这个部分------------------------------------------</span>
-<span class="token punctuation">}</span></code></pre>
+    // Slow path for untrusted targets
+    return transferToArbitraryChannel(position, icount, target);
+    //注意这个部分------------------------------------------
+}</code></pre>
 <p>可以看出优先使用transferToDirectly，其次是transferToTrustedChannel</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">long</span> <span class="token function">transferToDirectly</span><span class="token punctuation">(</span><span class="token keyword">long</span> position<span class="token punctuation">,</span> <span class="token keyword">int</span> icount<span class="token punctuation">,</span>
-                                WritableByteChannel target<span class="token punctuation">)</span>
-    <span class="token keyword">throws</span> IOException
-<span class="token punctuation">{</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>transferSupported<span class="token punctuation">)</span>
-        <span class="token keyword">return</span> IOStatus<span class="token punctuation">.</span>UNSUPPORTED<span class="token punctuation">;</span>
+<pre><code class="java">private long transferToDirectly(long position, int icount,
+                                WritableByteChannel target)
+    throws IOException
+{
+    if (!transferSupported)
+        return IOStatus.UNSUPPORTED;
 
-    FileDescriptor targetFD <span class="token operator">=</span> null<span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>target <span class="token keyword">instanceof</span> <span class="token class-name">FileChannelImpl</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>fileSupported<span class="token punctuation">)</span>
-            <span class="token keyword">return</span> IOStatus<span class="token punctuation">.</span>UNSUPPORTED_CASE<span class="token punctuation">;</span>
-        targetFD <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>FileChannelImpl<span class="token punctuation">)</span>target<span class="token punctuation">)</span><span class="token punctuation">.</span>fd<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>target <span class="token keyword">instanceof</span> <span class="token class-name">SelChImpl</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// Direct transfer to pipe causes EINVAL on some configurations</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>target <span class="token keyword">instanceof</span> <span class="token class-name">SinkChannelImpl</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>pipeSupported<span class="token punctuation">)</span>
-            <span class="token keyword">return</span> IOStatus<span class="token punctuation">.</span>UNSUPPORTED_CASE<span class="token punctuation">;</span>
-        targetFD <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>SelChImpl<span class="token punctuation">)</span>target<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getFD</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>targetFD <span class="token operator">==</span> null<span class="token punctuation">)</span>
-        <span class="token keyword">return</span> IOStatus<span class="token punctuation">.</span>UNSUPPORTED<span class="token punctuation">;</span>
-    <span class="token keyword">int</span> thisFDVal <span class="token operator">=</span> IOUtil<span class="token punctuation">.</span><span class="token function">fdVal</span><span class="token punctuation">(</span>fd<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">int</span> targetFDVal <span class="token operator">=</span> IOUtil<span class="token punctuation">.</span><span class="token function">fdVal</span><span class="token punctuation">(</span>targetFD<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>thisFDVal <span class="token operator">==</span> targetFDVal<span class="token punctuation">)</span> <span class="token comment" spellcheck="true">// Not supported on some configurations</span>
-        <span class="token keyword">return</span> IOStatus<span class="token punctuation">.</span>UNSUPPORTED<span class="token punctuation">;</span>
+    FileDescriptor targetFD = null;
+    if (target instanceof FileChannelImpl) {
+        if (!fileSupported)
+            return IOStatus.UNSUPPORTED_CASE;
+        targetFD = ((FileChannelImpl)target).fd;
+    } else if (target instanceof SelChImpl) {
+        // Direct transfer to pipe causes EINVAL on some configurations
+        if ((target instanceof SinkChannelImpl) &amp;&amp; !pipeSupported)
+            return IOStatus.UNSUPPORTED_CASE;
+        targetFD = ((SelChImpl)target).getFD();
+    }
+    if (targetFD == null)
+        return IOStatus.UNSUPPORTED;
+    int thisFDVal = IOUtil.fdVal(fd);
+    int targetFDVal = IOUtil.fdVal(targetFD);
+    if (thisFDVal == targetFDVal) // Not supported on some configurations
+        return IOStatus.UNSUPPORTED;
 
-    <span class="token keyword">long</span> n <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
-    <span class="token keyword">int</span> ti <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        <span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        ti <span class="token operator">=</span> threads<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">isOpen</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-            <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//注意这个部分------------------------------------------</span>
-        <span class="token keyword">do</span> <span class="token punctuation">{</span>
-            n <span class="token operator">=</span> <span class="token function">transferTo0</span><span class="token punctuation">(</span>thisFDVal<span class="token punctuation">,</span> position<span class="token punctuation">,</span> icount<span class="token punctuation">,</span> targetFDVal<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>n <span class="token operator">==</span> IOStatus<span class="token punctuation">.</span>INTERRUPTED<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token function">isOpen</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//注意这个部分------------------------------------------</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>n <span class="token operator">==</span> IOStatus<span class="token punctuation">.</span>UNSUPPORTED_CASE<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>target <span class="token keyword">instanceof</span> <span class="token class-name">SinkChannelImpl</span><span class="token punctuation">)</span>
-                pipeSupported <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>target <span class="token keyword">instanceof</span> <span class="token class-name">FileChannelImpl</span><span class="token punctuation">)</span>
-                fileSupported <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-            <span class="token keyword">return</span> IOStatus<span class="token punctuation">.</span>UNSUPPORTED_CASE<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>n <span class="token operator">==</span> IOStatus<span class="token punctuation">.</span>UNSUPPORTED<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// Don't bother trying again</span>
-            transferSupported <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-            <span class="token keyword">return</span> IOStatus<span class="token punctuation">.</span>UNSUPPORTED<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">return</span> IOStatus<span class="token punctuation">.</span><span class="token function">normalize</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-        threads<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>ti<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token function">end</span> <span class="token punctuation">(</span>n <span class="token operator">></span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    long n = -1;
+    int ti = -1;
+    try {
+        begin();
+        ti = threads.add();
+        if (!isOpen())
+            return -1;
+        //注意这个部分------------------------------------------
+        do {
+            n = transferTo0(thisFDVal, position, icount, targetFDVal);
+        } while ((n == IOStatus.INTERRUPTED) &amp;&amp; isOpen());
+        //注意这个部分------------------------------------------
+        if (n == IOStatus.UNSUPPORTED_CASE) {
+            if (target instanceof SinkChannelImpl)
+                pipeSupported = false;
+            if (target instanceof FileChannelImpl)
+                fileSupported = false;
+            return IOStatus.UNSUPPORTED_CASE;
+        }
+        if (n == IOStatus.UNSUPPORTED) {
+            // Don&#39;t bother trying again
+            transferSupported = false;
+            return IOStatus.UNSUPPORTED;
+        }
+        return IOStatus.normalize(n);
+    } finally {
+        threads.remove(ti);
+        end (n &gt; -1);
+    }
+}</code></pre>
 <p>在WINDOWS下：</p>
-<pre class=" language-c"><code class="language-c">JNIEXPORT jlong JNICALL
-<span class="token function">Java_sun_nio_ch_FileChannelImpl_transferTo0</span><span class="token punctuation">(</span>JNIEnv <span class="token operator">*</span>env<span class="token punctuation">,</span> jobject this<span class="token punctuation">,</span>
-                                            jint srcFD<span class="token punctuation">,</span>
-                                            jlong position<span class="token punctuation">,</span> jlong count<span class="token punctuation">,</span>
-                                            jint dstFD<span class="token punctuation">)</span>
-<span class="token punctuation">{</span>
-    <span class="token keyword">return</span> IOS_UNSUPPORTED<span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+<pre><code class="c">JNIEXPORT jlong JNICALL
+Java_sun_nio_ch_FileChannelImpl_transferTo0(JNIEnv *env, jobject this,
+                                            jint srcFD,
+                                            jlong position, jlong count,
+                                            jint dstFD)
+{
+    return IOS_UNSUPPORTED;
+}
 </code></pre>
 <p>即Windows不支持transferToDirectly。</p>
 <p>在unix系操作系统下：</p>
-<pre class=" language-c"><code class="language-c">JNIEXPORT jlong JNICALL
-<span class="token function">Java_sun_nio_ch_FileChannelImpl_transferTo0</span><span class="token punctuation">(</span>JNIEnv <span class="token operator">*</span>env<span class="token punctuation">,</span> jobject this<span class="token punctuation">,</span>
-                                            jint srcFD<span class="token punctuation">,</span>
-                                            jlong position<span class="token punctuation">,</span> jlong count<span class="token punctuation">,</span>
-                                            jint dstFD<span class="token punctuation">)</span>
-<span class="token punctuation">{</span>
-<span class="token macro property">#<span class="token directive keyword">if</span> defined(__linux__)</span>
-    off64_t offset <span class="token operator">=</span> <span class="token punctuation">(</span>off64_t<span class="token punctuation">)</span>position<span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">//注意 linux -> sendfile ---------------------------------</span>
-    jlong n <span class="token operator">=</span> <span class="token function">sendfile64</span><span class="token punctuation">(</span>dstFD<span class="token punctuation">,</span> srcFD<span class="token punctuation">,</span> <span class="token operator">&amp;</span>offset<span class="token punctuation">,</span> <span class="token punctuation">(</span>size_t<span class="token punctuation">)</span>count<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>n <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>errno <span class="token operator">==</span> EAGAIN<span class="token punctuation">)</span>
-            <span class="token keyword">return</span> IOS_UNAVAILABLE<span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>errno <span class="token operator">==</span> EINVAL<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>ssize_t<span class="token punctuation">)</span>count <span class="token operator">>=</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-            <span class="token keyword">return</span> IOS_UNSUPPORTED_CASE<span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>errno <span class="token operator">==</span> EINTR<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">return</span> IOS_INTERRUPTED<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token function">JNU_ThrowIOExceptionWithLastError</span><span class="token punctuation">(</span>env<span class="token punctuation">,</span> <span class="token string">"Transfer failed"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> IOS_THROWN<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> n<span class="token punctuation">;</span>
-<span class="token macro property">#<span class="token directive keyword">elif</span> defined (__solaris__)</span>
-    sendfilevec64_t sfv<span class="token punctuation">;</span>
-    size_t numBytes <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
-    jlong result<span class="token punctuation">;</span>
+<pre><code class="c">JNIEXPORT jlong JNICALL
+Java_sun_nio_ch_FileChannelImpl_transferTo0(JNIEnv *env, jobject this,
+                                            jint srcFD,
+                                            jlong position, jlong count,
+                                            jint dstFD)
+{
+#if defined(__linux__)
+    off64_t offset = (off64_t)position;
+    //注意 linux -&gt; sendfile ---------------------------------
+    jlong n = sendfile64(dstFD, srcFD, &amp;offset, (size_t)count);
+    if (n &lt; 0) {
+        if (errno == EAGAIN)
+            return IOS_UNAVAILABLE;
+        if ((errno == EINVAL) &amp;&amp; ((ssize_t)count &gt;= 0))
+            return IOS_UNSUPPORTED_CASE;
+        if (errno == EINTR) {
+            return IOS_INTERRUPTED;
+        }
+        JNU_ThrowIOExceptionWithLastError(env, &quot;Transfer failed&quot;);
+        return IOS_THROWN;
+    }
+    return n;
+#elif defined (__solaris__)
+    sendfilevec64_t sfv;
+    size_t numBytes = 0;
+    jlong result;
 
-    sfv<span class="token punctuation">.</span>sfv_fd <span class="token operator">=</span> srcFD<span class="token punctuation">;</span>
-    sfv<span class="token punctuation">.</span>sfv_flag <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
-    sfv<span class="token punctuation">.</span>sfv_off <span class="token operator">=</span> <span class="token punctuation">(</span>off64_t<span class="token punctuation">)</span>position<span class="token punctuation">;</span>
-    sfv<span class="token punctuation">.</span>sfv_len <span class="token operator">=</span> count<span class="token punctuation">;</span>
+    sfv.sfv_fd = srcFD;
+    sfv.sfv_flag = 0;
+    sfv.sfv_off = (off64_t)position;
+    sfv.sfv_len = count;
 
-    result <span class="token operator">=</span> <span class="token function">sendfilev64</span><span class="token punctuation">(</span>dstFD<span class="token punctuation">,</span> <span class="token operator">&amp;</span>sfv<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>numBytes<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    result = sendfilev64(dstFD, &amp;sfv, 1, &amp;numBytes);
 
-    <span class="token comment" spellcheck="true">/* Solaris sendfilev() will return -1 even if some bytes have been
+    /* Solaris sendfilev() will return -1 even if some bytes have been
      * transferred, so we check numBytes first.
-     */</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>numBytes <span class="token operator">></span> <span class="token number">0</span><span class="token punctuation">)</span>
-        <span class="token keyword">return</span> numBytes<span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>result <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>errno <span class="token operator">==</span> EAGAIN<span class="token punctuation">)</span>
-            <span class="token keyword">return</span> IOS_UNAVAILABLE<span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>errno <span class="token operator">==</span> EOPNOTSUPP<span class="token punctuation">)</span>
-            <span class="token keyword">return</span> IOS_UNSUPPORTED_CASE<span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>errno <span class="token operator">==</span> EINVAL<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>ssize_t<span class="token punctuation">)</span>count <span class="token operator">>=</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-            <span class="token keyword">return</span> IOS_UNSUPPORTED_CASE<span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>errno <span class="token operator">==</span> EINTR<span class="token punctuation">)</span>
-            <span class="token keyword">return</span> IOS_INTERRUPTED<span class="token punctuation">;</span>
-        <span class="token function">JNU_ThrowIOExceptionWithLastError</span><span class="token punctuation">(</span>env<span class="token punctuation">,</span> <span class="token string">"Transfer failed"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> IOS_THROWN<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> result<span class="token punctuation">;</span>
-<span class="token macro property">#<span class="token directive keyword">elif</span> defined(__APPLE__)</span>
-    off_t numBytes<span class="token punctuation">;</span>
-    <span class="token keyword">int</span> result<span class="token punctuation">;</span>
+     */
+    if (numBytes &gt; 0)
+        return numBytes;
+    if (result &lt; 0) {
+        if (errno == EAGAIN)
+            return IOS_UNAVAILABLE;
+        if (errno == EOPNOTSUPP)
+            return IOS_UNSUPPORTED_CASE;
+        if ((errno == EINVAL) &amp;&amp; ((ssize_t)count &gt;= 0))
+            return IOS_UNSUPPORTED_CASE;
+        if (errno == EINTR)
+            return IOS_INTERRUPTED;
+        JNU_ThrowIOExceptionWithLastError(env, &quot;Transfer failed&quot;);
+        return IOS_THROWN;
+    }
+    return result;
+#elif defined(__APPLE__)
+    off_t numBytes;
+    int result;
 
-    numBytes <span class="token operator">=</span> count<span class="token punctuation">;</span>
+    numBytes = count;
 
-    result <span class="token operator">=</span> <span class="token function">sendfile</span><span class="token punctuation">(</span>srcFD<span class="token punctuation">,</span> dstFD<span class="token punctuation">,</span> position<span class="token punctuation">,</span> <span class="token operator">&amp;</span>numBytes<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    result = sendfile(srcFD, dstFD, position, &amp;numBytes, NULL, 0);
 
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>numBytes <span class="token operator">></span> <span class="token number">0</span><span class="token punctuation">)</span>
-        <span class="token keyword">return</span> numBytes<span class="token punctuation">;</span>
+    if (numBytes &gt; 0)
+        return numBytes;
 
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>result <span class="token operator">==</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>errno <span class="token operator">==</span> EAGAIN<span class="token punctuation">)</span>
-            <span class="token keyword">return</span> IOS_UNAVAILABLE<span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>errno <span class="token operator">==</span> EOPNOTSUPP <span class="token operator">||</span> errno <span class="token operator">==</span> ENOTSOCK <span class="token operator">||</span> errno <span class="token operator">==</span> ENOTCONN<span class="token punctuation">)</span>
-            <span class="token keyword">return</span> IOS_UNSUPPORTED_CASE<span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>errno <span class="token operator">==</span> EINVAL<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>ssize_t<span class="token punctuation">)</span>count <span class="token operator">>=</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-            <span class="token keyword">return</span> IOS_UNSUPPORTED_CASE<span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>errno <span class="token operator">==</span> EINTR<span class="token punctuation">)</span>
-            <span class="token keyword">return</span> IOS_INTERRUPTED<span class="token punctuation">;</span>
-        <span class="token function">JNU_ThrowIOExceptionWithLastError</span><span class="token punctuation">(</span>env<span class="token punctuation">,</span> <span class="token string">"Transfer failed"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> IOS_THROWN<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    if (result == -1) {
+        if (errno == EAGAIN)
+            return IOS_UNAVAILABLE;
+        if (errno == EOPNOTSUPP || errno == ENOTSOCK || errno == ENOTCONN)
+            return IOS_UNSUPPORTED_CASE;
+        if ((errno == EINVAL) &amp;&amp; ((ssize_t)count &gt;= 0))
+            return IOS_UNSUPPORTED_CASE;
+        if (errno == EINTR)
+            return IOS_INTERRUPTED;
+        JNU_ThrowIOExceptionWithLastError(env, &quot;Transfer failed&quot;);
+        return IOS_THROWN;
+    }
 
-    <span class="token keyword">return</span> result<span class="token punctuation">;</span>
+    return result;
 
-<span class="token macro property">#<span class="token directive keyword">elif</span> defined(_AIX)</span>
-    jlong max <span class="token operator">=</span> <span class="token punctuation">(</span>jlong<span class="token punctuation">)</span>java_lang_Integer_MAX_VALUE<span class="token punctuation">;</span>
-    <span class="token keyword">struct</span> sf_parms sf_iobuf<span class="token punctuation">;</span>
-    jlong result<span class="token punctuation">;</span>
+#elif defined(_AIX)
+    jlong max = (jlong)java_lang_Integer_MAX_VALUE;
+    struct sf_parms sf_iobuf;
+    jlong result;
 
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>position <span class="token operator">></span> max<span class="token punctuation">)</span>
-        <span class="token keyword">return</span> IOS_UNSUPPORTED_CASE<span class="token punctuation">;</span>
+    if (position &gt; max)
+        return IOS_UNSUPPORTED_CASE;
 
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>count <span class="token operator">></span> max<span class="token punctuation">)</span>
-        count <span class="token operator">=</span> max<span class="token punctuation">;</span>
+    if (count &gt; max)
+        count = max;
 
-    <span class="token function">memset</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>sf_iobuf<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>sf_iobuf<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    sf_iobuf<span class="token punctuation">.</span>file_descriptor <span class="token operator">=</span> srcFD<span class="token punctuation">;</span>
-    sf_iobuf<span class="token punctuation">.</span>file_offset <span class="token operator">=</span> <span class="token punctuation">(</span>off_t<span class="token punctuation">)</span>position<span class="token punctuation">;</span>
-    sf_iobuf<span class="token punctuation">.</span>file_bytes <span class="token operator">=</span> count<span class="token punctuation">;</span>
+    memset(&amp;sf_iobuf, 0, sizeof(sf_iobuf));
+    sf_iobuf.file_descriptor = srcFD;
+    sf_iobuf.file_offset = (off_t)position;
+    sf_iobuf.file_bytes = count;
 
-    result <span class="token operator">=</span> <span class="token function">send_file</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>dstFD<span class="token punctuation">,</span> <span class="token operator">&amp;</span>sf_iobuf<span class="token punctuation">,</span> SF_SYNC_CACHE<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    result = send_file(&amp;dstFD, &amp;sf_iobuf, SF_SYNC_CACHE);
 
-    <span class="token comment" spellcheck="true">/* AIX send_file() will return 0 when this operation complete successfully,
+    /* AIX send_file() will return 0 when this operation complete successfully,
      * return 1 when partial bytes transfered and return -1 when an error has
      * Occured.
-     */</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>result <span class="token operator">==</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>errno <span class="token operator">==</span> EWOULDBLOCK<span class="token punctuation">)</span>
-            <span class="token keyword">return</span> IOS_UNAVAILABLE<span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>errno <span class="token operator">==</span> EINVAL<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>ssize_t<span class="token punctuation">)</span>count <span class="token operator">>=</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-            <span class="token keyword">return</span> IOS_UNSUPPORTED_CASE<span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>errno <span class="token operator">==</span> EINTR<span class="token punctuation">)</span>
-            <span class="token keyword">return</span> IOS_INTERRUPTED<span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>errno <span class="token operator">==</span> ENOTSOCK<span class="token punctuation">)</span>
-            <span class="token keyword">return</span> IOS_UNSUPPORTED<span class="token punctuation">;</span>
-        <span class="token function">JNU_ThrowIOExceptionWithLastError</span><span class="token punctuation">(</span>env<span class="token punctuation">,</span> <span class="token string">"Transfer failed"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> IOS_THROWN<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+     */
+    if (result == -1) {
+        if (errno == EWOULDBLOCK)
+            return IOS_UNAVAILABLE;
+        if ((errno == EINVAL) &amp;&amp; ((ssize_t)count &gt;= 0))
+            return IOS_UNSUPPORTED_CASE;
+        if (errno == EINTR)
+            return IOS_INTERRUPTED;
+        if (errno == ENOTSOCK)
+            return IOS_UNSUPPORTED;
+        JNU_ThrowIOExceptionWithLastError(env, &quot;Transfer failed&quot;);
+        return IOS_THROWN;
+    }
 
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>sf_iobuf<span class="token punctuation">.</span>bytes_sent <span class="token operator">></span> <span class="token number">0</span><span class="token punctuation">)</span>
-        <span class="token keyword">return</span> <span class="token punctuation">(</span>jlong<span class="token punctuation">)</span>sf_iobuf<span class="token punctuation">.</span>bytes_sent<span class="token punctuation">;</span>
+    if (sf_iobuf.bytes_sent &gt; 0)
+        return (jlong)sf_iobuf.bytes_sent;
 
-    <span class="token keyword">return</span> IOS_UNSUPPORTED_CASE<span class="token punctuation">;</span>
-<span class="token macro property">#<span class="token directive keyword">else</span></span>
-    <span class="token keyword">return</span> IOS_UNSUPPORTED_CASE<span class="token punctuation">;</span>
-<span class="token macro property">#<span class="token directive keyword">endif</span></span>
-<span class="token punctuation">}</span></code></pre>
+    return IOS_UNSUPPORTED_CASE;
+#else
+    return IOS_UNSUPPORTED_CASE;
+#endif
+}</code></pre>
 <p>sendfile64就是linux2.4改进后的sendfile，具体可以参考 <a href="https://linux.die.net/man/2/sendfile64" target="_blank" rel="noopener">https://linux.die.net/man/2/sendfile64</a></p>
 <p>而<code>transferToTrustedChannel</code>就和FileChannel的map方法原理一致了，使用的是mmap，这里就不贴源码跟踪了，在windows下使用的是系统函数<code>CreateFileMapping</code>，在linux下使用的是系统函数<code>mmap64</code></p>
 <h1 id="总结">4 总结</h1><ul>
@@ -1320,7 +1320,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1400,6 +1400,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

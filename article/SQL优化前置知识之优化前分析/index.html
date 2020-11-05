@@ -24,10 +24,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -405,7 +405,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    3.5k
+                    3.8k
                 </div>
                 
 
@@ -551,9 +551,9 @@
 </tbody></table>
 <h1 id="explain分析执行计划">3 explain分析执行计划</h1><p>通过以上步骤查询到效率低的 SQL 语句后，可以通过 EXPLAIN或者 DESC命令获取 MySQL如何执行 SELECT 语句的信息，包括在 SELECT 语句执行过程中表如何连接和连接的顺序。</p>
 <p>查询SQL语句的执行计划 ： </p>
-<pre class=" language-sql"><code class="language-sql"><span class="token keyword">explain</span>  <span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> tb_item <span class="token keyword">where</span> id <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="sql">explain  select * from tb_item where id = 1;</code></pre>
 <p><img src="https://api.codetool.top/img/15833935425677.png" alt></p>
-<pre class=" language-sql"><code class="language-sql"><span class="token keyword">explain</span>  <span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> tb_item <span class="token keyword">where</span> title <span class="token operator">=</span> <span class="token string">'阿尔卡特 (OT-979) 冰川白 联通3G手机3'</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="sql">explain  select * from tb_item where title = &#39;阿尔卡特 (OT-979) 冰川白 联通3G手机3&#39;;</code></pre>
 <p><img src="https://api.codetool.top/img/15833935895541.png" alt></p>
 <table>
 <thead>
@@ -811,182 +811,182 @@ select count(*) from tb_item;</code></pre><p>执行完上述命令之后，再�
 </tbody></table>
 <h1 id="trace分析优化器执行计划">5 trace分析优化器执行计划</h1><p>MySQL5.6提供了对SQL的跟踪trace, 通过trace文件能够进一步了解为什么优化器选择A计划, 而不是选择B计划。</p>
 <p>打开trace ，设置格式为 JSON，并设置trace最大能够使用的内存大小，避免解析过程中因为默认内存过小而不能够完整展示。</p>
-<pre class=" language-sql"><code class="language-sql"><span class="token keyword">SET</span> optimizer_trace<span class="token operator">=</span><span class="token string">"enabled=on"</span><span class="token punctuation">,</span>end_markers_in_json<span class="token operator">=</span><span class="token keyword">on</span><span class="token punctuation">;</span>
-<span class="token keyword">set</span> optimizer_trace_max_mem_size<span class="token operator">=</span><span class="token number">1000000</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="sql">SET optimizer_trace=&quot;enabled=on&quot;,end_markers_in_json=on;
+set optimizer_trace_max_mem_size=1000000;</code></pre>
 <p>执行SQL语句 ：</p>
-<pre class=" language-sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> tb_item <span class="token keyword">where</span> id <span class="token operator">&lt;</span> <span class="token number">4</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="sql">select * from tb_item where id &lt; 4;</code></pre>
 <p>最后， 检查information_schema.optimizer_trace就可以知道MySQL是如何执行SQL的 ：</p>
-<pre class=" language-sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> information_schema<span class="token punctuation">.</span>optimizer_trace\G<span class="token punctuation">;</span></code></pre>
-<pre class=" language-json"><code class="language-json">*************************** <span class="token number">1</span>. row ***************************
-QUERY<span class="token operator">:</span> select * from tb_item where id &lt; <span class="token number">4</span>
-TRACE<span class="token operator">:</span> <span class="token punctuation">{</span>
-  <span class="token property">"steps"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token punctuation">{</span>
-      <span class="token property">"join_preparation"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-        <span class="token property">"select#"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
-        <span class="token property">"steps"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-          <span class="token punctuation">{</span>
-            <span class="token property">"expanded_query"</span><span class="token operator">:</span> <span class="token string">"/* select#1 */ select `tb_item`.`id` AS `id`,`tb_item`.`title` AS `title`,`tb_item`.`price` AS `price`,`tb_item`.`num` AS `num`,`tb_item`.`categoryid` AS `categoryid`,`tb_item`.`status` AS `status`,`tb_item`.`sellerid` AS `sellerid`,`tb_item`.`createtime` AS `createtime`,`tb_item`.`updatetime` AS `updatetime` from `tb_item` where (`tb_item`.`id` &lt; 4)"</span>
-          <span class="token punctuation">}</span>
-        <span class="token punctuation">]</span> /* steps */
-      <span class="token punctuation">}</span> /* join_preparation */
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span>
-      <span class="token property">"join_optimization"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-        <span class="token property">"select#"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
-        <span class="token property">"steps"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-          <span class="token punctuation">{</span>
-            <span class="token property">"condition_processing"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-              <span class="token property">"condition"</span><span class="token operator">:</span> <span class="token string">"WHERE"</span><span class="token punctuation">,</span>
-              <span class="token property">"original_condition"</span><span class="token operator">:</span> <span class="token string">"(`tb_item`.`id` &lt; 4)"</span><span class="token punctuation">,</span>
-              <span class="token property">"steps"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-                <span class="token punctuation">{</span>
-                  <span class="token property">"transformation"</span><span class="token operator">:</span> <span class="token string">"equality_propagation"</span><span class="token punctuation">,</span>
-                  <span class="token property">"resulting_condition"</span><span class="token operator">:</span> <span class="token string">"(`tb_item`.`id` &lt; 4)"</span>
-                <span class="token punctuation">}</span><span class="token punctuation">,</span>
-                <span class="token punctuation">{</span>
-                  <span class="token property">"transformation"</span><span class="token operator">:</span> <span class="token string">"constant_propagation"</span><span class="token punctuation">,</span>
-                  <span class="token property">"resulting_condition"</span><span class="token operator">:</span> <span class="token string">"(`tb_item`.`id` &lt; 4)"</span>
-                <span class="token punctuation">}</span><span class="token punctuation">,</span>
-                <span class="token punctuation">{</span>
-                  <span class="token property">"transformation"</span><span class="token operator">:</span> <span class="token string">"trivial_condition_removal"</span><span class="token punctuation">,</span>
-                  <span class="token property">"resulting_condition"</span><span class="token operator">:</span> <span class="token string">"(`tb_item`.`id` &lt; 4)"</span>
-                <span class="token punctuation">}</span>
-              <span class="token punctuation">]</span> /* steps */
-            <span class="token punctuation">}</span> /* condition_processing */
-          <span class="token punctuation">}</span><span class="token punctuation">,</span>
-          <span class="token punctuation">{</span>
-            <span class="token property">"table_dependencies"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-              <span class="token punctuation">{</span>
-                <span class="token property">"table"</span><span class="token operator">:</span> <span class="token string">"`tb_item`"</span><span class="token punctuation">,</span>
-                <span class="token property">"row_may_be_null"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
-                <span class="token property">"map_bit"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
-                <span class="token property">"depends_on_map_bits"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-                <span class="token punctuation">]</span> /* depends_on_map_bits */
-              <span class="token punctuation">}</span>
-            <span class="token punctuation">]</span> /* table_dependencies */
-          <span class="token punctuation">}</span><span class="token punctuation">,</span>
-          <span class="token punctuation">{</span>
-            <span class="token property">"ref_optimizer_key_uses"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-            <span class="token punctuation">]</span> /* ref_optimizer_key_uses */
-          <span class="token punctuation">}</span><span class="token punctuation">,</span>
-          <span class="token punctuation">{</span>
-            <span class="token property">"rows_estimation"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-              <span class="token punctuation">{</span>
-                <span class="token property">"table"</span><span class="token operator">:</span> <span class="token string">"`tb_item`"</span><span class="token punctuation">,</span>
-                <span class="token property">"range_analysis"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-                  <span class="token property">"table_scan"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-                    <span class="token property">"rows"</span><span class="token operator">:</span> <span class="token number">9816098</span><span class="token punctuation">,</span>
-                    <span class="token property">"cost"</span><span class="token operator">:</span> <span class="token number">2.04e6</span>
-                  <span class="token punctuation">}</span> /* table_scan */<span class="token punctuation">,</span>
-                  <span class="token property">"potential_range_indices"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-                    <span class="token punctuation">{</span>
-                      <span class="token property">"index"</span><span class="token operator">:</span> <span class="token string">"PRIMARY"</span><span class="token punctuation">,</span>
-                      <span class="token property">"usable"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
-                      <span class="token property">"key_parts"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-                        <span class="token string">"id"</span>
-                      <span class="token punctuation">]</span> /* key_parts */
-                    <span class="token punctuation">}</span>
-                  <span class="token punctuation">]</span> /* potential_range_indices */<span class="token punctuation">,</span>
-                  <span class="token property">"setup_range_conditions"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-                  <span class="token punctuation">]</span> /* setup_range_conditions */<span class="token punctuation">,</span>
-                  <span class="token property">"group_index_range"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-                    <span class="token property">"chosen"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
-                    <span class="token property">"cause"</span><span class="token operator">:</span> <span class="token string">"not_group_by_or_distinct"</span>
-                  <span class="token punctuation">}</span> /* group_index_range */<span class="token punctuation">,</span>
-                  <span class="token property">"analyzing_range_alternatives"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-                    <span class="token property">"range_scan_alternatives"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-                      <span class="token punctuation">{</span>
-                        <span class="token property">"index"</span><span class="token operator">:</span> <span class="token string">"PRIMARY"</span><span class="token punctuation">,</span>
-                        <span class="token property">"ranges"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-                          <span class="token string">"id &lt; 4"</span>
-                        <span class="token punctuation">]</span> /* ranges */<span class="token punctuation">,</span>
-                        <span class="token property">"index_dives_for_eq_ranges"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
-                        <span class="token property">"rowid_ordered"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
-                        <span class="token property">"using_mrr"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
-                        <span class="token property">"index_only"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
-                        <span class="token property">"rows"</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span>
-                        <span class="token property">"cost"</span><span class="token operator">:</span> <span class="token number">1.6154</span><span class="token punctuation">,</span>
-                        <span class="token property">"chosen"</span><span class="token operator">:</span> <span class="token boolean">true</span>
-                      <span class="token punctuation">}</span>
-                    <span class="token punctuation">]</span> /* range_scan_alternatives */<span class="token punctuation">,</span>
-                    <span class="token property">"analyzing_roworder_intersect"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-                      <span class="token property">"usable"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
-                      <span class="token property">"cause"</span><span class="token operator">:</span> <span class="token string">"too_few_roworder_scans"</span>
-                    <span class="token punctuation">}</span> /* analyzing_roworder_intersect */
-                  <span class="token punctuation">}</span> /* analyzing_range_alternatives */<span class="token punctuation">,</span>
-                  <span class="token property">"chosen_range_access_summary"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-                    <span class="token property">"range_access_plan"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-                      <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"range_scan"</span><span class="token punctuation">,</span>
-                      <span class="token property">"index"</span><span class="token operator">:</span> <span class="token string">"PRIMARY"</span><span class="token punctuation">,</span>
-                      <span class="token property">"rows"</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span>
-                      <span class="token property">"ranges"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-                        <span class="token string">"id &lt; 4"</span>
-                      <span class="token punctuation">]</span> /* ranges */
-                    <span class="token punctuation">}</span> /* range_access_plan */<span class="token punctuation">,</span>
-                    <span class="token property">"rows_for_plan"</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span>
-                    <span class="token property">"cost_for_plan"</span><span class="token operator">:</span> <span class="token number">1.6154</span><span class="token punctuation">,</span>
-                    <span class="token property">"chosen"</span><span class="token operator">:</span> <span class="token boolean">true</span>
-                  <span class="token punctuation">}</span> /* chosen_range_access_summary */
-                <span class="token punctuation">}</span> /* range_analysis */
-              <span class="token punctuation">}</span>
-            <span class="token punctuation">]</span> /* rows_estimation */
-          <span class="token punctuation">}</span><span class="token punctuation">,</span>
-          <span class="token punctuation">{</span>
-            <span class="token property">"considered_execution_plans"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-              <span class="token punctuation">{</span>
-                <span class="token property">"plan_prefix"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-                <span class="token punctuation">]</span> /* plan_prefix */<span class="token punctuation">,</span>
-                <span class="token property">"table"</span><span class="token operator">:</span> <span class="token string">"`tb_item`"</span><span class="token punctuation">,</span>
-                <span class="token property">"best_access_path"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-                  <span class="token property">"considered_access_paths"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-                    <span class="token punctuation">{</span>
-                      <span class="token property">"access_type"</span><span class="token operator">:</span> <span class="token string">"range"</span><span class="token punctuation">,</span>
-                      <span class="token property">"rows"</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span>
-                      <span class="token property">"cost"</span><span class="token operator">:</span> <span class="token number">2.2154</span><span class="token punctuation">,</span>
-                      <span class="token property">"chosen"</span><span class="token operator">:</span> <span class="token boolean">true</span>
-                    <span class="token punctuation">}</span>
-                  <span class="token punctuation">]</span> /* considered_access_paths */
-                <span class="token punctuation">}</span> /* best_access_path */<span class="token punctuation">,</span>
-                <span class="token property">"cost_for_plan"</span><span class="token operator">:</span> <span class="token number">2.2154</span><span class="token punctuation">,</span>
-                <span class="token property">"rows_for_plan"</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span>
-                <span class="token property">"chosen"</span><span class="token operator">:</span> <span class="token boolean">true</span>
-              <span class="token punctuation">}</span>
-            <span class="token punctuation">]</span> /* considered_execution_plans */
-          <span class="token punctuation">}</span><span class="token punctuation">,</span>
-          <span class="token punctuation">{</span>
-            <span class="token property">"attaching_conditions_to_tables"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-              <span class="token property">"original_condition"</span><span class="token operator">:</span> <span class="token string">"(`tb_item`.`id` &lt; 4)"</span><span class="token punctuation">,</span>
-              <span class="token property">"attached_conditions_computation"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-              <span class="token punctuation">]</span> /* attached_conditions_computation */<span class="token punctuation">,</span>
-              <span class="token property">"attached_conditions_summary"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-                <span class="token punctuation">{</span>
-                  <span class="token property">"table"</span><span class="token operator">:</span> <span class="token string">"`tb_item`"</span><span class="token punctuation">,</span>
-                  <span class="token property">"attached"</span><span class="token operator">:</span> <span class="token string">"(`tb_item`.`id` &lt; 4)"</span>
-                <span class="token punctuation">}</span>
-              <span class="token punctuation">]</span> /* attached_conditions_summary */
-            <span class="token punctuation">}</span> /* attaching_conditions_to_tables */
-          <span class="token punctuation">}</span><span class="token punctuation">,</span>
-          <span class="token punctuation">{</span>
-            <span class="token property">"refine_plan"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-              <span class="token punctuation">{</span>
-                <span class="token property">"table"</span><span class="token operator">:</span> <span class="token string">"`tb_item`"</span><span class="token punctuation">,</span>
-                <span class="token property">"access_type"</span><span class="token operator">:</span> <span class="token string">"range"</span>
-              <span class="token punctuation">}</span>
-            <span class="token punctuation">]</span> /* refine_plan */
-          <span class="token punctuation">}</span>
-        <span class="token punctuation">]</span> /* steps */
-      <span class="token punctuation">}</span> /* join_optimization */
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span>
-      <span class="token property">"join_execution"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-        <span class="token property">"select#"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
-        <span class="token property">"steps"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-        <span class="token punctuation">]</span> /* steps */
-      <span class="token punctuation">}</span> /* join_execution */
-    <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span> /* steps */
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="sql">select * from information_schema.optimizer_trace\G;</code></pre>
+<pre><code class="json">*************************** 1. row ***************************
+QUERY: select * from tb_item where id &lt; 4
+TRACE: {
+  &quot;steps&quot;: [
+    {
+      &quot;join_preparation&quot;: {
+        &quot;select#&quot;: 1,
+        &quot;steps&quot;: [
+          {
+            &quot;expanded_query&quot;: &quot;/* select#1 */ select `tb_item`.`id` AS `id`,`tb_item`.`title` AS `title`,`tb_item`.`price` AS `price`,`tb_item`.`num` AS `num`,`tb_item`.`categoryid` AS `categoryid`,`tb_item`.`status` AS `status`,`tb_item`.`sellerid` AS `sellerid`,`tb_item`.`createtime` AS `createtime`,`tb_item`.`updatetime` AS `updatetime` from `tb_item` where (`tb_item`.`id` &lt; 4)&quot;
+          }
+        ] /* steps */
+      } /* join_preparation */
+    },
+    {
+      &quot;join_optimization&quot;: {
+        &quot;select#&quot;: 1,
+        &quot;steps&quot;: [
+          {
+            &quot;condition_processing&quot;: {
+              &quot;condition&quot;: &quot;WHERE&quot;,
+              &quot;original_condition&quot;: &quot;(`tb_item`.`id` &lt; 4)&quot;,
+              &quot;steps&quot;: [
+                {
+                  &quot;transformation&quot;: &quot;equality_propagation&quot;,
+                  &quot;resulting_condition&quot;: &quot;(`tb_item`.`id` &lt; 4)&quot;
+                },
+                {
+                  &quot;transformation&quot;: &quot;constant_propagation&quot;,
+                  &quot;resulting_condition&quot;: &quot;(`tb_item`.`id` &lt; 4)&quot;
+                },
+                {
+                  &quot;transformation&quot;: &quot;trivial_condition_removal&quot;,
+                  &quot;resulting_condition&quot;: &quot;(`tb_item`.`id` &lt; 4)&quot;
+                }
+              ] /* steps */
+            } /* condition_processing */
+          },
+          {
+            &quot;table_dependencies&quot;: [
+              {
+                &quot;table&quot;: &quot;`tb_item`&quot;,
+                &quot;row_may_be_null&quot;: false,
+                &quot;map_bit&quot;: 0,
+                &quot;depends_on_map_bits&quot;: [
+                ] /* depends_on_map_bits */
+              }
+            ] /* table_dependencies */
+          },
+          {
+            &quot;ref_optimizer_key_uses&quot;: [
+            ] /* ref_optimizer_key_uses */
+          },
+          {
+            &quot;rows_estimation&quot;: [
+              {
+                &quot;table&quot;: &quot;`tb_item`&quot;,
+                &quot;range_analysis&quot;: {
+                  &quot;table_scan&quot;: {
+                    &quot;rows&quot;: 9816098,
+                    &quot;cost&quot;: 2.04e6
+                  } /* table_scan */,
+                  &quot;potential_range_indices&quot;: [
+                    {
+                      &quot;index&quot;: &quot;PRIMARY&quot;,
+                      &quot;usable&quot;: true,
+                      &quot;key_parts&quot;: [
+                        &quot;id&quot;
+                      ] /* key_parts */
+                    }
+                  ] /* potential_range_indices */,
+                  &quot;setup_range_conditions&quot;: [
+                  ] /* setup_range_conditions */,
+                  &quot;group_index_range&quot;: {
+                    &quot;chosen&quot;: false,
+                    &quot;cause&quot;: &quot;not_group_by_or_distinct&quot;
+                  } /* group_index_range */,
+                  &quot;analyzing_range_alternatives&quot;: {
+                    &quot;range_scan_alternatives&quot;: [
+                      {
+                        &quot;index&quot;: &quot;PRIMARY&quot;,
+                        &quot;ranges&quot;: [
+                          &quot;id &lt; 4&quot;
+                        ] /* ranges */,
+                        &quot;index_dives_for_eq_ranges&quot;: true,
+                        &quot;rowid_ordered&quot;: true,
+                        &quot;using_mrr&quot;: false,
+                        &quot;index_only&quot;: false,
+                        &quot;rows&quot;: 3,
+                        &quot;cost&quot;: 1.6154,
+                        &quot;chosen&quot;: true
+                      }
+                    ] /* range_scan_alternatives */,
+                    &quot;analyzing_roworder_intersect&quot;: {
+                      &quot;usable&quot;: false,
+                      &quot;cause&quot;: &quot;too_few_roworder_scans&quot;
+                    } /* analyzing_roworder_intersect */
+                  } /* analyzing_range_alternatives */,
+                  &quot;chosen_range_access_summary&quot;: {
+                    &quot;range_access_plan&quot;: {
+                      &quot;type&quot;: &quot;range_scan&quot;,
+                      &quot;index&quot;: &quot;PRIMARY&quot;,
+                      &quot;rows&quot;: 3,
+                      &quot;ranges&quot;: [
+                        &quot;id &lt; 4&quot;
+                      ] /* ranges */
+                    } /* range_access_plan */,
+                    &quot;rows_for_plan&quot;: 3,
+                    &quot;cost_for_plan&quot;: 1.6154,
+                    &quot;chosen&quot;: true
+                  } /* chosen_range_access_summary */
+                } /* range_analysis */
+              }
+            ] /* rows_estimation */
+          },
+          {
+            &quot;considered_execution_plans&quot;: [
+              {
+                &quot;plan_prefix&quot;: [
+                ] /* plan_prefix */,
+                &quot;table&quot;: &quot;`tb_item`&quot;,
+                &quot;best_access_path&quot;: {
+                  &quot;considered_access_paths&quot;: [
+                    {
+                      &quot;access_type&quot;: &quot;range&quot;,
+                      &quot;rows&quot;: 3,
+                      &quot;cost&quot;: 2.2154,
+                      &quot;chosen&quot;: true
+                    }
+                  ] /* considered_access_paths */
+                } /* best_access_path */,
+                &quot;cost_for_plan&quot;: 2.2154,
+                &quot;rows_for_plan&quot;: 3,
+                &quot;chosen&quot;: true
+              }
+            ] /* considered_execution_plans */
+          },
+          {
+            &quot;attaching_conditions_to_tables&quot;: {
+              &quot;original_condition&quot;: &quot;(`tb_item`.`id` &lt; 4)&quot;,
+              &quot;attached_conditions_computation&quot;: [
+              ] /* attached_conditions_computation */,
+              &quot;attached_conditions_summary&quot;: [
+                {
+                  &quot;table&quot;: &quot;`tb_item`&quot;,
+                  &quot;attached&quot;: &quot;(`tb_item`.`id` &lt; 4)&quot;
+                }
+              ] /* attached_conditions_summary */
+            } /* attaching_conditions_to_tables */
+          },
+          {
+            &quot;refine_plan&quot;: [
+              {
+                &quot;table&quot;: &quot;`tb_item`&quot;,
+                &quot;access_type&quot;: &quot;range&quot;
+              }
+            ] /* refine_plan */
+          }
+        ] /* steps */
+      } /* join_optimization */
+    },
+    {
+      &quot;join_execution&quot;: {
+        &quot;select#&quot;: 1,
+        &quot;steps&quot;: [
+        ] /* steps */
+      } /* join_execution */
+    }
+  ] /* steps */
+}</code></pre>
 
             </div>
             <hr/>
@@ -1606,7 +1606,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1686,6 +1686,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

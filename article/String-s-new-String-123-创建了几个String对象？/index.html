@@ -6,9 +6,9 @@
     <meta charset="utf-8">
     <meta name="keywords" content="String s = new String(&#34;123&#34;);创建了几个String对象？, 代码段小站">
     <meta name="description" content="1 提要最近复习看到一道题目很有意思啊：
-String s = new String(&#34;123&#34;);
+String s = new String(&amp;quot;123&amp;quot;);
 问这样一行代码创建了几个String对象？
-乍一看我其实以为和JDK的版本有关系，因为在深入理解java虚拟机第三版读书笔记02中1.6.">
+乍一看我其实以为和JDK的版本有关系，因为在深入理解java虚拟机第三版读">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -27,10 +27,10 @@ String s = new String(&#34;123&#34;);
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -418,57 +418,57 @@ String s = new String(&#34;123&#34;);
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <h1 id="提要">1 提要</h1><p>最近复习看到一道题目很有意思啊：</p>
-<pre class=" language-java"><code class="language-java">String s <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">String</span><span class="token punctuation">(</span><span class="token string">"123"</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="java">String s = new String(&quot;123&quot;);</code></pre>
 <p>问这样一行代码创建了几个String对象？</p>
 <p>乍一看我其实以为和JDK的版本有关系，因为在<a href="../深入理解java虚拟机第三版读书笔记02">深入理解java虚拟机第三版读书笔记02</a>中<code>1.6.2 intern方法有意思的点</code>曾经提到，JDK7之前，字符串常量池在方法区（永久代）中，而JDK7开始，就将字符串常量池移到了堆中。那么这个题目和这个知识点有关系吗？</p>
 <p>然而仔细一看这行代码，便发现了蹊跷：我们平时定义字符串会使用这样的语法赋值吗？平时常用的给字符串赋值的方法应该是下面这样才对：</p>
-<pre class=" language-java"><code class="language-java">String s <span class="token operator">=</span> <span class="token string">"123"</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="java">String s = &quot;123&quot;;</code></pre>
 <p>那么这样两行代码有什么区别呢？先从搞清楚<code>&quot;123&quot;</code>是什么开始：</p>
 <h1 id="字符串字面量">2 字符串字面量</h1><p>字符串的字面量和基本类型的字面量有点不同，基本类型可以写<code>1</code>,<code>true</code>,<code>2l</code>这样的字面量。然而在Java中字符串不属于基本类型，String本身是一个类，那么 <strong><code>&quot;123&quot;</code>这样一个字面量肯定也是一个String的实例对象</strong>。</p>
 <p>但是我们之前又提到了“字符串常量池”这个东西，到底什么时候字符串会从常量池中取值呢？下面通过几个例子验证一下：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    String a <span class="token operator">=</span> <span class="token string">"111"</span><span class="token punctuation">;</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"111"</span> <span class="token operator">==</span> a<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public static void main(String[] args) {
+    String a = &quot;111&quot;;
+    System.out.println(&quot;111&quot; == a);
+}</code></pre>
 <p>首先，<code>&quot;111&quot;</code>是一个String的实例对象，将它赋值给<code>a</code>，我们通常说，<strong>在Java中只有值传递，没有引用传递</strong>，就是指这里其实是把<code>&quot;111&quot;</code>的引用地址通过值传递给了<code>a</code>这个引用类型，使得它们指向了同一个对象。</p>
 <p>而后面的输出语句中，再一次出现了<code>&quot;111&quot;</code>这个字面量，通过它和a做<code>==</code>比较，看它们指向的是不是同一个对象，结果输出true，说明<strong>重复出现的字面量其实指向的是同一个对象</strong>，这里可以猜测<strong>第一次出现的字符串字面量就创建了一个String实例，并放入了常量池中，后面出现的相同的字面量都是从常量池中取值</strong>。</p>
 <p>那么既然第一次出现的字面量就会将创建的String实例放入字符串常量池，<code>intern</code>这个方法有什么存在的必要呢？其实这是因为<strong>字符串不仅仅会以字面量的形式赋值</strong>。</p>
 <p>比如下面这个方法：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    String a <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StringBuilder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token string">"11"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token string">"1"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    String b <span class="token operator">=</span> <span class="token string">"111"</span><span class="token punctuation">;</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>a <span class="token operator">==</span> b<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public static void main(String[] args) {
+    String a = new StringBuilder().append(&quot;11&quot;).append(&quot;1&quot;).toString();
+    String b = &quot;111&quot;;
+    System.out.println(a == b);
+}</code></pre>
 <p>a是通过<code>StringBuilder</code>来构造的，因此没有出现<code>&quot;111&quot;</code>这个字符串字面量，相反而是出现了<code>&quot;11&quot;</code>,<code>&quot;1&quot;</code>这两个字面量，因此在与b进行比较的时候，输出的是false。</p>
 <p>但假设我们仍想在第一行代码中就让<code>&quot;111&quot;</code>进入字符串常量池，就可以使用<code>intern</code>方法：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    String a <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StringBuilder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token string">"11"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token string">"1"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    a<span class="token punctuation">.</span><span class="token function">intern</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    String b <span class="token operator">=</span> <span class="token string">"111"</span><span class="token punctuation">;</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>a <span class="token operator">==</span> b<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public static void main(String[] args) {
+    String a = new StringBuilder().append(&quot;11&quot;).append(&quot;1&quot;).toString();
+    a.intern();
+    String b = &quot;111&quot;;
+    System.out.println(a == b);
+}</code></pre>
 <p>这样就会输出<code>true</code></p>
 <p>通过这里的研究可以知道，下面这样的代码就是多此一举：</p>
-<pre class=" language-java"><code class="language-java">String a <span class="token operator">=</span> <span class="token string">"111"</span><span class="token punctuation">;</span>
-a<span class="token punctuation">.</span><span class="token function">intern</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="java">String a = &quot;111&quot;;
+a.intern();</code></pre>
 <p>因为第一行其实已经实现了<code>intern</code>的效果。</p>
 <h1 id="如何解答这个问题">3 如何解答这个问题</h1><p>了解完了字符串字面量这个概念，相信回答这个问题也不难了，</p>
-<pre class=" language-java"><code class="language-java">String s <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">String</span><span class="token punctuation">(</span><span class="token string">"123"</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="java">String s = new String(&quot;123&quot;);</code></pre>
 <p>这行代码中，<code>&quot;123&quot;</code>本身是一个String的实例对象，它的来源可能有两种情况：</p>
 <ol>
 <li>若之前字符串常量池中没有<code>&quot;123&quot;</code>，这里就会创建一个字符串，并放入常量池</li>
 <li>若之前字符串常量池中有<code>&quot;123&quot;</code>，这里就会直接指向常量池中的对象。</li>
 </ol>
 <p>而<code>s</code>是怎么来的？看一下这个构造方法（JDK8）：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token function">String</span><span class="token punctuation">(</span>String original<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>value <span class="token operator">=</span> original<span class="token punctuation">.</span>value<span class="token punctuation">;</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>hash <span class="token operator">=</span> original<span class="token punctuation">.</span>hash<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public String(String original) {
+    this.value = original.value;
+    this.hash = original.hash;
+}</code></pre>
 <p>可以看到<strong>这个构造方法实际上是一个浅复制</strong>，只是会将字符串字面量中的<code>value</code>字符数组复制过来。</p>
 <p>所以这个问题应该这样回答：</p>
 <p><strong>如果在这段代码运行之前字符串常量池中已经有<code>&quot;123&quot;</code>了，就只会创建一个String对象，相反则会创建两次，因为字符串字面量第一次出现会创建一个String实例对象。</strong></p>
 <p>与之对应的是，</p>
-<pre class=" language-java"><code class="language-java">String s <span class="token operator">=</span> <span class="token string">"123"</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="java">String s = &quot;123&quot;;</code></pre>
 <p><strong>这样一行代码倒是有可能一个字符串对象也不创建，因为只是将常量池中对象的引用地址传递了一下。</strong></p>
 
             </div>
@@ -1086,7 +1086,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1166,6 +1166,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

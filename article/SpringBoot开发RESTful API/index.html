@@ -25,10 +25,10 @@ GET /ge">
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -398,7 +398,7 @@ GET /ge">
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.1k
+                    1.2k
                 </div>
                 
 
@@ -461,9 +461,9 @@ GET /ge">
 </ul>
 <p>在<code>@xxxMapping</code>和<code>@RequestMapping</code>中，有两个属性需要关注：consumes和produces，可以为它们指定<code>MediaType</code>中的值来限定该方法接收什么类型的请求体和返回什么类型。</p>
 <p><code>@PathVariable</code>示例：</p>
-<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">//请求的url例如“/article/1”</span>
-<span class="token annotation punctuation">@DeleteMapping</span><span class="token punctuation">(</span><span class="token string">"/article/{id}"</span><span class="token punctuation">)</span>
-<span class="token keyword">public</span> <span class="token annotation punctuation">@ResponseBody</span> AjaxResponse <span class="token function">deleteArticle</span><span class="token punctuation">(</span><span class="token annotation punctuation">@PathVariable</span> Long id<span class="token punctuation">)</span> <span class="token punctuation">{</span></code></pre>
+<pre><code class="java">//请求的url例如“/article/1”
+@DeleteMapping(&quot;/article/{id}&quot;)
+public @ResponseBody AjaxResponse deleteArticle(@PathVariable Long id) {</code></pre>
 <ul>
 <li><code>@RequestBody</code>：接收请求体中的复杂数据并转为java对象</li>
 </ul>
@@ -472,71 +472,71 @@ GET /ge">
 <p>Spring提供了实体封装类<code>ResponseEntity</code>和注解<code>@ResponseStatus</code>。</p>
 <p><code>ResponseEntity</code>可以有效地封装错误消息、响应头和状态码，<code>@ResponseStatus</code>相对功能更少，可以配置指定的状态码返回给客户端。（<code>HttpStatus</code>中枚举了许多状态码）</p>
 <p>示例：（使用了lombok）</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Slf4j</span>
-<span class="token annotation punctuation">@RestController</span>
-<span class="token annotation punctuation">@RequestMapping</span><span class="token punctuation">(</span><span class="token string">"/article"</span><span class="token punctuation">)</span>
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">ArticleRestController</span> <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">//增加一篇Article ，使用POST方法</span>
-    <span class="token annotation punctuation">@ResponseStatus</span><span class="token punctuation">(</span>HttpStatus<span class="token punctuation">.</span>CREATED<span class="token punctuation">)</span>
-    <span class="token annotation punctuation">@RequestMapping</span><span class="token punctuation">(</span>value <span class="token operator">=</span> <span class="token string">"/"</span><span class="token punctuation">,</span> method <span class="token operator">=</span> POST<span class="token punctuation">,</span> produces <span class="token operator">=</span> <span class="token string">"application/json"</span><span class="token punctuation">)</span>
-    <span class="token keyword">public</span> String <span class="token function">saveArticle</span><span class="token punctuation">(</span><span class="token annotation punctuation">@RequestBody</span> Article article<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        log<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"saveArticle：{}"</span><span class="token punctuation">,</span>article<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> <span class="token string">"{\"status\":1,\"msg\":\"success\"}"</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+<pre><code class="java">@Slf4j
+@RestController
+@RequestMapping(&quot;/article&quot;)
+public class ArticleRestController {
+    //增加一篇Article ，使用POST方法
+    @ResponseStatus(HttpStatus.CREATED)
+    @RequestMapping(value = &quot;/&quot;, method = POST, produces = &quot;application/json&quot;)
+    public String saveArticle(@RequestBody Article article) {
+        log.info(&quot;saveArticle：{}&quot;,article);
+        return &quot;{\&quot;status\&quot;:1,\&quot;msg\&quot;:\&quot;success\&quot;}&quot;;
+    }
 
-    <span class="token comment" spellcheck="true">//获取一篇Article ，使用GET方法</span>
-    <span class="token annotation punctuation">@RequestMapping</span><span class="token punctuation">(</span>value <span class="token operator">=</span> <span class="token string">"/{id}"</span><span class="token punctuation">,</span> method <span class="token operator">=</span> GET<span class="token punctuation">,</span> produces <span class="token operator">=</span> <span class="token string">"application/json"</span><span class="token punctuation">)</span>
-    <span class="token keyword">public</span> ResponseEntity<span class="token operator">&lt;</span>Article<span class="token operator">></span> <span class="token function">getArticle</span><span class="token punctuation">(</span><span class="token annotation punctuation">@PathVariable</span> <span class="token keyword">long</span> id<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        Article article <span class="token operator">=</span> Article<span class="token punctuation">.</span><span class="token function">builder</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-                <span class="token punctuation">.</span><span class="token function">id</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
-                <span class="token punctuation">.</span><span class="token function">author</span><span class="token punctuation">(</span><span class="token string">"123"</span><span class="token punctuation">)</span>
-                <span class="token punctuation">.</span><span class="token function">content</span><span class="token punctuation">(</span><span class="token string">"456"</span><span class="token punctuation">)</span>
-                <span class="token punctuation">.</span><span class="token function">createTime</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-                <span class="token punctuation">.</span><span class="token function">title</span><span class="token punctuation">(</span><span class="token string">"789"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">build</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        HttpHeaders headers <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HttpHeaders</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        headers<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token string">"success"</span><span class="token punctuation">,</span><span class="token string">"success"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">ResponseEntity</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span>article<span class="token punctuation">,</span>headers<span class="token punctuation">,</span>HttpStatus<span class="token punctuation">.</span>OK<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    //获取一篇Article ，使用GET方法
+    @RequestMapping(value = &quot;/{id}&quot;, method = GET, produces = &quot;application/json&quot;)
+    public ResponseEntity&lt;Article&gt; getArticle(@PathVariable long id) {
+        Article article = Article.builder()
+                .id(1)
+                .author(&quot;123&quot;)
+                .content(&quot;456&quot;)
+                .createTime(new Date())
+                .title(&quot;789&quot;).build();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(&quot;success&quot;,&quot;success&quot;);
+        return new ResponseEntity&lt;&gt;(article,headers,HttpStatus.OK);
+    }
+}</code></pre>
 <p>至于处理异常，需要两个注解：<code>@ControllerAdvice</code>和<code>@ExceptionHandler</code>。</p>
 <p><code>@ControllerAdvice</code>的作用是给控制器增加通知，作用于类上，定义了一个控制器的通知类。</p>
 <p><code>@ExceptionHandler</code>配合<code>@ControllerAdvice</code>使用定义控制器发生异常后的操作，一般来说，发生异常后，可以跳转到指定的错误页面，以避免用户使用的不友好。</p>
 <p>示例（在MVC中）：</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@ControllerAdvice</span><span class="token punctuation">(</span>
-        <span class="token comment" spellcheck="true">//指定拦截的包</span>
-        basePackages <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token string">"com.rhett.bootweb.controller.*"</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
-        <span class="token comment" spellcheck="true">//被标注为@Controller的类才拦截</span>
-        annotations <span class="token operator">=</span> Controller<span class="token punctuation">.</span><span class="token keyword">class</span>
-<span class="token punctuation">)</span>
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">ErrorControllerAdvice</span> <span class="token punctuation">{</span>
+<pre><code class="java">@ControllerAdvice(
+        //指定拦截的包
+        basePackages = {&quot;com.rhett.bootweb.controller.*&quot;},
+        //被标注为@Controller的类才拦截
+        annotations = Controller.class
+)
+public class ErrorControllerAdvice {
 
-    <span class="token annotation punctuation">@ExceptionHandler</span>
-    <span class="token keyword">public</span> String <span class="token function">exception</span><span class="token punctuation">(</span>Model model<span class="token punctuation">,</span> Exception ex<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">//给数据模型增加异常信息</span>
-        model<span class="token punctuation">.</span><span class="token function">addAttribute</span><span class="token punctuation">(</span><span class="token string">"exception_message"</span><span class="token punctuation">,</span>ex<span class="token punctuation">.</span><span class="token function">getMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//返回异常视图</span>
-        <span class="token keyword">return</span> <span class="token string">"exception"</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    @ExceptionHandler
+    public String exception(Model model, Exception ex){
+        //给数据模型增加异常信息
+        model.addAttribute(&quot;exception_message&quot;,ex.getMessage());
+        //返回异常视图
+        return &quot;exception&quot;;
+    }
+}</code></pre>
 <p>示例（在RESTful API中）：</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@ControllerAdvice</span><span class="token punctuation">(</span>
-        basePackages <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token string">"com.rhett.bootweb.controller.*"</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
-        annotations <span class="token operator">=</span> Controller<span class="token punctuation">.</span><span class="token keyword">class</span>
-<span class="token punctuation">)</span>
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">ErrorControllerAdvice</span> <span class="token punctuation">{</span>
+<pre><code class="java">@ControllerAdvice(
+        basePackages = {&quot;com.rhett.bootweb.controller.*&quot;},
+        annotations = Controller.class
+)
+public class ErrorControllerAdvice {
 
-    <span class="token annotation punctuation">@ExceptionHandler</span>
-    <span class="token annotation punctuation">@ResponseBody</span>
-    <span class="token comment" spellcheck="true">//返回错误状态码</span>
-    <span class="token annotation punctuation">@ResponseStatus</span><span class="token punctuation">(</span>HttpStatus<span class="token punctuation">.</span>INTERNAL_SERVER_ERROR<span class="token punctuation">)</span>
-    <span class="token keyword">public</span> Map<span class="token operator">&lt;</span>String<span class="token punctuation">,</span>Object<span class="token operator">></span> <span class="token function">exception</span><span class="token punctuation">(</span>HttpServletRequest request<span class="token punctuation">,</span> Exception ex<span class="token punctuation">)</span><span class="token punctuation">{</span>
-        Map<span class="token operator">&lt;</span>String<span class="token punctuation">,</span>Object<span class="token operator">></span> msgMap <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">//获取异常信息</span>
-        msgMap<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span><span class="token string">"message"</span><span class="token punctuation">,</span>ex<span class="token punctuation">.</span><span class="token function">getMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        msgMap<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span><span class="token string">"cause"</span><span class="token punctuation">,</span>ex<span class="token punctuation">.</span><span class="token function">getStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> msgMap<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    @ExceptionHandler
+    @ResponseBody
+    //返回错误状态码
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map&lt;String,Object&gt; exception(HttpServletRequest request, Exception ex){
+        Map&lt;String,Object&gt; msgMap = new HashMap&lt;&gt;();
+        //获取异常信息
+        msgMap.put(&quot;message&quot;,ex.getMessage());
+        msgMap.put(&quot;cause&quot;,ex.getStackTrace());
+        return msgMap;
+    }
+}</code></pre>
 <p><code>@ExceptionHandler</code>还可以指定一个value，为某一个具体Excepetion的class对象，只针对某一具体异常进行拦截。</p>
 <p><code>@ControllerAdvice</code>还可以配合<code>@InitBinder</code>使用（在控制器参数转换前被执行的代码）</p>
 
@@ -1139,7 +1139,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1219,6 +1219,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

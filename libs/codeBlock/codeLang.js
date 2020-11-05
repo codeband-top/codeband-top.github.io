@@ -11,7 +11,9 @@ $(function () {
       return true;
     };
     var lang_name = code_language.replace("line-numbers", "").trim().replace("language-", "").trim();
-
+    if (lang_name == "none") {
+      return true;
+    };
     // 首字母大写
     // lang_name = lang_name.slice(0, 1).toUpperCase() + lang_name.slice(1);
     

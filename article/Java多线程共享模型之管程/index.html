@@ -28,10 +28,10 @@ Monitor的结构：WaitSet、EntryList、Owner
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -439,33 +439,33 @@ Monitor的结构：WaitSet、EntryList、Owner
 <li>如果没有开启偏向锁，那么对象创建后，markword 值为 0x01 即最后 3 位为 001，这时它的 hashcode、age 都为 0，第一次用到 hashcode 时才会赋值</li>
 </ul>
 <p>调用 wait/notify也会撤销偏向锁：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> InterruptedException <span class="token punctuation">{</span>
-    Dog d <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Dog</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    Thread t1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> <span class="token punctuation">{</span>
-        log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span>ClassLayout<span class="token punctuation">.</span><span class="token function">parseInstance</span><span class="token punctuation">(</span>d<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toPrintableSimple</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>d<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span>ClassLayout<span class="token punctuation">.</span><span class="token function">parseInstance</span><span class="token punctuation">(</span>d<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toPrintableSimple</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                d<span class="token punctuation">.</span><span class="token function">wait</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span>ClassLayout<span class="token punctuation">.</span><span class="token function">parseInstance</span><span class="token punctuation">(</span>d<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toPrintableSimple</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token string">"t1"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    t1<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> <span class="token punctuation">{</span>
-        <span class="token keyword">try</span> <span class="token punctuation">{</span>
-            Thread<span class="token punctuation">.</span><span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">6000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>d<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"notify"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            d<span class="token punctuation">.</span><span class="token function">notify</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token string">"t2"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">public static void main(String[] args) throws InterruptedException {
+    Dog d = new Dog();
+    Thread t1 = new Thread(() -&gt; {
+        log.debug(ClassLayout.parseInstance(d).toPrintableSimple(true));
+        synchronized (d) {
+            log.debug(ClassLayout.parseInstance(d).toPrintableSimple(true));
+            try {
+                d.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            log.debug(ClassLayout.parseInstance(d).toPrintableSimple(true));
+        }
+    }, &quot;t1&quot;);
+    t1.start();
+    new Thread(() -&gt; {
+        try {
+            Thread.sleep(6000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        synchronized (d) {
+            log.debug(&quot;notify&quot;);
+            d.notify();
+        }
+    }, &quot;t2&quot;).start();
+}</code></pre>
 <h3 id="批量重偏向">2.4.1 批量重偏向</h3><p>当一个线程创建了大量对象并执行了初始的同步操作，后来另一个线程也来将这些对象作为锁对象进行操作，会导偏向锁重偏向的操作。</p>
 <p>如果对象虽然被多个线程访问，但没有竞争，这时偏向了线程 T1 的对象仍有机会重新偏向 T2，重偏向会重置对象的 Thread ID.</p>
 <p>默认偏向锁批量重偏向阈值为20。</p>
@@ -488,16 +488,16 @@ Monitor的结构：WaitSet、EntryList、Owner
 <li><code>obj.notifyAll()</code> 让 object 上正在 waitSet 等待的线程全部唤醒</li>
 </ul>
 <p>它们都是线程之间进行协作的手段，都属于 Object 对象的方法。必须获得此对象的锁，才能调用这几个方法</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">synchronized</span><span class="token punctuation">(</span>lock<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">while</span><span class="token punctuation">(</span>条件不成立<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        lock<span class="token punctuation">.</span><span class="token function">wait</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">// 干活</span>
-<span class="token punctuation">}</span>
-<span class="token comment" spellcheck="true">//另一个线程</span>
-<span class="token keyword">synchronized</span><span class="token punctuation">(</span>lock<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    lock<span class="token punctuation">.</span><span class="token function">notifyAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">synchronized(lock) {
+    while(条件不成立) {
+        lock.wait();
+    }
+    // 干活
+}
+//另一个线程
+synchronized(lock) {
+    lock.notifyAll();
+}</code></pre>
 <h2 id="sleep-long-n-和-wait-long-n-的区别">3.3 sleep(long n) 和 wait(long n) 的区别</h2><ol>
 <li>sleep 是 Thread 方法，而 wait 是 Object 的方法 </li>
 <li>sleep 不需要强制和 synchronized 配合使用，但 wait 需要和 synchronized 一起用 </li>
@@ -511,70 +511,70 @@ Monitor的结构：WaitSet、EntryList、Owner
 <li>JDK 中，join 的实现、Future 的实现，采用的就是此模式</li>
 <li>因为要等待另一方的结果，因此归类到同步模式</li>
 </ul>
-<h2 id="实现：">4.2 实现：</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">GuardedObject</span> <span class="token punctuation">{</span>
-    <span class="token keyword">private</span> Object response<span class="token punctuation">;</span>
-    <span class="token keyword">private</span> <span class="token keyword">final</span> Object lock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Object</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">public</span> Object <span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>lock<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// 条件不满足则等待</span>
-            <span class="token keyword">while</span> <span class="token punctuation">(</span>response <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                    lock<span class="token punctuation">.</span><span class="token function">wait</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-            <span class="token keyword">return</span> response<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">complete</span><span class="token punctuation">(</span>Object response<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>lock<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// 条件满足，通知等待线程</span>
-            <span class="token keyword">this</span><span class="token punctuation">.</span>response <span class="token operator">=</span> response<span class="token punctuation">;</span>
-            lock<span class="token punctuation">.</span><span class="token function">notifyAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<h2 id="实现：">4.2 实现：</h2><pre><code class="java">class GuardedObject {
+    private Object response;
+    private final Object lock = new Object();
+    public Object get() {
+        synchronized (lock) {
+            // 条件不满足则等待
+            while (response == null) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            return response;
+        }
+    }
+    public void complete(Object response) {
+        synchronized (lock) {
+            // 条件满足，通知等待线程
+            this.response = response;
+            lock.notifyAll();
+        }
+    }
+}</code></pre>
 <p>带超时的版本：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">GuardedObjectV2</span> <span class="token punctuation">{</span>
-    <span class="token keyword">private</span> Object response<span class="token punctuation">;</span>
-    <span class="token keyword">private</span> <span class="token keyword">final</span> Object lock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Object</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">public</span> Object <span class="token function">get</span><span class="token punctuation">(</span><span class="token keyword">long</span> millis<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>lock<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">// 1) 记录最初时间</span>
-        <span class="token keyword">long</span> begin <span class="token operator">=</span> System<span class="token punctuation">.</span><span class="token function">currentTimeMillis</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment" spellcheck="true">// 2) 已经经历的时间</span>
-        <span class="token keyword">long</span> timePassed <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
-        <span class="token keyword">while</span> <span class="token punctuation">(</span>response <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// 4) 假设 millis 是 1000，结果在 400 时唤醒了，那么还有 600 要等</span>
-            <span class="token keyword">long</span> waitTime <span class="token operator">=</span> millis <span class="token operator">-</span> timePassed<span class="token punctuation">;</span>
-            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"waitTime: {}"</span><span class="token punctuation">,</span> waitTime<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">if</span> <span class="token punctuation">(</span>waitTime <span class="token operator">&lt;=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"break..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token keyword">break</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-            <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                lock<span class="token punctuation">.</span><span class="token function">wait</span><span class="token punctuation">(</span>waitTime<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-            <span class="token comment" spellcheck="true">// 3) 如果提前被唤醒，这时已经经历的时间假设为 400</span>
-            timePassed <span class="token operator">=</span> System<span class="token punctuation">.</span><span class="token function">currentTimeMillis</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> begin<span class="token punctuation">;</span>
-            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"timePassed: {}, object is null {}"</span><span class="token punctuation">,</span>
-            timePassed<span class="token punctuation">,</span> response <span class="token operator">==</span> null<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">return</span> response<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">complete</span><span class="token punctuation">(</span>Object response<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>lock<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// 条件满足，通知等待线程</span>
-            <span class="token keyword">this</span><span class="token punctuation">.</span>response <span class="token operator">=</span> response<span class="token punctuation">;</span>
-            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"notify..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            lock<span class="token punctuation">.</span><span class="token function">notifyAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">class GuardedObjectV2 {
+    private Object response;
+    private final Object lock = new Object();
+    public Object get(long millis) {
+        synchronized (lock) {
+        // 1) 记录最初时间
+        long begin = System.currentTimeMillis();
+        // 2) 已经经历的时间
+        long timePassed = 0;
+        while (response == null) {
+            // 4) 假设 millis 是 1000，结果在 400 时唤醒了，那么还有 600 要等
+            long waitTime = millis - timePassed;
+            log.debug(&quot;waitTime: {}&quot;, waitTime);
+            if (waitTime &lt;= 0) {
+                log.debug(&quot;break...&quot;);
+                break;
+            }
+            try {
+                lock.wait(waitTime);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            // 3) 如果提前被唤醒，这时已经经历的时间假设为 400
+            timePassed = System.currentTimeMillis() - begin;
+            log.debug(&quot;timePassed: {}, object is null {}&quot;,
+            timePassed, response == null);
+        }
+        return response;
+        }
+    }
+    public void complete(Object response) {
+        synchronized (lock) {
+            // 条件满足，通知等待线程
+            this.response = response;
+            log.debug(&quot;notify...&quot;);
+            lock.notifyAll();
+        }
+    }
+}</code></pre>
 <h1 id="异步模式之生产者-消费者">5 异步模式之生产者/消费者</h1><p><img src="https://api.codetool.top/img/15805814773211.png" alt></p>
 <h2 id="要点">5.1 要点</h2><ul>
 <li>与前面的保护性暂停中的 GuardObject 不同，不需要产生结果和消费结果的线程一一对应</li>
@@ -583,79 +583,79 @@ Monitor的结构：WaitSet、EntryList、Owner
 <li>消息队列是有容量限制的，满时不会再加入数据，空时不会再消耗数据</li>
 <li>JDK 中各种阻塞队列，采用的就是这种模式</li>
 </ul>
-<h2 id="实现">5.2 实现</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Message</span> <span class="token punctuation">{</span>
-    <span class="token keyword">private</span> <span class="token keyword">int</span> id<span class="token punctuation">;</span>
-    <span class="token keyword">private</span> Object message<span class="token punctuation">;</span>
-    <span class="token keyword">public</span> <span class="token function">Message</span><span class="token punctuation">(</span><span class="token keyword">int</span> id<span class="token punctuation">,</span> Object message<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>id <span class="token operator">=</span> id<span class="token punctuation">;</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>message <span class="token operator">=</span> message<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">getId</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> id<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">public</span> Object <span class="token function">getMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> message<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
+<h2 id="实现">5.2 实现</h2><pre><code class="java">class Message {
+    private int id;
+    private Object message;
+    public Message(int id, Object message) {
+        this.id = id;
+        this.message = message;
+    }
+    public int getId() {
+        return id;
+    }
+    public Object getMessage() {
+        return message;
+    }
+}
 
-<span class="token keyword">class</span> <span class="token class-name">MessageQueue</span> <span class="token punctuation">{</span>
-    <span class="token keyword">private</span> LinkedList<span class="token operator">&lt;</span>Message<span class="token operator">></span> queue<span class="token punctuation">;</span>
-    <span class="token keyword">private</span> <span class="token keyword">int</span> capacity<span class="token punctuation">;</span>
-    <span class="token keyword">public</span> <span class="token function">MessageQueue</span><span class="token punctuation">(</span><span class="token keyword">int</span> capacity<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>capacity <span class="token operator">=</span> capacity<span class="token punctuation">;</span>
-        queue <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">LinkedList</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">public</span> Message <span class="token function">take</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>queue<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">while</span> <span class="token punctuation">(</span>queue<span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"没货了, wait"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                    queue<span class="token punctuation">.</span><span class="token function">wait</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-            Message message <span class="token operator">=</span> queue<span class="token punctuation">.</span><span class="token function">removeFirst</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            queue<span class="token punctuation">.</span><span class="token function">notifyAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token keyword">return</span> message<span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">put</span><span class="token punctuation">(</span>Message message<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>queue<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">while</span> <span class="token punctuation">(</span>queue<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> capacity<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"库存已达上限, wait"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                    queue<span class="token punctuation">.</span><span class="token function">wait</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-            queue<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span><span class="token punctuation">;</span>
-            queue<span class="token punctuation">.</span><span class="token function">notifyAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>   
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+class MessageQueue {
+    private LinkedList&lt;Message&gt; queue;
+    private int capacity;
+    public MessageQueue(int capacity) {
+        this.capacity = capacity;
+        queue = new LinkedList&lt;&gt;();
+    }
+    public Message take() {
+        synchronized (queue) {
+            while (queue.isEmpty()) {
+                log.debug(&quot;没货了, wait&quot;);
+                try {
+                    queue.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            Message message = queue.removeFirst();
+            queue.notifyAll();
+            return message;
+        }
+    }
+    public void put(Message message) {
+        synchronized (queue) {
+            while (queue.size() == capacity) {
+                log.debug(&quot;库存已达上限, wait&quot;);
+                try {
+                    queue.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            queue.addLast(message);
+            queue.notifyAll();
+        }   
+    }
+}</code></pre>
 <h1 id="park-unpark">6 park unpark</h1><h2 id="基本使用">6.1 基本使用</h2><p>它们是 LockSupport 类中的方法</p>
-<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// 暂停当前线程</span>
-LockSupport<span class="token punctuation">.</span><span class="token function">park</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token comment" spellcheck="true">// 恢复某个线程的运行</span>
-LockSupport<span class="token punctuation">.</span><span class="token function">unpark</span><span class="token punctuation">(</span>暂停线程对象<span class="token punctuation">)</span></code></pre>
+<pre><code class="java">// 暂停当前线程
+LockSupport.park();
+// 恢复某个线程的运行
+LockSupport.unpark(暂停线程对象)</code></pre>
 <p>先park再unpark</p>
-<pre class=" language-java"><code class="language-java">Thread t1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> <span class="token punctuation">{</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"start..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        Thread<span class="token punctuation">.</span><span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">1000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"park..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        LockSupport<span class="token punctuation">.</span><span class="token function">park</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"resume..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span><span class="token punctuation">,</span><span class="token string">"t1"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-t1<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-Thread<span class="token punctuation">.</span><span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">2000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"unpark..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-LockSupport<span class="token punctuation">.</span><span class="token function">unpark</span><span class="token punctuation">(</span>t1<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="java">Thread t1 = new Thread(() -&gt; {
+    System.out.println(&quot;start...&quot;);
+    try {
+        Thread.sleep(1000);
+        System.out.println(&quot;park...&quot;);
+        LockSupport.park();
+        System.out.println(&quot;resume...&quot;);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+},&quot;t1&quot;);
+t1.start();
+Thread.sleep(2000);
+System.out.println(&quot;unpark...&quot;);
+LockSupport.unpark(t1);</code></pre>
 <p>可以先调用unpark再调用park，会抵消。（但是多次unpark也只能抵消一次park）</p>
 <h2 id="特点">6.2 特点</h2><p>与 Object 的 wait &amp; notify 相比</p>
 <ul>
@@ -671,66 +671,66 @@ LockSupport<span class="token punctuation">.</span><span class="token function">
 <li>支持多个条件变量</li>
 </ul>
 <p>与 synchronized 一样，都支持可重入</p>
-<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// 获取锁</span>
-reentrantLock<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">try</span> <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">// 临界区</span>
-<span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">// 释放锁</span>
-    reentrantLock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+<pre><code class="java">// 获取锁
+reentrantLock.lock();
+try {
+    // 临界区
+} finally {
+    // 释放锁
+    reentrantLock.unlock();
+}
 </code></pre>
 <h2 id="可打断">7.1 可打断</h2><p>lockInterruptibly()方法等待锁期间可以被interrupt打断</p>
-<pre class=" language-java"><code class="language-java">ReentrantLock lock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ReentrantLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-Thread t1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> <span class="token punctuation">{</span>
-    log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"启动..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        <span class="token comment" spellcheck="true">//如果该锁没有被占用就会获得锁</span>
-        <span class="token comment" spellcheck="true">//如果该锁被占用就进入阻塞队列，可以被其他线程用interrupt打断</span>
-        lock<span class="token punctuation">.</span><span class="token function">lockInterruptibly</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"等锁的过程中被打断"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"获得了锁"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-        lock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token string">"t1"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-lock<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"获得了锁"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-t1<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">try</span> <span class="token punctuation">{</span>
-    <span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    t1<span class="token punctuation">.</span><span class="token function">interrupt</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"执行打断"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-    lock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">ReentrantLock lock = new ReentrantLock();
+Thread t1 = new Thread(() -&gt; {
+    log.debug(&quot;启动...&quot;);
+    try {
+        //如果该锁没有被占用就会获得锁
+        //如果该锁被占用就进入阻塞队列，可以被其他线程用interrupt打断
+        lock.lockInterruptibly();
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+        log.debug(&quot;等锁的过程中被打断&quot;);
+        return;
+    }
+    try {
+        log.debug(&quot;获得了锁&quot;);
+    } finally {
+        lock.unlock();
+    }
+}, &quot;t1&quot;);
+lock.lock();
+log.debug(&quot;获得了锁&quot;);
+t1.start();
+try {
+    sleep(1);
+    t1.interrupt();
+    log.debug(&quot;执行打断&quot;);
+} finally {
+    lock.unlock();
+}</code></pre>
 <h2 id="锁超时">7.2 锁超时</h2><p><code>tryLock()</code>可带参可不带参，如果未指定时间，只要该锁被占用就获取不到锁，返回false，如果指定时间，在指定时间内该锁还被占用则获取不到锁，返回false</p>
-<pre class=" language-java"><code class="language-java">ReentrantLock lock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ReentrantLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-Thread t1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> <span class="token punctuation">{</span>
-    log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"启动..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>lock<span class="token punctuation">.</span><span class="token function">tryLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"获取立刻失败，返回"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span>
-        log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"获得了锁"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-        lock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token string">"t1"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-lock<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"获得了锁"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-t1<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">try</span> <span class="token punctuation">{</span>
-    <span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
-    lock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">ReentrantLock lock = new ReentrantLock();
+Thread t1 = new Thread(() -&gt; {
+    log.debug(&quot;启动...&quot;);
+    if (!lock.tryLock()) {
+        log.debug(&quot;获取立刻失败，返回&quot;);
+        return;
+    }
+    try {
+        log.debug(&quot;获得了锁&quot;);
+    } finally {
+        lock.unlock();
+    }
+}, &quot;t1&quot;);
+lock.lock();
+log.debug(&quot;获得了锁&quot;);
+t1.start();
+try {
+    sleep(2);
+} finally {
+    lock.unlock();
+}</code></pre>
 <h2 id="公平锁">7.3 公平锁</h2><p>ReentrantLock 默认是不公平的，可以使用<code>new ReentrantLock(true)</code><br>设置为公平锁，采用先到先得的方法获得锁。（排队）</p>
 <h2 id="条件变量">7.4 条件变量</h2><ul>
 <li><code>Condition.await()</code></li>
@@ -746,53 +746,53 @@ t1<span class="token punctuation">.</span><span class="token function">start</sp
 <li>竞争 lock 锁成功后，从 <code>await</code> 后继续执行</li>
 </ul>
 <h1 id="同步模式之顺序控制">8 同步模式之顺序控制</h1><h2 id="固定顺序">8.1 固定顺序</h2><p>比如，必须先 2 后 1 打印</p>
-<h3 id="wait-notify-版">8.1.1 wait notify 版</h3><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">// 用来同步的对象</span>
-<span class="token keyword">static</span> Object obj <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Object</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token comment" spellcheck="true">// t2 运行标记， 代表 t2 是否执行过</span>
-<span class="token keyword">static</span> <span class="token keyword">boolean</span> t2runed <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    Thread t1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> <span class="token punctuation">{</span>
-        <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>obj<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// 如果 t2 没有执行过</span>
-            <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token operator">!</span>t2runed<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                <span class="token keyword">try</span> <span class="token punctuation">{</span>
-                    <span class="token comment" spellcheck="true">// t1 先等一会</span>
-                    obj<span class="token punctuation">.</span><span class="token function">wait</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-                    e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    Thread t2 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> <span class="token punctuation">{</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">synchronized</span> <span class="token punctuation">(</span>obj<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// 修改运行标记</span>
-            t2runed <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
-            <span class="token comment" spellcheck="true">// 通知 obj 上等待的线程（可能有多个，因此需要用 notifyAll）</span>
-            obj<span class="token punctuation">.</span><span class="token function">notifyAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    t1<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    t2<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<h3 id="wait-notify-版">8.1.1 wait notify 版</h3><pre><code class="java">// 用来同步的对象
+static Object obj = new Object();
+// t2 运行标记， 代表 t2 是否执行过
+static boolean t2runed = false;
+    public static void main(String[] args) {
+    Thread t1 = new Thread(() -&gt; {
+        synchronized (obj) {
+            // 如果 t2 没有执行过
+            while (!t2runed) {
+                try {
+                    // t1 先等一会
+                    obj.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        System.out.println(1);
+    });
+    Thread t2 = new Thread(() -&gt; {
+        System.out.println(2);
+        synchronized (obj) {
+            // 修改运行标记
+            t2runed = true;
+            // 通知 obj 上等待的线程（可能有多个，因此需要用 notifyAll）
+            obj.notifyAll();
+        }
+    });
+    t1.start();
+    t2.start();
+}</code></pre>
 <h3 id="Park-Unpark-版">8.1.2 Park Unpark 版</h3><p>park 和 unpark 方法比较灵活，他俩谁先调用，谁后调用无所谓。并且是以线程为单位进行『暂停』和『恢复』，不需要『同步对象』和『运行标记』</p>
-<pre class=" language-java"><code class="language-java">Thread t1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> <span class="token punctuation">{</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{</span> 
-        Thread<span class="token punctuation">.</span><span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">1000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
-    <span class="token comment" spellcheck="true">// 当没有『许可』时，当前线程暂停运行；有『许可』时，用掉这个『许可』，当前线程恢复运行</span>
-    LockSupport<span class="token punctuation">.</span><span class="token function">park</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"1"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-Thread t2 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> <span class="token punctuation">{</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"2"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token comment" spellcheck="true">// 给线程 t1 发放『许可』（多次连续调用 unpark 只会发放一个『许可』）</span>
-    LockSupport<span class="token punctuation">.</span><span class="token function">unpark</span><span class="token punctuation">(</span>t1<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-t1<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-t2<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="java">Thread t1 = new Thread(() -&gt; {
+    try { 
+        Thread.sleep(1000);
+        } catch (InterruptedException e) { }
+    // 当没有『许可』时，当前线程暂停运行；有『许可』时，用掉这个『许可』，当前线程恢复运行
+    LockSupport.park();
+    System.out.println(&quot;1&quot;);
+});
+Thread t2 = new Thread(() -&gt; {
+    System.out.println(&quot;2&quot;);
+    // 给线程 t1 发放『许可』（多次连续调用 unpark 只会发放一个『许可』）
+    LockSupport.unpark(t1);
+});
+t1.start();
+t2.start();</code></pre>
 <h2 id="交替输出">8.2 交替输出</h2><p>见<a href="../leetcode1115-交替打印FooBar">leetcode1115-交替打印FooBar</a></p>
 <p>除此之外知道线程对象还可以使用park、unpark。</p>
 
@@ -1408,7 +1408,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1488,6 +1488,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

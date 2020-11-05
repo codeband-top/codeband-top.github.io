@@ -30,10 +30,10 @@ void ad">
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -407,7 +407,7 @@ void ad">
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    340
+                    345
                 </div>
                 
 
@@ -439,44 +439,44 @@ void ad">
 <li>如果数据流中 99% 的整数都在 0 到 100 范围内，你将如何优化你的算法？</li>
 </ol>
 <h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>求中位树可以维护两个堆，一个大顶堆用于存放数据较小的半部分，一个小顶堆用于存放数据较大的半部分。</p>
-<h2 id="代码">2.2 代码</h2><pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">MedianFinder</span> <span class="token punctuation">{</span>
+<h2 id="代码">2.2 代码</h2><pre><code class="java">public class MedianFinder {
 
-    <span class="token keyword">private</span> <span class="token keyword">int</span> count<span class="token punctuation">;</span>
-    <span class="token keyword">private</span> PriorityQueue<span class="token operator">&lt;</span>Integer<span class="token operator">></span> maxheap<span class="token punctuation">;</span>
-    <span class="token keyword">private</span> PriorityQueue<span class="token operator">&lt;</span>Integer<span class="token operator">></span> minheap<span class="token punctuation">;</span>
+    private int count;
+    private PriorityQueue&lt;Integer&gt; maxheap;
+    private PriorityQueue&lt;Integer&gt; minheap;
 
-    <span class="token comment" spellcheck="true">/**
+    /**
      * initialize your data structure here.
-     */</span>
-    <span class="token keyword">public</span> <span class="token function">MedianFinder</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        count <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
-        maxheap <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">PriorityQueue</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">(</span>x<span class="token punctuation">,</span> y<span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> y <span class="token operator">-</span> x<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        minheap <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">PriorityQueue</span><span class="token operator">&lt;</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+     */
+    public MedianFinder() {
+        count = 0;
+        maxheap = new PriorityQueue&lt;&gt;((x, y) -&gt; y - x);
+        minheap = new PriorityQueue&lt;&gt;();
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">addNum</span><span class="token punctuation">(</span><span class="token keyword">int</span> num<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        count <span class="token operator">+=</span> <span class="token number">1</span><span class="token punctuation">;</span>
-        maxheap<span class="token punctuation">.</span><span class="token function">offer</span><span class="token punctuation">(</span>num<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        minheap<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>maxheap<span class="token punctuation">.</span><span class="token function">poll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>count<span class="token operator">%</span><span class="token number">2</span> <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            maxheap<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>minheap<span class="token punctuation">.</span><span class="token function">poll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+    public void addNum(int num) {
+        count += 1;
+        maxheap.offer(num);
+        minheap.add(maxheap.poll());
+        if (count%2 != 0) {
+            maxheap.add(minheap.poll());
+        }
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">double</span> <span class="token function">findMedian</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>count<span class="token operator">%</span><span class="token number">2</span> <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">)</span> 
-            <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token keyword">double</span><span class="token punctuation">)</span> maxheap<span class="token punctuation">.</span><span class="token function">peek</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">else</span>
-            <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token keyword">double</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>maxheap<span class="token punctuation">.</span><span class="token function">peek</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> minheap<span class="token punctuation">.</span><span class="token function">peek</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">/</span> <span class="token number">2</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
+    public double findMedian() {
+        if (count%2 != 0) 
+            return (double) maxheap.peek();
+        else
+            return (double) (maxheap.peek() + minheap.peek()) / 2;
+    }
+}
 
-<span class="token comment" spellcheck="true">/**
+/**
  * Your MedianFinder object will be instantiated and called as such:
  * MedianFinder obj = new MedianFinder();
  * obj.addNum(num);
  * double param_2 = obj.findMedian();
- */</span></code></pre>
+ */</code></pre>
 
             </div>
             <hr/>
@@ -1098,7 +1098,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1178,6 +1178,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

@@ -25,10 +25,10 @@
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -364,12 +364,12 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/Hystrix/">
-                                <span class="chip bg-color">Hystrix</span>
-                            </a>
-                        
                             <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">
                                 <span class="chip bg-color">微服务</span>
+                            </a>
+                        
+                            <a href="/tags/Hystrix/">
+                                <span class="chip bg-color">Hystrix</span>
                             </a>
                         
                     </div>
@@ -402,7 +402,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    716
+                    752
                 </div>
                 
 
@@ -421,28 +421,28 @@
 <p>Closed：熔断器关闭状态（所有请求返回成功）</p>
 <p>Open：熔断器打开状态（调用次数累计到达阈值或者比例，熔断器打开，服务直接返回错误）</p>
 <p>Half Open：熔断器半开状态（默认时间过后，进入半熔断状态，允许定量服务请求，如果调用都成功，则认为恢复了，则关闭断路器，反之打开断路器）</p>
-<h1 id="使用">2 使用</h1><pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">//这里即10秒内10次请求中失败6次则熔断</span>
-<span class="token annotation punctuation">@HystrixCommand</span><span class="token punctuation">(</span>
-    <span class="token comment" spellcheck="true">//指定降级方法</span>
-    fallbackMethod <span class="token operator">=</span> <span class="token string">"paymentCircuitBreaker_fallback"</span><span class="token punctuation">,</span> commandProperties <span class="token operator">=</span> <span class="token punctuation">{</span>
-        <span class="token annotation punctuation">@HystrixProperty</span><span class="token punctuation">(</span>name <span class="token operator">=</span> <span class="token string">"circuitBreaker.enabled"</span><span class="token punctuation">,</span> value <span class="token operator">=</span> <span class="token string">"true"</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token comment" spellcheck="true">// 是否开启断路器</span>
-        <span class="token annotation punctuation">@HystrixProperty</span><span class="token punctuation">(</span>name <span class="token operator">=</span> <span class="token string">"circuitBreaker.requestVolumeThreshold"</span><span class="token punctuation">,</span> value <span class="token operator">=</span> <span class="token string">"10"</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token comment" spellcheck="true">// 请求次数</span>
-        <span class="token annotation punctuation">@HystrixProperty</span><span class="token punctuation">(</span>name <span class="token operator">=</span> <span class="token string">"circuitBreaker.sleepWindowInMilliseconds"</span><span class="token punctuation">,</span> value <span class="token operator">=</span> <span class="token string">"10000"</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token comment" spellcheck="true">// 时间窗口期/时间范围</span>
-        <span class="token annotation punctuation">@HystrixProperty</span><span class="token punctuation">(</span>name <span class="token operator">=</span> <span class="token string">"circuitBreaker.errorThresholdPercentage"</span><span class="token punctuation">,</span> value <span class="token operator">=</span> <span class="token string">"60"</span><span class="token punctuation">)</span><span class="token comment" spellcheck="true">// 失败率达到多少后熔断</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">)</span>
-<span class="token keyword">public</span> String <span class="token function">paymentCircuitBreaker</span><span class="token punctuation">(</span><span class="token annotation punctuation">@PathVariable</span><span class="token punctuation">(</span><span class="token string">"id"</span><span class="token punctuation">)</span> Integer id<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>id <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">RuntimeException</span><span class="token punctuation">(</span><span class="token string">"*****id不能是负数"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    String serialNumber <span class="token operator">=</span> IdUtil<span class="token punctuation">.</span><span class="token function">simpleUUID</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> Thread<span class="token punctuation">.</span><span class="token function">currentThread</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token string">"\t"</span> <span class="token operator">+</span> <span class="token string">"调用成功,流水号:"</span> <span class="token operator">+</span> serialNumber<span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+<h1 id="使用">2 使用</h1><pre><code class="java">//这里即10秒内10次请求中失败6次则熔断
+@HystrixCommand(
+    //指定降级方法
+    fallbackMethod = &quot;paymentCircuitBreaker_fallback&quot;, commandProperties = {
+        @HystrixProperty(name = &quot;circuitBreaker.enabled&quot;, value = &quot;true&quot;),// 是否开启断路器
+        @HystrixProperty(name = &quot;circuitBreaker.requestVolumeThreshold&quot;, value = &quot;10&quot;),// 请求次数
+        @HystrixProperty(name = &quot;circuitBreaker.sleepWindowInMilliseconds&quot;, value = &quot;10000&quot;),// 时间窗口期/时间范围
+        @HystrixProperty(name = &quot;circuitBreaker.errorThresholdPercentage&quot;, value = &quot;60&quot;)// 失败率达到多少后熔断
+    }
+)
+public String paymentCircuitBreaker(@PathVariable(&quot;id&quot;) Integer id) {
+    if (id &lt; 0) {
+        throw new RuntimeException(&quot;*****id不能是负数&quot;);
+    }
+    String serialNumber = IdUtil.simpleUUID();
+    return Thread.currentThread().getName() + &quot;\t&quot; + &quot;调用成功,流水号:&quot; + serialNumber;
+}
 
-<span class="token comment" spellcheck="true">//降级方法</span>
-<span class="token keyword">public</span> String <span class="token function">paymentCircuitBreaker_fallback</span><span class="token punctuation">(</span><span class="token annotation punctuation">@PathVariable</span><span class="token punctuation">(</span><span class="token string">"id"</span><span class="token punctuation">)</span> Integer id<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">return</span> <span class="token string">"id 不能负数,请稍后重试,o(╥﹏╥)o id:"</span> <span class="token operator">+</span> id<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+//降级方法
+public String paymentCircuitBreaker_fallback(@PathVariable(&quot;id&quot;) Integer id) {
+    return &quot;id 不能负数,请稍后重试,o(╥﹏╥)o id:&quot; + id;
+}</code></pre>
 <p>关于服务熔断，除了要将<code>circuitBreaker.enabled</code>设为<code>true</code>，还有三个重要的参数：</p>
 <table>
 <thead>
@@ -469,12 +469,12 @@
 </tr>
 </tbody></table>
 <p>然后修改controller调用它：</p>
-<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@GetMapping</span><span class="token punctuation">(</span><span class="token string">"/payment/circuit/{id}"</span><span class="token punctuation">)</span>
-<span class="token keyword">public</span> String <span class="token function">paymentInfo_Timeout</span><span class="token punctuation">(</span><span class="token annotation punctuation">@PathVariable</span><span class="token punctuation">(</span><span class="token string">"id"</span><span class="token punctuation">)</span> Integer id<span class="token punctuation">)</span><span class="token punctuation">{</span>
-    String result <span class="token operator">=</span> paymentService<span class="token punctuation">.</span><span class="token function">paymentCircuitBreaker</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    log<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"****result:"</span><span class="token operator">+</span>result<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> result<span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">@GetMapping(&quot;/payment/circuit/{id}&quot;)
+public String paymentInfo_Timeout(@PathVariable(&quot;id&quot;) Integer id){
+    String result = paymentService.paymentCircuitBreaker(id);
+    log.info(&quot;****result:&quot;+result);
+    return result;
+}</code></pre>
 <p>此时启动服务，若访问 <a href="http://localhost:8001/payment/circuit/-30" target="_blank" rel="noopener">http://localhost:8001/payment/circuit/-30</a> （只要传入id为负数）在10秒钟之内超过10次（此时的失败率是100%），就会触发熔断，在熔断期间内，即使发出正常的请求如 <a href="http://localhost:8001/payment/circuit/10" target="_blank" rel="noopener">http://localhost:8001/payment/circuit/10</a> 也不会得到回复</p>
 
             </div>
@@ -529,12 +529,12 @@
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/Hystrix/">
-                                    <span class="chip bg-color">Hystrix</span>
-                                </a>
-                            
                                 <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">
                                     <span class="chip bg-color">微服务</span>
+                                </a>
+                            
+                                <a href="/tags/Hystrix/">
+                                    <span class="chip bg-color">Hystrix</span>
                                 </a>
                             
                         </div>
@@ -874,12 +874,12 @@
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Hystrix/">
-                        <span class="chip bg-color">Hystrix</span>
-                    </a>
-                    
                     <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">
                         <span class="chip bg-color">微服务</span>
+                    </a>
+                    
+                    <a href="/tags/Hystrix/">
+                        <span class="chip bg-color">Hystrix</span>
                     </a>
                     
                 </div>
@@ -928,12 +928,12 @@
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Hystrix/">
-                        <span class="chip bg-color">Hystrix</span>
-                    </a>
-                    
                     <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">
                         <span class="chip bg-color">微服务</span>
+                    </a>
+                    
+                    <a href="/tags/Hystrix/">
+                        <span class="chip bg-color">Hystrix</span>
                     </a>
                     
                 </div>
@@ -1083,7 +1083,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1163,6 +1163,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->

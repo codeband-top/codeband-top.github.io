@@ -26,10 +26,10 @@ Which of the following can be applied to">
     <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
     <link rel="stylesheet" type="text/css" href="/css/matery.css">
     <link rel="stylesheet" type="text/css" href="/css/my.css">
-    
+    <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
-<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+</head>
 
 
 <body>
@@ -425,19 +425,19 @@ Which of the following can be applied to">
 <p>我选的时候觉得A C有可能，然后因为是单选选了C。</p>
 <p>经测试，类构造器不能带以上任何一个修饰符，如果要声明为最终类，直接在类上修饰为final的就行了。</p>
 <p>而synchronized，我一开始以为因为方法上的<code>synchronized</code>默认锁住的是this对象，而还没构造的对象可能不能锁，但后来发现并不是这个原因，起码下面这段代码是能运行的：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">TestConstructor</span> <span class="token punctuation">{</span>
-    String name<span class="token punctuation">;</span>
-    <span class="token keyword">public</span> <span class="token function">TestConstructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-        <span class="token keyword">synchronized</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-            name <span class="token operator">=</span> <span class="token string">"1"</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+<pre><code class="java">public class TestConstructor {
+    String name;
+    public TestConstructor(){
+        synchronized (this){
+            name = &quot;1&quot;;
+        }
+    }
 
-    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        TestConstructor testConstructor <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">TestConstructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>testConstructor<span class="token punctuation">.</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    public static void main(String[] args) {
+        TestConstructor testConstructor = new TestConstructor();
+        System.out.println(testConstructor.name);
+    }
+}</code></pre>
 <p>并且通过调试发现在进入<code>synchronized</code>代码块之前对象已经创建出来，只是还没有对name赋值。所以可能就是硬不可以吧。</p>
 <h1 id="关于整数和字符串相加的问题">2 关于整数和字符串相加的问题</h1><p>题目：</p>
 <p>如果int x=20, y=5，则语句System.out.println(x+y +””+(x+y)+y);  的输出结果是（）</p>
@@ -447,45 +447,45 @@ Which of the following can be applied to">
 <p>这道题虽然选对了，但是是根据排除法做出来的，因为空字符串后面那部分<code>(x+y)+y</code>必是<code>255</code>，但是空字符串前面的那个<code>x+y</code>我不确定是<code>25</code>还是<code>205</code>。</p>
 <p>经测试，运行结果是25255，那就说明在遇到字符串之前还是做正常的整数加法，而遇到字符串之后都是做字符串拼接。如果思考一下原因，也很好解释，大概就是因为加法是单步执行的（JVM字节码执行的时候一条指令最多操作两个操作数栈中的操作数），那么遇到字符串之前，都不知道后面会有字符串，也就会做正常的整数加法了。</p>
 <h1 id="重载静态多分派">3 重载静态多分派</h1><p>题目：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Demo</span> <span class="token punctuation">{</span>
-    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        Collection<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span> collections <span class="token operator">=</span>
-                <span class="token punctuation">{</span><span class="token keyword">new</span> <span class="token class-name">HashSet</span><span class="token operator">&lt;</span>String<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token operator">&lt;</span>String<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token operator">&lt;</span>String<span class="token punctuation">,</span> String<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">values</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
-        Super subToSuper <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Sub</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">for</span> <span class="token punctuation">(</span>Collection<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> collection <span class="token operator">:</span> collections<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>subToSuper<span class="token punctuation">.</span><span class="token function">getType</span><span class="token punctuation">(</span>collection<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+<pre><code class="java">public class Demo {
+    public static void main(String[] args) {
+        Collection&lt;?&gt;[] collections =
+                {new HashSet&lt;String&gt;(), new ArrayList&lt;String&gt;(), new HashMap&lt;String, String&gt;().values()};
+        Super subToSuper = new Sub();
+        for (Collection&lt;?&gt; collection : collections) {
+            System.out.println(subToSuper.getType(collection));
+        }
+    }
 
-    <span class="token keyword">abstract</span> <span class="token keyword">static</span> <span class="token keyword">class</span> <span class="token class-name">Super</span> <span class="token punctuation">{</span>
-        <span class="token keyword">public</span> <span class="token keyword">static</span> String <span class="token function">getType</span><span class="token punctuation">(</span>Collection<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> collection<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">return</span> <span class="token string">"Super:collection"</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
+    abstract static class Super {
+        public static String getType(Collection&lt;?&gt; collection) {
+            return &quot;Super:collection&quot;;
+        }
 
-        <span class="token keyword">public</span> <span class="token keyword">static</span> String <span class="token function">getType</span><span class="token punctuation">(</span>List<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> list<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">return</span> <span class="token string">"Super:list"</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
+        public static String getType(List&lt;?&gt; list) {
+            return &quot;Super:list&quot;;
+        }
 
-        <span class="token keyword">public</span> String <span class="token function">getType</span><span class="token punctuation">(</span>ArrayList<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> list<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">return</span> <span class="token string">"Super:arrayList"</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
+        public String getType(ArrayList&lt;?&gt; list) {
+            return &quot;Super:arrayList&quot;;
+        }
 
-        <span class="token keyword">public</span> <span class="token keyword">static</span> String <span class="token function">getType</span><span class="token punctuation">(</span>Set<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> set<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">return</span> <span class="token string">"Super:set"</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
+        public static String getType(Set&lt;?&gt; set) {
+            return &quot;Super:set&quot;;
+        }
 
-        <span class="token keyword">public</span> String <span class="token function">getType</span><span class="token punctuation">(</span>HashSet<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> set<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token keyword">return</span> <span class="token string">"Super:hashSet"</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+        public String getType(HashSet&lt;?&gt; set) {
+            return &quot;Super:hashSet&quot;;
+        }
+    }
 
-    <span class="token keyword">static</span> <span class="token keyword">class</span> <span class="token class-name">Sub</span> <span class="token keyword">extends</span> <span class="token class-name">Super</span> <span class="token punctuation">{</span>
-        <span class="token keyword">public</span> <span class="token keyword">static</span> String <span class="token function">getType</span><span class="token punctuation">(</span>Collection<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> collection<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            <span class="token comment" spellcheck="true">// 我猜这一行应该是想返回"Sub:collection"</span>
-            <span class="token keyword">return</span> <span class="token string">"Sub"</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
+    static class Sub extends Super {
+        public static String getType(Collection&lt;?&gt; collection) {
+            // 我猜这一行应该是想返回&quot;Sub:collection&quot;
+            return &quot;Sub&quot;;
+        }
+    }
+}</code></pre>
 <p>A.<br>Sub:collection<br>Sub:collection<br>Sub:collection  </p>
 <p>B.<br>Sub:hashSet<br>Sub:arrayList<br>Sub:collection  </p>
 <p>C.<br>Super:collection<br>Super:collection<br>Super:collection   </p>
@@ -496,10 +496,10 @@ Which of the following can be applied to">
 <p>这道题目其实涉及多个知识点：</p>
 <p>首先它是通过了一个实例对象去调用静态方法，注意两个类中的方法都是静态的，而静态方法是不会被覆写的。</p>
 <p>然后下面这部分代码，要确定到底调用的是哪个类中的getType方法：</p>
-<pre class=" language-java"><code class="language-java">Super subToSuper <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Sub</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">for</span> <span class="token punctuation">(</span>Collection<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> collection <span class="token operator">:</span> collections<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>subToSuper<span class="token punctuation">.</span><span class="token function">getType</span><span class="token punctuation">(</span>collection<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+<pre><code class="java">Super subToSuper = new Sub();
+for (Collection&lt;?&gt; collection : collections) {
+    System.out.println(subToSuper.getType(collection));
+}</code></pre>
 <p>第一行就属于静态分派，new了一个<code>Sub</code>对象，但将其声明为<code>Super</code>类型的引用，这就属于编译期间确定好的类型，也称为“静态分派”。那么可以确定，后面调用的<code>getType</code>方法，实际上是调用了<code>Super</code>类型的静态方法，但到底是哪个重载版本呢？</p>
 <p>其实后面这个也是静态分派，因为第二行代码中<code>Collection&lt;?&gt; collection : collections</code>也显式地将从集合中取出来的对象声明为了<code>Collection</code>类型的引用，所以调用的重载方法版本就是参数为Collection类型的。</p>
 <h1 id="布尔型居然可以用位运算？">4 布尔型居然可以用位运算？</h1><p>我一直以为布尔型位运算只存在于C语言这种语言中，直到我遇见了这道题：</p>
@@ -510,12 +510,12 @@ Which of the following can be applied to">
 <hr>
 <p>虽然我是选对了，因为我知道根据短路原则BD必不可能嘛，但是我还真不知道布尔型可以用位运算。</p>
 <p>然后我就试了一下这些代码：</p>
-<pre class=" language-java"><code class="language-java">System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token operator">&amp;</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token operator">&amp;</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token operator">&amp;</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token operator">|</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token operator">|</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token operator">|</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<pre><code class="java">System.out.println(true&amp;true);
+System.out.println(false&amp;true);
+System.out.println(false&amp;false);
+System.out.println(true|true);
+System.out.println(false|true);
+System.out.println(false|false);</code></pre>
 <p>发现都是可以正常执行的，并且输出依次为：</p>
 <pre><code>true
 false
@@ -528,13 +528,13 @@ false</code></pre><p>可见和逻辑运算的结果并没有差别，那么true�
 </blockquote>
 <p>那么就假定这是正确的，但通过实验，布尔类型不能和整型互转，也不能参与整型的运算。不是很明白JVM这样设计的用意。</p>
 <p>那么谈到这里，和题目一比较，大概就知道了，这样的位运算符运用在布尔类型上和逻辑运算符的区别就是没有短路原则，可以做个实验验证一下：</p>
-<pre class=" language-java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token operator">|</span><span class="token function">returnFalse</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+<pre><code class="java">public static void main(String[] args) {
+    System.out.println(true|returnFalse());
+}
 
-<span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">boolean</span> <span class="token function">returnFalse</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-    <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code></pre>
+public static boolean returnFalse(){
+    return false;
+}</code></pre>
 <p>写一段这样的代码，经过调试发现，会执行到<code>returnFalse</code>这个方法中去。所以说是没有短路原则的。</p>
 
             </div>
@@ -1146,7 +1146,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">614.2k</span>&nbsp;字
+                class="white-color">634k</span>&nbsp;字
             
             
             
@@ -1226,6 +1226,7 @@ $(function () {
     <script src="/libs/aos/aos.js"></script>
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/libs/prism/prism.js"></script>
     <script src="/js/matery.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
