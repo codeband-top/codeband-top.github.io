@@ -30,6 +30,7 @@ Java技术 | 细谈Java中UUID的简单了解与使用 - 林深时觉寒 - 博�
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -400,7 +401,7 @@ Java技术 | 细谈Java中UUID的简单了解与使用 - 林深时觉寒 - 博�
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.8k
+                    1.9k
                 </div>
                 
 
@@ -414,8 +415,8 @@ Java技术 | 细谈Java中UUID的简单了解与使用 - 林深时觉寒 - 博�
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <p>本文参考资源：</p>
-<p><a href="https://www.cnblogs.com/wuneng/p/11478160.html" target="_blank" rel="noopener">大型互联网公司分布式ID方案总结 - 悟能之能 - 博客园</a></p>
-<p><a href="https://www.cnblogs.com/kjgym/p/11614510.html" target="_blank" rel="noopener">Java技术 | 细谈Java中UUID的简单了解与使用 - 林深时觉寒 - 博客园</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/wuneng/p/11478160.html">大型互联网公司分布式ID方案总结 - 悟能之能 - 博客园</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/kjgym/p/11614510.html">Java技术 | 细谈Java中UUID的简单了解与使用 - 林深时觉寒 - 博客园</a></p>
 <p>在应用程序中，经常需要全局唯一的ID作为数据库主键。分库分表后，每个表中的数据都会按自己的节奏进行自增，很有可能出现ID冲突。这时就需要一个单独的机制来负责生成唯一ID，生成出来的ID也可以叫做分布式ID，或全局ID。</p>
 <h1 id="UUID">1 UUID</h1><p>UUID 是通用唯一识别码（Universally Unique Identifier）的缩写，其目的，是让分布式系统中的所有元素，都能有唯一的辨识信息，UUID的标准格式：</p>
 <p><code>xxxxxxxx-xxxx-Axxx-Bxxx-xxxxxxxxxxxx</code></p>
@@ -443,11 +444,13 @@ Java技术 | 细谈Java中UUID的简单了解与使用 - 林深时觉寒 - 博�
 </ul>
 <h1 id="数据库多主自增id">2 数据库多主自增id</h1><p>如果我们两个数据库组成一个主从模式集群，正常情况下可以解决数据库可靠性问题，但是如果主库挂掉后，数据没有及时同步到从库，这个时候会出现ID重复的现象。我们<strong>可以使用双主模式集群，也就是两个Mysql实例都能单独的生产自增ID，这样能够提高效率，但是如果不经过其他改造的话，这两个Mysql实例很可能会生成同样的ID。需要单独给每个Mysql实例配置不同的起始值和自增步长。</strong></p>
 <p>第一台Mysql实例配置：</p>
-<pre><code class="sql">set @@auto_increment_offset = 1;     -- 起始值
-set @@auto_increment_increment = 2;  -- 步长</code></pre>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">set</span> @<span class="token variable">@auto_increment_offset</span> <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>     <span class="token comment">-- 起始值</span>
+<span class="token keyword">set</span> @<span class="token variable">@auto_increment_increment</span> <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>  <span class="token comment">-- 步长</span></code></pre>
+
 <p>第二台Mysql实例配置：</p>
-<pre><code class="sql">set @@auto_increment_offset = 2;     -- 起始值
-set @@auto_increment_increment = 2;  -- 步长</code></pre>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">set</span> @<span class="token variable">@auto_increment_offset</span> <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>     <span class="token comment">-- 起始值</span>
+<span class="token keyword">set</span> @<span class="token variable">@auto_increment_increment</span> <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>  <span class="token comment">-- 步长</span></code></pre>
+
 <p>经过上面的配置后，这两个Mysql实例生成的id序列如下：</p>
 <ul>
 <li>mysql1,起始值为1,步长为2,ID生成的序列为：<code>1,3,5,7,9,...</code></li>
@@ -455,22 +458,24 @@ set @@auto_increment_increment = 2;  -- 步长</code></pre>
 </ul>
 <p>对于这种生成分布式ID的方案，需要单独新增一个生成分布式ID应用，比如DistributIdService，该<strong>应用提供一个接口供业务应用获取ID</strong>，业务应用需要一个ID时，通过rpc的方式请求DistributIdService，<strong>DistributIdService随机去上面的两个Mysql实例中去获取ID。</strong></p>
 <p>实行这种方案后，就算其中某一台Mysql实例下线了，也不会影响DistributIdService，DistributIdService仍然可以利用另外一台Mysql来生成ID。</p>
-<p>但是这种方案的扩展性不太好，如果两台Mysql实例不够用，<strong><em>需要新增Mysql实例来提高性能时，这时就会比较麻烦。</em></strong></p>
+<p>但是这种方案的扩展性不太好，如果两台Mysql实例不够用，**<em>需要新增Mysql实例来提高性能时，这时就会比较麻烦。**</em></p>
 <p>现在如果要新增一个实例mysql3，要怎么操作呢？</p>
 <p>第一，mysql1、mysql2的步长肯定都要修改为3，而且只能是人工去修改，这是需要时间的。<br>第二，因为mysql1和mysql2是不停在自增的，对于mysql3的起始值我们可能要定得大一点，以给充分的时间去修改mysql1，mysql2的步长。<br>第三，在修改步长的时候很可能会出现重复ID，要解决这个问题，可能需要停机才行。  </p>
-<h1 id="Zookeeper-Redis">3 Zookeeper/Redis</h1><h2 id="Zookeeper">3.1 Zookeeper</h2><p>之前在<a href="../Zookeeper应用场景和各种分布式锁的实现/#toc-heading-3">Zookeeper应用场景和各种分布式锁的实现</a> 中提到，可以利用zookeeper提供命名服务，即全局唯一的ID，并且可以保证ID的递增性。</p>
+<h1 id="Zookeeper-Redis">3 Zookeeper/Redis</h1><h2 id="Zookeeper">3.1 Zookeeper</h2><p>之前在<a href="../Zookeeper%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF%E5%92%8C%E5%90%84%E7%A7%8D%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0/#toc-heading-3">Zookeeper应用场景和各种分布式锁的实现</a> 中提到，可以利用zookeeper提供命名服务，即全局唯一的ID，并且可以保证ID的递增性。</p>
 <p>无论是数据库/Zookeeper，实现唯一ID的原理都是把所有 ID 集中放在一个地方进行管理，对每个 ID 序列独立管理，每台机器上使用 ID 时就从这个 ID 生成器中取。但也都会导致性能问题：<strong>每次都远程取 ID 会有资源损耗</strong>。一种改进方案是一次取一段 ID，然后缓存在本地，这样就不需要每次都去远程的生成器上取 ID 了。但是也会带来问题，如果应用取了一段 ID，正在用时完全宕机了，那么一些 ID 号就浪费不可用了。</p>
 <h2 id="Redis">3.2 Redis</h2><p>redis产生自增ID就是使用了incr命令：</p>
-<pre><code>127.0.0.1:6379&gt; set seq_id 1     // 初始化自增ID为1
+<pre class="language-none"><code class="language-none">127.0.0.1:6379&gt; set seq_id 1     &#x2F;&#x2F; 初始化自增ID为1
 OK
-127.0.0.1:6379&gt; incr seq_id      // 增加1，并返回
+127.0.0.1:6379&gt; incr seq_id      &#x2F;&#x2F; 增加1，并返回
 (integer) 2
-127.0.0.1:6379&gt; incr seq_id      // 增加1，并返回
-(integer) 3</code></pre><p>从redis获取id的效率较高，但要考虑持久化的问题。</p>
+127.0.0.1:6379&gt; incr seq_id      &#x2F;&#x2F; 增加1，并返回
+(integer) 3</code></pre>
+
+<p>从redis获取id的效率较高，但要考虑持久化的问题。</p>
 <h1 id="雪花算法">4 雪花算法</h1><p>我们可以换个角度来对分布式ID进行思考，只要能让负责生成分布式ID的每台机器在每毫秒内生成不一样的ID就行了。</p>
 <p>snowflake是twitter开源的分布式ID生成算法，是一种算法，可以在机器本地生成，效率很高。</p>
 <p>核心思想是：分布式ID固定是一个long型的数字，一个long型占8个字节，也就是64个bit，原始snowflake算法中对于bit的分配如下图：</p>
-<p><img src="https://api.codetool.top/img/15851352114447.png" alt></p>
+<p><img src="https://api.codetool.top/img/15851352114447.png"></p>
 <ul>
 <li>第一个bit位是标识部分，在java中由于long的最高位是符号位，正数是0，负数是1，一般生成的ID为正数，所以固定为0。</li>
 <li>时间戳部分占41bit，这个是毫秒级的时间，一般实现上不会存储当前的时间戳，而是<strong>时间戳的差值（当前时间-固定的开始时间）</strong>，这样可以使产生的ID从更小值开始；41位的时间戳可以使用69年，(1L &lt;&lt; 41) / (1000L * 60 * 60 * 24 * 365) = 69年</li>
@@ -1084,7 +1089,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

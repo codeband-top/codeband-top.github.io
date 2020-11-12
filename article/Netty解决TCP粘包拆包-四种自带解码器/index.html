@@ -29,6 +29,7 @@ LengthFieldBasedFrameDecoder 秒懂 - 疯狂创客圈 - 博客园
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -413,128 +414,132 @@ LengthFieldBasedFrameDecoder 秒懂 - 疯狂创客圈 - 博客园
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <p>本文参考资源：</p>
-<p><a href="https://www.cnblogs.com/crazymakercircle/p/10294745.html" target="_blank" rel="noopener">LengthFieldBasedFrameDecoder 秒懂 - 疯狂创客圈 - 博客园</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/crazymakercircle/p/10294745.html">LengthFieldBasedFrameDecoder 秒懂 - 疯狂创客圈 - 博客园</a></p>
 <p>在TCP协议中，一个完整的包可能会被拆分为多个包进行发送，也有可能把多个小的包封装成一个大的数据包进行发送，这就是所谓的TCP粘包和拆包问题。</p>
 <h1 id="粘包-拆包发生的原因">1 粘包/拆包发生的原因</h1><ol>
 <li>应用程序write写入的字节大小大于套接口发送缓冲区大小</li>
 <li>进行MSS大小的TCP分段（最大报文长度）</li>
 <li>以太网帧的payload大于MTU进行IP分片（链路层的最大传输单元）</li>
 </ol>
-<h2 id="发生粘包问题的时间服务器案例">1.1 发生粘包问题的时间服务器案例</h2><h3 id="服务端">1.1.1 服务端</h3><pre><code class="java">public class NettyServer {
-    public void bind(int port) throws Exception{
-        //配置服务器的NIO线程组
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        try{
-            ServerBootstrap serverBootstrap = new ServerBootstrap();
-            serverBootstrap.group(bossGroup,workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .option(ChannelOption.SO_BACKLOG, 1024)
-                    .childHandler(new ChildChannelHandler());
-            //绑定端口，同步等待成功
-            ChannelFuture future = serverBootstrap.bind(port).sync();
-            //等待服务端监听端口关闭
-            future.channel().closeFuture().sync();
-        }finally {
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
-        }
-    }
+<h2 id="发生粘包问题的时间服务器案例">1.1 发生粘包问题的时间服务器案例</h2><h3 id="服务端">1.1.1 服务端</h3><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">NettyServer</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">int</span> port<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span><span class="token punctuation">&#123;</span>
+        <span class="token comment">//配置服务器的NIO线程组</span>
+        <span class="token class-name">EventLoopGroup</span> bossGroup <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">NioEventLoopGroup</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">EventLoopGroup</span> workerGroup <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">NioEventLoopGroup</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">try</span><span class="token punctuation">&#123;</span>
+            <span class="token class-name">ServerBootstrap</span> serverBootstrap <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ServerBootstrap</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            serverBootstrap<span class="token punctuation">.</span><span class="token function">group</span><span class="token punctuation">(</span>bossGroup<span class="token punctuation">,</span>workerGroup<span class="token punctuation">)</span>
+                    <span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token class-name">NioServerSocketChannel</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span>
+                    <span class="token punctuation">.</span><span class="token function">option</span><span class="token punctuation">(</span><span class="token class-name">ChannelOption</span><span class="token punctuation">.</span>SO_BACKLOG<span class="token punctuation">,</span> <span class="token number">1024</span><span class="token punctuation">)</span>
+                    <span class="token punctuation">.</span><span class="token function">childHandler</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ChildChannelHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">//绑定端口，同步等待成功</span>
+            <span class="token class-name">ChannelFuture</span> future <span class="token operator">=</span> serverBootstrap<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span>port<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">sync</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">//等待服务端监听端口关闭</span>
+            future<span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">closeFuture</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">sync</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span><span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+            bossGroup<span class="token punctuation">.</span><span class="token function">shutdownGracefully</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            workerGroup<span class="token punctuation">.</span><span class="token function">shutdownGracefully</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
 
-    private class ChildChannelHandler extends ChannelInitializer&lt;SocketChannel&gt;{
+    <span class="token keyword">private</span> <span class="token keyword">class</span> <span class="token class-name">ChildChannelHandler</span> <span class="token keyword">extends</span> <span class="token class-name">ChannelInitializer</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">SocketChannel</span><span class="token punctuation">></span></span><span class="token punctuation">&#123;</span>
 
-        protected void initChannel(SocketChannel ch) throws Exception {
-            ch.pipeline().addLast(new NettyServerHandler());
-        }
-    }
+        <span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">initChannel</span><span class="token punctuation">(</span><span class="token class-name">SocketChannel</span> ch<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+            ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">NettyServerHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
 
-    public static void main(String[] args) throws Exception {
-        int port = 8080;
-        new NettyServer().bind(8080);
-    }
-}</code></pre>
-<pre><code class="java">public class NettyServerHandler extends ChannelInboundHandlerAdapter {
-    private int counter;
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">int</span> port <span class="token operator">=</span> <span class="token number">8080</span><span class="token punctuation">;</span>
+        <span class="token keyword">new</span> <span class="token class-name">NettyServer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token number">8080</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        ByteBuf buf = (ByteBuf) msg;
-        String body = buf.toString(CharsetUtil.UTF_8);
-        System.out.println(&quot;The time server receive order: &quot;+ body + &quot;; the counter is: &quot; + ++counter);
-        //如果收到的请求是QUERY TIME ORDER就返回当前时间
-        String currentTime = &quot;QUERY TIME ORDER&quot;.equalsIgnoreCase(body)?new java.util.Date(
-                System.currentTimeMillis()
-                ).toString():&quot;BAD ORDER&quot;;
-        currentTime = currentTime + System.getProperty(&quot;line.separator&quot;);
-        ByteBuf resp = Unpooled.copiedBuffer(currentTime.getBytes());
-        ctx.writeAndFlush(resp);
-    }
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        ctx.close();
-    }
-}</code></pre>
-<h3 id="客户端">1.1.2 客户端</h3><pre><code class="java">public class NettyClient {
-    public void connect(int port,String host) throws Exception{
-        //配置客户端NIO线程组
-        EventLoopGroup group = new NioEventLoopGroup();
-        try {
-            Bootstrap bootstrap = new Bootstrap();
-            bootstrap.group(group).channel(NioSocketChannel.class)
-                    .option(ChannelOption.TCP_NODELAY, true)
-                    .handler(new ChannelInitializer&lt;SocketChannel&gt;() {
-                        protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new NettyClientHandler());
-                        }
-                    });
-            ChannelFuture future = bootstrap.connect(host, port).sync();
-            future.channel().closeFuture().sync();
-        }finally {
-            group.shutdownGracefully();
-        }
-    }
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">NettyServerHandler</span> <span class="token keyword">extends</span> <span class="token class-name">ChannelInboundHandlerAdapter</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">private</span> <span class="token keyword">int</span> counter<span class="token punctuation">;</span>
 
-    public static void main(String[] args) throws Exception {
-        int port = 8080;
-        new NettyClient().connect(port, &quot;127.0.0.1&quot;);
-    }
-}</code></pre>
-<pre><code class="java">public class NettyClientHandler extends ChannelInboundHandlerAdapter {
-    private static final Logger logger = Logger.getLogger(NettyClientHandler.class.getName());
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">channelRead</span><span class="token punctuation">(</span><span class="token class-name">ChannelHandlerContext</span> ctx<span class="token punctuation">,</span> <span class="token class-name">Object</span> msg<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">ByteBuf</span> buf <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">ByteBuf</span><span class="token punctuation">)</span> msg<span class="token punctuation">;</span>
+        <span class="token class-name">String</span> body <span class="token operator">=</span> buf<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token class-name">CharsetUtil</span><span class="token punctuation">.</span>UTF_8<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"The time server receive order: "</span><span class="token operator">+</span> body <span class="token operator">+</span> <span class="token string">"; the counter is: "</span> <span class="token operator">+</span> <span class="token operator">++</span>counter<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//如果收到的请求是QUERY TIME ORDER就返回当前时间</span>
+        <span class="token class-name">String</span> currentTime <span class="token operator">=</span> <span class="token string">"QUERY TIME ORDER"</span><span class="token punctuation">.</span><span class="token function">equalsIgnoreCase</span><span class="token punctuation">(</span>body<span class="token punctuation">)</span><span class="token operator">?</span><span class="token keyword">new</span> java<span class="token punctuation">.</span>util<span class="token punctuation">.</span><span class="token class-name">Date</span><span class="token punctuation">(</span>
+                <span class="token class-name">System</span><span class="token punctuation">.</span><span class="token function">currentTimeMillis</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+                <span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span><span class="token string">"BAD ORDER"</span><span class="token punctuation">;</span>
+        currentTime <span class="token operator">=</span> currentTime <span class="token operator">+</span> <span class="token class-name">System</span><span class="token punctuation">.</span><span class="token function">getProperty</span><span class="token punctuation">(</span><span class="token string">"line.separator"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">ByteBuf</span> resp <span class="token operator">=</span> <span class="token class-name">Unpooled</span><span class="token punctuation">.</span><span class="token function">copiedBuffer</span><span class="token punctuation">(</span>currentTime<span class="token punctuation">.</span><span class="token function">getBytes</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ctx<span class="token punctuation">.</span><span class="token function">writeAndFlush</span><span class="token punctuation">(</span>resp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">exceptionCaught</span><span class="token punctuation">(</span><span class="token class-name">ChannelHandlerContext</span> ctx<span class="token punctuation">,</span> <span class="token class-name">Throwable</span> cause<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        ctx<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-    private int counter;
-    private byte[] req;
+<h3 id="客户端">1.1.2 客户端</h3><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">NettyClient</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">connect</span><span class="token punctuation">(</span><span class="token keyword">int</span> port<span class="token punctuation">,</span><span class="token class-name">String</span> host<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span><span class="token punctuation">&#123;</span>
+        <span class="token comment">//配置客户端NIO线程组</span>
+        <span class="token class-name">EventLoopGroup</span> group <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">NioEventLoopGroup</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            <span class="token class-name">Bootstrap</span> bootstrap <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Bootstrap</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            bootstrap<span class="token punctuation">.</span><span class="token function">group</span><span class="token punctuation">(</span>group<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token class-name">NioSocketChannel</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span>
+                    <span class="token punctuation">.</span><span class="token function">option</span><span class="token punctuation">(</span><span class="token class-name">ChannelOption</span><span class="token punctuation">.</span>TCP_NODELAY<span class="token punctuation">,</span> <span class="token boolean">true</span><span class="token punctuation">)</span>
+                    <span class="token punctuation">.</span><span class="token function">handler</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ChannelInitializer</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">SocketChannel</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                        <span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">initChannel</span><span class="token punctuation">(</span><span class="token class-name">SocketChannel</span> ch<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+                            ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">NettyClientHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token punctuation">&#125;</span>
+                    <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">ChannelFuture</span> future <span class="token operator">=</span> bootstrap<span class="token punctuation">.</span><span class="token function">connect</span><span class="token punctuation">(</span>host<span class="token punctuation">,</span> port<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">sync</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            future<span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">closeFuture</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">sync</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span><span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+            group<span class="token punctuation">.</span><span class="token function">shutdownGracefully</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
 
-    public NettyClientHandler() {
-        req = (&quot;QUERY TIME ORDER&quot; + System.getProperty(&quot;line.separator&quot;)).getBytes();
-    }
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">int</span> port <span class="token operator">=</span> <span class="token number">8080</span><span class="token punctuation">;</span>
+        <span class="token keyword">new</span> <span class="token class-name">NettyClient</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">connect</span><span class="token punctuation">(</span>port<span class="token punctuation">,</span> <span class="token string">"127.0.0.1"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        ByteBuf message = null;
-        //连续发送一百条QUERY TIME ORDER消息
-        for(int i = 0;i&lt;100;i++){
-            message = Unpooled.buffer(req.length);
-            message.writeBytes(req);
-            ctx.writeAndFlush(message);
-        }
-    }
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">NettyClientHandler</span> <span class="token keyword">extends</span> <span class="token class-name">ChannelInboundHandlerAdapter</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token class-name">Logger</span> logger <span class="token operator">=</span> <span class="token class-name">Logger</span><span class="token punctuation">.</span><span class="token function">getLogger</span><span class="token punctuation">(</span><span class="token class-name">NettyClientHandler</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        ByteBuf buf = (ByteBuf) msg;
-        String body = buf.toString(CharsetUtil.UTF_8);
-        System.out.println(&quot;Now is：&quot;+body+&quot;; the counter is: &quot;+ ++counter);
-    }
+    <span class="token keyword">private</span> <span class="token keyword">int</span> counter<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> req<span class="token punctuation">;</span>
 
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.warning(&quot;Unexpected exception from downstream: &quot;+cause.getMessage());
-        ctx.close();
-    }
-}</code></pre>
+    <span class="token keyword">public</span> <span class="token class-name">NettyClientHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        req <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token string">"QUERY TIME ORDER"</span> <span class="token operator">+</span> <span class="token class-name">System</span><span class="token punctuation">.</span><span class="token function">getProperty</span><span class="token punctuation">(</span><span class="token string">"line.separator"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getBytes</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">channelActive</span><span class="token punctuation">(</span><span class="token class-name">ChannelHandlerContext</span> ctx<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">ByteBuf</span> message <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+        <span class="token comment">//连续发送一百条QUERY TIME ORDER消息</span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span><span class="token number">100</span><span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            message <span class="token operator">=</span> <span class="token class-name">Unpooled</span><span class="token punctuation">.</span><span class="token function">buffer</span><span class="token punctuation">(</span>req<span class="token punctuation">.</span>length<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            message<span class="token punctuation">.</span><span class="token function">writeBytes</span><span class="token punctuation">(</span>req<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            ctx<span class="token punctuation">.</span><span class="token function">writeAndFlush</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">channelRead</span><span class="token punctuation">(</span><span class="token class-name">ChannelHandlerContext</span> ctx<span class="token punctuation">,</span> <span class="token class-name">Object</span> msg<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">ByteBuf</span> buf <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">ByteBuf</span><span class="token punctuation">)</span> msg<span class="token punctuation">;</span>
+        <span class="token class-name">String</span> body <span class="token operator">=</span> buf<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token class-name">CharsetUtil</span><span class="token punctuation">.</span>UTF_8<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"Now is："</span><span class="token operator">+</span>body<span class="token operator">+</span><span class="token string">"; the counter is: "</span><span class="token operator">+</span> <span class="token operator">++</span>counter<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">exceptionCaught</span><span class="token punctuation">(</span><span class="token class-name">ChannelHandlerContext</span> ctx<span class="token punctuation">,</span> <span class="token class-name">Throwable</span> cause<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        logger<span class="token punctuation">.</span><span class="token function">warning</span><span class="token punctuation">(</span><span class="token string">"Unexpected exception from downstream: "</span><span class="token operator">+</span>cause<span class="token punctuation">.</span><span class="token function">getMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ctx<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>分别运行服务端和客户端，预期结果应该是服务端响应100次时间，然而服务端打印：</p>
-<pre><code>The time server receive order: QUERY TIME ORDER
+<pre class="language-none"><code class="language-none">The time server receive order: QUERY TIME ORDER
 QUERY TIME ORDER
 QUERY TIME ORDER
 QUERY TIME ORDER
@@ -548,10 +553,14 @@ QUERY TIME ORDER
 ---省略部分，此处共43条QUERY TIME ORDER----
 QUERY TIME ORDER
 QUERY TIME ORDER
-; the counter is: 2</code></pre><p>可见发生了粘包问题，自然客户端也没有收到正确的响应：</p>
-<pre><code>Now is：BAD ORDER
+; the counter is: 2</code></pre>
+
+<p>可见发生了粘包问题，自然客户端也没有收到正确的响应：</p>
+<pre class="language-none"><code class="language-none">Now is：BAD ORDER
 BAD ORDER
-; the counter is: 1</code></pre><h1 id="解决策略">2 解决策略</h1><ol>
+; the counter is: 1</code></pre>
+
+<h1 id="解决策略">2 解决策略</h1><ol>
 <li>消息定长，例如每个报文的大小为固定长度200字节，如果不够，空位补空格;</li>
 <li>在包尾增加回车换行符进行分割，例如FTP协议;</li>
 <li>将消息分为消息头和消息体，消息头中包含表示消息总长度(或者消息体长度)的字段，通常设计思路为消息头的第一个字段使用int32来表示消息的总长度;</li>
@@ -560,90 +569,101 @@ BAD ORDER
 <h2 id="使用LineBasedFrameDecoder解决TCP粘包问题">2.1 使用LineBasedFrameDecoder解决TCP粘包问题</h2><p>为了解决TCP粘包/拆包导致的半包读写问题，Netty 默认提供了多种编解码器用于处理半包，LineBasedFrameDecoder是其中的一种，通过换行符来分包。</p>
 <h2 id="使用LineBasedFrameDecoder改写后的案例">2.2 使用LineBasedFrameDecoder改写后的案例</h2><p>需要改写的有四个地方：</p>
 <p>在NettyServer中pipeline添加处理器</p>
-<pre><code class="java">private class ChildChannelHandler extends ChannelInitializer&lt;SocketChannel&gt;{
-    protected void initChannel(SocketChannel ch) throws Exception {
-        ch.pipeline().addLast(new LineBasedFrameDecoder(1024));
-        ch.pipeline().addLast(new StringDecoder());
-        ch.pipeline().addLast(new NettyServerHandler());
-    }
-}</code></pre>
-<p>在NettyServerHandler中把消息当字符串处理</p>
-<pre><code class="java">@Override
-public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-    //转String
-    String body = (String) msg;
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">class</span> <span class="token class-name">ChildChannelHandler</span> <span class="token keyword">extends</span> <span class="token class-name">ChannelInitializer</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">SocketChannel</span><span class="token punctuation">></span></span><span class="token punctuation">&#123;</span>
+    <span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">initChannel</span><span class="token punctuation">(</span><span class="token class-name">SocketChannel</span> ch<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">LineBasedFrameDecoder</span><span class="token punctuation">(</span><span class="token number">1024</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">StringDecoder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">NettyServerHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-    System.out.println(&quot;The time server receive order: &quot;+ body + &quot;; the counter is: &quot; + ++counter);
-    String currentTime = &quot;QUERY TIME ORDER&quot;.equalsIgnoreCase(body)?new java.util.Date(
-            System.currentTimeMillis()
-            ).toString():&quot;BAD ORDER&quot;;
-    currentTime = currentTime + System.getProperty(&quot;line.separator&quot;);
-    ByteBuf resp = Unpooled.copiedBuffer(currentTime.getBytes());
-    ctx.writeAndFlush(resp);
-}</code></pre>
+<p>在NettyServerHandler中把消息当字符串处理</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@Override</span>
+<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">channelRead</span><span class="token punctuation">(</span><span class="token class-name">ChannelHandlerContext</span> ctx<span class="token punctuation">,</span> <span class="token class-name">Object</span> msg<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">//转String</span>
+    <span class="token class-name">String</span> body <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">)</span> msg<span class="token punctuation">;</span>
+    
+    <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"The time server receive order: "</span><span class="token operator">+</span> body <span class="token operator">+</span> <span class="token string">"; the counter is: "</span> <span class="token operator">+</span> <span class="token operator">++</span>counter<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">String</span> currentTime <span class="token operator">=</span> <span class="token string">"QUERY TIME ORDER"</span><span class="token punctuation">.</span><span class="token function">equalsIgnoreCase</span><span class="token punctuation">(</span>body<span class="token punctuation">)</span><span class="token operator">?</span><span class="token keyword">new</span> java<span class="token punctuation">.</span>util<span class="token punctuation">.</span><span class="token class-name">Date</span><span class="token punctuation">(</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span><span class="token function">currentTimeMillis</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+            <span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span><span class="token string">"BAD ORDER"</span><span class="token punctuation">;</span>
+    currentTime <span class="token operator">=</span> currentTime <span class="token operator">+</span> <span class="token class-name">System</span><span class="token punctuation">.</span><span class="token function">getProperty</span><span class="token punctuation">(</span><span class="token string">"line.separator"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">ByteBuf</span> resp <span class="token operator">=</span> <span class="token class-name">Unpooled</span><span class="token punctuation">.</span><span class="token function">copiedBuffer</span><span class="token punctuation">(</span>currentTime<span class="token punctuation">.</span><span class="token function">getBytes</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    ctx<span class="token punctuation">.</span><span class="token function">writeAndFlush</span><span class="token punctuation">(</span>resp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>在NettyClient中pipeline添加处理器</p>
-<pre><code class="java">new ChannelInitializer&lt;SocketChannel&gt;() {
-    protected void initChannel(SocketChannel ch) throws Exception {
-        ch.pipeline().addLast(new LineBasedFrameDecoder(1024));
-        ch.pipeline().addLast(new StringDecoder());
-        ch.pipeline().addLast(new NettyClientHandler());
-    }
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">new</span> <span class="token class-name">ChannelInitializer</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">SocketChannel</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">initChannel</span><span class="token punctuation">(</span><span class="token class-name">SocketChannel</span> ch<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">LineBasedFrameDecoder</span><span class="token punctuation">(</span><span class="token number">1024</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">StringDecoder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">NettyClientHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>在NettyClientHandler中把消息当字符串处理</p>
-<pre><code class="java">@Override
-public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-    String body = (String) msg;
-    System.out.println(&quot;Now is：&quot;+body+&quot;; the counter is: &quot;+ ++counter);
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@Override</span>
+<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">channelRead</span><span class="token punctuation">(</span><span class="token class-name">ChannelHandlerContext</span> ctx<span class="token punctuation">,</span> <span class="token class-name">Object</span> msg<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">String</span> body <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">)</span> msg<span class="token punctuation">;</span>
+    <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"Now is："</span><span class="token operator">+</span>body<span class="token operator">+</span><span class="token string">"; the counter is: "</span><span class="token operator">+</span> <span class="token operator">++</span>counter<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>再次分别运行服务端、客户端，发现问题解决：</p>
-<pre><code>The time server receive order: QUERY TIME ORDER; the counter is: 1
+<pre class="language-none"><code class="language-none">The time server receive order: QUERY TIME ORDER; the counter is: 1
 The time server receive order: QUERY TIME ORDER; the counter is: 2
 The time server receive order: QUERY TIME ORDER; the counter is: 3
 -----------------------省略---------------------------
 The time server receive order: QUERY TIME ORDER; the counter is: 98
 The time server receive order: QUERY TIME ORDER; the counter is: 99
-The time server receive order: QUERY TIME ORDER; the counter is: 100</code></pre><pre><code>Now is：Sun Mar 15 16:39:58 CST 2020; the counter is: 1
+The time server receive order: QUERY TIME ORDER; the counter is: 100</code></pre>
+
+<pre class="language-none"><code class="language-none">Now is：Sun Mar 15 16:39:58 CST 2020; the counter is: 1
 Now is：Sun Mar 15 16:39:58 CST 2020; the counter is: 2
 Now is：Sun Mar 15 16:39:58 CST 2020; the counter is: 3
 -----------------------省略-------------------------
 Now is：Sun Mar 15 16:39:58 CST 2020; the counter is: 98
 Now is：Sun Mar 15 16:39:58 CST 2020; the counter is: 99
-Now is：Sun Mar 15 16:39:58 CST 2020; the counter is: 100</code></pre><h2 id="LineBasedFrameDecoder工作原理">2.3 LineBasedFrameDecoder工作原理</h2><p><code>LineBasedFrameDecoder</code>的工作原理是它<strong>依次遍历ByteBuf中的可读字节，判断看是否有“<code>\n</code>”或者“<code>\r\n</code>”</strong>， 如果有，就以此位置为结束位置，从可读索引到结束位置区间的字节就组成了一行。<strong>它是以换行符为结束标志的解码器</strong>，支持携带结束符或者不携带结束符两种解码方式，同时支持配置单行的最大长度。如果连续读取到最大长度后仍然没有发现换行符，就会抛出异常，同时忽略掉之前读到的异常码流。</p>
+Now is：Sun Mar 15 16:39:58 CST 2020; the counter is: 100</code></pre>
+
+<h2 id="LineBasedFrameDecoder工作原理">2.3 LineBasedFrameDecoder工作原理</h2><p><code>LineBasedFrameDecoder</code>的工作原理是它<strong>依次遍历ByteBuf中的可读字节，判断看是否有“<code>\n</code>”或者“<code>\r\n</code>”</strong>， 如果有，就以此位置为结束位置，从可读索引到结束位置区间的字节就组成了一行。<strong>它是以换行符为结束标志的解码器</strong>，支持携带结束符或者不携带结束符两种解码方式，同时支持配置单行的最大长度。如果连续读取到最大长度后仍然没有发现换行符，就会抛出异常，同时忽略掉之前读到的异常码流。</p>
 <p><strong>StringDecoder的功能非常简单，就是将接收到的对象转换成字符串，然后继续调用后面的Handler。 <code>LineBasedFrameDecoder + StringDecoder</code> 组合就是按行切换的文本解码器，它被设计用来支持TCP的粘包和拆包。</strong></p>
 <p>如果发送的消息不是以换行符结束的，或者没有回车换行符，希望根据消息头中的长度字段来分包，Netty提供了多种支持TCP粘包/拆包的解码器，用来满足用户的不同诉求。</p>
 <h2 id="其他解码器">2.4 其他解码器</h2><h3 id="DelimiterBasedFrameDecoder">2.4.1 DelimiterBasedFrameDecoder</h3><p>这是一个根据自定义分隔符分包的解码器</p>
 <p>使用：</p>
-<pre><code class="java">private class ChildChannelHandler extends ChannelInitializer&lt;SocketChannel&gt;{
-    protected void initChannel(SocketChannel ch) throws Exception {
-        ByteBuf delimiter = Unpooled.copiedBuffer(&quot;$_&quot;.getBytes());
-        //第一个参数代表单条消息的最大长度，当达到该长度仍没有查到分隔符抛出异常
-        ch.pipeline().addLast(new DelimiterBasedFrameDecoder(1024,delimiter));
-        ch.pipeline().addLast(new StringDecoder());
-        ch.pipeline().addLast(new NettyServerHandler());
-    }
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">class</span> <span class="token class-name">ChildChannelHandler</span> <span class="token keyword">extends</span> <span class="token class-name">ChannelInitializer</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">SocketChannel</span><span class="token punctuation">></span></span><span class="token punctuation">&#123;</span>
+    <span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">initChannel</span><span class="token punctuation">(</span><span class="token class-name">SocketChannel</span> ch<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">ByteBuf</span> delimiter <span class="token operator">=</span> <span class="token class-name">Unpooled</span><span class="token punctuation">.</span><span class="token function">copiedBuffer</span><span class="token punctuation">(</span><span class="token string">"$_"</span><span class="token punctuation">.</span><span class="token function">getBytes</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//第一个参数代表单条消息的最大长度，当达到该长度仍没有查到分隔符抛出异常</span>
+        ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">DelimiterBasedFrameDecoder</span><span class="token punctuation">(</span><span class="token number">1024</span><span class="token punctuation">,</span>delimiter<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">StringDecoder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">NettyServerHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>发消息的时候也要在消息末尾增加”<code>$_</code>“，和LineBasedFrameDecoder加换行符差不多的做法。</p>
 <h3 id="FixedLengthFrameDecoder">2.4.2 FixedLengthFrameDecoder</h3><p>这是一个按固定长度分包的解码器</p>
 <p>使用：</p>
-<pre><code class="java">private class ChildChannelHandler extends ChannelInitializer&lt;SocketChannel&gt;{
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">class</span> <span class="token class-name">ChildChannelHandler</span> <span class="token keyword">extends</span> <span class="token class-name">ChannelInitializer</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">SocketChannel</span><span class="token punctuation">></span></span><span class="token punctuation">&#123;</span>
 
-    protected void initChannel(SocketChannel ch) throws Exception {
-        ch.pipeline().addLast(new FixedLengthFrameDecoder(20));
-        ch.pipeline().addLast(new StringDecoder());
-        ch.pipeline().addLast(new NettyServerHandler());
-    }
-}</code></pre>
+    <span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">initChannel</span><span class="token punctuation">(</span><span class="token class-name">SocketChannel</span> ch<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">FixedLengthFrameDecoder</span><span class="token punctuation">(</span><span class="token number">20</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">StringDecoder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">NettyServerHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>无论一次接收到多少数据报，它都会按照构造函数中设置的固定长度进行解码。适用于数据长度固定的情况，否则在handler中手动填充长度也行。</p>
 <h3 id="LengthFieldBasedFrameDecoder">2.4.3 LengthFieldBasedFrameDecoder</h3><p>这个就是在在数据包中，加了一个长度字段（长度域），保存上层包的长度。解码的时候，会按照这个长度，进行上层ByteBuf应用包的提取。</p>
 <p>使用：</p>
-<pre><code class="java">private class ChildChannelHandler extends ChannelInitializer&lt;SocketChannel&gt;{
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">class</span> <span class="token class-name">ChildChannelHandler</span> <span class="token keyword">extends</span> <span class="token class-name">ChannelInitializer</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">SocketChannel</span><span class="token punctuation">></span></span><span class="token punctuation">&#123;</span>
 
-    protected void initChannel(SocketChannel ch) throws Exception {
-        ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(1024,0,4,0,4));
-        ch.pipeline().addLast(new StringDecoder());
-        ch.pipeline().addLast(new NettyServerHandler());
-    }
-}</code></pre>
+    <span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">initChannel</span><span class="token punctuation">(</span><span class="token class-name">SocketChannel</span> ch<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">LengthFieldBasedFrameDecoder</span><span class="token punctuation">(</span><span class="token number">1024</span><span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">,</span><span class="token number">4</span><span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">,</span><span class="token number">4</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">StringDecoder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">NettyServerHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>其中五个参数：</p>
 <p>（1）<code>maxFrameLength</code> - 发送的数据包最大长度；</p>
 <p>（2）<code>lengthFieldOffset</code> - 长度域偏移量，指的是长度域位于整个数据包字节数组中的下标；</p>
@@ -1075,9 +1095,10 @@ public class TestHttpSer
                     <div class="summary block-with-text">
                         
                             maven依赖：
-&lt;dependency&gt;
-    &lt;groupId&gt;io.netty&lt;/groupId&gt;
-    &lt;artifactId&gt;netty-all&lt;/artifactId&g
+&lt;dependency>
+    &lt;groupId>io.netty&lt;/groupId>
+    &lt;artifactId>netty-all&lt;/artifactId>
+    &lt;vers
                         
                     </div>
                     <div class="publish-info">
@@ -1250,7 +1271,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

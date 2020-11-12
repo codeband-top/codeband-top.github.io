@@ -31,6 +31,7 @@ raft协议应用方面的疑问？ - 知乎
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -416,11 +417,11 @@ raft协议应用方面的疑问？ - 知乎
             <div id="articleContent">
                 <p>本文并不会对每种算法进行深入，我只是参考了部分网上的博客和整理的资料，也只是处于一种懵懂的状态。</p>
 <p>本文参考资源：</p>
-<p><a href="https://zh.wikipedia.org/wiki/Paxos%E7%AE%97%E6%B3%95" target="_blank" rel="noopener">Paxos算法 - 维基百科，自由的百科全书</a></p>
-<p><a href="https://www.zhihu.com/question/54997169" target="_blank" rel="noopener">raft协议应用方面的疑问？ - 知乎</a></p>
-<p><a href="https://www.zhihu.com/question/19787937" target="_blank" rel="noopener">如何浅显易懂地解说 Paxos 的算法？ - 知乎</a></p>
-<p><a href="https://www.bilibili.com/video/av21667358?from=search&seid=3548054564060124942" target="_blank" rel="noopener">一致性算法（Paxos、Raft、ZAB）_哔哩哔哩 (゜-゜)つロ 干杯~-bilibili</a></p>
-<p><a href="https://www.cnblogs.com/xybaby/p/10124083.html" target="_blank" rel="noopener">一文搞懂Raft算法 - xybaby - 博客园一文搞懂Raft算法 - xybaby - 博客园</a></p>
+<p><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/Paxos%E7%AE%97%E6%B3%95">Paxos算法 - 维基百科，自由的百科全书</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/54997169">raft协议应用方面的疑问？ - 知乎</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/19787937">如何浅显易懂地解说 Paxos 的算法？ - 知乎</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/av21667358?from=search&seid=3548054564060124942">一致性算法（Paxos、Raft、ZAB）_哔哩哔哩 (゜-゜)つロ 干杯~-bilibili</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/xybaby/p/10124083.html">一文搞懂Raft算法 - xybaby - 博客园一文搞懂Raft算法 - xybaby - 博客园</a></p>
 <p>还有一些没记下来，研究这些东西有英文能力的还是尽量去读发明者所著论文吧。。</p>
 <h1 id="拜占庭将军问题">1 拜占庭将军问题</h1><p>拜占庭帝国有许多支军队，不同军队的将军之间必须制定一个统一的行动计划，从而做出仅供或者撤退的决定，同时，各个将军在地理上都是被分隔开的，只能依靠军队的通讯员来进行通讯。然而，在所有的通讯员中可能会存在叛徒，这些叛徒可以篡改信息，从而达到欺骗将军的目的。</p>
 <p>为了解决网络分区情况下，部分节点之间的通讯可能出现消失丢失或消息被篡改的情况。衍生出了几种共识算法：</p>
@@ -466,7 +467,7 @@ raft协议应用方面的疑问？ - 知乎
 <p><img src="https://api.codetool.top/img/15843723595393.png" alt="上图：竞选leader，下图：有leader后的请求"></p>
 <p>Multi-Paxos允许有多个自认为是Leader的节点并发提交Proposal而不影响其安全性，这样的场景即退化为Basic Paxos。</p>
 <p>Chubby和Boxwood均使用Multi-Paxos。ZooKeeper使用的ZAB也是Multi-Paxos的变形。</p>
-<h1 id="Raft">4 Raft</h1><p>之前写的博客<a href="../Redis主从复制、哨兵、集群详解">Redis主从复制、哨兵、集群详解</a>中，redis的哨兵机制sentinel就是使用的raft思想，有leader sentinel和leader选举。</p>
+<h1 id="Raft">4 Raft</h1><p>之前写的博客<a href="../Redis%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E3%80%81%E5%93%A8%E5%85%B5%E3%80%81%E9%9B%86%E7%BE%A4%E8%AF%A6%E8%A7%A3">Redis主从复制、哨兵、集群详解</a>中，redis的哨兵机制sentinel就是使用的raft思想，有leader sentinel和leader选举。</p>
 <p>Raft基于Multi-Paxos思想，它把Multi-Paxos划分为三个子问题：</p>
 <ul>
 <li>Leader Election：Leader的选举</li>
@@ -481,8 +482,8 @@ raft协议应用方面的疑问？ - 知乎
 </ul>
 <p>leader会不停的给follower发心跳消息，表明自己的存活状态。如果leader故障，follower会在一段时间内没有收到leader的心跳包，过了超时时间那么follower会转换成candidate，重新选出leader。</p>
 <p>raft官方参考：</p>
-<p><a href="https://raft.github.io/" target="_blank" rel="noopener">https://raft.github.io/</a>  </p>
-<p><a href="http://thesecretlivesofdata.com/raft/" target="_blank" rel="noopener">http://thesecretlivesofdata.com/raft/</a></p>
+<p><a target="_blank" rel="noopener" href="https://raft.github.io/">https://raft.github.io/</a>  </p>
+<p><a target="_blank" rel="noopener" href="http://thesecretlivesofdata.com/raft/">http://thesecretlivesofdata.com/raft/</a></p>
 <h2 id="Leader-Election">4.1 Leader Election</h2><p>leader选举的过程：</p>
 <ul>
 <li>增加节点本地的 current term ，切换到candidate状态</li>
@@ -886,8 +887,8 @@ raft协议应用方面的疑问？ - 知乎
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题给你一份『词汇表』（字符串数组） words 和一张『字母表』（字符串） chars。
-假如你可以用 chars 中的『字母』（字符）拼写出 words 中的某个『单词』（字符串），那么我们就认为你掌握了这个单词。
+                            1 原题给你一份『词汇表』（字符串数组） words 和一张『字母表』（字符串） chars。
+假如你可以用 chars 中的『字母』（字符）拼写出 words 中的某个『单词』（字符串），那么我们就认为你掌握了这个单词。
 注意：每次拼写时
                         
                     </div>
@@ -1117,7 +1118,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

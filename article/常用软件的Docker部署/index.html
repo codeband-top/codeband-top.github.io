@@ -32,6 +32,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -402,7 +403,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    662
+                    690
                 </div>
                 
 
@@ -424,23 +425,28 @@
 <h1 id="Mysql部署">2 Mysql部署</h1><ol>
 <li>搜索mysql镜像</li>
 </ol>
-<pre><code>docker search mysql</code></pre><ol start="2">
+<pre class="language-none"><code class="language-none">docker search mysql</code></pre>
+
+<ol start="2">
 <li>拉取mysql镜像</li>
 </ol>
-<pre><code>docker pull mysql:5.7</code></pre><ol start="3">
+<pre class="language-none"><code class="language-none">docker pull mysql:5.7</code></pre>
+
+<ol start="3">
 <li>创建容器，设置端口映射、目录映射</li>
 </ol>
-<pre><code class="shell"># 在/root目录下创建mysql目录用于存储mysql数据信息
-mkdir ~/mysql
-cd ~/mysql
+<pre class="language-shell" data-language="shell"><code class="language-shell"># 在&#x2F;root目录下创建mysql目录用于存储mysql数据信息
+mkdir ~&#x2F;mysql
+cd ~&#x2F;mysql
 docker run -id \
 -p 3306:3306 \
---name=c_mysql \
--v $PWD/conf:/etc/mysql/conf.d \
--v $PWD/logs:/logs \
--v $PWD/data:/var/lib/mysql \
--e MYSQL_ROOT_PASSWORD=123456 \
+--name&#x3D;c_mysql \
+-v $PWD&#x2F;conf:&#x2F;etc&#x2F;mysql&#x2F;conf.d \
+-v $PWD&#x2F;logs:&#x2F;logs \
+-v $PWD&#x2F;data:&#x2F;var&#x2F;lib&#x2F;mysql \
+-e MYSQL_ROOT_PASSWORD&#x3D;123456 \
 mysql:5.7</code></pre>
+
 <p>参数说明：</p>
 <ul>
 <li><code>-p 3306:3306</code>：将容器的 3306 端口映射到宿主机的 3306 端口。前一个3306是宿主机的端口。</li>
@@ -451,40 +457,53 @@ mysql:5.7</code></pre>
 </ul>
 <p>【注】如果提示<code>[Warning] IPv4 forwarding is disabled. Networking will not work.</code>：</p>
 <p>在docker的宿主机中更改文件：</p>
-<pre><code>vim /usr/lib/sysctl.d/00-system.conf</code></pre><p>在文件末尾添加<code>net.ipv4.ip_forward=1</code></p>
+<pre class="language-none"><code class="language-none">vim &#x2F;usr&#x2F;lib&#x2F;sysctl.d&#x2F;00-system.conf</code></pre>
+
+<p>在文件末尾添加<code>net.ipv4.ip_forward=1</code></p>
 <p>重新启动network服务：<code>systemctl restart network</code></p>
 <ol>
 <li>进入容器环境</li>
 </ol>
-<pre><code>docker exec -it c_mysql /bin/bash</code></pre><h1 id="Nginx部署">3 Nginx部署</h1><pre><code>docker pull nginx</code></pre><p>下面这个步骤是把nginx.conf文件复制出来：</p>
-<pre><code>mkdir ~/nginx
-cd ~/nginx
+<pre class="language-none"><code class="language-none">docker exec -it c_mysql &#x2F;bin&#x2F;bash</code></pre>
+
+<h1 id="Nginx部署">3 Nginx部署</h1><pre class="language-none"><code class="language-none">docker pull nginx</code></pre>
+
+<p>下面这个步骤是把nginx.conf文件复制出来：</p>
+<pre class="language-none"><code class="language-none">mkdir ~&#x2F;nginx
+cd ~&#x2F;nginx
 mkdir conf
-docker run -id --name=c_nginx -p 80:80 nginx
-docker cp c_nginx:/etc/nginx/nginx.conf ~/nginx/conf
+docker run -id --name&#x3D;c_nginx -p 80:80 nginx
+docker cp c_nginx:&#x2F;etc&#x2F;nginx&#x2F;nginx.conf ~&#x2F;nginx&#x2F;conf
 docker stop c_nginx
-docker rm c_nginx</code></pre><p>重新生成容器，并绑定数据卷：</p>
-<pre><code>docker run -id --name=c_nginx \
+docker rm c_nginx</code></pre>
+
+<p>重新生成容器，并绑定数据卷：</p>
+<pre class="language-none"><code class="language-none">docker run -id --name&#x3D;c_nginx \
 -p 80:80 \
--v $PWD/conf/nginx.conf:/etc/nginx/nginx.conf \
--v $PWD/logs:/var/log/nginx \
--v $PWD/html:/usr/share/nginx/html \
-nginx</code></pre><p>在<code>html/</code>下新建index.html：</p>
-<pre><code class="html">&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-    &lt;meta charset=&quot;UTF-8&quot;&gt;
-    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
-    &lt;title&gt;Document&lt;/title&gt;
-&lt;/head&gt;
-&lt;body&gt;
-    &lt;h1&gt;hello docker nginx！&lt;/h1&gt;
-&lt;/body&gt;
-&lt;/html&gt;</code></pre>
+-v $PWD&#x2F;conf&#x2F;nginx.conf:&#x2F;etc&#x2F;nginx&#x2F;nginx.conf \
+-v $PWD&#x2F;logs:&#x2F;var&#x2F;log&#x2F;nginx \
+-v $PWD&#x2F;html:&#x2F;usr&#x2F;share&#x2F;nginx&#x2F;html \
+nginx</code></pre>
+
+<p>在<code>html/</code>下新建index.html：</p>
+<pre class="language-html" data-language="html"><code class="language-html"><span class="token doctype"><span class="token punctuation">&lt;!</span><span class="token doctype-tag">DOCTYPE</span> <span class="token name">html</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>html</span> <span class="token attr-name">lang</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>en<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>head</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">charset</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>UTF-8<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>viewport<span class="token punctuation">"</span></span> <span class="token attr-name">content</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>width=device-width, initial-scale=1.0<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>title</span><span class="token punctuation">></span></span>Document<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>title</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>head</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>body</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h1</span><span class="token punctuation">></span></span>hello docker nginx！<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h1</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>html</span><span class="token punctuation">></span></span></code></pre>
+
 <p>保存并退出，访问宿主机的80端口，可以看见网站成功响应</p>
-<p><img src="https://api.codetool.top/img/15854600337280.png" alt></p>
-<h1 id="redis部署">4 redis部署</h1><pre><code>docker pull redis:5.0
-docker run -id --name=c_redis -p 6379:6379 redis:5.0</code></pre>
+<p><img src="https://api.codetool.top/img/15854600337280.png"></p>
+<h1 id="redis部署">4 redis部署</h1><pre class="language-none"><code class="language-none">docker pull redis:5.0
+docker run -id --name&#x3D;c_redis -p 6379:6379 redis:5.0</code></pre>
+
+
             </div>
             <hr/>
 
@@ -1082,7 +1101,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

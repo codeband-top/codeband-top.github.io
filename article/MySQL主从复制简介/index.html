@@ -29,6 +29,7 @@ MySQL ">
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -427,7 +428,7 @@ MySQL ">
 <li>备份</li>
 <li>高可用和故障切换</li>
 </ul>
-<h1 id="复制原理">2 复制原理</h1><h2 id="复制如何工作">2.1 复制如何工作</h2><p><img src="https://api.codetool.top/img/15835759827402.png" alt></p>
+<h1 id="复制原理">2 复制原理</h1><h2 id="复制如何工作">2.1 复制如何工作</h2><p><img src="https://api.codetool.top/img/15835759827402.png"></p>
 <ol>
 <li>在主库上把数据更改记录在 <code>binlog</code> 中（这些记录称为二进制日志事件）</li>
 <li>备库将主库上的日志<strong>复制到自己的中继日志中</strong></li>
@@ -454,11 +455,11 @@ MySQL ">
 <h1 id="搭建步骤">3 搭建步骤</h1><h2 id="master">3.1 master</h2><ol>
 <li>在master的配置文件中，配置如下内容：</li>
 </ol>
-<pre><code class="conf">#mysql 服务ID,保证整个集群环境中唯一
-server-id=1
+<pre class="language-conf" data-language="conf"><code class="language-conf">#mysql 服务ID,保证整个集群环境中唯一
+server-id&#x3D;1
 
 #mysql binlog 日志的存储路径和文件名，主从复制是基于binlog的
-log-bin=/var/lib/mysql/mysqlbin
+log-bin&#x3D;&#x2F;var&#x2F;lib&#x2F;mysql&#x2F;mysqlbin
 
 #错误日志,默认已经开启
 #log-err
@@ -473,23 +474,26 @@ log-bin=/var/lib/mysql/mysqlbin
 #datadir
 
 #是否只读,1 代表只读, 0 代表读写
-read-only=0
+read-only&#x3D;0
 
 #忽略的数据, 指不需要同步的数据库
-binlog-ignore-db=mysql
+binlog-ignore-db&#x3D;mysql
 
 #指定同步的数据库
-#binlog-do-db=db01</code></pre>
+#binlog-do-db&#x3D;db01</code></pre>
+
 <ol start="2">
 <li>在客户端中建同步数据的账户，并且进行授权操作：</li>
 </ol>
-<pre><code class="sql">grant replication slave on *.* to &#39;slave1&#39;@&#39;slave_host&#39; identified by &#39;password&#39;;    
-flush privileges;</code></pre>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">grant</span> <span class="token keyword">replication</span> slave <span class="token keyword">on</span> <span class="token operator">*</span><span class="token punctuation">.</span><span class="token operator">*</span> <span class="token keyword">to</span> <span class="token string">'slave1'</span><span class="token variable">@'slave_host'</span> identified <span class="token keyword">by</span> <span class="token string">'password'</span><span class="token punctuation">;</span>	
+flush <span class="token keyword">privileges</span><span class="token punctuation">;</span></code></pre>
+
 <p>如果需要配置多个从机就创建多个账户，<code>&#39;slave_host&#39;</code>代表从机的ip地址。</p>
 <ol start="3">
 <li>查看master状态：</li>
 </ol>
-<pre><code class="sql">show master status;</code></pre>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">show</span> master <span class="token keyword">status</span><span class="token punctuation">;</span></code></pre>
+
 <ul>
 <li>File : 从哪个日志文件开始推送日志文件 </li>
 <li>Position ： 从哪个位置开始推送日志</li>
@@ -498,27 +502,29 @@ flush privileges;</code></pre>
 <h2 id="slave">3.2 slave</h2><ol>
 <li>在 slave 端配置文件中，配置如下内容：</li>
 </ol>
-<pre><code class="conf">#mysql服务端ID,唯一
-server-id=2
+<pre class="language-conf" data-language="conf"><code class="language-conf">#mysql服务端ID,唯一
+server-id&#x3D;2
 
 #指定binlog日志
-log-bin=/var/lib/mysql/mysqlbin</code></pre>
+log-bin&#x3D;&#x2F;var&#x2F;lib&#x2F;mysql&#x2F;mysqlbin</code></pre>
+
 <ol start="2">
 <li>在客户端内执行如下指令 ：</li>
 </ol>
-<pre><code class="sql">change master to master_host= &#39;master_host&#39;, master_user=&#39;slave1&#39;, master_password=&#39;password&#39;, master_log_file=&#39;mysqlbin.000001&#39;, master_log_pos=413;</code></pre>
+<pre class="language-sql" data-language="sql"><code class="language-sql">change master <span class="token keyword">to</span> master_host<span class="token operator">=</span> <span class="token string">'master_host'</span><span class="token punctuation">,</span> master_user<span class="token operator">=</span><span class="token string">'slave1'</span><span class="token punctuation">,</span> master_password<span class="token operator">=</span><span class="token string">'password'</span><span class="token punctuation">,</span> master_log_file<span class="token operator">=</span><span class="token string">'mysqlbin.000001'</span><span class="token punctuation">,</span> master_log_pos<span class="token operator">=</span><span class="token number">413</span><span class="token punctuation">;</span></code></pre>
+
 <p>指定当前从库对应的主库的IP地址，用户名，密码，从哪个日志文件开始的那个位置开始同步推送日志。（这些都是在master status中看到的）</p>
 <ol start="3">
 <li>开启同步操作</li>
 </ol>
-<pre><code class="sql">start slave;
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">start</span> slave<span class="token punctuation">;</span>
 
-show slave status;</code></pre>
+<span class="token keyword">show</span> slave <span class="token keyword">status</span><span class="token punctuation">;</span></code></pre>
+
 <ol start="4">
 <li>停止同步操作</li>
 </ol>
-<pre><code class="sql">stop slave;</code></pre>
-
+<pre class="language-sql" data-language="sql"><code class="language-sql">stop slave<span class="token punctuation">;</span></code></pre>
             </div>
             <hr/>
 
@@ -1130,7 +1136,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

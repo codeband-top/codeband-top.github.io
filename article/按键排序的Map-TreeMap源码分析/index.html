@@ -30,6 +30,7 @@ TreeMap基于红黑树实现，可以对Map中的key排序
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -408,7 +409,7 @@ TreeMap基于红黑树实现，可以对Map中的key排序
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.6k
+                    1.7k
                 </div>
                 
 
@@ -427,295 +428,302 @@ TreeMap基于红黑树实现，可以对Map中的key排序
 <li>它的排序和定位需要依赖比较器或实现 Comparable 接口，也因此不需要key重写hashCode方法和equals方法，就可以排除掉重复的key。</li>
 <li>TreeMap 的查询、插入、删除效率均没有 HashMap 高，一般只有要对 key 排序时才使用TreeMap。</li>
 </ol>
-<h1 id="导言">2 导言</h1><p>之前有写过<a href="../弱平衡的二叉查找树-红黑树">弱平衡的二叉查找树-红黑树</a>，然而很多具体实现都没有提，这篇文章就来谈谈JDK基于红黑树实现的可以按键排序的Map——TreeMap</p>
+<h1 id="导言">2 导言</h1><p>之前有写过<a href="../%E5%BC%B1%E5%B9%B3%E8%A1%A1%E7%9A%84%E4%BA%8C%E5%8F%89%E6%9F%A5%E6%89%BE%E6%A0%91-%E7%BA%A2%E9%BB%91%E6%A0%91">弱平衡的二叉查找树-红黑树</a>，然而很多具体实现都没有提，这篇文章就来谈谈JDK基于红黑树实现的可以按键排序的Map——TreeMap</p>
 <p>还是按我的习惯，直接从重要方法读起：</p>
-<h1 id="重要方法">3 重要方法</h1><h2 id="put">3.1 put</h2><pre><code class="java">public V put(K key, V value) {
-    //可以猜到Entry应该就是红黑树的节点类
-    Entry&lt;K,V&gt; t = root;
-    //如果根节点为空
-    if (t == null) {
-        //这里的compare只是类型检查和null值检查key
-        compare(key, key); // type (and possibly null) check
+<h1 id="重要方法">3 重要方法</h1><h2 id="put">3.1 put</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">V</span> <span class="token function">put</span><span class="token punctuation">(</span><span class="token class-name">K</span> key<span class="token punctuation">,</span> <span class="token class-name">V</span> value<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">//可以猜到Entry应该就是红黑树的节点类</span>
+    <span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> t <span class="token operator">=</span> root<span class="token punctuation">;</span>
+    <span class="token comment">//如果根节点为空</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>t <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">//这里的compare只是类型检查和null值检查key</span>
+        <span class="token function">compare</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> key<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// type (and possibly null) check</span>
 
-        root = new Entry&lt;&gt;(key, value, null);
-        size = 1;
-        modCount++;
-        return null;
-    }
-    int cmp;
-    Entry&lt;K,V&gt; parent;
-    // 获取比较器
-    Comparator&lt;? super K&gt; cpr = comparator;
-    // 如果有比较器
-    if (cpr != null) {
-        //获取要插入的位置
-        do {
-            parent = t;
-            cmp = cpr.compare(key, t.key);
-            if (cmp &lt; 0)
-                t = t.left;
-            else if (cmp &gt; 0)
-                t = t.right;
-            else
-                //如果已有这个键了，那么替换值
-                return t.setValue(value);
-        } while (t != null);
-    }
-    // 如果没有比较器 即为实现了Comparable接口，类似的逻辑
-    else {
-        if (key == null)
-            throw new NullPointerException();
-        @SuppressWarnings(&quot;unchecked&quot;)
-            Comparable&lt;? super K&gt; k = (Comparable&lt;? super K&gt;) key;
-        do {
-            parent = t;
-            cmp = k.compareTo(t.key);
-            if (cmp &lt; 0)
-                t = t.left;
-            else if (cmp &gt; 0)
-                t = t.right;
-            else
-                return t.setValue(value);
-        } while (t != null);
-    }
-    //构造结点
-    Entry&lt;K,V&gt; e = new Entry&lt;&gt;(key, value, parent);
-    //插入对应位置
-    if (cmp &lt; 0)
-        parent.left = e;
-    else
-        parent.right = e;
-    //插入后的调整
-    fixAfterInsertion(e);
-    size++;
-    modCount++;
-    return null;
-}</code></pre>
+        root <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> value<span class="token punctuation">,</span> <span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        size <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+        modCount<span class="token operator">++</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">int</span> cmp<span class="token punctuation">;</span>
+    <span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> parent<span class="token punctuation">;</span>
+    <span class="token comment">// 获取比较器</span>
+    <span class="token class-name">Comparator</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">super</span> <span class="token class-name">K</span><span class="token punctuation">></span></span> cpr <span class="token operator">=</span> comparator<span class="token punctuation">;</span>
+    <span class="token comment">// 如果有比较器</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>cpr <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">//获取要插入的位置</span>
+        <span class="token keyword">do</span> <span class="token punctuation">&#123;</span>
+            parent <span class="token operator">=</span> t<span class="token punctuation">;</span>
+            cmp <span class="token operator">=</span> cpr<span class="token punctuation">.</span><span class="token function">compare</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> t<span class="token punctuation">.</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>cmp <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+                t <span class="token operator">=</span> t<span class="token punctuation">.</span>left<span class="token punctuation">;</span>
+            <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>cmp <span class="token operator">></span> <span class="token number">0</span><span class="token punctuation">)</span>
+                t <span class="token operator">=</span> t<span class="token punctuation">.</span>right<span class="token punctuation">;</span>
+            <span class="token keyword">else</span>
+                <span class="token comment">//如果已有这个键了，那么替换值</span>
+                <span class="token keyword">return</span> t<span class="token punctuation">.</span><span class="token function">setValue</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">while</span> <span class="token punctuation">(</span>t <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token comment">// 如果没有比较器 即为实现了Comparable接口，类似的逻辑</span>
+    <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>key <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span>
+            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">NullPointerException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token annotation punctuation">@SuppressWarnings</span><span class="token punctuation">(</span><span class="token string">"unchecked"</span><span class="token punctuation">)</span>
+            <span class="token class-name">Comparable</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">super</span> <span class="token class-name">K</span><span class="token punctuation">></span></span> k <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">Comparable</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">super</span> <span class="token class-name">K</span><span class="token punctuation">></span></span><span class="token punctuation">)</span> key<span class="token punctuation">;</span>
+        <span class="token keyword">do</span> <span class="token punctuation">&#123;</span>
+            parent <span class="token operator">=</span> t<span class="token punctuation">;</span>
+            cmp <span class="token operator">=</span> k<span class="token punctuation">.</span><span class="token function">compareTo</span><span class="token punctuation">(</span>t<span class="token punctuation">.</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>cmp <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+                t <span class="token operator">=</span> t<span class="token punctuation">.</span>left<span class="token punctuation">;</span>
+            <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>cmp <span class="token operator">></span> <span class="token number">0</span><span class="token punctuation">)</span>
+                t <span class="token operator">=</span> t<span class="token punctuation">.</span>right<span class="token punctuation">;</span>
+            <span class="token keyword">else</span>
+                <span class="token keyword">return</span> t<span class="token punctuation">.</span><span class="token function">setValue</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">while</span> <span class="token punctuation">(</span>t <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token comment">//构造结点</span>
+    <span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> e <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> value<span class="token punctuation">,</span> parent<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//插入对应位置</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>cmp <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+        parent<span class="token punctuation">.</span>left <span class="token operator">=</span> e<span class="token punctuation">;</span>
+    <span class="token keyword">else</span>
+        parent<span class="token punctuation">.</span>right <span class="token operator">=</span> e<span class="token punctuation">;</span>
+    <span class="token comment">//插入后的调整</span>
+    <span class="token function">fixAfterInsertion</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    size<span class="token operator">++</span><span class="token punctuation">;</span>
+    modCount<span class="token operator">++</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>看完这个函数的结论：  </p>
 <ol>
 <li>Entry是结点的类</li>
 <li>按正常的搜索树方法插入节点之后，调用<code>fixAfterInsertion(e)</code>来调整树。</li>
 </ol>
 <p>那么我们分别来看对应的源码：</p>
-<h3 id="Entry">3.1.1 Entry</h3><pre><code class="java">static final class Entry&lt;K,V&gt; implements Map.Entry&lt;K,V&gt; {
-    K key;
-    V value;
-    Entry&lt;K,V&gt; left;
-    Entry&lt;K,V&gt; right;
-    Entry&lt;K,V&gt; parent;
-    boolean color = BLACK;
-    //...
-}</code></pre>
-<p>其实似曾相识，因为之前在<a href="../HashMap源码分析/">HashMap源码分析</a>中看过HashMap用红黑树实现的部分也实现了红黑树的节点，不过当时也没有谈具体方法的实现。</p>
-<h3 id="fixAfterInsertion">3.1.2 fixAfterInsertion</h3><pre><code class="java">private void fixAfterInsertion(Entry&lt;K,V&gt; x) {
-    //插入节点默认为红色
-    x.color = RED;
+<h3 id="Entry">3.1.1 Entry</h3><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">class</span> <span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> <span class="token keyword">implements</span> <span class="token class-name">Map</span><span class="token punctuation">.</span><span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">K</span> key<span class="token punctuation">;</span>
+    <span class="token class-name">V</span> value<span class="token punctuation">;</span>
+    <span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> left<span class="token punctuation">;</span>
+    <span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> right<span class="token punctuation">;</span>
+    <span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> parent<span class="token punctuation">;</span>
+    <span class="token keyword">boolean</span> color <span class="token operator">=</span> BLACK<span class="token punctuation">;</span>
+    <span class="token comment">//...</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-    // 如果父节点也是红色
-    while (x != null &amp;&amp; x != root &amp;&amp; x.parent.color == RED) {
-        //如果父节点是祖父节点的左子节点
-        if (parentOf(x) == leftOf(parentOf(parentOf(x)))) {
-            //获取祖父节点的右子节点
-            Entry&lt;K,V&gt; y = rightOf(parentOf(parentOf(x)));
-            //如果父节点的兄弟节点也是红色
-            if (colorOf(y) == RED) {
-                //把父节点和父节点的兄弟节点设为黑色
-                setColor(parentOf(x), BLACK);
-                setColor(y, BLACK);
-                //把祖父节点设为红色
-                setColor(parentOf(parentOf(x)), RED);
-                //定位到祖父节点，分析下一步的变化规则
-                x = parentOf(parentOf(x));
-            //如果父节点的兄弟节点不是红色
-            } else {
-                //如果当前节点是右子节点
-                if (x == rightOf(parentOf(x))) {
-                    //说明是“折线型失衡”，先左旋，再右旋
-                    x = parentOf(x);
-                    rotateLeft(x);
-                }
-                //“直线型失衡”，直接右旋
-                setColor(parentOf(x), BLACK);
-                setColor(parentOf(parentOf(x)), RED);
-                rotateRight(parentOf(parentOf(x)));
-            }
-        } else {
-            Entry&lt;K,V&gt; y = leftOf(parentOf(parentOf(x)));
-            if (colorOf(y) == RED) {
-                setColor(parentOf(x), BLACK);
-                setColor(y, BLACK);
-                setColor(parentOf(parentOf(x)), RED);
-                x = parentOf(parentOf(x));
-            } else {
-                if (x == leftOf(parentOf(x))) {
-                    x = parentOf(x);
-                    rotateRight(x);
-                }
-                setColor(parentOf(x), BLACK);
-                setColor(parentOf(parentOf(x)), RED);
-                rotateLeft(parentOf(parentOf(x)));
-            }
-        }
-    }
-    //永远保持根节点为黑色
-    root.color = BLACK;
-}</code></pre>
-<h2 id="get">3.2 get</h2><pre><code class="java">public V get(Object key) {
-    Entry&lt;K,V&gt; p = getEntry(key);
-    return (p==null ? null : p.value);
-}</code></pre>
+<p>其实似曾相识，因为之前在<a href="../HashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">HashMap源码分析</a>中看过HashMap用红黑树实现的部分也实现了红黑树的节点，不过当时也没有谈具体方法的实现。</p>
+<h3 id="fixAfterInsertion">3.1.2 fixAfterInsertion</h3><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">fixAfterInsertion</span><span class="token punctuation">(</span><span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> x<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">//插入节点默认为红色</span>
+    x<span class="token punctuation">.</span>color <span class="token operator">=</span> RED<span class="token punctuation">;</span>
+
+    <span class="token comment">// 如果父节点也是红色</span>
+    <span class="token keyword">while</span> <span class="token punctuation">(</span>x <span class="token operator">!=</span> <span class="token keyword">null</span> <span class="token operator">&amp;&amp;</span> x <span class="token operator">!=</span> root <span class="token operator">&amp;&amp;</span> x<span class="token punctuation">.</span>parent<span class="token punctuation">.</span>color <span class="token operator">==</span> RED<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">//如果父节点是祖父节点的左子节点</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token function">leftOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token comment">//获取祖父节点的右子节点</span>
+            <span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> y <span class="token operator">=</span> <span class="token function">rightOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">//如果父节点的兄弟节点也是红色</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">colorOf</span><span class="token punctuation">(</span>y<span class="token punctuation">)</span> <span class="token operator">==</span> RED<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                <span class="token comment">//把父节点和父节点的兄弟节点设为黑色</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">,</span> BLACK<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span>y<span class="token punctuation">,</span> BLACK<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token comment">//把祖父节点设为红色</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span> RED<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token comment">//定位到祖父节点，分析下一步的变化规则</span>
+                x <span class="token operator">=</span> <span class="token function">parentOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">//如果父节点的兄弟节点不是红色</span>
+            <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+                <span class="token comment">//如果当前节点是右子节点</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>x <span class="token operator">==</span> <span class="token function">rightOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                    <span class="token comment">//说明是“折线型失衡”，先左旋，再右旋</span>
+                    x <span class="token operator">=</span> <span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token function">rotateLeft</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span>
+                <span class="token comment">//“直线型失衡”，直接右旋</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">,</span> BLACK<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span> RED<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">rotateRight</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+            <span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> y <span class="token operator">=</span> <span class="token function">leftOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">colorOf</span><span class="token punctuation">(</span>y<span class="token punctuation">)</span> <span class="token operator">==</span> RED<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">,</span> BLACK<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span>y<span class="token punctuation">,</span> BLACK<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span> RED<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                x <span class="token operator">=</span> <span class="token function">parentOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>x <span class="token operator">==</span> <span class="token function">leftOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                    x <span class="token operator">=</span> <span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token function">rotateRight</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">,</span> BLACK<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span> RED<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">rotateLeft</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token comment">//永远保持根节点为黑色</span>
+    root<span class="token punctuation">.</span>color <span class="token operator">=</span> BLACK<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h2 id="get">3.2 get</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">V</span> <span class="token function">get</span><span class="token punctuation">(</span><span class="token class-name">Object</span> key<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> p <span class="token operator">=</span> <span class="token function">getEntry</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token punctuation">(</span>p<span class="token operator">==</span><span class="token keyword">null</span> <span class="token operator">?</span> <span class="token keyword">null</span> <span class="token operator">:</span> p<span class="token punctuation">.</span>value<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>get其实没什么好看的，就是搜索树的搜索。</p>
-<pre><code class="java">final Entry&lt;K,V&gt; getEntry(Object key) {
-    // Offload comparator-based version for sake of performance
-    if (comparator != null)
-        return getEntryUsingComparator(key);
-    if (key == null)
-        throw new NullPointerException();
-    @SuppressWarnings(&quot;unchecked&quot;)
-        Comparable&lt;? super K&gt; k = (Comparable&lt;? super K&gt;) key;
-    Entry&lt;K,V&gt; p = root;
-    while (p != null) {
-        int cmp = k.compareTo(p.key);
-        if (cmp &lt; 0)
-            p = p.left;
-        else if (cmp &gt; 0)
-            p = p.right;
-        else
-            return p;
-    }
-    return null;
-}</code></pre>
-<h2 id="remove">3.3 remove</h2><pre><code class="java">public V remove(Object key) {
-    Entry&lt;K,V&gt; p = getEntry(key);
-    if (p == null)
-        return null;
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">final</span> <span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> <span class="token function">getEntry</span><span class="token punctuation">(</span><span class="token class-name">Object</span> key<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// Offload comparator-based version for sake of performance</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>comparator <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token function">getEntryUsingComparator</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>key <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span>
+        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">NullPointerException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token annotation punctuation">@SuppressWarnings</span><span class="token punctuation">(</span><span class="token string">"unchecked"</span><span class="token punctuation">)</span>
+        <span class="token class-name">Comparable</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">super</span> <span class="token class-name">K</span><span class="token punctuation">></span></span> k <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">Comparable</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">super</span> <span class="token class-name">K</span><span class="token punctuation">></span></span><span class="token punctuation">)</span> key<span class="token punctuation">;</span>
+    <span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> p <span class="token operator">=</span> root<span class="token punctuation">;</span>
+    <span class="token keyword">while</span> <span class="token punctuation">(</span>p <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">int</span> cmp <span class="token operator">=</span> k<span class="token punctuation">.</span><span class="token function">compareTo</span><span class="token punctuation">(</span>p<span class="token punctuation">.</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>cmp <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+            p <span class="token operator">=</span> p<span class="token punctuation">.</span>left<span class="token punctuation">;</span>
+        <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>cmp <span class="token operator">></span> <span class="token number">0</span><span class="token punctuation">)</span>
+            p <span class="token operator">=</span> p<span class="token punctuation">.</span>right<span class="token punctuation">;</span>
+        <span class="token keyword">else</span>
+            <span class="token keyword">return</span> p<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">return</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-    V oldValue = p.value;
-    deleteEntry(p);
-    return oldValue;
-}</code></pre>
+<h2 id="remove">3.3 remove</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">V</span> <span class="token function">remove</span><span class="token punctuation">(</span><span class="token class-name">Object</span> key<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> p <span class="token operator">=</span> <span class="token function">getEntry</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>p <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+
+    <span class="token class-name">V</span> oldValue <span class="token operator">=</span> p<span class="token punctuation">.</span>value<span class="token punctuation">;</span>
+    <span class="token function">deleteEntry</span><span class="token punctuation">(</span>p<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> oldValue<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>写红黑树的时候提到，删除操作可复杂了，分好多情况，这里也不详细说明了：</p>
-<pre><code class="java">private void deleteEntry(Entry&lt;K,V&gt; p) {
-    modCount++;
-    size--;
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">deleteEntry</span><span class="token punctuation">(</span><span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> p<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    modCount<span class="token operator">++</span><span class="token punctuation">;</span>
+    size<span class="token operator">--</span><span class="token punctuation">;</span>
 
-    // If strictly internal, copy successor&#39;s element to p and then make p
-    // point to successor.
-    // 如果p有两个孩子节点
-    if (p.left != null &amp;&amp; p.right != null) {
-        // 获取后继结点
-        Entry&lt;K,V&gt; s = successor(p);
-        // 用后继节点替换当前节点（颜色不变）
-        p.key = s.key;
-        p.value = s.value;
-        // 然后把p指向s，和后面p只有一个或0个孩子节点的方法通用
-        p = s;
-    } // p has 2 children
+    <span class="token comment">// If strictly internal, copy successor's element to p and then make p</span>
+    <span class="token comment">// point to successor.</span>
+    <span class="token comment">// 如果p有两个孩子节点</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>p<span class="token punctuation">.</span>left <span class="token operator">!=</span> <span class="token keyword">null</span> <span class="token operator">&amp;&amp;</span> p<span class="token punctuation">.</span>right <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">// 获取后继结点</span>
+        <span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> s <span class="token operator">=</span> <span class="token function">successor</span><span class="token punctuation">(</span>p<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">// 用后继节点替换当前节点（颜色不变）</span>
+        p<span class="token punctuation">.</span>key <span class="token operator">=</span> s<span class="token punctuation">.</span>key<span class="token punctuation">;</span>
+        p<span class="token punctuation">.</span>value <span class="token operator">=</span> s<span class="token punctuation">.</span>value<span class="token punctuation">;</span>
+        <span class="token comment">// 然后把p指向s，和后面p只有一个或0个孩子节点的方法通用</span>
+        p <span class="token operator">=</span> s<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token comment">// p has 2 children</span>
 
-    // Start fixup at replacement node, if it exists.
-    Entry&lt;K,V&gt; replacement = (p.left != null ? p.left : p.right);
-    //有一个孩子节点
-    if (replacement != null) {
-        // Link replacement to parent
-        replacement.parent = p.parent;
-        if (p.parent == null)
-            root = replacement;
-        else if (p == p.parent.left)
-            p.parent.left  = replacement;
-        else
-            p.parent.right = replacement;
+    <span class="token comment">// Start fixup at replacement node, if it exists.</span>
+    <span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> replacement <span class="token operator">=</span> <span class="token punctuation">(</span>p<span class="token punctuation">.</span>left <span class="token operator">!=</span> <span class="token keyword">null</span> <span class="token operator">?</span> p<span class="token punctuation">.</span>left <span class="token operator">:</span> p<span class="token punctuation">.</span>right<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//有一个孩子节点</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>replacement <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">// Link replacement to parent</span>
+        replacement<span class="token punctuation">.</span>parent <span class="token operator">=</span> p<span class="token punctuation">.</span>parent<span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>p<span class="token punctuation">.</span>parent <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span>
+            root <span class="token operator">=</span> replacement<span class="token punctuation">;</span>
+        <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>p <span class="token operator">==</span> p<span class="token punctuation">.</span>parent<span class="token punctuation">.</span>left<span class="token punctuation">)</span>
+            p<span class="token punctuation">.</span>parent<span class="token punctuation">.</span>left  <span class="token operator">=</span> replacement<span class="token punctuation">;</span>
+        <span class="token keyword">else</span>
+            p<span class="token punctuation">.</span>parent<span class="token punctuation">.</span>right <span class="token operator">=</span> replacement<span class="token punctuation">;</span>
 
-        // Null out links so they are OK to use by fixAfterDeletion.
-        p.left = p.right = p.parent = null;
+        <span class="token comment">// Null out links so they are OK to use by fixAfterDeletion.</span>
+        p<span class="token punctuation">.</span>left <span class="token operator">=</span> p<span class="token punctuation">.</span>right <span class="token operator">=</span> p<span class="token punctuation">.</span>parent <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
 
-        // Fix replacement
-        if (p.color == BLACK)
-            fixAfterDeletion(replacement);
-    } else if (p.parent == null) { // return if we are the only node.
-        root = null;
-    //没有孩子节点，且要删除的是黑色节点，那么还要通过fixAfterDeletion再继续调整
-    } else { //  No children. Use self as phantom replacement and unlink.
-        if (p.color == BLACK)
-            fixAfterDeletion(p);
-        if (p.parent != null) {
-            if (p == p.parent.left)
-                p.parent.left = null;
-            else if (p == p.parent.right)
-                p.parent.right = null;
-            p.parent = null;
-        }
-    }
-}</code></pre>
-<pre><code class="java">private void fixAfterDeletion(Entry&lt;K,V&gt; x) {
-    while (x != root &amp;&amp; colorOf(x) == BLACK) {
-        if (x == leftOf(parentOf(x))) {
-            Entry&lt;K,V&gt; sib = rightOf(parentOf(x));
+        <span class="token comment">// Fix replacement</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>p<span class="token punctuation">.</span>color <span class="token operator">==</span> BLACK<span class="token punctuation">)</span>
+            <span class="token function">fixAfterDeletion</span><span class="token punctuation">(</span>replacement<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>p<span class="token punctuation">.</span>parent <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token comment">// return if we are the only node.</span>
+        root <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token comment">//没有孩子节点，且要删除的是黑色节点，那么还要通过fixAfterDeletion再继续调整</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span> <span class="token comment">//  No children. Use self as phantom replacement and unlink.</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>p<span class="token punctuation">.</span>color <span class="token operator">==</span> BLACK<span class="token punctuation">)</span>
+            <span class="token function">fixAfterDeletion</span><span class="token punctuation">(</span>p<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>p<span class="token punctuation">.</span>parent <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>p <span class="token operator">==</span> p<span class="token punctuation">.</span>parent<span class="token punctuation">.</span>left<span class="token punctuation">)</span>
+                p<span class="token punctuation">.</span>parent<span class="token punctuation">.</span>left <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+            <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>p <span class="token operator">==</span> p<span class="token punctuation">.</span>parent<span class="token punctuation">.</span>right<span class="token punctuation">)</span>
+                p<span class="token punctuation">.</span>parent<span class="token punctuation">.</span>right <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+            p<span class="token punctuation">.</span>parent <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-            if (colorOf(sib) == RED) {
-                setColor(sib, BLACK);
-                setColor(parentOf(x), RED);
-                rotateLeft(parentOf(x));
-                sib = rightOf(parentOf(x));
-            }
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">fixAfterDeletion</span><span class="token punctuation">(</span><span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> x<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">while</span> <span class="token punctuation">(</span>x <span class="token operator">!=</span> root <span class="token operator">&amp;&amp;</span> <span class="token function">colorOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span> <span class="token operator">==</span> BLACK<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>x <span class="token operator">==</span> <span class="token function">leftOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> sib <span class="token operator">=</span> <span class="token function">rightOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-            if (colorOf(leftOf(sib))  == BLACK &amp;&amp;
-                colorOf(rightOf(sib)) == BLACK) {
-                setColor(sib, RED);
-                x = parentOf(x);
-            } else {
-                if (colorOf(rightOf(sib)) == BLACK) {
-                    setColor(leftOf(sib), BLACK);
-                    setColor(sib, RED);
-                    rotateRight(sib);
-                    sib = rightOf(parentOf(x));
-                }
-                setColor(sib, colorOf(parentOf(x)));
-                setColor(parentOf(x), BLACK);
-                setColor(rightOf(sib), BLACK);
-                rotateLeft(parentOf(x));
-                x = root;
-            }
-        } else { // symmetric
-            Entry&lt;K,V&gt; sib = leftOf(parentOf(x));
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">colorOf</span><span class="token punctuation">(</span>sib<span class="token punctuation">)</span> <span class="token operator">==</span> RED<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span>sib<span class="token punctuation">,</span> BLACK<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">,</span> RED<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">rotateLeft</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                sib <span class="token operator">=</span> <span class="token function">rightOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
 
-            if (colorOf(sib) == RED) {
-                setColor(sib, BLACK);
-                setColor(parentOf(x), RED);
-                rotateRight(parentOf(x));
-                sib = leftOf(parentOf(x));
-            }
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">colorOf</span><span class="token punctuation">(</span><span class="token function">leftOf</span><span class="token punctuation">(</span>sib<span class="token punctuation">)</span><span class="token punctuation">)</span>  <span class="token operator">==</span> BLACK <span class="token operator">&amp;&amp;</span>
+                <span class="token function">colorOf</span><span class="token punctuation">(</span><span class="token function">rightOf</span><span class="token punctuation">(</span>sib<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">==</span> BLACK<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span>sib<span class="token punctuation">,</span> RED<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                x <span class="token operator">=</span> <span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">colorOf</span><span class="token punctuation">(</span><span class="token function">rightOf</span><span class="token punctuation">(</span>sib<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">==</span> BLACK<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                    <span class="token function">setColor</span><span class="token punctuation">(</span><span class="token function">leftOf</span><span class="token punctuation">(</span>sib<span class="token punctuation">)</span><span class="token punctuation">,</span> BLACK<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token function">setColor</span><span class="token punctuation">(</span>sib<span class="token punctuation">,</span> RED<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token function">rotateRight</span><span class="token punctuation">(</span>sib<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    sib <span class="token operator">=</span> <span class="token function">rightOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span>sib<span class="token punctuation">,</span> <span class="token function">colorOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">,</span> BLACK<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span><span class="token function">rightOf</span><span class="token punctuation">(</span>sib<span class="token punctuation">)</span><span class="token punctuation">,</span> BLACK<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">rotateLeft</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                x <span class="token operator">=</span> root<span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span> <span class="token comment">// symmetric</span>
+            <span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> sib <span class="token operator">=</span> <span class="token function">leftOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-            if (colorOf(rightOf(sib)) == BLACK &amp;&amp;
-                colorOf(leftOf(sib)) == BLACK) {
-                setColor(sib, RED);
-                x = parentOf(x);
-            } else {
-                if (colorOf(leftOf(sib)) == BLACK) {
-                    setColor(rightOf(sib), BLACK);
-                    setColor(sib, RED);
-                    rotateLeft(sib);
-                    sib = leftOf(parentOf(x));
-                }
-                setColor(sib, colorOf(parentOf(x)));
-                setColor(parentOf(x), BLACK);
-                setColor(leftOf(sib), BLACK);
-                rotateRight(parentOf(x));
-                x = root;
-            }
-        }
-    }
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">colorOf</span><span class="token punctuation">(</span>sib<span class="token punctuation">)</span> <span class="token operator">==</span> RED<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span>sib<span class="token punctuation">,</span> BLACK<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">,</span> RED<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">rotateRight</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                sib <span class="token operator">=</span> <span class="token function">leftOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
 
-    setColor(x, BLACK);
-}</code></pre>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">colorOf</span><span class="token punctuation">(</span><span class="token function">rightOf</span><span class="token punctuation">(</span>sib<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">==</span> BLACK <span class="token operator">&amp;&amp;</span>
+                <span class="token function">colorOf</span><span class="token punctuation">(</span><span class="token function">leftOf</span><span class="token punctuation">(</span>sib<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">==</span> BLACK<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span>sib<span class="token punctuation">,</span> RED<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                x <span class="token operator">=</span> <span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">colorOf</span><span class="token punctuation">(</span><span class="token function">leftOf</span><span class="token punctuation">(</span>sib<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">==</span> BLACK<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                    <span class="token function">setColor</span><span class="token punctuation">(</span><span class="token function">rightOf</span><span class="token punctuation">(</span>sib<span class="token punctuation">)</span><span class="token punctuation">,</span> BLACK<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token function">setColor</span><span class="token punctuation">(</span>sib<span class="token punctuation">,</span> RED<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token function">rotateLeft</span><span class="token punctuation">(</span>sib<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    sib <span class="token operator">=</span> <span class="token function">leftOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span>sib<span class="token punctuation">,</span> <span class="token function">colorOf</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">,</span> BLACK<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">setColor</span><span class="token punctuation">(</span><span class="token function">leftOf</span><span class="token punctuation">(</span>sib<span class="token punctuation">)</span><span class="token punctuation">,</span> BLACK<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">rotateRight</span><span class="token punctuation">(</span><span class="token function">parentOf</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                x <span class="token operator">=</span> root<span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token function">setColor</span><span class="token punctuation">(</span>x<span class="token punctuation">,</span> BLACK<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <h1 id="构造方法">4 构造方法</h1><p>考虑到TreeMap是由红黑树实现的，不存在什么扩容，构造方法也很简单：</p>
-<pre><code class="java">public TreeMap() {
-    comparator = null;
-}
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">TreeMap</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    comparator <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
 
-public TreeMap(Comparator&lt;? super K&gt; comparator) {
-    this.comparator = comparator;
-}</code></pre>
-
+<span class="token keyword">public</span> <span class="token class-name">TreeMap</span><span class="token punctuation">(</span><span class="token class-name">Comparator</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">super</span> <span class="token class-name">K</span><span class="token punctuation">></span></span> comparator<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>comparator <span class="token operator">=</span> comparator<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
             </div>
             <hr/>
 
@@ -1149,8 +1157,8 @@ public TreeMap(Comparator&lt;? super K&gt; comparator) {
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题在一条环路上有 N 个加油站，其中第 i 个加油站有汽油 gas[i] 升。
-你有一辆油箱容量无限的的汽车，从第 i 个加油站开往第 i+1 个加油站需要消耗汽油 cost[i] 升。你从其中的一个加油站出发，开始时油箱为空。
+                            1 原题在一条环路上有 N 个加油站，其中第 i 个加油站有汽油 gas[i] 升。
+你有一辆油箱容量无限的的汽车，从第 i 个加油站开往第 i+1 个加油站需要消耗汽油 cost[i] 升。你从其中的一个加油站出发，开始时油箱为空。
 如果
                         
                     </div>
@@ -1328,7 +1336,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

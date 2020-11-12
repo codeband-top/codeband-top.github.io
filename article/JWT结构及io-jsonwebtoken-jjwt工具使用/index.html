@@ -28,6 +28,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -398,7 +399,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1k
+                    980
                 </div>
                 
 
@@ -416,133 +417,137 @@
 <p>名词解释：</p>
 <p><strong>HS256：</strong> HMACSHA256，一种消息摘要算法<br><strong>Base64URL：</strong>  Base64中用的三个字符是<code>&quot;+&quot;</code>，<code>&quot;/&quot;</code>和<code>&quot;=&quot;</code>，由于在URL中有特殊含义，因此Base64URL中对他们做了替换：<code>&quot;=&quot;</code>去掉，<code>&quot;+&quot;</code>用<code>&quot;-&quot;</code>替换，<code>&quot;/&quot;</code>用<code>&quot;_&quot;</code>替换，这就是Base64URL算法。</p>
 <h1 id="结构">2 结构</h1><h2 id="头部-header">2.1 头部(header)</h2><p>Header 部分是一个 JSON 对象，描述 JWT 的元数据，一般很少改动直接使用默认的即可            </p>
-<pre><code class="json">{
-    &quot;typ&quot;: &quot;JWT&quot;,
-    &quot;alg&quot;: &quot;HS256&quot;
-}</code></pre>
+<pre class="language-json" data-language="json"><code class="language-json"><span class="token punctuation">&#123;</span>
+    <span class="token property">"typ"</span><span class="token operator">:</span> <span class="token string">"JWT"</span><span class="token punctuation">,</span>
+    <span class="token property">"alg"</span><span class="token operator">:</span> <span class="token string">"HS256"</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p><code>alg</code>属性表示<strong>签名的算法</strong>（algorithm）；<code>typ</code>属性表示这个<strong>令牌（token）的类型（type）</strong>，JWT 令牌统一写为<code>JWT</code>。</p>
 <h2 id="载荷-playload">2.2 载荷(playload)</h2><p>Payload 部分也是一个 JSON 对象，用来存放实际需要传递的数据。</p>
 <p><strong>可自行指定字段，很灵活</strong>，也有固定字段表示特定含义（但不一定要包含特定字段，只是推荐）。下面是官方推荐的字段：</p>
-<pre><code class="json">{
-    &quot;iss&quot;: &quot;签发者&quot;,
-    &quot;sub&quot;: &quot;当前令牌的描述说明&quot;,
-    &quot;aud&quot;: &quot;接收方&quot;,
-    &quot;exp&quot;: &quot;过期时间&quot;,
-    &quot;iat&quot;: &quot;创建时间&quot;,
-    &quot;nbf&quot;: &quot;在什么时间之前，该Token不可用&quot;,
-    &quot;jti&quot;: &quot;Token唯一标识&quot;
-}</code></pre>
+<pre class="language-json" data-language="json"><code class="language-json"><span class="token punctuation">&#123;</span>
+    <span class="token property">"iss"</span><span class="token operator">:</span> <span class="token string">"签发者"</span><span class="token punctuation">,</span>
+    <span class="token property">"sub"</span><span class="token operator">:</span> <span class="token string">"当前令牌的描述说明"</span><span class="token punctuation">,</span>
+    <span class="token property">"aud"</span><span class="token operator">:</span> <span class="token string">"接收方"</span><span class="token punctuation">,</span>
+    <span class="token property">"exp"</span><span class="token operator">:</span> <span class="token string">"过期时间"</span><span class="token punctuation">,</span>
+    <span class="token property">"iat"</span><span class="token operator">:</span> <span class="token string">"创建时间"</span><span class="token punctuation">,</span>
+    <span class="token property">"nbf"</span><span class="token operator">:</span> <span class="token string">"在什么时间之前，该Token不可用"</span><span class="token punctuation">,</span>
+    <span class="token property">"jti"</span><span class="token operator">:</span> <span class="token string">"Token唯一标识"</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>下面就是一个例子：</p>
-<pre><code class="json">{
-    &quot;sub&quot;: &quot;1234567890&quot;,
-    &quot;name&quot;: &quot;John Doe&quot;,
-    &quot;admin&quot;: true
-}</code></pre>
+<pre class="language-json" data-language="json"><code class="language-json"><span class="token punctuation">&#123;</span>
+    <span class="token property">"sub"</span><span class="token operator">:</span> <span class="token string">"1234567890"</span><span class="token punctuation">,</span>
+    <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"John Doe"</span><span class="token punctuation">,</span>
+    <span class="token property">"admin"</span><span class="token operator">:</span> <span class="token boolean">true</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+
 <h2 id="签名-signature">2.3 签名(signature)</h2><p>Signature 部分是对前两部分的签名，防止数据篡改。</p>
 <p>首先，<strong>需要指定一个密钥（secret）</strong>。这个密钥只有服务器才知道，不能泄露给用户。然后，使用 Header 里面指定的签名算法（默认是 HMAC SHA256），按照下面的公式产生签名。</p>
 <p><code>HMACSHA256(base64UrlEncode(header) + &quot;.&quot; + base64UrlEncode(payload) , secret)</code></p>
 <p>密钥在摘要算法中起盐值的作用。</p>
 <p><strong>算出签名以后，将header和payload用Base64URL算法对象序列化，然后把这三部分用“.”拼接起来就是生成的token了。</strong></p>
 <h1 id="io-jsonwebtoken-jjwt工具使用">3 io.jsonwebtoken.jjwt工具使用</h1><p>maven依赖：</p>
-<pre><code class="xml">&lt;dependency&gt;
-    &lt;groupId&gt;io.jsonwebtoken&lt;/groupId&gt;
-    &lt;artifactId&gt;jjwt&lt;/artifactId&gt;
-    &lt;version&gt;0.9.1&lt;/version&gt;
-&lt;/dependency&gt;</code></pre>
+<pre class="language-xml" data-language="xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>io.jsonwebtoken<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>jjwt<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>0.9.1<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span></code></pre>
+
 <p>下面是一个示例工具类：</p>
-<pre><code class="java">import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.util.StringUtils;
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">import</span> <span class="token namespace">io<span class="token punctuation">.</span>jsonwebtoken<span class="token punctuation">.</span></span><span class="token class-name">Claims</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">io<span class="token punctuation">.</span>jsonwebtoken<span class="token punctuation">.</span></span><span class="token class-name">Jws</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">io<span class="token punctuation">.</span>jsonwebtoken<span class="token punctuation">.</span></span><span class="token class-name">Jwts</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">io<span class="token punctuation">.</span>jsonwebtoken<span class="token punctuation">.</span></span><span class="token class-name">SignatureAlgorithm</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>springframework<span class="token punctuation">.</span>util<span class="token punctuation">.</span></span><span class="token class-name">StringUtils</span><span class="token punctuation">;</span>
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
+<span class="token keyword">import</span> <span class="token namespace">javax<span class="token punctuation">.</span>servlet<span class="token punctuation">.</span>http<span class="token punctuation">.</span></span><span class="token class-name">HttpServletRequest</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">java<span class="token punctuation">.</span>util<span class="token punctuation">.</span></span><span class="token class-name">Date</span><span class="token punctuation">;</span>
 
-/**
+<span class="token comment">/**
  * @author
- */
-public class JwtUtils {
+ */</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">JwtUtils</span> <span class="token punctuation">&#123;</span>
 
-    //过期时间
-    public static final long EXPIRE = 1000 * 60 * 60 * 24;
-    //签名密钥
-    public static final String SECRET = &quot;ukc8BDbRigUDaY6pZFfWus2jZWLPHO&quot;;
+    <span class="token comment">//过期时间</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">long</span> EXPIRE <span class="token operator">=</span> <span class="token number">1000</span> <span class="token operator">*</span> <span class="token number">60</span> <span class="token operator">*</span> <span class="token number">60</span> <span class="token operator">*</span> <span class="token number">24</span><span class="token punctuation">;</span>
+    <span class="token comment">//签名密钥</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token class-name">String</span> SECRET <span class="token operator">=</span> <span class="token string">"ukc8BDbRigUDaY6pZFfWus2jZWLPHO"</span><span class="token punctuation">;</span>
 
-    /**
+    <span class="token comment">/**
     * 使用用户id和nickname获取一个token字符串
-    */
-    public static String getJwtToken(String id, String nickname){
+    */</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token class-name">String</span> <span class="token function">getJwtToken</span><span class="token punctuation">(</span><span class="token class-name">String</span> id<span class="token punctuation">,</span> <span class="token class-name">String</span> nickname<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
 
-        //使用builder构造一个JwtToken
-        String JwtToken = Jwts.builder()
-                //头部信息
-                .setHeaderParam(&quot;typ&quot;, &quot;JWT&quot;)
-                .setHeaderParam(&quot;alg&quot;, &quot;HS256&quot;)
-                //载荷中的推荐信息
-                .setSubject(&quot;guli-user&quot;)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRE))
-                //载荷中的自定义信息
-                .claim(&quot;id&quot;, id)
-                .claim(&quot;nickname&quot;, nickname)
-                //签名
-                .signWith(SignatureAlgorithm.HS256, SECRET)
-                //Base64URL前两部分并连接签名，获取token
-                .compact();
+        <span class="token comment">//使用builder构造一个JwtToken</span>
+        <span class="token class-name">String</span> <span class="token class-name">JwtToken</span> <span class="token operator">=</span> <span class="token class-name">Jwts</span><span class="token punctuation">.</span><span class="token function">builder</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+                <span class="token comment">//头部信息</span>
+                <span class="token punctuation">.</span><span class="token function">setHeaderParam</span><span class="token punctuation">(</span><span class="token string">"typ"</span><span class="token punctuation">,</span> <span class="token string">"JWT"</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">setHeaderParam</span><span class="token punctuation">(</span><span class="token string">"alg"</span><span class="token punctuation">,</span> <span class="token string">"HS256"</span><span class="token punctuation">)</span>
+                <span class="token comment">//载荷中的推荐信息</span>
+                <span class="token punctuation">.</span><span class="token function">setSubject</span><span class="token punctuation">(</span><span class="token string">"guli-user"</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">setIssuedAt</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">setExpiration</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token class-name">System</span><span class="token punctuation">.</span><span class="token function">currentTimeMillis</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> EXPIRE<span class="token punctuation">)</span><span class="token punctuation">)</span>
+                <span class="token comment">//载荷中的自定义信息</span>
+                <span class="token punctuation">.</span><span class="token function">claim</span><span class="token punctuation">(</span><span class="token string">"id"</span><span class="token punctuation">,</span> id<span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">claim</span><span class="token punctuation">(</span><span class="token string">"nickname"</span><span class="token punctuation">,</span> nickname<span class="token punctuation">)</span>
+                <span class="token comment">//签名</span>
+                <span class="token punctuation">.</span><span class="token function">signWith</span><span class="token punctuation">(</span><span class="token class-name">SignatureAlgorithm</span><span class="token punctuation">.</span>HS256<span class="token punctuation">,</span> SECRET<span class="token punctuation">)</span>
+                <span class="token comment">//Base64URL前两部分并连接签名，获取token</span>
+                <span class="token punctuation">.</span><span class="token function">compact</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        return JwtToken;
-    }
+        <span class="token keyword">return</span> <span class="token class-name">JwtToken</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    /**
+    <span class="token comment">/**
      * 判断传入的token字符串是否存在与有效
-     */
-    public static boolean checkToken(String jwtToken) {
-        if(StringUtils.isEmpty(jwtToken)) return false;
-        try {
-            //使用parser解析jwt信息
-            Jwts.parser().setSigningKey(SECRET).parseClaimsJws(jwtToken);
-        //如果格式不对，会抛出UnsupportedJwtException异常
-        //如果验证签名失败，会抛出SignatureException异常
-        //如果token过期，会抛出ExpiredJwtException异常
-        //如果字符串为空，会抛出IllegalArgumentException异常
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
+     */</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">boolean</span> <span class="token function">checkToken</span><span class="token punctuation">(</span><span class="token class-name">String</span> jwtToken<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token class-name">StringUtils</span><span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span>jwtToken<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            <span class="token comment">//使用parser解析jwt信息</span>
+            <span class="token class-name">Jwts</span><span class="token punctuation">.</span><span class="token function">parser</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">setSigningKey</span><span class="token punctuation">(</span>SECRET<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">parseClaimsJws</span><span class="token punctuation">(</span>jwtToken<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//如果格式不对，会抛出UnsupportedJwtException异常</span>
+        <span class="token comment">//如果验证签名失败，会抛出SignatureException异常</span>
+        <span class="token comment">//如果token过期，会抛出ExpiredJwtException异常</span>
+        <span class="token comment">//如果字符串为空，会抛出IllegalArgumentException异常</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    /**
+    <span class="token comment">/**
      * 判断HttpServletRequest中头部携带的token是否存在与有效
-     */
-    public static boolean checkToken(HttpServletRequest request) {
-        try {
-            String jwtToken = request.getHeader(&quot;token&quot;);
-            if(StringUtils.isEmpty(jwtToken)) return false;
-            Jwts.parser().setSigningKey(SECRET).parseClaimsJws(jwtToken);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
+     */</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">boolean</span> <span class="token function">checkToken</span><span class="token punctuation">(</span><span class="token class-name">HttpServletRequest</span> request<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            <span class="token class-name">String</span> jwtToken <span class="token operator">=</span> request<span class="token punctuation">.</span><span class="token function">getHeader</span><span class="token punctuation">(</span><span class="token string">"token"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token class-name">StringUtils</span><span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span>jwtToken<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+            <span class="token class-name">Jwts</span><span class="token punctuation">.</span><span class="token function">parser</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">setSigningKey</span><span class="token punctuation">(</span>SECRET<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">parseClaimsJws</span><span class="token punctuation">(</span>jwtToken<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    /**
+    <span class="token comment">/**
      * 根据token获取用户id
      * @param request
      * @return
-     */
-    public static String getMemberIdByJwtToken(HttpServletRequest request) {
-        String jwtToken = request.getHeader(&quot;token&quot;);
-        if(StringUtils.isEmpty(jwtToken)) return &quot;&quot;;
-        Jws&lt;Claims&gt; claimsJws = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(jwtToken);
-        //getBody获取用户在载荷中定义的信息
-        Claims claims = claimsJws.getBody();
-        return (String)claims.get(&quot;id&quot;);
-    }
-}</code></pre>
-
+     */</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token class-name">String</span> <span class="token function">getMemberIdByJwtToken</span><span class="token punctuation">(</span><span class="token class-name">HttpServletRequest</span> request<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">String</span> jwtToken <span class="token operator">=</span> request<span class="token punctuation">.</span><span class="token function">getHeader</span><span class="token punctuation">(</span><span class="token string">"token"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token class-name">StringUtils</span><span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span>jwtToken<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token string">""</span><span class="token punctuation">;</span>
+        <span class="token class-name">Jws</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Claims</span><span class="token punctuation">></span></span> claimsJws <span class="token operator">=</span> <span class="token class-name">Jwts</span><span class="token punctuation">.</span><span class="token function">parser</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">setSigningKey</span><span class="token punctuation">(</span>SECRET<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">parseClaimsJws</span><span class="token punctuation">(</span>jwtToken<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//getBody获取用户在载荷中定义的信息</span>
+        <span class="token class-name">Claims</span> claims <span class="token operator">=</span> claimsJws<span class="token punctuation">.</span><span class="token function">getBody</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">)</span>claims<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"id"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
             </div>
             <hr/>
 
@@ -1148,7 +1153,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

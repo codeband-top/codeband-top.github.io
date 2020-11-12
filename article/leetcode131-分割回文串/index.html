@@ -37,6 +37,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -411,7 +412,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    421
+                    422
                 </div>
                 
 
@@ -435,40 +436,39 @@
 ]</pre>
 
 <h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>在字符串中搜索是回文串的子字符串，可以使用dfs。</p>
-<p>但判断子字符串是不是回文串的时候，可以下功夫优化，这里不能使用我在<a href="leetcode125-验证回文串">leetcode125-验证回文串</a>中用到的方法，因为子字符串之间存在很多个重复的单元。</p>
-<p>那么就可以使用动态规划的方法判断子字符串是否为回文串：使用一个二维的dp数组，<strong><code>dp[i][j]</code>代表在字符串中下标i起始，下标j截止的子字符串是否为回文串，</strong>根据回文串的判断方法，可以得到状态转移方程<code>dp[i][j]</code> = <code>s.charAt(i)==s.charAt(j) &amp;&amp; dp[i+1][j-1]</code>。</p>
-<h2 id="代码">2.2 代码</h2><pre><code class="java">class Solution {
-    boolean[][] dp;
-    char[] chars;
-    List&lt;List&lt;String&gt;&gt; ans = new ArrayList&lt;&gt;();
-    public List&lt;List&lt;String&gt;&gt; partition(String s) {
-        int length = s.length();
-        chars = s.toCharArray();
-        dp = new boolean[length][length];
-        List&lt;String&gt; list = new ArrayList&lt;&gt;();
-        dfs(0,list);
-        return ans;
-    }
-    // 子字符串是否是回文串，使用动态规划判断
-    public boolean isPalindrome(int startIndex,int endIndex){
-        if(startIndex &gt;= endIndex) return true;
-        boolean result = chars[startIndex] == chars[endIndex] &amp;&amp; isPalindrome(startIndex+1,endIndex-1);
-        dp[startIndex][endIndex] = result;
-        return result;
-    }
-    // 从下标为startIndex处进行dfs搜索
-    public void dfs(int startIndex,List&lt;String&gt; list){
-        for(int i = startIndex;i&lt;chars.length;i++){
-            if(isPalindrome(startIndex,i)){
-                List&lt;String&gt; copy = new ArrayList&lt;&gt;(list);
-                copy.add(new String(chars,startIndex,i-startIndex+1));
-                if(i == chars.length-1) ans.add(copy);
-                else dfs(i+1,copy);
-            }
-        }
-    }
-}</code></pre>
-
+<p>但判断子字符串是不是回文串的时候，可以下功夫优化，这里不能使用我在<a href="leetcode125-%E9%AA%8C%E8%AF%81%E5%9B%9E%E6%96%87%E4%B8%B2">leetcode125-验证回文串</a>中用到的方法，因为子字符串之间存在很多个重复的单元。</p>
+<p>那么就可以使用动态规划的方法判断子字符串是否为回文串：使用一个二维的dp数组，**<code>dp[i][j]</code>代表在字符串中下标i起始，下标j截止的子字符串是否为回文串，**根据回文串的判断方法，可以得到状态转移方程<code>dp[i][j]</code> = <code>s.charAt(i)==s.charAt(j) &amp;&amp; dp[i+1][j-1]</code>。</p>
+<h2 id="代码">2.2 代码</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">boolean</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span> dp<span class="token punctuation">;</span>
+    <span class="token keyword">char</span><span class="token punctuation">[</span><span class="token punctuation">]</span> chars<span class="token punctuation">;</span>
+    <span class="token class-name">List</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">List</span><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span><span class="token punctuation">></span></span> ans <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token class-name">List</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">List</span><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span><span class="token punctuation">></span></span> <span class="token function">partition</span><span class="token punctuation">(</span><span class="token class-name">String</span> s<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">int</span> length <span class="token operator">=</span> s<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        chars <span class="token operator">=</span> s<span class="token punctuation">.</span><span class="token function">toCharArray</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        dp <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">boolean</span><span class="token punctuation">[</span>length<span class="token punctuation">]</span><span class="token punctuation">[</span>length<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token class-name">List</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> list <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">dfs</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span>list<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> ans<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token comment">// 子字符串是否是回文串，使用动态规划判断</span>
+    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">isPalindrome</span><span class="token punctuation">(</span><span class="token keyword">int</span> startIndex<span class="token punctuation">,</span><span class="token keyword">int</span> endIndex<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>startIndex <span class="token operator">>=</span> endIndex<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+        <span class="token keyword">boolean</span> result <span class="token operator">=</span> chars<span class="token punctuation">[</span>startIndex<span class="token punctuation">]</span> <span class="token operator">==</span> chars<span class="token punctuation">[</span>endIndex<span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token function">isPalindrome</span><span class="token punctuation">(</span>startIndex<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">,</span>endIndex<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        dp<span class="token punctuation">[</span>startIndex<span class="token punctuation">]</span><span class="token punctuation">[</span>endIndex<span class="token punctuation">]</span> <span class="token operator">=</span> result<span class="token punctuation">;</span>
+        <span class="token keyword">return</span> result<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token comment">// 从下标为startIndex处进行dfs搜索</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">dfs</span><span class="token punctuation">(</span><span class="token keyword">int</span> startIndex<span class="token punctuation">,</span><span class="token class-name">List</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> list<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> startIndex<span class="token punctuation">;</span>i<span class="token operator">&lt;</span>chars<span class="token punctuation">.</span>length<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">isPalindrome</span><span class="token punctuation">(</span>startIndex<span class="token punctuation">,</span>i<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                <span class="token class-name">List</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> copy <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span>list<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                copy<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">String</span><span class="token punctuation">(</span>chars<span class="token punctuation">,</span>startIndex<span class="token punctuation">,</span>i<span class="token operator">-</span>startIndex<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">if</span><span class="token punctuation">(</span>i <span class="token operator">==</span> chars<span class="token punctuation">.</span>length<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> ans<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>copy<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">else</span> <span class="token function">dfs</span><span class="token punctuation">(</span>i<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">,</span>copy<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
             </div>
             <hr/>
 
@@ -910,8 +910,8 @@
 一个Thread对象可以重复地调用start()方法吗？
 试试就知道了：
 @Test
-public void test(){
-    Thread thread = new 
+public void test()&#123;
+    Thread thread =
                         
                     </div>
                     <div class="publish-info">
@@ -1096,7 +1096,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

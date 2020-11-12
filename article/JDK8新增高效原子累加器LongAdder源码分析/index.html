@@ -28,6 +28,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -423,26 +424,27 @@
         <hr class="clearfix">
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <p>很久以前写过<a href="../CAS应用之JUC下的原子类/">CAS应用之JUC下的原子类</a>，但是LongAdder这个类没有去看，只是给了一个其他博客的参考链接。今天就自己来分析一下。</p>
+                <p>很久以前写过<a href="../CAS%E5%BA%94%E7%94%A8%E4%B9%8BJUC%E4%B8%8B%E7%9A%84%E5%8E%9F%E5%AD%90%E7%B1%BB/">CAS应用之JUC下的原子类</a>，但是LongAdder这个类没有去看，只是给了一个其他博客的参考链接。今天就自己来分析一下。</p>
 <h1 id="AtomicLong的问题和LongAdder的基本使用">1 AtomicLong的问题和LongAdder的基本使用</h1><p>与LongAdder功能类似的就是<code>AtomicLong</code>了，但我们知道，<code>AtomicLong</code>中只有一个原子变量value，多线程必须通过CAS自旋去尝试修改这个变量，同一时间只能有一个线程修改成功，会产生效率的问题。</p>
 <p>而LongAdder，则是为了解决<code>AtomicLong</code>的效率问题，它的思路是，既然多个线程同时去抢一个原子变量会有效率问题，那么可以将这一个原子变量分为多个原子变量，让多个线程去争抢，就能提高线程CAS成功的概率。</p>
 <p>先看看LongAdder的用法：</p>
-<pre><code class="java">public static void main(String[] args) {
-    LongAdder adder = new LongAdder();
-    System.out.println(adder.sum());
-    Runnable runnable = () -&gt; {
-        long origin = adder.sum();
-        //加1
-        adder.increment();
-        System.out.println(&quot;加1之前：&quot;+ origin+ &quot;，加1之后：&quot;+adder.sum());
-    };
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">LongAdder</span> adder <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">LongAdder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>adder<span class="token punctuation">.</span><span class="token function">sum</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">Runnable</span> runnable <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-></span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">long</span> origin <span class="token operator">=</span> adder<span class="token punctuation">.</span><span class="token function">sum</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//加1</span>
+        adder<span class="token punctuation">.</span><span class="token function">increment</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"加1之前："</span><span class="token operator">+</span> origin<span class="token operator">+</span> <span class="token string">"，加1之后："</span><span class="token operator">+</span>adder<span class="token punctuation">.</span><span class="token function">sum</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
 
-    for(int i = 0;i&lt;10;i++){
-        new Thread(runnable).start();
-    }
-}</code></pre>
+    <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span><span class="token number">10</span><span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span>runnable<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>在我电脑上的运行结果是：</p>
-<pre><code>0
+<pre class="language-none"><code class="language-none">0
 加1之前：0，加1之后：1
 加1之前：1，加1之后：2
 加1之前：2，加1之后：3
@@ -452,111 +454,119 @@
 加1之前：5，加1之后：7
 加1之前：7，加1之后：8
 加1之前：8，加1之后：9
-加1之前：9，加1之后：10</code></pre><p>可见，加之前和加之后获取的值并不一定相差1，但却很严谨地进行了原子累加操作，最后结果也是10。</p>
+加1之前：9，加1之后：10</code></pre>
+
+<p>可见，加之前和加之后获取的值并不一定相差1，但却很严谨地进行了原子累加操作，最后结果也是10。</p>
 <p>除了通过<code>increment()</code>累加1外，LongAdder还可以通过<code>add()</code>方法增加其他的值。</p>
-<h1 id="源码分析">2 源码分析</h1><p><img src="https://api.codetool.top/img/15898741569888.png" alt></p>
+<h1 id="源码分析">2 源码分析</h1><p><img src="https://api.codetool.top/img/15898741569888.png"></p>
 <p>LongAdder继承自<code>Striped64</code>，核心逻辑还是在<code>Striped64</code>中，体现着JDK尽可能抽取公用复用部分的思想。</p>
 <p>LongAdder的构造器方法没有任何东西，类中也看不到任何代表存储值的字段：</p>
-<pre><code class="java">public LongAdder() {
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">LongAdder</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>那么就来看看<code>sum()</code>方法获取的值是从哪来的：</p>
-<pre><code class="java">public long sum() {
-    Cell[] as = cells; Cell a;
-    // 获取base值
-    long sum = base;
-    // 如果Cell数组不为null
-    if (as != null) {
-        // 遍历Cell数组，并加上每个Cell代表的值
-        for (int i = 0; i &lt; as.length; ++i) {
-            if ((a = as[i]) != null)
-                sum += a.value;
-        }
-    }
-    return sum;
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">long</span> <span class="token function">sum</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">Cell</span><span class="token punctuation">[</span><span class="token punctuation">]</span> as <span class="token operator">=</span> cells<span class="token punctuation">;</span> <span class="token class-name">Cell</span> a<span class="token punctuation">;</span>
+    <span class="token comment">// 获取base值</span>
+    <span class="token keyword">long</span> sum <span class="token operator">=</span> base<span class="token punctuation">;</span>
+    <span class="token comment">// 如果Cell数组不为null</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>as <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">// 遍历Cell数组，并加上每个Cell代表的值</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> as<span class="token punctuation">.</span>length<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>a <span class="token operator">=</span> as<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span>
+                sum <span class="token operator">+=</span> a<span class="token punctuation">.</span>value<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">return</span> sum<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>从该方法看出，LongAdder存储的值分布于base和Cell数组中，为它们值的总和。</p>
 <p>那么base和Cell数组在哪里呢？通过定位，发现在<code>Striped64</code>类中：</p>
-<pre><code class="java">//Cell内部类
-@sun.misc.Contended static final class Cell {
-    volatile long value;
-    //可通过构造函数赋值
-    Cell(long x) { value = x; }
-    //提供CAS操作
-    final boolean cas(long cmp, long val) {
-        return UNSAFE.compareAndSwapLong(this, valueOffset, cmp, val);
-    }
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">//Cell内部类</span>
+<span class="token annotation punctuation">@sun</span><span class="token punctuation">.</span>misc<span class="token punctuation">.</span><span class="token class-name">Contended</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">class</span> <span class="token class-name">Cell</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">volatile</span> <span class="token keyword">long</span> value<span class="token punctuation">;</span>
+    <span class="token comment">//可通过构造函数赋值</span>
+    <span class="token class-name">Cell</span><span class="token punctuation">(</span><span class="token keyword">long</span> x<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> value <span class="token operator">=</span> x<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
+    <span class="token comment">//提供CAS操作</span>
+    <span class="token keyword">final</span> <span class="token keyword">boolean</span> <span class="token function">cas</span><span class="token punctuation">(</span><span class="token keyword">long</span> cmp<span class="token punctuation">,</span> <span class="token keyword">long</span> val<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> UNSAFE<span class="token punctuation">.</span><span class="token function">compareAndSwapLong</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> valueOffset<span class="token punctuation">,</span> cmp<span class="token punctuation">,</span> val<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    private static final sun.misc.Unsafe UNSAFE;
-    // value字段的偏移地址
-    private static final long valueOffset;
-    // 获取value字段的偏移地址
-    static {
-        try {
-            UNSAFE = sun.misc.Unsafe.getUnsafe();
-            Class&lt;?&gt; ak = Cell.class;
-            valueOffset = UNSAFE.objectFieldOffset
-                (ak.getDeclaredField(&quot;value&quot;));
-        } catch (Exception e) {
-            throw new Error(e);
-        }
-    }
-}
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> sun<span class="token punctuation">.</span>misc<span class="token punctuation">.</span><span class="token class-name">Unsafe</span> UNSAFE<span class="token punctuation">;</span>
+    <span class="token comment">// value字段的偏移地址</span>
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">long</span> valueOffset<span class="token punctuation">;</span>
+    <span class="token comment">// 获取value字段的偏移地址</span>
+    <span class="token keyword">static</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            UNSAFE <span class="token operator">=</span> sun<span class="token punctuation">.</span>misc<span class="token punctuation">.</span><span class="token class-name">Unsafe</span><span class="token punctuation">.</span><span class="token function">getUnsafe</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">Class</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span><span class="token punctuation">></span></span> ak <span class="token operator">=</span> <span class="token class-name">Cell</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">;</span>
+            valueOffset <span class="token operator">=</span> UNSAFE<span class="token punctuation">.</span>objectFieldOffset
+                <span class="token punctuation">(</span>ak<span class="token punctuation">.</span><span class="token function">getDeclaredField</span><span class="token punctuation">(</span><span class="token string">"value"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
 
-// CPU的个数
-static final int NCPU = Runtime.getRuntime().availableProcessors();
+<span class="token comment">// CPU的个数</span>
+<span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">int</span> NCPU <span class="token operator">=</span> <span class="token class-name">Runtime</span><span class="token punctuation">.</span><span class="token function">getRuntime</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">availableProcessors</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-// Cell数组
-transient volatile Cell[] cells;
+<span class="token comment">// Cell数组</span>
+<span class="token keyword">transient</span> <span class="token keyword">volatile</span> <span class="token class-name">Cell</span><span class="token punctuation">[</span><span class="token punctuation">]</span> cells<span class="token punctuation">;</span>
 
-transient volatile long base;
-// 用于保护cells数组更改的CAS变量
-transient volatile int cellsBusy;
+<span class="token keyword">transient</span> <span class="token keyword">volatile</span> <span class="token keyword">long</span> base<span class="token punctuation">;</span>
+<span class="token comment">// 用于保护cells数组更改的CAS变量</span>
+<span class="token keyword">transient</span> <span class="token keyword">volatile</span> <span class="token keyword">int</span> cellsBusy<span class="token punctuation">;</span>
 
-private static final sun.misc.Unsafe UNSAFE;
-// base、cellsbusy字段和Thread threadLocalRandomProbe字段的偏移量
-private static final long BASE;
-private static final long CELLSBUSY;
-private static final long PROBE;
-static {
-    try {
-        UNSAFE = sun.misc.Unsafe.getUnsafe();
-        Class&lt;?&gt; sk = Striped64.class;
-        BASE = UNSAFE.objectFieldOffset
-            (sk.getDeclaredField(&quot;base&quot;));
-        CELLSBUSY = UNSAFE.objectFieldOffset
-            (sk.getDeclaredField(&quot;cellsBusy&quot;));
-        Class&lt;?&gt; tk = Thread.class;
-        PROBE = UNSAFE.objectFieldOffset
-            (tk.getDeclaredField(&quot;threadLocalRandomProbe&quot;));
-    } catch (Exception e) {
-        throw new Error(e);
-    }
-}</code></pre>
-<p><code>threadLocalRandomProbe</code>这个字段我们在<a href="../Random在多线程下的问题以及ThreadLocalRandom类分析">Random在多线程下的问题以及ThreadLocalRandom类分析</a>里见过，没想到这里也用上了。</p>
+<span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> sun<span class="token punctuation">.</span>misc<span class="token punctuation">.</span><span class="token class-name">Unsafe</span> UNSAFE<span class="token punctuation">;</span>
+<span class="token comment">// base、cellsbusy字段和Thread threadLocalRandomProbe字段的偏移量</span>
+<span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">long</span> BASE<span class="token punctuation">;</span>
+<span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">long</span> CELLSBUSY<span class="token punctuation">;</span>
+<span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">long</span> PROBE<span class="token punctuation">;</span>
+<span class="token keyword">static</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+        UNSAFE <span class="token operator">=</span> sun<span class="token punctuation">.</span>misc<span class="token punctuation">.</span><span class="token class-name">Unsafe</span><span class="token punctuation">.</span><span class="token function">getUnsafe</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">Class</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span><span class="token punctuation">></span></span> sk <span class="token operator">=</span> <span class="token class-name">Striped64</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">;</span>
+        BASE <span class="token operator">=</span> UNSAFE<span class="token punctuation">.</span>objectFieldOffset
+            <span class="token punctuation">(</span>sk<span class="token punctuation">.</span><span class="token function">getDeclaredField</span><span class="token punctuation">(</span><span class="token string">"base"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        CELLSBUSY <span class="token operator">=</span> UNSAFE<span class="token punctuation">.</span>objectFieldOffset
+            <span class="token punctuation">(</span>sk<span class="token punctuation">.</span><span class="token function">getDeclaredField</span><span class="token punctuation">(</span><span class="token string">"cellsBusy"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">Class</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span><span class="token punctuation">></span></span> tk <span class="token operator">=</span> <span class="token class-name">Thread</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">;</span>
+        PROBE <span class="token operator">=</span> UNSAFE<span class="token punctuation">.</span>objectFieldOffset
+            <span class="token punctuation">(</span>tk<span class="token punctuation">.</span><span class="token function">getDeclaredField</span><span class="token punctuation">(</span><span class="token string">"threadLocalRandomProbe"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p><code>threadLocalRandomProbe</code>这个字段我们在<a href="../Random%E5%9C%A8%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B8%8B%E7%9A%84%E9%97%AE%E9%A2%98%E4%BB%A5%E5%8F%8AThreadLocalRandom%E7%B1%BB%E5%88%86%E6%9E%90">Random在多线程下的问题以及ThreadLocalRandom类分析</a>里见过，没想到这里也用上了。</p>
 <p>看完了这些字段后可知，base和cells数组都没有经过初始化，即base默认为0，cells默认为null，这也符合初始化LongAdder值为0的结果。</p>
 <p>那么，来看一下LongAdder的<code>increment()</code>方法：</p>
-<pre><code class="java">public void increment() {
-    add(1L);
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">increment</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">add</span><span class="token punctuation">(</span><span class="token number">1L</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>就是调用了<code>add()</code>函数加1：</p>
-<pre><code class="java">public void add(long x) {
-    Cell[] as; long b, v; int m; Cell a;
-    if ((as = cells) != null || !casBase(b = base, b + x)) {
-        boolean uncontended = true;
-        // 如果Cell数组为null，或长度为0
-        // 或要争抢的cell为null
-        // 或CAS要争抢的cell失败
-        if (as == null || (m = as.length - 1) &lt; 0 ||
-            (a = as[getProbe() &amp; m]) == null ||
-            !(uncontended = a.cas(v = a.value, v + x)))
-            // 交由longAccumulate处理
-            longAccumulate(x, null, uncontended);
-    }
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">long</span> x<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">Cell</span><span class="token punctuation">[</span><span class="token punctuation">]</span> as<span class="token punctuation">;</span> <span class="token keyword">long</span> b<span class="token punctuation">,</span> v<span class="token punctuation">;</span> <span class="token keyword">int</span> m<span class="token punctuation">;</span> <span class="token class-name">Cell</span> a<span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>as <span class="token operator">=</span> cells<span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">null</span> <span class="token operator">||</span> <span class="token operator">!</span><span class="token function">casBase</span><span class="token punctuation">(</span>b <span class="token operator">=</span> base<span class="token punctuation">,</span> b <span class="token operator">+</span> x<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">boolean</span> uncontended <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+        <span class="token comment">// 如果Cell数组为null，或长度为0</span>
+        <span class="token comment">// 或要争抢的cell为null</span>
+        <span class="token comment">// 或CAS要争抢的cell失败</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>as <span class="token operator">==</span> <span class="token keyword">null</span> <span class="token operator">||</span> <span class="token punctuation">(</span>m <span class="token operator">=</span> as<span class="token punctuation">.</span>length <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">0</span> <span class="token operator">||</span>
+            <span class="token punctuation">(</span>a <span class="token operator">=</span> as<span class="token punctuation">[</span><span class="token function">getProbe</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span> m<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token keyword">null</span> <span class="token operator">||</span>
+            <span class="token operator">!</span><span class="token punctuation">(</span>uncontended <span class="token operator">=</span> a<span class="token punctuation">.</span><span class="token function">cas</span><span class="token punctuation">(</span>v <span class="token operator">=</span> a<span class="token punctuation">.</span>value<span class="token punctuation">,</span> v <span class="token operator">+</span> x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token comment">// 交由longAccumulate处理</span>
+            <span class="token function">longAccumulate</span><span class="token punctuation">(</span>x<span class="token punctuation">,</span> <span class="token keyword">null</span><span class="token punctuation">,</span> uncontended<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>可见这段代码的逻辑仍是优先对base变量进行CAS操作，当cells数组为空的时候，首先尝试CAS一次base变量，仅当争抢base变量没成功才继续往下走：</p>
-<pre><code class="java">final boolean casBase(long cmp, long val) {
-    return UNSAFE.compareAndSwapLong(this, BASE, cmp, val);
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">final</span> <span class="token keyword">boolean</span> <span class="token function">casBase</span><span class="token punctuation">(</span><span class="token keyword">long</span> cmp<span class="token punctuation">,</span> <span class="token keyword">long</span> val<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> UNSAFE<span class="token punctuation">.</span><span class="token function">compareAndSwapLong</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> BASE<span class="token punctuation">,</span> cmp<span class="token punctuation">,</span> val<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>其次，以下任意条件都能触发<code>longAccumulate</code>方法：</p>
 <ul>
 <li>Cell数组为null</li>
@@ -566,108 +576,109 @@ static {
 </ul>
 <p>而线程是怎么确定要争抢哪个cell元素呢？通过代码中<br><code>a = as[getProbe() &amp; m]</code>可以看出，是<strong>通过线程中的<code>threadLocalRandomProbe</code>与<code>Cell数组的长度-1</code>做位与运算确定的</strong>。并且Striped64要求Cell的数组长度为2的整数幂，也就是<code>Cell数组的长度-1</code>每一位都是1，位与之后的结果会尽量均匀。</p>
 <p>那我们现在假设Cell数组还没有初始化，即Cell数组还是null，会触发<code>longAccumulate</code>方法：</p>
-<pre><code class="java">final void longAccumulate(long x, LongBinaryOperator fn,
-                            boolean wasUncontended) {
-    int h;
-    // 如果probe为0，代表ThreadLocalRandom对象还没有获取，原因上一篇中看过了
-    if ((h = getProbe()) == 0) {
-        // 获取ThreadLocalRandom对象，同时初始化种子、探针等字段
-        ThreadLocalRandom.current(); 
-        // 获取探针
-        h = getProbe();
-        wasUncontended = true;
-    }
-    // 是否发生碰撞
-    boolean collide = false;            
-    for (;;) {
-        Cell[] as; Cell a; int n; long v;
-        // Cell数组是否初始化且长度不为0
-        if ((as = cells) != null &amp;&amp; (n = as.length) &gt; 0) {
-            // 如果线程对应的Cell为null
-            if ((a = as[(n - 1) &amp; h]) == null) {
-                // 如果cellsBusy没有被锁上
-                if (cellsBusy == 0) { 
-                    // 先获取一个Cell对象
-                    Cell r = new Cell(x); 
-                    // 尝试锁住cellsBusy
-                    if (cellsBusy == 0 &amp;&amp; casCellsBusy()) {
-                        boolean created = false;
-                        try {  
-                            // 将对应的cell赋值为创建的Cell对象
-                            Cell[] rs; int m, j;
-                            if ((rs = cells) != null &amp;&amp;
-                                (m = rs.length) &gt; 0 &amp;&amp;
-                                rs[j = (m - 1) &amp; h] == null) {
-                                rs[j] = r;
-                                created = true;
-                            }
-                        } finally {
-                            cellsBusy = 0;
-                        }
-                        if (created)
-                            break;
-                        continue;  
-                    }
-                }
-                collide = false;
-            }
-            else if (!wasUncontended)       
-                wasUncontended = true;      
-            // 线程对应的Cell不为null，尝试CAS更改
-            else if (a.cas(v = a.value, ((fn == null) ? v + x :
-                                            fn.applyAsLong(v, x))))
-                break;
-            // 如果CAS对应的cell失败
-            // 若Cell数组的长度大于CPU个数，或者cells被更改了，都不进行扩容
-            else if (n &gt;= NCPU || cells != as)
-                collide = false; 
-            // 否则进行扩容       
-            else if (!collide)
-                collide = true;
-            // 尝试cas锁上cellsBusy
-            else if (cellsBusy == 0 &amp;&amp; casCellsBusy()) {
-                try {
-                    //进行扩容
-                    if (cells == as) {
-                        //扩容一倍      
-                        Cell[] rs = new Cell[n &lt;&lt; 1];
-                        for (int i = 0; i &lt; n; ++i)
-                            rs[i] = as[i];
-                        cells = rs;
-                    }
-                } finally {
-                    cellsBusy = 0;
-                }
-                collide = false;
-                continue;
-            }
-            //更改一下probe探针
-            h = advanceProbe(h);
-        }
-        // 如果cell数组没有初始化，锁上cellsBusy进行初始化
-        else if (cellsBusy == 0 &amp;&amp; cells == as &amp;&amp; casCellsBusy()) {
-            boolean init = false;
-            try {                   
-                //cells没有被更改        
-                if (cells == as) {
-                    // 初始化一个长度为2的Cell数组
-                    Cell[] rs = new Cell[2];
-                    // 给线程对应的Cell初始化值
-                    rs[h &amp; 1] = new Cell(x);
-                    cells = rs;
-                    init = true;
-                }
-            } finally {
-                cellsBusy = 0;
-            }
-            if (init)
-                break;
-        }
-        // 如果CAS锁cellsBusy变量没有成功，再次尝试CAS base变量，如果成功就不用搞了，失败继续循环
-        else if (casBase(v = base, ((fn == null) ? v + x :fn.applyAsLong(v, x))))
-            break;                         
-    }
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">final</span> <span class="token keyword">void</span> <span class="token function">longAccumulate</span><span class="token punctuation">(</span><span class="token keyword">long</span> x<span class="token punctuation">,</span> <span class="token class-name">LongBinaryOperator</span> fn<span class="token punctuation">,</span>
+                            <span class="token keyword">boolean</span> wasUncontended<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">int</span> h<span class="token punctuation">;</span>
+    <span class="token comment">// 如果probe为0，代表ThreadLocalRandom对象还没有获取，原因上一篇中看过了</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>h <span class="token operator">=</span> <span class="token function">getProbe</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">// 获取ThreadLocalRandom对象，同时初始化种子、探针等字段</span>
+        <span class="token class-name">ThreadLocalRandom</span><span class="token punctuation">.</span><span class="token function">current</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+        <span class="token comment">// 获取探针</span>
+        h <span class="token operator">=</span> <span class="token function">getProbe</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        wasUncontended <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token comment">// 是否发生碰撞</span>
+    <span class="token keyword">boolean</span> collide <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>            
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token punctuation">;</span><span class="token punctuation">;</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">Cell</span><span class="token punctuation">[</span><span class="token punctuation">]</span> as<span class="token punctuation">;</span> <span class="token class-name">Cell</span> a<span class="token punctuation">;</span> <span class="token keyword">int</span> n<span class="token punctuation">;</span> <span class="token keyword">long</span> v<span class="token punctuation">;</span>
+        <span class="token comment">// Cell数组是否初始化且长度不为0</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>as <span class="token operator">=</span> cells<span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">null</span> <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span>n <span class="token operator">=</span> as<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token operator">></span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token comment">// 如果线程对应的Cell为null</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>a <span class="token operator">=</span> as<span class="token punctuation">[</span><span class="token punctuation">(</span>n <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span> h<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                <span class="token comment">// 如果cellsBusy没有被锁上</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>cellsBusy <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> 
+                    <span class="token comment">// 先获取一个Cell对象</span>
+                    <span class="token class-name">Cell</span> r <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Cell</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+                    <span class="token comment">// 尝试锁住cellsBusy</span>
+                    <span class="token keyword">if</span> <span class="token punctuation">(</span>cellsBusy <span class="token operator">==</span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span> <span class="token function">casCellsBusy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                        <span class="token keyword">boolean</span> created <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+                        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>  
+                            <span class="token comment">// 将对应的cell赋值为创建的Cell对象</span>
+                            <span class="token class-name">Cell</span><span class="token punctuation">[</span><span class="token punctuation">]</span> rs<span class="token punctuation">;</span> <span class="token keyword">int</span> m<span class="token punctuation">,</span> j<span class="token punctuation">;</span>
+                            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>rs <span class="token operator">=</span> cells<span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">null</span> <span class="token operator">&amp;&amp;</span>
+                                <span class="token punctuation">(</span>m <span class="token operator">=</span> rs<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token operator">></span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span>
+                                rs<span class="token punctuation">[</span>j <span class="token operator">=</span> <span class="token punctuation">(</span>m <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span> h<span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                                rs<span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">=</span> r<span class="token punctuation">;</span>
+                                created <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+                            <span class="token punctuation">&#125;</span>
+                        <span class="token punctuation">&#125;</span> <span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+                            cellsBusy <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+                        <span class="token punctuation">&#125;</span>
+                        <span class="token keyword">if</span> <span class="token punctuation">(</span>created<span class="token punctuation">)</span>
+                            <span class="token keyword">break</span><span class="token punctuation">;</span>
+                        <span class="token keyword">continue</span><span class="token punctuation">;</span>  
+                    <span class="token punctuation">&#125;</span>
+                <span class="token punctuation">&#125;</span>
+                collide <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+            <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>wasUncontended<span class="token punctuation">)</span>       
+                wasUncontended <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>      
+            <span class="token comment">// 线程对应的Cell不为null，尝试CAS更改</span>
+            <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>a<span class="token punctuation">.</span><span class="token function">cas</span><span class="token punctuation">(</span>v <span class="token operator">=</span> a<span class="token punctuation">.</span>value<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>fn <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token operator">?</span> v <span class="token operator">+</span> x <span class="token operator">:</span>
+                                            fn<span class="token punctuation">.</span><span class="token function">applyAsLong</span><span class="token punctuation">(</span>v<span class="token punctuation">,</span> x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+                <span class="token keyword">break</span><span class="token punctuation">;</span>
+            <span class="token comment">// 如果CAS对应的cell失败</span>
+            <span class="token comment">// 若Cell数组的长度大于CPU个数，或者cells被更改了，都不进行扩容</span>
+            <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>n <span class="token operator">>=</span> NCPU <span class="token operator">||</span> cells <span class="token operator">!=</span> as<span class="token punctuation">)</span>
+                collide <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span> 
+            <span class="token comment">// 否则进行扩容       </span>
+            <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>collide<span class="token punctuation">)</span>
+                collide <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+            <span class="token comment">// 尝试cas锁上cellsBusy</span>
+            <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>cellsBusy <span class="token operator">==</span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span> <span class="token function">casCellsBusy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+                    <span class="token comment">//进行扩容</span>
+                    <span class="token keyword">if</span> <span class="token punctuation">(</span>cells <span class="token operator">==</span> as<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                        <span class="token comment">//扩容一倍      </span>
+                        <span class="token class-name">Cell</span><span class="token punctuation">[</span><span class="token punctuation">]</span> rs <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Cell</span><span class="token punctuation">[</span>n <span class="token operator">&lt;&lt;</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+                        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> n<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span>
+                            rs<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> as<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+                        cells <span class="token operator">=</span> rs<span class="token punctuation">;</span>
+                    <span class="token punctuation">&#125;</span>
+                <span class="token punctuation">&#125;</span> <span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+                    cellsBusy <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span>
+                collide <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+                <span class="token keyword">continue</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+            <span class="token comment">//更改一下probe探针</span>
+            h <span class="token operator">=</span> <span class="token function">advanceProbe</span><span class="token punctuation">(</span>h<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token comment">// 如果cell数组没有初始化，锁上cellsBusy进行初始化</span>
+        <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>cellsBusy <span class="token operator">==</span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span> cells <span class="token operator">==</span> as <span class="token operator">&amp;&amp;</span> <span class="token function">casCellsBusy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">boolean</span> init <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+            <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>                   
+                <span class="token comment">//cells没有被更改        </span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>cells <span class="token operator">==</span> as<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                    <span class="token comment">// 初始化一个长度为2的Cell数组</span>
+                    <span class="token class-name">Cell</span><span class="token punctuation">[</span><span class="token punctuation">]</span> rs <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Cell</span><span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+                    <span class="token comment">// 给线程对应的Cell初始化值</span>
+                    rs<span class="token punctuation">[</span>h <span class="token operator">&amp;</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Cell</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    cells <span class="token operator">=</span> rs<span class="token punctuation">;</span>
+                    init <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span>
+            <span class="token punctuation">&#125;</span> <span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+                cellsBusy <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>init<span class="token punctuation">)</span>
+                <span class="token keyword">break</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token comment">// 如果CAS锁cellsBusy变量没有成功，再次尝试CAS base变量，如果成功就不用搞了，失败继续循环</span>
+        <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">casBase</span><span class="token punctuation">(</span>v <span class="token operator">=</span> base<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>fn <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token operator">?</span> v <span class="token operator">+</span> x <span class="token operator">:</span>fn<span class="token punctuation">.</span><span class="token function">applyAsLong</span><span class="token punctuation">(</span>v<span class="token punctuation">,</span> x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token keyword">break</span><span class="token punctuation">;</span>                         
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>可见，Cell数组中的元素是懒惰初始化的，并且数组初始容量为2，如果发生碰撞还会对数组进行扩容，不过最终不会超过CPU的个数。</p>
 <p>过程中会反复尝试CAS cellsBusy锁变量，如果失败，还会再次去尝试CAS base变量，如果成功就不需要更改Cell数组了。</p>
 
@@ -1298,7 +1309,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

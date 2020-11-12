@@ -30,6 +30,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -426,29 +427,29 @@
 <p>对应的原理其实就是，一个小数，通过小数点移位，总能将小数点移到一个统一的位置上。例如对于十进制小数<code>0.035 = 3.5 * 10^-2</code>，对于<code>0.000059 = 5.9 * 10^-5</code>。</p>
 <p>那么二进制小数也是这样，例如，<code>0.0101 = 1.01 * 2^-2</code>。浮点数通过统一将小数表示成这种方式，做到不限制小数点的位置。</p>
 <p>具体来说，浮点数把一个二进制数表示成如下图：</p>
-<p><img src="https://api.codetool.top/img/15858348577366.png" alt></p>
+<p><img src="https://api.codetool.top/img/15858348577366.png"></p>
 <p>那么根据S、M、E就能唯一确定一个小数。要将S、M、E表示到一起，就出现了IEEE754标准。</p>
 <blockquote>
 <p>IEEE二进制浮点数算术标准（IEEE 754）是20世纪80年代以来最广泛使用的浮点数运算标准，为许多CPU与浮点运算器所采用。这个标准定义了表示浮点数的格式（包括负零-0）与反常值（denormal number）），一些特殊数值（无穷（Inf）与非数值（NaN）），以及这些数值的“浮点数运算符”；它也指明了四种数值舍入规则和五种例外状况（包括例外发生的时机与处理方式）。</p>
 </blockquote>
 <p>IEEE754将一个二进制串表示为上图末尾的那一条，其中S就是符号位，exp对应的是阶码E，而frac对应的是尾数M。</p>
 <p>exp和frac在单精度浮点数和双精度浮点数中的长度如下所示：</p>
-<p><img src="https://api.codetool.top/img/1585837072894.png" alt></p>
+<p><img src="https://api.codetool.top/img/1585837072894.png"></p>
 <h1 id="规格化浮点数">2 规格化浮点数</h1><p>那么如何确定exp和frac？</p>
 <p>首先要了解的是，虽然阶码E是有符号的，例如 <code>1.01 * 2^-2</code>中，尾数为<code>1.01</code>，阶码为<code>-2</code>，但IEEE754中会把<strong>exp的范围转移到非负数区域，即它是一个无符号表示。</strong>（不能全为0或者全为1，因为被非规格化浮点数和特殊值占用了）</p>
 <p>而尾数frac，则是M的小数部分，例如<code>1.01 * 2^-2</code>中，M为<code>1.01</code>，frac为<code>01</code>。</p>
-<p><img src="https://api.codetool.top/img/15858373331935.png" alt></p>
+<p><img src="https://api.codetool.top/img/15858373331935.png"></p>
 <p>举例如何将十进制数转浮点数：</p>
-<p><img src="https://api.codetool.top/img/15858377951909.png" alt></p>
+<p><img src="https://api.codetool.top/img/15858377951909.png"></p>
 <h1 id="非规格化浮点数">3 非规格化浮点数</h1><p>虽然规格化浮点数能表示的范围已经很牛X了，但对于很小的数还是难以表示，比如，单精度数的阶码上限不是127吗，假设我有一个小数<code>0.00...(省略127个0)...111</code>，在小数点后面连续0的个数达到了阶码上限，则通过小数点移位后，阶码会超过127，此时规格化浮点数就无法表示了。</p>
 <p>有没有方法解决这个问题呢？</p>
 <p>IEEE定义了非规格化浮点数，此时就<strong>不要求尾数部分以<code>1.*</code>开头了，而是用<code>0.*</code>表示</strong>。然后阶码域必须最小，即exp全为0，因为尾数域的规则改了，要平滑过渡到规格化浮点数，此时<code>E=-Bias+1</code>，和规格化浮点数的计算有不同。</p>
-<p><img src="https://api.codetool.top/img/15858384367562.png" alt></p>
+<p><img src="https://api.codetool.top/img/15858384367562.png"></p>
 <p>这种思想其实就是<strong>用精度换范围</strong>，因为frac的长度本身有限，非规格化浮点数的尾数部分前面用0填充，使得尾数部分有效位个数减少，精度也就对应减少。</p>
-<p><img src="https://api.codetool.top/img/15858385838055.png" alt></p>
+<p><img src="https://api.codetool.top/img/15858385838055.png"></p>
 <p>非规格化浮点数可以表示0，并且区分+0和-0（即符号位不同）。</p>
 <h1 id="特殊值">4 特殊值</h1><p>IEEE754还定义了无穷、NaN，它们的exp全为1。</p>
-<p><img src="https://api.codetool.top/img/15858388387642.png" alt></p>
+<p><img src="https://api.codetool.top/img/15858388387642.png"></p>
 <p>有意思的是，浮点数运算中，任何数除以0都会等于无穷。</p>
 <h1 id="舍入（Rounding）规则">5 舍入（Rounding）规则</h1><p>因为部分小数在计算机中不能精确表示成浮点数，IEEE754定义了四种舍入规则。它们是：</p>
 <ul>
@@ -832,7 +833,7 @@
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题请你来实现一个 atoi 函数，使其能将字符串转换成整数。
+                            1 原题请你来实现一个 atoi 函数，使其能将字符串转换成整数。
 首先，该函数会根据需要丢弃无用的开头空格字符，直到寻找到第一个非空格的字符为止。接下来的转化规则如下：
 
 如果第一个非空字符为正或者负号时，则将该符号与之后面尽可能多的连续
@@ -888,7 +889,7 @@
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题根据 百度百科 ，生命游戏，简称为生命，是英国数学家约翰·何顿·康威在 1970 年发明的细胞自动机。
+                            1 原题根据 百度百科 ，生命游戏，简称为生命，是英国数学家约翰·何顿·康威在 1970 年发明的细胞自动机。
 给定一个包含 m × n 个格子的面板，每一个格子都可以看成是一个细胞。每个细胞都具有一个初始状态：1 即为活细胞（live），
                         
                     </div>
@@ -1066,7 +1067,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

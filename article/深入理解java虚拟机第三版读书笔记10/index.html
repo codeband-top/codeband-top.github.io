@@ -32,6 +32,7 @@ Java中的编译可能是指：
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -406,7 +407,7 @@ Java中的编译可能是指：
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.9k
+                    2k
                 </div>
                 
 
@@ -453,8 +454,8 @@ Java中的编译可能是指：
 <ol>
 <li>不支持基本类型，例如<code>ArrayList&lt;int&gt;</code>，因为无法实现int和Object互转，只能自动装箱、拆箱使用Integer，导致执行效率低。</li>
 <li>运行期无法取到泛型类型信息，导致不能出现下列操作：<ul>
-<li><code>if (item instanceof E) {   // 不合法，无法对泛型进行实例判断</code></li>
-<li><code>E newItem = new E();       // 不合法，无法使用泛型创建对象</code></li>
+<li><code>if (item instanceof E) &#123;   // 不合法，无法对泛型进行实例判断</code></li>
+<li><code>E newItem = new E();       // 不合法，无法使用泛型创建对象 </code></li>
 <li><code>E[] itemArray = new E[10]; // 不合法，无法使用泛型创建数组</code></li>
 </ul>
 </li>
@@ -465,157 +466,167 @@ Java中的编译可能是指：
 <p>值类型可以与引用类型一样，具有构造函数、方法或是属性字段，等等，而它与引用类型的区别在于它<strong>在赋值的时候通常是整体复制，而不是像引用类型那样传递引用的。</strong>更为关键的是，值类型的实例很容易实现分配在方法的调用栈上的，这意味着<strong>值类型会随着当前方法的退出而自动释放，不会给垃圾收集子系统带来任何压力。</strong></p>
 <p>在Valhalla项目中，Java的值类型方案被称为“内联类型”，计划通过一个新的关键字inline来定义。</p>
 <h2 id="条件编译">2.2 条件编译</h2><p>使用条件为常量的if语句，可以在编译期间过滤掉一些代码</p>
-<pre><code class="java">public static void main(String[] args) {     
-    if (true) {
-        System.out.println(&quot;block 1&quot;);
-    } else {
-        System.out.println(&quot;block 2&quot;);
-    }
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>     
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"block 1"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"block 2"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>反编译的结果</p>
-<pre><code class="java">public static void main(String[] args) {
-    System.out.println(&quot;block 1&quot;);
-}</code></pre>
-<h2 id="可变参数">2.3 可变参数</h2><p><code>public void foo(String... args){}</code></p>
-<p>=&gt; <code>public void foo(String[] args){}</code></p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"block 1"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h2 id="可变参数">2.3 可变参数</h2><p><code>public void foo(String... args)&#123;&#125;</code></p>
+<p>=&gt; <code>public void foo(String[] args)&#123;&#125;</code></p>
 <h2 id="switch-字符串和switch-enum">2.4 switch-字符串和switch-enum</h2><h3 id="switch-字符串">2.4.1 switch-字符串</h3><p>配合字符串的哈希值使用。</p>
-<pre><code class="java">String i = &quot;hello&quot;;
-switch (i){
-    case &quot;hello&quot;:
-        System.out.println(&quot;h&quot;);
-        break;
-    case &quot;world&quot;:
-        System.out.println(&quot;w&quot;);
-        break;
-}</code></pre>
-<p>反编译后</p>
-<pre><code class="java">String i = &quot;hello&quot;;
-byte var3 = -1;
-switch(i.hashCode()) {
-case 99162322:
-    if (i.equals(&quot;hello&quot;)) {
-        var3 = 0;
-    }
-    break;
-case 113318802:
-    if (i.equals(&quot;world&quot;)) {
-        var3 = 1;
-    }
-}
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token class-name">String</span> i <span class="token operator">=</span> <span class="token string">"hello"</span><span class="token punctuation">;</span>
+<span class="token keyword">switch</span> <span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+    <span class="token keyword">case</span> <span class="token string">"hello"</span><span class="token operator">:</span>
+        <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"h"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">break</span><span class="token punctuation">;</span>
+    <span class="token keyword">case</span> <span class="token string">"world"</span><span class="token operator">:</span>
+        <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"w"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">break</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-switch(var3) {
-case 0:
-    System.out.println(&quot;h&quot;);
-    break;
-case 1:
-    System.out.println(&quot;w&quot;);
-}</code></pre>
-<h3 id="switch-enum">2.4.2 switch-enum</h3><pre><code class="java">enum Sex{
-    MALE,FEMALE
-}
-
-public static void foo(Sex sex){
-    switch (sex){
-        case MALE:
-            System.out.println(&quot;男&quot;);
-            break;
-        case FEMALE:
-            System.out.println(&quot;女&quot;);
-            break;
-    }
-}</code></pre>
 <p>反编译后</p>
-<pre><code class="java">/*
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token class-name">String</span> i <span class="token operator">=</span> <span class="token string">"hello"</span><span class="token punctuation">;</span>
+<span class="token keyword">byte</span> var3 <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token keyword">switch</span><span class="token punctuation">(</span>i<span class="token punctuation">.</span><span class="token function">hashCode</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+<span class="token keyword">case</span> <span class="token number">99162322</span><span class="token operator">:</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>i<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">"hello"</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        var3 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">break</span><span class="token punctuation">;</span>
+<span class="token keyword">case</span> <span class="token number">113318802</span><span class="token operator">:</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>i<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">"world"</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        var3 <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">switch</span><span class="token punctuation">(</span>var3<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+<span class="token keyword">case</span> <span class="token number">0</span><span class="token operator">:</span>
+    <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"h"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">break</span><span class="token punctuation">;</span>
+<span class="token keyword">case</span> <span class="token number">1</span><span class="token operator">:</span>
+    <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"w"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h3 id="switch-enum">2.4.2 switch-enum</h3><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">enum</span> <span class="token class-name">Sex</span><span class="token punctuation">&#123;</span>
+    MALE<span class="token punctuation">,</span>FEMALE
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">foo</span><span class="token punctuation">(</span><span class="token class-name">Sex</span> sex<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+    <span class="token keyword">switch</span> <span class="token punctuation">(</span>sex<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token keyword">case</span> MALE<span class="token operator">:</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"男"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">break</span><span class="token punctuation">;</span>
+        <span class="token keyword">case</span> FEMALE<span class="token operator">:</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"女"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">break</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>反编译后</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">/*
  *定义一个合成类（仅jvm使用，对我们不可见）
  *用来映射枚举的ordina1与数组元素的关系
  *枚举的ordinal表示枚举对象的序号，从0开始
  *即MALE的ordinal()=0，FEMALE的ordinal()=1
- */
-static class $MAP{ 
-    //数组大小即为枚举元素个数，里面存储case用来对比的数字 
-    static int[] map = new int[2]; 
-    static{ 
-        map[Sex.MALE.ordinal()]=1; 
-        map[Sex.FEMALE.ordinal()]=2; 
-    }
-}
+ */</span>
+<span class="token keyword">static</span> <span class="token keyword">class</span> $MAP<span class="token punctuation">&#123;</span> 
+    <span class="token comment">//数组大小即为枚举元素个数，里面存储case用来对比的数字 </span>
+    <span class="token keyword">static</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> map <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">;</span> 
+    <span class="token keyword">static</span><span class="token punctuation">&#123;</span> 
+        map<span class="token punctuation">[</span><span class="token class-name">Sex</span><span class="token punctuation">.</span>MALE<span class="token punctuation">.</span><span class="token function">ordinal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">;</span> 
+        map<span class="token punctuation">[</span><span class="token class-name">Sex</span><span class="token punctuation">.</span>FEMALE<span class="token punctuation">.</span><span class="token function">ordinal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token operator">=</span><span class="token number">2</span><span class="token punctuation">;</span> 
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
 
-public static void foo(Sex sex)
-{ 
-    int x = $MAP.map[sex.ordinal()]; 
-    switch(x){ 
-        case 1:
-            System.out.println(&quot;男&quot;）; 
-            break; 
-        case 2:
-            System.out.println(&quot;女&quot;）; 
-            break;
-    }
-}</code></pre>
-<h2 id="枚举">2.5 枚举</h2><pre><code class="java">enum Sex{
-    MALE,FEMALE
-}</code></pre>
+<span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">foo</span><span class="token punctuation">(</span><span class="token class-name">Sex</span> sex<span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span> 
+    <span class="token keyword">int</span> x <span class="token operator">=</span> $MAP<span class="token punctuation">.</span>map<span class="token punctuation">[</span>sex<span class="token punctuation">.</span><span class="token function">ordinal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">;</span> 
+    <span class="token keyword">switch</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">&#123;</span> 
+        <span class="token keyword">case</span> <span class="token number">1</span><span class="token operator">:</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"男"</span>）<span class="token punctuation">;</span> 
+            <span class="token keyword">break</span><span class="token punctuation">;</span> 
+        <span class="token keyword">case</span> <span class="token number">2</span><span class="token operator">:</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"女"</span>）<span class="token punctuation">;</span> 
+            <span class="token keyword">break</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h2 id="枚举">2.5 枚举</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">enum</span> <span class="token class-name">Sex</span><span class="token punctuation">&#123;</span>
+    MALE<span class="token punctuation">,</span>FEMALE
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>实际上是编译成了</p>
-<pre><code class="java">public final class Sex extends Enum&lt;Sex&gt;{ 
-    public static final Sex MALE; 
-    public static final Sex FEMALE; 
-    private static final Sex[] $VALUES;
-    static{ 
-        MALE = new Sex(&quot;MALE&quot;,0); 
-        FEMALE = new Sex(&quot;FEMALE&quot;,1); 
-        $VALUES = new Sex[]{MALE,FEMALE};
-    }
-    private Sex(String name,int ordinal){ 
-        super(name,ordinal); 
-    }
-    public static Sex[] values(){ 
-        return $VALUES.clone(); 
-    }
-    public static Sex valueOf(String name){ 
-        return Enum.valueOf(Sex.class,name);
-    }
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">final</span> <span class="token keyword">class</span> <span class="token class-name">Sex</span> <span class="token keyword">extends</span> <span class="token class-name">Enum</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Sex</span><span class="token punctuation">></span></span><span class="token punctuation">&#123;</span> 
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token class-name">Sex</span> MALE<span class="token punctuation">;</span> 
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token class-name">Sex</span> FEMALE<span class="token punctuation">;</span> 
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token class-name">Sex</span><span class="token punctuation">[</span><span class="token punctuation">]</span> $VALUES<span class="token punctuation">;</span>
+    <span class="token keyword">static</span><span class="token punctuation">&#123;</span> 
+        MALE <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Sex</span><span class="token punctuation">(</span><span class="token string">"MALE"</span><span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+        FEMALE <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Sex</span><span class="token punctuation">(</span><span class="token string">"FEMALE"</span><span class="token punctuation">,</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+        $VALUES <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Sex</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">&#123;</span>MALE<span class="token punctuation">,</span>FEMALE<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">private</span> <span class="token class-name">Sex</span><span class="token punctuation">(</span><span class="token class-name">String</span> name<span class="token punctuation">,</span><span class="token keyword">int</span> ordinal<span class="token punctuation">)</span><span class="token punctuation">&#123;</span> 
+        <span class="token keyword">super</span><span class="token punctuation">(</span>name<span class="token punctuation">,</span>ordinal<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token class-name">Sex</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">values</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span> 
+        <span class="token keyword">return</span> $VALUES<span class="token punctuation">.</span><span class="token function">clone</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token class-name">Sex</span> <span class="token function">valueOf</span><span class="token punctuation">(</span><span class="token class-name">String</span> name<span class="token punctuation">)</span><span class="token punctuation">&#123;</span> 
+        <span class="token keyword">return</span> <span class="token class-name">Enum</span><span class="token punctuation">.</span><span class="token function">valueOf</span><span class="token punctuation">(</span><span class="token class-name">Sex</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">,</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <h2 id="try-with-resources">2.6 try-with-resources</h2><p>JDK7开始新增了对需要关闭的资源处理的特殊语法<code>try-with-resources</code>:</p>
-<pre><code class="java">try(资源变量=创建资源对象){
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">try</span><span class="token punctuation">(</span>资源变量<span class="token operator">=</span>创建资源对象<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
 
-}catch(){
+<span class="token punctuation">&#125;</span><span class="token keyword">catch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
 
-}</code></pre>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>其中资源对象需要实现<code>Autocloseable</code>接口，例如<code>InputStream、OutputStream、Connection、Statement、Resultset</code>等接口都实现了<code>Autocloseable</code>，使用<code>try-with-resources</code>可以不用写finally语句块，编译器会帮助生成关闭资源代码，例如：</p>
-<pre><code class="java">public static void main(String[]args){ 
-    try(InputStream is = new FileInputStream(&quot;d:\\1.txt&quot;)){ 
-        System.out.println(is); 
-    }catch(IOException e){ 
-        e.printStackTrace(); 
-    } 
-} </code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span>args<span class="token punctuation">)</span><span class="token punctuation">&#123;</span> 
+    <span class="token keyword">try</span><span class="token punctuation">(</span><span class="token class-name">InputStream</span> is <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">FileInputStream</span><span class="token punctuation">(</span><span class="token string">"d:\\1.txt"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span> 
+        <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>is<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+    <span class="token punctuation">&#125;</span><span class="token keyword">catch</span><span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span><span class="token punctuation">&#123;</span> 
+        e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+    <span class="token punctuation">&#125;</span> 
+<span class="token punctuation">&#125;</span> </code></pre>
+
 <p>反编译后：</p>
-<pre><code class="java">try {
-    InputStream is = new FileInputStream(&quot;d:\\1.txt&quot;);
-    Throwable var2 = null;
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">InputStream</span> is <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">FileInputStream</span><span class="token punctuation">(</span><span class="token string">"d:\\1.txt"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">Throwable</span> var2 <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
 
-    try {
-        System.out.println(is);
-    } catch (Throwable var12) {
-        var2 = var12;
-        throw var12;
-    } finally {
-        if (is != null) {
-            if (var2 != null) {
-                try {
-                    is.close();
-                } catch (Throwable var11) {
-                    var2.addSuppressed(var11);
-                }
-            } else {
-                is.close();
-            }
-        }
+    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>is<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Throwable</span> var12<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        var2 <span class="token operator">=</span> var12<span class="token punctuation">;</span>
+        <span class="token keyword">throw</span> var12<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>is <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>var2 <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+                    is<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Throwable</span> var11<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                    var2<span class="token punctuation">.</span><span class="token function">addSuppressed</span><span class="token punctuation">(</span>var11<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span>
+            <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+                is<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
 
-    }
-} catch (IOException var14) {
-    var14.printStackTrace();
-}</code></pre>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> var14<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    var14<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
             </div>
             <hr/>
@@ -993,14 +1004,14 @@ public static void foo(Sex sex)
                     <div class="summary block-with-text">
                         
                             1 原题实现一个基本的计算器来计算一个简单的字符串表达式的值。
-字符串表达式可以包含左括号 ( ，右括号 )，加号 + ，减号 -，非负整数和空格 。
+字符串表达式可以包含左括号 ( ，右括号 )，加号 + ，减号 -，非负整数和空格   。
 示例1：
 
 输入: “1 + 1”输出: 2  
 
 示例2：
 
-输入: “ 2-1 + 
+输入: “ 2-1 
                         
                     </div>
                     <div class="publish-info">
@@ -1233,7 +1244,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

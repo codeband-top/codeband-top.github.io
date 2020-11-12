@@ -29,6 +29,7 @@ Serv">
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -403,7 +404,7 @@ Serv">
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    657
+                    626
                 </div>
                 
 
@@ -433,66 +434,75 @@ Serv">
 <li>openssl</li>
 </ul>
 <h2 id="配置tomcat">2.1 配置tomcat</h2><p>编辑<code>server.xml</code>，将原来的<code>port=&quot;8080&quot; HTTP/1.1</code>替换成:</p>
-<pre><code class="xml">&lt;Connector port=&quot;8443&quot; protocol=&quot;org.apache.coyote.http11.Http11AprProtocol&quot;
-            maxThreads=&quot;150&quot; SSLEnabled=&quot;true&quot; &gt;
-    &lt;UpgradeProtocol className=&quot;org.apache.coyote.http2.Http2Protocol&quot; /&gt;
-    &lt;SSLHostConfig&gt;
-        &lt;Certificate certificateKeyFile=&quot;conf/localhost-rsa-key.pem&quot;
-                        certificateFile=&quot;conf/localhost-rsa-cert.pem&quot;
-                        type=&quot;RSA&quot; /&gt;
-    &lt;/SSLHostConfig&gt;
-&lt;/Connector&gt;</code></pre>
+<pre class="language-xml" data-language="xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Connector</span> <span class="token attr-name">port</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>8443<span class="token punctuation">"</span></span> <span class="token attr-name">protocol</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>org.apache.coyote.http11.Http11AprProtocol<span class="token punctuation">"</span></span>
+            <span class="token attr-name">maxThreads</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>150<span class="token punctuation">"</span></span> <span class="token attr-name">SSLEnabled</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>true<span class="token punctuation">"</span></span> <span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>UpgradeProtocol</span> <span class="token attr-name">className</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>org.apache.coyote.http2.Http2Protocol<span class="token punctuation">"</span></span> <span class="token punctuation">/></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>SSLHostConfig</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Certificate</span> <span class="token attr-name">certificateKeyFile</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>conf/localhost-rsa-key.pem<span class="token punctuation">"</span></span>
+                        <span class="token attr-name">certificateFile</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>conf/localhost-rsa-cert.pem<span class="token punctuation">"</span></span>
+                        <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>RSA<span class="token punctuation">"</span></span> <span class="token punctuation">/></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>SSLHostConfig</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>Connector</span><span class="token punctuation">></span></span></code></pre>
+
 <h2 id="生成SSL证书">2.2 生成SSL证书</h2><p>生成私钥和证书文件在tomcat-native目录下：</p>
-<pre><code>OpenSSL&gt; genrsa -out localhost-rsa-key.pem 2048
-OpenSSL&gt; req -new -x509 -key localhost-rsa-key.pem -out localhost-rsa-cert.pem -days 3650</code></pre><p>将<code>localhost-rsa-key.pem</code>和<code>localhost-rsa-cert.pem</code>复制到tomcat的<code>conf/</code>文件夹下。</p>
+<pre class="language-none"><code class="language-none">OpenSSL&gt; genrsa -out localhost-rsa-key.pem 2048
+OpenSSL&gt; req -new -x509 -key localhost-rsa-key.pem -out localhost-rsa-cert.pem -days 3650</code></pre>
+
+<p>将<code>localhost-rsa-key.pem</code>和<code>localhost-rsa-cert.pem</code>复制到tomcat的<code>conf/</code>文件夹下。</p>
 <p>将tomcat-native中<code>bin/(x64/)</code>下的<code>tcnative-1.dll</code>和<code>tcnative-1-src.pdb</code>复制到JAVA_HOME的<code>/bin</code>目录下</p>
 <p>然后重启tomcat就能用HTTP/2来连接了。</p>
 <h2 id="服务器推送">2.3 服务器推送</h2><p>将用户所需的WEB资源提前推送到用户的浏览器缓存中，当用户使用浏览器访问所需WEB资源时，用户不需要再次下载所需的WEB资源，因为用户所需的WEB资源已经存在于用户的浏览器缓存中。</p>
 <p><strong>获取：</strong></p>
-<pre><code>request.newPushBuilder();</code></pre><p><strong>方法：</strong></p>
+<pre class="language-none"><code class="language-none">request.newPushBuilder();</code></pre>
+
+<p><strong>方法：</strong></p>
 <p><code>PushBuilder.path()</code>设置要推送资源的路径。<br><code>PushBuilder.push()</code>推送WEB资源到用户的浏览器缓存中。</p>
-<pre><code class="java">protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    PushBuilder pb = request.newPushBuilder();
-    pb.path(&quot;pic01.jpg&quot;);
-    pb.push();
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">doPost</span><span class="token punctuation">(</span><span class="token class-name">HttpServletRequest</span> request<span class="token punctuation">,</span> <span class="token class-name">HttpServletResponse</span> response<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">ServletException</span><span class="token punctuation">,</span> <span class="token class-name">IOException</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">PushBuilder</span> pb <span class="token operator">=</span> request<span class="token punctuation">.</span><span class="token function">newPushBuilder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    pb<span class="token punctuation">.</span><span class="token function">path</span><span class="token punctuation">(</span><span class="token string">"pic01.jpg"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    pb<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>简化：</p>
-<pre><code class="java">PushBuilder pb = request.newPushBuilder();
-pb.path(&quot;pic01.jpg&quot;).push();
-pb.path(&quot;pic02.jpg&quot;).push();</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token class-name">PushBuilder</span> pb <span class="token operator">=</span> request<span class="token punctuation">.</span><span class="token function">newPushBuilder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+pb<span class="token punctuation">.</span><span class="token function">path</span><span class="token punctuation">(</span><span class="token string">"pic01.jpg"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+pb<span class="token punctuation">.</span><span class="token function">path</span><span class="token punctuation">(</span><span class="token string">"pic02.jpg"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
 <h2 id="HttpServletMapping">2.4 HttpServletMapping</h2><p>在运行时获取Servlet的映射信息（反射机制）</p>
 <p><strong>获取：</strong></p>
-<pre><code>request.getHttpServletMapping();</code></pre><p><strong>方法：</strong></p>
+<pre class="language-none"><code class="language-none">request.getHttpServletMapping();</code></pre>
+
+<p><strong>方法：</strong></p>
 <p><code>getMappingMatch()</code> 请求路径的类型<br><code>getMatchValue()</code> 映射的资源名<br><code>getPattern()</code> 返回Servlet映射的路径<br><code>getServletName()</code> 返回Servlet的名称</p>
-<pre><code class="java">protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    HttpServletMapping mapping = request.getHttpServletMapping();
-    MappingMatch match = mapping.getMappingMatch();
-    System.out.println(match);
-    String value = mapping.getMatchValue();
-    System.out.println(value);
-    String pattern = mapping.getPattern();
-    System.out.println(pattern);
-    String name = mapping.getServletName();
-    System.out.println(name);
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">doPost</span><span class="token punctuation">(</span><span class="token class-name">HttpServletRequest</span> request<span class="token punctuation">,</span> <span class="token class-name">HttpServletResponse</span> response<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">ServletException</span><span class="token punctuation">,</span> <span class="token class-name">IOException</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">HttpServletMapping</span> mapping <span class="token operator">=</span> request<span class="token punctuation">.</span><span class="token function">getHttpServletMapping</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">MappingMatch</span> match <span class="token operator">=</span> mapping<span class="token punctuation">.</span><span class="token function">getMappingMatch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>match<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">String</span> value <span class="token operator">=</span> mapping<span class="token punctuation">.</span><span class="token function">getMatchValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">String</span> pattern <span class="token operator">=</span> mapping<span class="token punctuation">.</span><span class="token function">getPattern</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>pattern<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">String</span> name <span class="token operator">=</span> mapping<span class="token punctuation">.</span><span class="token function">getServletName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <h2 id="HttpFilter">2.5 HttpFilter</h2><p>Filter的实现类：</p>
 <ul>
 <li><code>GenericFilter</code></li>
 <li><code>HttpFilter</code>，是<code>GenericFilter</code>的子类。</li>
 </ul>
 <p>通过继承<code>HttpFilter</code>来实现Filter：</p>
-<pre><code class="java">@WebFilter(filterName = &quot;FilterDemo&quot;,urlPatterns = &quot;/*&quot;)
-public class FilterDemo extends HttpFilter {
-    @Override
-    protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        request.setCharacterEncoding(&quot;UTF-8&quot;);
-        response.setContentType(&quot;text/html;charset=UTF-8&quot;);
-        System.out.println(&quot;FilterDemo:放行前&quot;);
-        chain.doFilter(request,response);
-        System.out.println(&quot;FilterDemo:放行后&quot;);
-    }
-}</code></pre>
-
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@WebFilter</span><span class="token punctuation">(</span>filterName <span class="token operator">=</span> <span class="token string">"FilterDemo"</span><span class="token punctuation">,</span>urlPatterns <span class="token operator">=</span> <span class="token string">"/*"</span><span class="token punctuation">)</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">FilterDemo</span> <span class="token keyword">extends</span> <span class="token class-name">HttpFilter</span> <span class="token punctuation">&#123;</span>
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">doFilter</span><span class="token punctuation">(</span><span class="token class-name">HttpServletRequest</span> request<span class="token punctuation">,</span> <span class="token class-name">HttpServletResponse</span> response<span class="token punctuation">,</span> <span class="token class-name">FilterChain</span> chain<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">IOException</span><span class="token punctuation">,</span> <span class="token class-name">ServletException</span> <span class="token punctuation">&#123;</span>
+        request<span class="token punctuation">.</span><span class="token function">setCharacterEncoding</span><span class="token punctuation">(</span><span class="token string">"UTF-8"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        response<span class="token punctuation">.</span><span class="token function">setContentType</span><span class="token punctuation">(</span><span class="token string">"text/html;charset=UTF-8"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"FilterDemo:放行前"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        chain<span class="token punctuation">.</span><span class="token function">doFilter</span><span class="token punctuation">(</span>request<span class="token punctuation">,</span>response<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"FilterDemo:放行后"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
             </div>
             <hr/>
 
@@ -1103,7 +1113,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

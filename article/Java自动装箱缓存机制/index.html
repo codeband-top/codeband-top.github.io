@@ -32,6 +32,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -406,7 +407,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    504
+                    510
                 </div>
                 
 
@@ -426,47 +427,48 @@
 <p>首先要知道在java中<code>==</code>比较的是对象的引用，从直觉出发，无论是integer1、integer2还是integer3、integer4都是不同的引用，结果都应该是不等的。</p>
 <p>造成这个结果的原因是JDK1.5引入的包装类自动装箱时的<strong>缓存机制</strong></p>
 <p><strong>自动装箱的概念：</strong></p>
-<pre><code class="java">Integer a = 10; //自动装箱，相当于下面这句
-Integer a = Integer.valueOf(10);</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token class-name">Integer</span> a <span class="token operator">=</span> <span class="token number">10</span><span class="token punctuation">;</span> <span class="token comment">//自动装箱，相当于下面这句</span>
+<span class="token class-name">Integer</span> a <span class="token operator">=</span> <span class="token class-name">Integer</span><span class="token punctuation">.</span><span class="token function">valueOf</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
 <p>而看看Integer中<code>valueOf(int)</code>的源码：</p>
-<pre><code class="java">public static Integer valueOf(int i) {
-    if (i &gt;= IntegerCache.low &amp;&amp; i &lt;= IntegerCache.high)
-        return IntegerCache.cache[i + (-IntegerCache.low)];//这句就是我们要研究的重点
-    return new Integer(i);
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token class-name">Integer</span> <span class="token function">valueOf</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>i <span class="token operator">>=</span> <span class="token class-name">IntegerCache</span><span class="token punctuation">.</span>low <span class="token operator">&amp;&amp;</span> i <span class="token operator">&lt;=</span> <span class="token class-name">IntegerCache</span><span class="token punctuation">.</span>high<span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token class-name">IntegerCache</span><span class="token punctuation">.</span>cache<span class="token punctuation">[</span>i <span class="token operator">+</span> <span class="token punctuation">(</span><span class="token operator">-</span><span class="token class-name">IntegerCache</span><span class="token punctuation">.</span>low<span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">;</span><span class="token comment">//这句就是我们要研究的重点</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Integer</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p><strong>IntegerCache</strong>是一个缓存类，它的内部有一个静态的<code>Integer cache[]</code>数组，在这个类第一次被加载时，会用整数值在-128~127之间的Integer实例对象填充这个数组，如果调用valueOf方法的时候参数值在这个范围内，就会从IntegerCache中的cache数组去取出这样一个共享对象。</p>
 <p>这样就能回答一开始的程序integer1、integer2为什么相等了，因为他们都是从cache数组中取出来的同一个引用。</p>
 <p>而300这个数是不在-128~127之间的，缓存数组中不存在这样的对象，最终是调用了构造方法创建了两个不同的Integer对象。</p>
 <hr>
 <p><strong>拓展：IntegerCache的静态代码块</strong></p>
-<pre><code class="java">static {
-    // 缓存的数据范围可以由用户设置，这里从配置中获取了用户设置的缓存范围
-    int h = 127;
-    String integerCacheHighPropValue =
-        sun.misc.VM.getSavedProperty(&quot;java.lang.Integer.IntegerCache.high&quot;);
-    if (integerCacheHighPropValue != null) {
-        try {
-            int i = parseInt(integerCacheHighPropValue);
-            i = Math.max(i, 127);
-            // Maximum array size is Integer.MAX_VALUE
-            h = Math.min(i, Integer.MAX_VALUE - (-low) -1);
-        } catch( NumberFormatException nfe) {
-            // If the property cannot be parsed into an int, ignore it.
-        }
-    }
-    high = h;
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">static</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 缓存的数据范围可以由用户设置，这里从配置中获取了用户设置的缓存范围</span>
+    <span class="token keyword">int</span> h <span class="token operator">=</span> <span class="token number">127</span><span class="token punctuation">;</span>
+    <span class="token class-name">String</span> integerCacheHighPropValue <span class="token operator">=</span>
+        sun<span class="token punctuation">.</span>misc<span class="token punctuation">.</span>VM<span class="token punctuation">.</span><span class="token function">getSavedProperty</span><span class="token punctuation">(</span><span class="token string">"java.lang.Integer.IntegerCache.high"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>integerCacheHighPropValue <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token function">parseInt</span><span class="token punctuation">(</span>integerCacheHighPropValue<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            i <span class="token operator">=</span> <span class="token class-name">Math</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span> <span class="token number">127</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">// Maximum array size is Integer.MAX_VALUE</span>
+            h <span class="token operator">=</span> <span class="token class-name">Math</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span> <span class="token class-name">Integer</span><span class="token punctuation">.</span>MAX_VALUE <span class="token operator">-</span> <span class="token punctuation">(</span><span class="token operator">-</span>low<span class="token punctuation">)</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span><span class="token punctuation">(</span> <span class="token class-name">NumberFormatException</span> nfe<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token comment">// If the property cannot be parsed into an int, ignore it.</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+    high <span class="token operator">=</span> h<span class="token punctuation">;</span>
 
-    cache = new Integer[(high - low) + 1];
-    int j = low;
+    cache <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Integer</span><span class="token punctuation">[</span><span class="token punctuation">(</span>high <span class="token operator">-</span> low<span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> j <span class="token operator">=</span> low<span class="token punctuation">;</span>
+    
+    <span class="token comment">// 这里循环构造Integer对象填充cache数组</span>
+    <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> k <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> k <span class="token operator">&lt;</span> cache<span class="token punctuation">.</span>length<span class="token punctuation">;</span> k<span class="token operator">++</span><span class="token punctuation">)</span>
+        cache<span class="token punctuation">[</span>k<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Integer</span><span class="token punctuation">(</span>j<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    // 这里循环构造Integer对象填充cache数组
-    for(int k = 0; k &lt; cache.length; k++)
-        cache[k] = new Integer(j++);
-
-    // range [-128, 127] must be interned (JLS7 5.1.7)
-    assert IntegerCache.high &gt;= 127;
-}</code></pre>
-
+    <span class="token comment">// range [-128, 127] must be interned (JLS7 5.1.7)</span>
+    <span class="token keyword">assert</span> <span class="token class-name">IntegerCache</span><span class="token punctuation">.</span>high <span class="token operator">>=</span> <span class="token number">127</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
             </div>
             <hr/>
 
@@ -1086,7 +1088,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

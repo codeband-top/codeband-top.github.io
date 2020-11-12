@@ -30,6 +30,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -400,7 +401,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.5k
+                    1.3k
                 </div>
                 
 
@@ -416,212 +417,216 @@
                 <h1 id="java实现建立索引">1 java实现建立索引</h1><p>在数据库中建一个lucene库，插入一个tb_sku表，内含百万条目级别的数据。</p>
 <p>附建表sql下载：</p>
 <blockquote>
-<p>链接：<a href="https://pan.baidu.com/s/13FbFc5YmzaTcj0Rxh-O2Bg" target="_blank" rel="noopener">https://pan.baidu.com/s/13FbFc5YmzaTcj0Rxh-O2Bg</a><br>提取码：ue7x </p>
+<p>链接：<a target="_blank" rel="noopener" href="https://pan.baidu.com/s/13FbFc5YmzaTcj0Rxh-O2Bg">https://pan.baidu.com/s/13FbFc5YmzaTcj0Rxh-O2Bg</a><br>提取码：ue7x </p>
 </blockquote>
 <p>新建工程，</p>
 <p>pom：</p>
-<pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
-         xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
-    &lt;parent&gt;
-        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-        &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
-        &lt;version&gt;2.2.4.RELEASE&lt;/version&gt;
-    &lt;/parent&gt;
-    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+<pre class="language-xml" data-language="xml"><code class="language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8"?></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>project</span> <span class="token attr-name">xmlns</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>http://maven.apache.org/POM/4.0.0<span class="token punctuation">"</span></span>
+         <span class="token attr-name"><span class="token namespace">xmlns:</span>xsi</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>http://www.w3.org/2001/XMLSchema-instance<span class="token punctuation">"</span></span>
+         <span class="token attr-name"><span class="token namespace">xsi:</span>schemaLocation</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>parent</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework.boot<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-boot-starter-parent<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>2.2.4.RELEASE<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>parent</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>modelVersion</span><span class="token punctuation">></span></span>4.0.0<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>modelVersion</span><span class="token punctuation">></span></span>
 
-    &lt;artifactId&gt;luceneDemo&lt;/artifactId&gt;
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>luceneDemo<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
 
-    &lt;properties&gt;
-        &lt;maven.compiler.source&gt;1.8&lt;/maven.compiler.source&gt;
-        &lt;maven.compiler.target&gt;1.8&lt;/maven.compiler.target&gt;
-        &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
-        &lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;
-        &lt;skipTests&gt;true&lt;/skipTests&gt;
-    &lt;/properties&gt;
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>properties</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>maven.compiler.source</span><span class="token punctuation">></span></span>1.8<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>maven.compiler.source</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>maven.compiler.target</span><span class="token punctuation">></span></span>1.8<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>maven.compiler.target</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>project.build.sourceEncoding</span><span class="token punctuation">></span></span>UTF-8<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>project.build.sourceEncoding</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>project.reporting.outputEncoding</span><span class="token punctuation">></span></span>UTF-8<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>project.reporting.outputEncoding</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>skipTests</span><span class="token punctuation">></span></span>true<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>skipTests</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>properties</span><span class="token punctuation">></span></span>
 
-    &lt;dependencies&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.projectlombok&lt;/groupId&gt;
-            &lt;artifactId&gt;lombok&lt;/artifactId&gt;
-            &lt;version&gt;1.18.12&lt;/version&gt;
-        &lt;/dependency&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;commons-io&lt;/groupId&gt;
-            &lt;artifactId&gt;commons-io&lt;/artifactId&gt;
-            &lt;version&gt;2.6&lt;/version&gt;
-        &lt;/dependency&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.apache.lucene&lt;/groupId&gt;
-            &lt;artifactId&gt;lucene-core&lt;/artifactId&gt;
-            &lt;version&gt;7.7.2&lt;/version&gt;
-        &lt;/dependency&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.apache.lucene&lt;/groupId&gt;
-            &lt;artifactId&gt;lucene-analyzers-common&lt;/artifactId&gt;
-            &lt;version&gt;7.7.2&lt;/version&gt;
-        &lt;/dependency&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.apache.lucene&lt;/groupId&gt;
-            &lt;artifactId&gt;lucene-queryparser&lt;/artifactId&gt;
-            &lt;version&gt;7.7.2&lt;/version&gt;
-        &lt;/dependency&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;junit&lt;/groupId&gt;
-            &lt;artifactId&gt;junit&lt;/artifactId&gt;
-            &lt;version&gt;4.12&lt;/version&gt;
-            &lt;scope&gt;test&lt;/scope&gt;
-        &lt;/dependency&gt;
-        &lt;!-- mysql数据库驱动 --&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;mysql&lt;/groupId&gt;
-            &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
-            &lt;version&gt;5.1.48&lt;/version&gt;
-        &lt;/dependency&gt;
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependencies</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.projectlombok<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>lombok<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>1.18.12<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>commons-io<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>commons-io<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>2.6<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.apache.lucene<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>lucene-core<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>7.7.2<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.apache.lucene<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>lucene-analyzers-common<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>7.7.2<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.apache.lucene<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>lucene-queryparser<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>7.7.2<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>junit<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>junit<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>4.12<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>scope</span><span class="token punctuation">></span></span>test<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>scope</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+        <span class="token comment">&lt;!-- mysql数据库驱动 --></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>mysql<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>mysql-connector-java<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>5.1.48<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
 
-        &lt;!-- IK中文分词器 --&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.wltea.ik-analyzer&lt;/groupId&gt;
-            &lt;artifactId&gt;ik-analyzer&lt;/artifactId&gt;
-            &lt;version&gt;8.1.0&lt;/version&gt;
-        &lt;/dependency&gt;
+        <span class="token comment">&lt;!-- IK中文分词器 --></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.wltea.ik-analyzer<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>ik-analyzer<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>8.1.0<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
 
-        &lt;!--web起步依赖--&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-            &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
-        &lt;/dependency&gt;
-        &lt;!-- 引入thymeleaf --&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-            &lt;artifactId&gt;spring-boot-starter-thymeleaf&lt;/artifactId&gt;
-        &lt;/dependency&gt;
-        &lt;!-- Json转换工具 --&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
-            &lt;artifactId&gt;fastjson&lt;/artifactId&gt;
-            &lt;version&gt;1.2.51&lt;/version&gt;
-        &lt;/dependency&gt;
-    &lt;/dependencies&gt;
+        <span class="token comment">&lt;!--web起步依赖--></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework.boot<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-boot-starter-web<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+        <span class="token comment">&lt;!-- 引入thymeleaf --></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework.boot<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-boot-starter-thymeleaf<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+        <span class="token comment">&lt;!-- Json转换工具 --></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>com.alibaba<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>fastjson<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>1.2.51<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependencies</span><span class="token punctuation">></span></span>
 
-&lt;/project&gt;</code></pre>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>project</span><span class="token punctuation">></span></span></code></pre>
+
 <p>实体类：</p>
-<pre><code class="java">@Data
-public class Sku {
-    //商品主键id
-    private String id;
-    //商品名称
-    private String name;
-    //价格
-    private Integer price;
-    //库存数量
-    private Integer num;
-    //图片
-    private String image;
-    //分类名称
-    private String categoryName;
-    //品牌名称
-    private String brandName;
-    //规格
-    private String spec;
-    //销量
-    private Integer saleNum;
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@Data</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Sku</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">//商品主键id</span>
+    <span class="token keyword">private</span> <span class="token class-name">String</span> id<span class="token punctuation">;</span>
+    <span class="token comment">//商品名称</span>
+    <span class="token keyword">private</span> <span class="token class-name">String</span> name<span class="token punctuation">;</span>
+    <span class="token comment">//价格</span>
+    <span class="token keyword">private</span> <span class="token class-name">Integer</span> price<span class="token punctuation">;</span>
+    <span class="token comment">//库存数量</span>
+    <span class="token keyword">private</span> <span class="token class-name">Integer</span> num<span class="token punctuation">;</span>
+    <span class="token comment">//图片</span>
+    <span class="token keyword">private</span> <span class="token class-name">String</span> image<span class="token punctuation">;</span>
+    <span class="token comment">//分类名称</span>
+    <span class="token keyword">private</span> <span class="token class-name">String</span> categoryName<span class="token punctuation">;</span>
+    <span class="token comment">//品牌名称</span>
+    <span class="token keyword">private</span> <span class="token class-name">String</span> brandName<span class="token punctuation">;</span>
+    <span class="token comment">//规格</span>
+    <span class="token keyword">private</span> <span class="token class-name">String</span> spec<span class="token punctuation">;</span>
+    <span class="token comment">//销量</span>
+    <span class="token keyword">private</span> <span class="token class-name">Integer</span> saleNum<span class="token punctuation">;</span>
 
-}</code></pre>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>新建一个Dao接口及其实现，这里不展示代码</p>
 <p>写一个测试类，通过测试方法建立索引:</p>
-<pre><code class="java">@Test
-public void createIndexTest() throws IOException {
-    //1. 采集数据
-    SkuDao skuDao = new SkuDaoImpl();
-    List&lt;Sku&gt; skuList = skuDao.querySkuList();
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@Test</span>
+<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">createIndexTest</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">IOException</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">//1. 采集数据</span>
+    <span class="token class-name">SkuDao</span> skuDao <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SkuDaoImpl</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">List</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Sku</span><span class="token punctuation">></span></span> skuList <span class="token operator">=</span> skuDao<span class="token punctuation">.</span><span class="token function">querySkuList</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    List&lt;Document&gt; docList = new ArrayList&lt;&gt;();
-    //2. 创建文档对象
-    for (Sku sku : skuList) {
-        Document document = new Document();
+    <span class="token class-name">List</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Document</span><span class="token punctuation">></span></span> docList <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//2. 创建文档对象</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token class-name">Sku</span> sku <span class="token operator">:</span> skuList<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">Document</span> document <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Document</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        //创建域对象
-        document.add(new TextField(&quot;id&quot;, sku.getId(), Field.Store.YES));
-        document.add(new TextField(&quot;name&quot;, sku.getName(), Field.Store.YES));
-        document.add(new TextField(&quot;price&quot;, String.valueOf(sku.getPrice()), Field.Store.YES));
-        document.add(new TextField(&quot;image&quot;, sku.getImage(), Field.Store.YES));
-        document.add(new TextField(&quot;categoryName&quot;, sku.getCategoryName(), Field.Store.YES));
-        document.add(new TextField(&quot;brandName&quot;, sku.getBrandName(), Field.Store.YES));
-        //将文档对象放入文档集合中
-        docList.add(document);
-    }
-    //3. 创建分词器，StandardAnalyzer对英文分词效果好，对中文是单字分词
-    Analyzer analyzer = new StandardAnalyzer();
-    //4. 创建Directory目录对象，表示索引库的位置
-    Directory dir = FSDirectory.open(Paths.get(&quot;D:\\dir&quot;));
-    //5. 创建IndexWriterConfig对象，指定切分词使用的分词器
-    IndexWriterConfig config = new IndexWriterConfig(analyzer);
-    //6. 创建IndexWriter输出流对象，指定输出的位置和使用的config初始化对象
-    IndexWriter indexWriter = new IndexWriter(dir,config);
-    //7. 写入文档到索引库
-    for (Document document : docList) {
-        indexWriter.addDocument(document);
-    }
-    //8. 释放资源
-    indexWriter.close();
-}</code></pre>
+        <span class="token comment">//创建域对象</span>
+        document<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">TextField</span><span class="token punctuation">(</span><span class="token string">"id"</span><span class="token punctuation">,</span> sku<span class="token punctuation">.</span><span class="token function">getId</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token class-name">Field</span><span class="token punctuation">.</span><span class="token class-name">Store</span><span class="token punctuation">.</span>YES<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        document<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">TextField</span><span class="token punctuation">(</span><span class="token string">"name"</span><span class="token punctuation">,</span> sku<span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token class-name">Field</span><span class="token punctuation">.</span><span class="token class-name">Store</span><span class="token punctuation">.</span>YES<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        document<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">TextField</span><span class="token punctuation">(</span><span class="token string">"price"</span><span class="token punctuation">,</span> <span class="token class-name">String</span><span class="token punctuation">.</span><span class="token function">valueOf</span><span class="token punctuation">(</span>sku<span class="token punctuation">.</span><span class="token function">getPrice</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token class-name">Field</span><span class="token punctuation">.</span><span class="token class-name">Store</span><span class="token punctuation">.</span>YES<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        document<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">TextField</span><span class="token punctuation">(</span><span class="token string">"image"</span><span class="token punctuation">,</span> sku<span class="token punctuation">.</span><span class="token function">getImage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token class-name">Field</span><span class="token punctuation">.</span><span class="token class-name">Store</span><span class="token punctuation">.</span>YES<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        document<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">TextField</span><span class="token punctuation">(</span><span class="token string">"categoryName"</span><span class="token punctuation">,</span> sku<span class="token punctuation">.</span><span class="token function">getCategoryName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token class-name">Field</span><span class="token punctuation">.</span><span class="token class-name">Store</span><span class="token punctuation">.</span>YES<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        document<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">TextField</span><span class="token punctuation">(</span><span class="token string">"brandName"</span><span class="token punctuation">,</span> sku<span class="token punctuation">.</span><span class="token function">getBrandName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token class-name">Field</span><span class="token punctuation">.</span><span class="token class-name">Store</span><span class="token punctuation">.</span>YES<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//将文档对象放入文档集合中</span>
+        docList<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>document<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token comment">//3. 创建分词器，StandardAnalyzer对英文分词效果好，对中文是单字分词</span>
+    <span class="token class-name">Analyzer</span> analyzer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StandardAnalyzer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//4. 创建Directory目录对象，表示索引库的位置</span>
+    <span class="token class-name">Directory</span> dir <span class="token operator">=</span> <span class="token class-name">FSDirectory</span><span class="token punctuation">.</span><span class="token keyword">open</span><span class="token punctuation">(</span><span class="token class-name">Paths</span><span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"D:\\dir"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//5. 创建IndexWriterConfig对象，指定切分词使用的分词器</span>
+    <span class="token class-name">IndexWriterConfig</span> config <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">IndexWriterConfig</span><span class="token punctuation">(</span>analyzer<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//6. 创建IndexWriter输出流对象，指定输出的位置和使用的config初始化对象</span>
+    <span class="token class-name">IndexWriter</span> indexWriter <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">IndexWriter</span><span class="token punctuation">(</span>dir<span class="token punctuation">,</span>config<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//7. 写入文档到索引库</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token class-name">Document</span> document <span class="token operator">:</span> docList<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        indexWriter<span class="token punctuation">.</span><span class="token function">addDocument</span><span class="token punctuation">(</span>document<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token comment">//8. 释放资源</span>
+    indexWriter<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>运行前先建立对应的目录<code>D:\dir</code>，运行后即可在目录下看到许多lucene建立索引后生成的存储文件</p>
-<p><img src="https://api.codetool.top/img/15851893158699.png" alt></p>
+<p><img src="https://api.codetool.top/img/15851893158699.png"></p>
 <h1 id="使用Luke工具查看生成的文件内容">2 使用Luke工具查看生成的文件内容</h1><p>打开工具，选择数据文件所在的目录</p>
-<p><img src="https://api.codetool.top/img/15851900418727.png" alt></p>
+<p><img src="https://api.codetool.top/img/15851900418727.png"></p>
 <p>在overview标签页可以看到概览信息，包括域数、文档数、词数、词的频数统计</p>
-<p><img src="https://api.codetool.top/img/15851900585107.png" alt></p>
+<p><img src="https://api.codetool.top/img/15851900585107.png"></p>
 <p>在document标签页可以看到单个的文档信息</p>
-<p><img src="https://api.codetool.top/img/15851901847947.png" alt></p>
+<p><img src="https://api.codetool.top/img/15851901847947.png"></p>
 <p>在search标签页可以进行搜索</p>
-<p><img src="https://api.codetool.top/img/15851901942754.png" alt></p>
-<h1 id="使用java查询数据">3 使用java查询数据</h1><pre><code class="java">@Test
-public void testSearch() throws ParseException, IOException {
-    //1. 创建分词器（对搜索的文本进行分词）
-    //注意；分词器要和创建索引时用的分词器一样
-    Analyzer analyzer = new StandardAnalyzer();
-    //2. 创建查询对象，第一个参数：默认查询域
-    //第二个参数：使用的分词器
-    QueryParser queryParser = new QueryParser(&quot;name&quot;,analyzer);
-    //3. 设置搜索关键词
-    Query query = queryParser.parse(&quot;华为手机&quot;);
-    //写成queryParser.parse(&quot;brandName: 华为手机&quot;);又可以指定查询域
-    //4. 创建Directory目录对象，指定索引库的位置
-    Directory dir = FSDirectory.open(Paths.get(&quot;D:\\dir&quot;));
-    //5. 创建输入流对象
-    IndexReader indexReader = DirectoryReader.open(dir);
-    //6. 创建搜索对象
-    IndexSearcher indexSearcher = new IndexSearcher(indexReader);
-    //7. 搜索，并返回结果
-    //第二个参数：返回多少条消息，分页使用
-    TopDocs topDocs = indexSearcher.search(query, 10);
-    System.out.println(&quot;count: &quot;+topDocs.totalHits);
-    //8. 获取结果集
-    ScoreDoc[] scoreDocs = topDocs.scoreDocs;
-    //9. 遍历结果集
-    if(scoreDocs != null){
-        for (ScoreDoc scoreDoc : scoreDocs) {
-            //获取查询到的文档唯一标识ID，这个ID是由lucene创建文档的时候分配的
-            int docID = scoreDoc.doc;
-            //通过ID读取文档
-            Document doc = indexSearcher.doc(docID);
-            System.out.println(&quot;============================&quot;);
-            //通过域名，从文档中获取域值
-            System.out.println(&quot;id: &quot;+doc.get(&quot;id&quot;));
-            System.out.println(&quot;name: &quot;+doc.get(&quot;name&quot;));
-            System.out.println(&quot;price: &quot;+doc.get(&quot;price&quot;));
-            System.out.println(&quot;image: &quot;+doc.get(&quot;image&quot;));
-            System.out.println(&quot;brandName: &quot;+doc.get(&quot;brandName&quot;));
-            System.out.println(&quot;categoryName: &quot;+doc.get(&quot;categoryName&quot;));
-        }
-    }
-    //10. 关闭流
-    indexReader.close();
-}</code></pre>
+<p><img src="https://api.codetool.top/img/15851901942754.png"></p>
+<h1 id="使用java查询数据">3 使用java查询数据</h1><pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@Test</span>
+<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">testSearch</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">ParseException</span><span class="token punctuation">,</span> <span class="token class-name">IOException</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">//1. 创建分词器（对搜索的文本进行分词）</span>
+    <span class="token comment">//注意；分词器要和创建索引时用的分词器一样</span>
+    <span class="token class-name">Analyzer</span> analyzer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StandardAnalyzer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//2. 创建查询对象，第一个参数：默认查询域</span>
+    <span class="token comment">//第二个参数：使用的分词器</span>
+    <span class="token class-name">QueryParser</span> queryParser <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">QueryParser</span><span class="token punctuation">(</span><span class="token string">"name"</span><span class="token punctuation">,</span>analyzer<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//3. 设置搜索关键词</span>
+    <span class="token class-name">Query</span> query <span class="token operator">=</span> queryParser<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token string">"华为手机"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//写成queryParser.parse("brandName: 华为手机");又可以指定查询域</span>
+    <span class="token comment">//4. 创建Directory目录对象，指定索引库的位置</span>
+    <span class="token class-name">Directory</span> dir <span class="token operator">=</span> <span class="token class-name">FSDirectory</span><span class="token punctuation">.</span><span class="token keyword">open</span><span class="token punctuation">(</span><span class="token class-name">Paths</span><span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"D:\\dir"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//5. 创建输入流对象</span>
+    <span class="token class-name">IndexReader</span> indexReader <span class="token operator">=</span> <span class="token class-name">DirectoryReader</span><span class="token punctuation">.</span><span class="token keyword">open</span><span class="token punctuation">(</span>dir<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//6. 创建搜索对象</span>
+    <span class="token class-name">IndexSearcher</span> indexSearcher <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">IndexSearcher</span><span class="token punctuation">(</span>indexReader<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//7. 搜索，并返回结果</span>
+    <span class="token comment">//第二个参数：返回多少条消息，分页使用</span>
+    <span class="token class-name">TopDocs</span> topDocs <span class="token operator">=</span> indexSearcher<span class="token punctuation">.</span><span class="token function">search</span><span class="token punctuation">(</span>query<span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"count: "</span><span class="token operator">+</span>topDocs<span class="token punctuation">.</span>totalHits<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//8. 获取结果集</span>
+    <span class="token class-name">ScoreDoc</span><span class="token punctuation">[</span><span class="token punctuation">]</span> scoreDocs <span class="token operator">=</span> topDocs<span class="token punctuation">.</span>scoreDocs<span class="token punctuation">;</span>
+    <span class="token comment">//9. 遍历结果集</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>scoreDocs <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token class-name">ScoreDoc</span> scoreDoc <span class="token operator">:</span> scoreDocs<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token comment">//获取查询到的文档唯一标识ID，这个ID是由lucene创建文档的时候分配的</span>
+            <span class="token keyword">int</span> docID <span class="token operator">=</span> scoreDoc<span class="token punctuation">.</span>doc<span class="token punctuation">;</span>
+            <span class="token comment">//通过ID读取文档</span>
+            <span class="token class-name">Document</span> doc <span class="token operator">=</span> indexSearcher<span class="token punctuation">.</span><span class="token function">doc</span><span class="token punctuation">(</span>docID<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"============================"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">//通过域名，从文档中获取域值</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"id: "</span><span class="token operator">+</span>doc<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"id"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"name: "</span><span class="token operator">+</span>doc<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"name"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"price: "</span><span class="token operator">+</span>doc<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"price"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"image: "</span><span class="token operator">+</span>doc<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"image"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"brandName: "</span><span class="token operator">+</span>doc<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"brandName"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"categoryName: "</span><span class="token operator">+</span>doc<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"categoryName"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token comment">//10. 关闭流</span>
+    indexReader<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>查看输出:</p>
-<p><img src="https://api.codetool.top/img/15851916227090.png" alt></p>
+<p><img src="https://api.codetool.top/img/15851916227090.png"></p>
 
             </div>
             <hr/>
@@ -1051,8 +1056,8 @@ public void testSearch() throws ParseException, IOException {
                         
                             1 原题999. 车的可用捕获量 - 力扣（LeetCode）
 2 解法2.1 思想这道题题目有点难理解，其实就是上下左右搜索，质量有点低了。
-2.2 代码class Solution {
-    char[][] boardGlobal;
+2.2 代码class Solution &#123;
+    char[][] boardGl
                         
                     </div>
                     <div class="publish-info">
@@ -1229,7 +1234,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

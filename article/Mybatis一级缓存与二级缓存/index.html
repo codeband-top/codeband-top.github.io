@@ -36,6 +36,7 @@ MyBatis 二级缓存全详解 - cxuan - 博客园
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -420,7 +421,7 @@ MyBatis 二级缓存全详解 - cxuan - 博客园
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <p>本文参考资源：</p>
-<p><a href="https://www.cnblogs.com/cxuanBlog/p/11333021.html" target="_blank" rel="noopener">MyBatis 二级缓存全详解 - cxuan - 博客园</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/cxuanBlog/p/11333021.html">MyBatis 二级缓存全详解 - cxuan - 博客园</a></p>
 <h1 id="缓存">1 缓存</h1><p>存在于内存中的临时数据</p>
 <p>减少和数据库的交互次数，提高执行效率</p>
 <p>适用于缓存的数据：</p>
@@ -432,7 +433,7 @@ MyBatis 二级缓存全详解 - cxuan - 博客园
 <p>一个SqlSession对象通常表示用户和Mybatis建立的一次会话，在这个会话中，重复执行完全相同的查询语句且不受影响的情况下就会使用一级缓存。</p>
 <p>每当一个SqlSession对象创建时，它会持有一个Executor执行器，直接和Connection打交道，当我们第一次执行查询之后，查询的结果会同时存入到这个Executor执行器中的一块区域：</p>
 <p>MyBatis 将缓存和对缓存相关的操作封装成了 Cache 接口中，Executor 接口的实现类 BaseExecutor 中拥有一个 Cache 接口的实现类 PerpetualCache，则对于 BaseExecutor 对象而言，它将使用 PerpetualCache 对象维护缓存。</p>
-<p><img src="https://api.codetool.top/img/15823651517004.png" alt></p>
+<p><img src="https://api.codetool.top/img/15823651517004.png"></p>
 <p>PerpetualCache 实现原理其实很简单，其内部就是通过一个简单的 <code>HashMap&lt;k,v&gt;</code> 来实现<br>的，没有其他的任何限制。</p>
 <h2 id="生命周期">2.2 生命周期</h2><ol>
 <li>MyBatis 在开启一个数据库会话时，会创建一个新的 SqlSession 对象，SqlSession 对象中会有一个新的 Executor 对象，Executor 对象中持有一个新的 PerpetualCache 对象；<strong>当会话结束时，SqlSession 对象及其内部的 Executor 对象还有 PerpetualCache 对象也一并释放掉。</strong></li>
@@ -453,21 +454,23 @@ MyBatis 二级缓存全详解 - cxuan - 博客园
 </ol>
 <p>一级缓存是一个粗粒度的缓存，没有更新缓存和缓存过期的概念</p>
 <h1 id="二级缓存">3 二级缓存</h1><h2 id="概述-1">3.1 概述</h2><p>MyBatis一级缓存最大的共享范围就是一个SqlSession内部，那么如果多个 SqlSession 需要共享缓存，则需要开启二级缓存，开启二级缓存后，会使用 CachingExecutor 装饰 Executor，进入一级缓存的查询流程前，先在CachingExecutor 进行二级缓存的查询，具体的工作流程如下所示</p>
-<p><img src="https://api.codetool.top/img/15823669308067.png" alt></p>
+<p><img src="https://api.codetool.top/img/15823669308067.png"></p>
 <p>当二级缓存开启后，<strong>同一个命名空间(namespace) 所有的操作语句，都影响着一个共同的 cache</strong>，也就是二级缓存被多个 SqlSession 共享，是一个全局的变量。当开启缓存后，数据的查询执行的流程就是 二级缓存 -&gt; 一级缓存 -&gt; 数据库。</p>
 <p>但二级缓存缓存的是数据而不是对象，当我们在使用二级缓存时，所缓存的类一定要实现 <code>java.io.Serializable</code> 接口，这种就可以使用序列化方式来保存对象。</p>
 <h2 id="使用">3.2 使用</h2><p>二级缓存默认是不开启的，需要以下操作开启：</p>
 <ul>
 <li>在Mybatis.xml总配置</li>
 </ul>
-<pre><code class="xml">&lt;settings&gt;
-    &lt;setting name=&quot;cacheEnabled&quot; value=&quot;true&quot;/&gt;
-&lt;/settings&gt;</code></pre>
+<pre class="language-xml" data-language="xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>settings</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>setting</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>cacheEnabled<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>true<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>settings</span><span class="token punctuation">></span></span></code></pre>
+
 <p>因为 cacheEnabled 的取值默认就为 true，所以这一步可以省略不配置。为 true 代表开启二级缓存；为false 代表不开启二级缓存</p>
 <ul>
 <li>在Mapper配置文件中配置</li>
 </ul>
-<pre><code class="xml">&lt;cache/&gt;</code></pre>
+<pre class="language-xml" data-language="xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>cache</span><span class="token punctuation">/></span></span></code></pre>
+
 <p>cache标签可以设置以下属性：</p>
 <ul>
 <li><code>eviction</code>: 缓存回收策略，有这几种回收策略<ul>
@@ -493,9 +496,10 @@ MyBatis 二级缓存全详解 - cxuan - 博客园
 <li><p>在Select标签中配置</p>
 </li>
 </ul>
-<pre><code class="xml">&lt;select id=&quot;&quot; useCache=&quot;true&quot;&gt;
+<pre class="language-xml" data-language="xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>select</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token punctuation">"</span></span> <span class="token attr-name">useCache</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>true<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
     ...
-&lt;/select&gt;</code></pre>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>select</span><span class="token punctuation">></span></span></code></pre>
+
 <h2 id="注意">3.3 注意</h2><ul>
 <li>二级缓存是以<code>namespace</code>为单位的，不同namespace下的操作互不影响。</li>
 <li><code>insert,update,delete</code>操作会清空所在namespace下的全部缓存。</li>
@@ -1104,7 +1108,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

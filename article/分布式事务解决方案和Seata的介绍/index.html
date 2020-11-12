@@ -28,6 +28,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -419,12 +420,12 @@
         <hr class="clearfix">
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h1 id="什么是分布式事务">1 什么是分布式事务</h1><p>事务的概念：<a href="../数据库理论之事务与恢复技术">数据库理论之事务与恢复技术</a></p>
+                <h1 id="什么是分布式事务">1 什么是分布式事务</h1><p>事务的概念：<a href="../%E6%95%B0%E6%8D%AE%E5%BA%93%E7%90%86%E8%AE%BA%E4%B9%8B%E4%BA%8B%E5%8A%A1%E4%B8%8E%E6%81%A2%E5%A4%8D%E6%8A%80%E6%9C%AF">数据库理论之事务与恢复技术</a></p>
 <p>本地事务主要限制在单个会话内，不涉及多个数据库资源。但是在基于SOA(Service-Oriented Architecture，面向服务架构)的分布式应用环境下，越来越多的应用要求对多个数据库资源，多个服务的访问都能纳入到同一个事务当中，分布式事务应运而生。</p>
 <p><strong>分布式事务指事务的参与者、支持事务的服务器、资源服务器以及事务管理器分别位于不同的分布式系统的不同节点之上,且属于不同的应用，分布式事务需要保证这些操作要么全部成功，要么全部失败。本质上来说，分布式事务就是为了保证不同数据库的数据一致性。</strong></p>
 <p>分布式事务可能涉及到多个服务、多个数据源之间，因此较之基于单一数据库资源访问的本地事务，分布式事务的应用架构更为复杂。在不同的分布式应用架构下，实现一个分布式事务要考虑的问题并不完全一样，比如对多资源的协调、事务的跨服务传播等，实现机制也是复杂多变。</p>
-<h1 id="分布式事务相关理论">2 分布式事务相关理论</h1><p><a href="../分布式一致性理论和一致性协议2PC、3PC">分布式一致性理论和一致性协议2PC、3PC</a> </p>
-<h1 id="分布式事务解决方案">3 分布式事务解决方案</h1><h2 id="基于XA协议的2PC或3PC">3.1 基于XA协议的2PC或3PC</h2><p>2PC理论和过程已经在<a href="../分布式一致性理论和一致性协议2PC、3PC">分布式一致性理论和一致性协议2PC、3PC</a> 中描述过了。</p>
+<h1 id="分布式事务相关理论">2 分布式事务相关理论</h1><p><a href="../%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E7%90%86%E8%AE%BA%E5%92%8C%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE2PC%E3%80%813PC">分布式一致性理论和一致性协议2PC、3PC</a> </p>
+<h1 id="分布式事务解决方案">3 分布式事务解决方案</h1><h2 id="基于XA协议的2PC或3PC">3.1 基于XA协议的2PC或3PC</h2><p>2PC理论和过程已经在<a href="../%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E7%90%86%E8%AE%BA%E5%92%8C%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE2PC%E3%80%813PC">分布式一致性理论和一致性协议2PC、3PC</a> 中描述过了。</p>
 <p>需要注意的是<strong>2PC处理分布式事务最致命的缺点是同步阻塞</strong>，即两阶段提交中的第二阶段, 协调者需要等待所有参与者发出 yes 请求, 或者一个参与者发出 no 请求后, 才能执行提交或者中断操作. 这会造成<strong>长时间同时锁住多个资源</strong>, 造成性能瓶颈，如果参与者有一个耗时长的操作, 性能损耗会更明显，<strong>即会丢失一部分可用性</strong>。 而现在的大型分布式系统中，往往对性能较为敏感，那么2PC带来的性能损耗通常是不可忍受的。</p>
 <p>2PC和3PC强调的都是强一致性，往往会丢失一部分可用性或数据一致性（网络分区问题）。</p>
 <h2 id="TCC补偿事务（Try-Confirm-Commit）">3.2 TCC补偿事务（Try-Confirm-Commit）</h2><p>TCC 是基于补偿型事务的 AP 系统的一种实现, 具有<strong>最终一致性</strong>。</p>
@@ -450,7 +451,7 @@
 </tbody></table>
 <p>其核心在于将业务分为两个操作步骤完成。不依赖 RM 对分布式事务的支持，而是通过对业务逻辑的分解来实现分布式事务。</p>
 <p><strong>如果任一子业务在 Try 阶段有操作无法执行成功，则调用 cancel 接口回滚try阶段进行的操作。</strong> 否则调用confirm接口开始执行业务操作（此时断言confirm操作必须成功），注意 <strong>confirm 和 cancel 两个阶段是两个相悖的选择，而不是先后关系</strong>。 <strong>如果任一子业务在 Confirm 阶段有操作无法执行成功, 会造成对业务活动管理器的响应超时,此时要对其他业务执行补偿性事务。</strong> 如果补偿操作执行也出现异常, 必须进行重试, <strong>若实在无法执行成功, 则事务管理器必须能够感知到失败的操作, 进行log(用于事后人工进行补偿性事务操作或者交由中间件接管在之后进行补偿性事务操作)。</strong></p>
-<p><img src="https://api.codetool.top/img/15889559575854.png" alt></p>
+<p><img src="https://api.codetool.top/img/15889559575854.png"></p>
 <p>例如：A 要向 B 转账，思路大概是：</p>
 <p>我们有一个本地方法，里面依次调用 </p>
 <ol>
@@ -498,12 +499,12 @@
 <p><strong>优点：</strong> TCC能够对分布式事务中的各个资源进行分别锁定, 分别提交与释放, 例如, 假设有A、B两个操作, <strong>假设A操作耗时短, 那么 A 就能较快的完成自身的try-confirm-cancel流程, 释放资源，即可用性有较大提高。</strong> 无需等待 B 操作. 如果事后出现问题, 追加执行补偿性事务即可。</p>
 <p><strong>缺点：</strong> TCC属于应用层的一种补偿方式，所以需要程序员在实现的时候多写很多补偿的代码，在一些场景中，一些业务流程可能用TCC不太好定义及处理。</p>
 <h2 id="本地消息表（异步确保）">3.3 本地消息表（异步确保）</h2><p>本地消息表这种实现方式应该是业界使用最多的，其核心思想是将分布式事务拆分成本地事务进行处理，该实现方式遵循BASE理论，也是属于确保最终一致性的补偿性事务，性能较高。</p>
-<p><img src="https://api.codetool.top/img/15889573704295.png" alt></p>
+<p><img src="https://api.codetool.top/img/15889573704295.png"></p>
 <p>基本思路就是：</p>
 <p><strong>消息生产方需要在业务表的同一数据库中额外建一个消息表，并记录消息发送状态。消息表和业务数据要在一个本地事务里提交。</strong> 然后消息会经过MQ发送到消息的消费方（消息状态确认系统定时扫描消息表中的消息状态）。<strong>如果消息发送失败，会进行重试发送。</strong></p>
 <p><strong>消息消费方需要处理这个消息，并完成自己的业务逻辑。</strong>此时如果本地事务处理成功，表明已经处理成功了，<strong>如果处理失败，那么就会重试执行。如果是业务上面的失败，可以给生产方发送一个业务补偿消息，通知生产方进行回滚等操作。</strong></p>
 <p><strong>生产方和消费方定时扫描本地消息表，把还没处理完成的消息或者失败的消息再发送一遍。</strong>如果有靠谱的自动对账补账逻辑，这种方案还是非常实用的。</p>
-<p><img src="https://api.codetool.top/img/1588957835275.png" alt></p>
+<p><img src="https://api.codetool.top/img/1588957835275.png"></p>
 <p><strong>优点：</strong> 一种非常经典的实现，避免了分布式事务，实现了最终一致性。在 .NET 中有现成的解决方案。</p>
 <p><strong>缺点：</strong> <strong>消息表会耦合到业务系统中</strong>，如果没有封装好的解决方案，会有很多杂活需要处理。</p>
 <h2 id="MQ事务消息">3.4 MQ事务消息</h2><p>有一些第三方的MQ是支持事务消息的，比如RocketMQ，他们支持事务消息的方式也是<strong>类似于采用的二阶段提交</strong>，但是市面上一些主流的MQ都是不支持事务消息的，比如 RabbitMQ 和 Kafka 都不支持。</p>
@@ -516,7 +517,7 @@
 <li>当得知本地事务执行成功时, MQ Server 允许 MQ 订阅方消费本条事务消息。需要额外说明的一点, 就是<strong>事务消息投递到 MQ 订阅方后, 并不一定能够成功执行. 需要MQ 订阅方主动给予消费反馈(ack)。如果 MQ 订阅方执行远程事务成功, 则给予消费成功的 ack, 那么 MQ Server 可以安全将事务消息移除；如果执行失败, MQ Server 需要对消息重新投递, 直至消费成功。</strong></li>
 </ol>
 <p>也就是说在业务方法内要向消息队列提交两次请求，一次发送消息和一次确认消息。如果确认消息发送失败了RocketMQ会定期扫描消息集群中的事务消息，这时候发现了Prepared消息，它会向消息发送者确认，所以<strong>生产方需要实现一个<code>check</code>接口</strong>，RocketMQ会根据发送端设置的策略来决定是回滚还是继续发送确认消息。这样就保证了消息发送与本地事务同时成功或同时失败。</p>
-<p><img src="https://api.codetool.top/img/15889581964042.png" alt></p>
+<p><img src="https://api.codetool.top/img/15889581964042.png"></p>
 <p><strong>优点：</strong> 实现了最终一致性，不需要依赖本地数据库事务。<br><strong>缺点：</strong> 目前主流MQ中只有RocketMQ支持事务消息。</p>
 <h2 id="最大努力通知型（基于消息中间件，定期校对）">3.5 最大努力通知型（基于消息中间件，定期校对）</h2><p>这是分布式事务中要求最低的一种，甚至连最终一致性都不一定能保证。它也可以通过消息中间件实现, 与前面异步确保型操作不同的一点是, <strong>在消息由 MQ Server 投递到消费者之后, 允许在达到最大重试次数之后正常结束事务。</strong></p>
 <p>流程：</p>
@@ -527,7 +528,7 @@
 <li>业务活动的被动方如果正常接收了数据，就正常返回响应，并结束事务。</li>
 <li>如果被动方没有正常接收，根据定时策略，向业务活动主动方查询，恢复丢失的业务消息。</li>
 </ol>
-<h1 id="Seata分布式事务">4 Seata分布式事务</h1><p>Seata官方文档：<a href="https://seata.io/zh-cn/docs/overview/what-is-seata.html" target="_blank" rel="noopener">https://seata.io/zh-cn/docs/overview/what-is-seata.html</a></p>
+<h1 id="Seata分布式事务">4 Seata分布式事务</h1><p>Seata官方文档：<a target="_blank" rel="noopener" href="https://seata.io/zh-cn/docs/overview/what-is-seata.html">https://seata.io/zh-cn/docs/overview/what-is-seata.html</a></p>
 <h2 id="Seata介绍">4.1 Seata介绍</h2><p>2019 年 1 月，阿里巴巴中间件团队发起了开源项目 <code>Fescar（Fast &amp; EaSy Commit And Rollback）</code>，和社区一起共建开源分布式事务解决方案。Fescar 的愿景是让分布式事务的使用像本地事务的使用一样，简单和高效，并逐步解决开发者们遇到的分布式事务方面的所有难题。</p>
 <p>Fescar 开源后，蚂蚁金服加入 Fescar 社区参与共建，并在 Fescar 0.4.0 版本中贡献了 TCC 模式。</p>
 <p>为了打造更中立、更开放、生态更加丰富的分布式事务开源社区，经过社区核心成员的投票，大家决定对 Fescar 进行品牌升级，并更名为 <code>Seata</code>，意为：<code>Simple Extensible Autonomous Transaction Architecture</code>，是一套一站式分布式事务解决方案。</p>
@@ -558,9 +559,9 @@
 <li>事务管理器 (TM, Transaction Manager)： 定义全局事务的范围：开始全局事务、提交或回滚全局事务。</li>
 <li>资源管理器 (RM, Resource Manager)： 管理分支事务处理的资源，与TC交谈以注册分支事务和报告分支事务的状态，并驱动分支事务提交或回滚。</li>
 </ul>
-<p><img src="https://api.codetool.top/img/15889588135449.png" alt></p>
+<p><img src="https://api.codetool.top/img/15889588135449.png"></p>
 <h2 id="一次分布式事务的处理过程">4.4 一次分布式事务的处理过程</h2><p>Transaction ID (XID)： 全局唯一的事务id </p>
-<p><img src="https://api.codetool.top/img/15889602442167.png" alt></p>
+<p><img src="https://api.codetool.top/img/15889602442167.png"></p>
 <ol>
 <li>TM 向TC申请开启一个全局事务，全局事务创建成功并生成一个全局唯一的XID;</li>
 <li>XID在微服务调用链路的上下文中传播;</li>
@@ -1191,7 +1192,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

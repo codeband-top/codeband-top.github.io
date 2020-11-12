@@ -32,6 +32,7 @@ SQL优化前置知识之索引的正确使用姿势
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -425,8 +426,8 @@ SQL优化前置知识之索引的正确使用姿势
             <div id="articleContent">
                 <p>该文前置知识：</p>
 <ul>
-<li><a href="../SQL优化前置知识之优化前分析/">SQL优化前置知识之优化前分析</a></li>
-<li><a href="../SQL优化前置知识之索引的正确使用姿势/">SQL优化前置知识之索引的正确使用姿势</a></li>
+<li><a href="../SQL%E4%BC%98%E5%8C%96%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86%E4%B9%8B%E4%BC%98%E5%8C%96%E5%89%8D%E5%88%86%E6%9E%90/">SQL优化前置知识之优化前分析</a></li>
+<li><a href="../SQL%E4%BC%98%E5%8C%96%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86%E4%B9%8B%E7%B4%A2%E5%BC%95%E7%9A%84%E6%AD%A3%E7%A1%AE%E4%BD%BF%E7%94%A8%E5%A7%BF%E5%8A%BF/">SQL优化前置知识之索引的正确使用姿势</a></li>
 </ul>
 <p>数据库的性能在系统中非常重要，在前面了解了Redis高可用的背景下也了解到了许多问题都会给数据库施加非常大的压力，一旦数据库崩溃会带来非常严重的后果乃至整个系统崩溃，对数据库性能的优化主要方法是：</p>
 <ol>
@@ -445,22 +446,25 @@ SQL优化前置知识之索引的正确使用姿势
 <h1 id="优化insert语句">2 优化insert语句</h1><p>当进行数据的insert操作的时候，可以考虑采用以下几种优化方案。</p>
 <h2 id="合并insert语句">2.1 合并insert语句</h2><p>如果需要同时对一张表插入很多行数据时，应该尽量使用多个值的insert语句，这种方式将大大的缩减客户端与数据库之间的连接、关闭等消耗。使得效率比分开执行的单个insert语句快。</p>
 <p>示例， 原始方式为：</p>
-<pre><code class="sql">insert into tb_test values(1,&#39;Tom&#39;);
-insert into tb_test values(2,&#39;Cat&#39;);
-insert into tb_test values(3,&#39;Jerry&#39;);</code></pre>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">insert</span> <span class="token keyword">into</span> tb_test <span class="token keyword">values</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token string">'Tom'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">insert</span> <span class="token keyword">into</span> tb_test <span class="token keyword">values</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">,</span><span class="token string">'Cat'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">insert</span> <span class="token keyword">into</span> tb_test <span class="token keyword">values</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">,</span><span class="token string">'Jerry'</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
 <p>优化后的方案为 ： </p>
-<pre><code class="sql">insert into tb_test values(1,&#39;Tom&#39;),(2,&#39;Cat&#39;)，(3,&#39;Jerry&#39;);</code></pre>
-<h2 id="在事务中进行数据插入">2.2 在事务中进行数据插入</h2><pre><code class="sql">start transaction;
-insert into tb_test values(1,&#39;Tom&#39;);
-insert into tb_test values(2,&#39;Cat&#39;);
-insert into tb_test values(3,&#39;Jerry&#39;);
-commit;</code></pre>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">insert</span> <span class="token keyword">into</span> tb_test <span class="token keyword">values</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token string">'Tom'</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">,</span><span class="token string">'Cat'</span><span class="token punctuation">)</span>，<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">,</span><span class="token string">'Jerry'</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<h2 id="在事务中进行数据插入">2.2 在事务中进行数据插入</h2><pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">start</span> <span class="token keyword">transaction</span><span class="token punctuation">;</span>
+<span class="token keyword">insert</span> <span class="token keyword">into</span> tb_test <span class="token keyword">values</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token string">'Tom'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">insert</span> <span class="token keyword">into</span> tb_test <span class="token keyword">values</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">,</span><span class="token string">'Cat'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">insert</span> <span class="token keyword">into</span> tb_test <span class="token keyword">values</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">,</span><span class="token string">'Jerry'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">commit</span><span class="token punctuation">;</span></code></pre>
+
 <h2 id="数据有序插入">2.3 数据有序插入</h2><p>和load data一样的原理</p>
-<h1 id="优化join">3 优化join</h1><p>这部分的内容在<a href="../数据库理论之查询处理和查询优化/">数据库理论之查询处理和查询优化</a>谈得比较详细，总的来说是要先选择再连接。</p>
+<h1 id="优化join">3 优化join</h1><p>这部分的内容在<a href="../%E6%95%B0%E6%8D%AE%E5%BA%93%E7%90%86%E8%AE%BA%E4%B9%8B%E6%9F%A5%E8%AF%A2%E5%A4%84%E7%90%86%E5%92%8C%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96/">数据库理论之查询处理和查询优化</a>谈得比较详细，总的来说是要先选择再连接。</p>
 <h1 id="小表驱动大表">4 小表驱动大表</h1><p>如果有两张表连接，类似于二重循环</p>
 <p>外层的表应该是小表，内层的应该是大表。</p>
 <p>虽然总的遍历次数是一样的，但是频繁切换数据表是影响效率的（IO 次数），应该尽可能减少切换表的次数。</p>
-<p>这方面内容可以参考：<a href="https://www.cnblogs.com/chafanbusi/p/10647471.html" target="_blank" rel="noopener">MySql 小表驱动大表 - 茶饭不撕 - 博客园</a></p>
+<p>这方面内容可以参考：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/chafanbusi/p/10647471.html">MySql 小表驱动大表 - 茶饭不撕 - 博客园</a></p>
 <h1 id="优化order-by语句">5 优化order by语句</h1><h2 id="了解：两种排序方式">5.1 了解：两种排序方式</h2><p>第一种是通过<strong>对返回数据进行排序</strong>，也就是通常说的 <code>filesort</code> 排序，所有不是通过索引直接返回排序结果的排序都叫 FileSort 排序。</p>
 <p>第二种<strong>通过有序索引顺序扫描</strong>直接返回有序数据，这种情况即为 <code>using index</code>，不需要额外排序，操作效率高。</p>
 <p>可以在explain中看到sql语句使用的是哪种排序方法。</p>
@@ -488,7 +492,7 @@ commit;</code></pre>
 <li>使用WHERE子句与ORDER BY子句条件列组合满足索引最左前缀列</li>
 </ol>
 <p>例：<code>WHERE a = const AND b = const ORDER BY c</code>是允许的</p>
-<p><strong>2)  select * 是一个大忌</strong></p>
+<p>*<em>2)  select * 是一个大忌*</em></p>
 <p>只取出需要的字段， 这点非常重要。在这里的影响是：</p>
 <ol>
 <li>尽量使用覆盖索引，可以直接从索引树中读取数据，避免二次查询聚簇索引，进而导致filesort。</li>
@@ -508,16 +512,19 @@ commit;</code></pre>
 <h1 id="优化嵌套查询">7 优化嵌套查询</h1><p>Mysql4.1版本之后，开始支持SQL的子查询。这个技术可以使用SELECT语句来创建一个单列的查询结果，然后把这个结果作为过滤条件用在另一个查询中。使用子查询可以一次性的完成很多逻辑上需要多个步骤才能完成的SQL操作，同时也可以避免事务或者表锁死，并且写起来也很容易。但是，有些情况下，子查询是可以被更高效的连接（JOIN）替代。</p>
 <p>事实上，MySQL5.7已经会自动优化一些可以被转成join的sql语句了，临时表开始被避免使用。</p>
 <p>示例：</p>
-<pre><code class="sql">select * from t_user where id in (select user_id from user_role );</code></pre>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> t_user <span class="token keyword">where</span> id <span class="token operator">in</span> <span class="token punctuation">(</span><span class="token keyword">select</span> user_id <span class="token keyword">from</span> user_role <span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
 <p>优化为：</p>
-<pre><code class="sql">select * from t_user u , user_role ur where u.id = ur.user_id;</code></pre>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> t_user u <span class="token punctuation">,</span> user_role ur <span class="token keyword">where</span> u<span class="token punctuation">.</span>id <span class="token operator">=</span> ur<span class="token punctuation">.</span>user_id<span class="token punctuation">;</span></code></pre>
+
 <h1 id="优化OR条件">8 优化OR条件</h1><p>对于包含OR的查询子句，如果要利用索引，则OR之间的每个条件列都必须用到索引，而且不能使用到复合索引；如果没有索引，则应该考虑增加索引。（避免索引失效）</p>
 <p>如果无法增加索引，还可以考虑使用union合并有索引的那些查询出来的和没索引查询出来的结果集代替or。（在数据量小的情况下不推荐，用到临时表有的时候效率更低）</p>
 <h1 id="优化limit语句">9 优化limit语句</h1><p>当偏移量非常大的时候，比如 limit 100000,20 这样的查询，这时 MySQL 需要查询 100020 条记录然后只返回最后 20 条，这样的代价非常高。要优化这种查询，要么在页面中限制分页数量，要么优化大偏移的性能。</p>
 <p>一个简单的办法是使用覆盖索引（延迟关联）</p>
 <p>意思就是先把索引排序，取出100000-20的索引值，然后用这些数据再回表查询对应行的所有列的值。使用子查询的写法就是：</p>
-<pre><code class="sql">select * from tb_item t, 
-(select id from tb_item order by id limit 100000,20) a where t.id=a.id;</code></pre>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> tb_item t<span class="token punctuation">,</span> 
+<span class="token punctuation">(</span><span class="token keyword">select</span> id <span class="token keyword">from</span> tb_item <span class="token keyword">order</span> <span class="token keyword">by</span> id <span class="token keyword">limit</span> <span class="token number">100000</span><span class="token punctuation">,</span><span class="token number">20</span><span class="token punctuation">)</span> a <span class="token keyword">where</span> t<span class="token punctuation">.</span>id<span class="token operator">=</span>a<span class="token punctuation">.</span>id<span class="token punctuation">;</span></code></pre>
+
 <p>另一种方法，如果使用书签记录上次取数据的位置，那么下次就可以直接从该书签记录的位置开始扫描。假设主键递增，那么当查询<code>limit 100000,20</code>返回的最后一条数据是<code>id= 1000102</code>，那么下一次查询可以使用<code>where id&gt;1000102</code>来限定范围。</p>
 <h1 id="使用SQL提示">10 使用SQL提示</h1><p>SQL提示，是优化数据库的一个重要手段，简单来说，就是在SQL语句中加入一些人为的提示来达到优化操作的目的。</p>
 <p>但是除非你的优化经验很好，否则不建议使用hint强制要求使用某个索引，因为至今MySQL本身对sql的优化程度已经很高了 : )</p>
@@ -1144,7 +1151,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

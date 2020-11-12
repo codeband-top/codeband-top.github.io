@@ -28,6 +28,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -402,7 +403,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    968
+                    924
                 </div>
                 
 
@@ -418,9 +419,10 @@
                 <p>消息积压的场景有很多，如果发送的消息没有得到及时回复，则会导致持久化消息不断积压而得不到释放，从而堵塞消息队列。对于这种情况，可以通过配置消息的过期时间和死信队列处理来预防。</p>
 <h1 id="TTL消息">1 TTL消息</h1><p>RabbitMQ支持消息的过期时间，即之前某篇博客在消息属性中设置的<code>expiration(&quot;10000&quot;)</code>，也支持在队列层面配置队列中消息的过期时间，从消息入队列开始计算，只要超过了队列的超时时间配置，那么消息会自动地清除。</p>
 <p>配置队列的消息过期时间：在声明队列的时候配置队列参数<code>x-message-ttl</code>：</p>
-<pre><code class="java">Map&lt;String, Object&gt; arguments = new HashMap&lt;&gt;();
-arguments.put(&quot;x-message-ttl&quot;, 10000);
-channel.queueDeclare(queueName,true,false, false, arguments);</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token class-name">Map</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">,</span> <span class="token class-name">Object</span><span class="token punctuation">></span></span> arguments <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+arguments<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span><span class="token string">"x-message-ttl"</span><span class="token punctuation">,</span> <span class="token number">10000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+channel<span class="token punctuation">.</span><span class="token function">queueDeclare</span><span class="token punctuation">(</span>queueName<span class="token punctuation">,</span><span class="token boolean">true</span><span class="token punctuation">,</span><span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">,</span> arguments<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
 <h1 id="死信队列">2 死信队列</h1><h2 id="概述">2.1 概述</h2><p>DLX，Dead-Letter-Exchange</p>
 <p>利用DLX，当消息在一个队列中变成死信 (dead message)之后，它能被重新publish到另一个Exchange，这个Exchange就是DLX</p>
 <p>消息变成死信有以下几种情况</p>
@@ -437,98 +439,100 @@ channel.queueDeclare(queueName,true,false, false, arguments);</code></pre>
 </ul>
 <p>声明队列时添加参数<code>x-dead-letter-exchange</code>，值为死信队列交换机的名字。</p>
 <h2 id="示例">2.2 示例</h2><p>消费端：</p>
-<pre><code class="java">public class Comsumer {
-    public static void main(String[] args) throws Exception {
-        ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setHost(&quot;127.0.0.1&quot;);
-        connectionFactory.setPort(5672);
-        connectionFactory.setUsername(&quot;guest&quot;);
-        connectionFactory.setPassword(&quot;guest&quot;);
-        connectionFactory.setVirtualHost(&quot;/&quot;);
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Comsumer</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">ConnectionFactory</span> connectionFactory <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ConnectionFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        connectionFactory<span class="token punctuation">.</span><span class="token function">setHost</span><span class="token punctuation">(</span><span class="token string">"127.0.0.1"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        connectionFactory<span class="token punctuation">.</span><span class="token function">setPort</span><span class="token punctuation">(</span><span class="token number">5672</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        connectionFactory<span class="token punctuation">.</span><span class="token function">setUsername</span><span class="token punctuation">(</span><span class="token string">"guest"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        connectionFactory<span class="token punctuation">.</span><span class="token function">setPassword</span><span class="token punctuation">(</span><span class="token string">"guest"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        connectionFactory<span class="token punctuation">.</span><span class="token function">setVirtualHost</span><span class="token punctuation">(</span><span class="token string">"/"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        Connection connection = connectionFactory.newConnection();
-        Channel channel = connection.createChannel();
+        <span class="token class-name">Connection</span> connection <span class="token operator">=</span> connectionFactory<span class="token punctuation">.</span><span class="token function">newConnection</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">Channel</span> channel <span class="token operator">=</span> connection<span class="token punctuation">.</span><span class="token function">createChannel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        String exchange = &quot;test_dlx_exchange&quot;;
-        String routingKey = &quot;dlx.#&quot;;
-        String queueName = &quot;test_consumer_queue&quot;;
-        String dlxName = &quot;dlx.exchange&quot;;
-        String dlxQueueName = &quot;dlx.queue&quot;;
+        <span class="token class-name">String</span> exchange <span class="token operator">=</span> <span class="token string">"test_dlx_exchange"</span><span class="token punctuation">;</span>
+        <span class="token class-name">String</span> routingKey <span class="token operator">=</span> <span class="token string">"dlx.#"</span><span class="token punctuation">;</span>
+        <span class="token class-name">String</span> queueName <span class="token operator">=</span> <span class="token string">"test_consumer_queue"</span><span class="token punctuation">;</span>
+        <span class="token class-name">String</span> dlxName <span class="token operator">=</span> <span class="token string">"dlx.exchange"</span><span class="token punctuation">;</span>
+        <span class="token class-name">String</span> dlxQueueName <span class="token operator">=</span> <span class="token string">"dlx.queue"</span><span class="token punctuation">;</span>
 
-        //声明并绑定死信队列到交换器上
-        channel.exchangeDeclare(dlxName, &quot;topic&quot;,true,false,null);
-        channel.queueDeclare(dlxQueueName,true,false,false,null);
-        channel.queueBind(dlxQueueName, dlxName, &quot;#&quot;);
+        <span class="token comment">//声明并绑定死信队列到交换器上</span>
+        channel<span class="token punctuation">.</span><span class="token function">exchangeDeclare</span><span class="token punctuation">(</span>dlxName<span class="token punctuation">,</span> <span class="token string">"topic"</span><span class="token punctuation">,</span><span class="token boolean">true</span><span class="token punctuation">,</span><span class="token boolean">false</span><span class="token punctuation">,</span><span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        channel<span class="token punctuation">.</span><span class="token function">queueDeclare</span><span class="token punctuation">(</span>dlxQueueName<span class="token punctuation">,</span><span class="token boolean">true</span><span class="token punctuation">,</span><span class="token boolean">false</span><span class="token punctuation">,</span><span class="token boolean">false</span><span class="token punctuation">,</span><span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        channel<span class="token punctuation">.</span><span class="token function">queueBind</span><span class="token punctuation">(</span>dlxQueueName<span class="token punctuation">,</span> dlxName<span class="token punctuation">,</span> <span class="token string">"#"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        Map&lt;String, Object&gt; arguments = new HashMap&lt;&gt;();
-        //设置队列消息ttl
-        arguments.put(&quot;x-message-ttl&quot;, 10000);
-        //设置死信队列交换器
-        arguments.put(&quot;x-dead-letter-exchange&quot;,dlxName);
+        <span class="token class-name">Map</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">,</span> <span class="token class-name">Object</span><span class="token punctuation">></span></span> arguments <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//设置队列消息ttl</span>
+        arguments<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span><span class="token string">"x-message-ttl"</span><span class="token punctuation">,</span> <span class="token number">10000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//设置死信队列交换器</span>
+        arguments<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span><span class="token string">"x-dead-letter-exchange"</span><span class="token punctuation">,</span>dlxName<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        //声明一个正常接收消息的队列和交换机
-        channel.exchangeDeclare(exchange, &quot;topic&quot;,true,false,null);
-        channel.queueDeclare(queueName,true,false, false, arguments);
-        channel.queueBind(queueName, exchange,routingKey);
+        <span class="token comment">//声明一个正常接收消息的队列和交换机</span>
+        channel<span class="token punctuation">.</span><span class="token function">exchangeDeclare</span><span class="token punctuation">(</span>exchange<span class="token punctuation">,</span> <span class="token string">"topic"</span><span class="token punctuation">,</span><span class="token boolean">true</span><span class="token punctuation">,</span><span class="token boolean">false</span><span class="token punctuation">,</span><span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        channel<span class="token punctuation">.</span><span class="token function">queueDeclare</span><span class="token punctuation">(</span>queueName<span class="token punctuation">,</span><span class="token boolean">true</span><span class="token punctuation">,</span><span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">,</span> arguments<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        channel<span class="token punctuation">.</span><span class="token function">queueBind</span><span class="token punctuation">(</span>queueName<span class="token punctuation">,</span> exchange<span class="token punctuation">,</span>routingKey<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 
-        com.rabbitmq.client.Consumer consumer = new DefaultConsumer(channel) {
-            @Override
-            //消费消息
-            public void handleDelivery(String consumerTag,
-                                       Envelope envelope,
-                                       AMQP.BasicProperties properties,
-                                       byte[] body)
-                    throws IOException
-            {
-                String routingKey = envelope.getRoutingKey();
-                String contentType = properties.getContentType();
-                System.out.println(&quot;消费的路由键：&quot;+routingKey);
-                System.out.println(&quot;消费的内容类型：&quot;+contentType);
-                long deliveryTag = envelope.getDeliveryTag();
-                // 确认消息
-                channel.basicAck(deliveryTag, false);
-                System.out.println(&quot;消费的消息体内容：&quot;);
-                String bodyStr = new String(body,&quot;UTF-8&quot;);
-                System.out.println(bodyStr);
+        com<span class="token punctuation">.</span>rabbitmq<span class="token punctuation">.</span>client<span class="token punctuation">.</span><span class="token class-name">Consumer</span> consumer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DefaultConsumer</span><span class="token punctuation">(</span>channel<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token annotation punctuation">@Override</span>
+            <span class="token comment">//消费消息</span>
+            <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">handleDelivery</span><span class="token punctuation">(</span><span class="token class-name">String</span> consumerTag<span class="token punctuation">,</span>
+                                       <span class="token class-name">Envelope</span> envelope<span class="token punctuation">,</span>
+                                       AMQP<span class="token punctuation">.</span><span class="token class-name">BasicProperties</span> properties<span class="token punctuation">,</span>
+                                       <span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> body<span class="token punctuation">)</span>
+                    <span class="token keyword">throws</span> <span class="token class-name">IOException</span>
+            <span class="token punctuation">&#123;</span>
+                <span class="token class-name">String</span> routingKey <span class="token operator">=</span> envelope<span class="token punctuation">.</span><span class="token function">getRoutingKey</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token class-name">String</span> contentType <span class="token operator">=</span> properties<span class="token punctuation">.</span><span class="token function">getContentType</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"消费的路由键："</span><span class="token operator">+</span>routingKey<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"消费的内容类型："</span><span class="token operator">+</span>contentType<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">long</span> deliveryTag <span class="token operator">=</span> envelope<span class="token punctuation">.</span><span class="token function">getDeliveryTag</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token comment">// 确认消息</span>
+                channel<span class="token punctuation">.</span><span class="token function">basicAck</span><span class="token punctuation">(</span>deliveryTag<span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"消费的消息体内容："</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token class-name">String</span> bodyStr <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">String</span><span class="token punctuation">(</span>body<span class="token punctuation">,</span><span class="token string">"UTF-8"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>bodyStr<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-            }
-        };
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
 
-        //直接接收死信队列内的消息，这样正常队列没有消费者，过了10s后消息就会被转发到死信队列中。
-        channel.basicConsume(dlxQueueName,false,consumer);
-    }
-}</code></pre>
+        <span class="token comment">//直接接收死信队列内的消息，这样正常队列没有消费者，过了10s后消息就会被转发到死信队列中。</span>
+        channel<span class="token punctuation">.</span><span class="token function">basicConsume</span><span class="token punctuation">(</span>dlxQueueName<span class="token punctuation">,</span><span class="token boolean">false</span><span class="token punctuation">,</span>consumer<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>生产端：</p>
-<pre><code class="java">public class Producer {
-    public static void main(String[] args) throws Exception {
-        ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setHost(&quot;127.0.0.1&quot;);
-        connectionFactory.setPort(5672);
-        connectionFactory.setUsername(&quot;guest&quot;);
-        connectionFactory.setPassword(&quot;guest&quot;);
-        connectionFactory.setVirtualHost(&quot;/&quot;);
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Producer</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">ConnectionFactory</span> connectionFactory <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ConnectionFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        connectionFactory<span class="token punctuation">.</span><span class="token function">setHost</span><span class="token punctuation">(</span><span class="token string">"127.0.0.1"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        connectionFactory<span class="token punctuation">.</span><span class="token function">setPort</span><span class="token punctuation">(</span><span class="token number">5672</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        connectionFactory<span class="token punctuation">.</span><span class="token function">setUsername</span><span class="token punctuation">(</span><span class="token string">"guest"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        connectionFactory<span class="token punctuation">.</span><span class="token function">setPassword</span><span class="token punctuation">(</span><span class="token string">"guest"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        connectionFactory<span class="token punctuation">.</span><span class="token function">setVirtualHost</span><span class="token punctuation">(</span><span class="token string">"/"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        Connection connection = connectionFactory.newConnection();
-        Channel channel = connection.createChannel();
+        <span class="token class-name">Connection</span> connection <span class="token operator">=</span> connectionFactory<span class="token punctuation">.</span><span class="token function">newConnection</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">Channel</span> channel <span class="token operator">=</span> connection<span class="token punctuation">.</span><span class="token function">createChannel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        String exchange = &quot;test_dlx_exchange&quot;;
-        String routingKey = &quot;dlx.save&quot;;
+        <span class="token class-name">String</span> exchange <span class="token operator">=</span> <span class="token string">"test_dlx_exchange"</span><span class="token punctuation">;</span>
+        <span class="token class-name">String</span> routingKey <span class="token operator">=</span> <span class="token string">"dlx.save"</span><span class="token punctuation">;</span>
 
-        String msg = &quot;Hello RabbitMQ &quot;;
+        <span class="token class-name">String</span> msg <span class="token operator">=</span> <span class="token string">"Hello RabbitMQ "</span><span class="token punctuation">;</span>
+        
+        channel<span class="token punctuation">.</span><span class="token function">basicPublish</span><span class="token punctuation">(</span>exchange<span class="token punctuation">,</span>routingKey<span class="token punctuation">,</span><span class="token keyword">null</span><span class="token punctuation">,</span>msg<span class="token punctuation">.</span><span class="token function">getBytes</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        
+        channel<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        connection<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-        channel.basicPublish(exchange,routingKey,null,msg.getBytes());
-
-        channel.close();
-        connection.close();
-    }
-}</code></pre>
 <p>先运行消费端，暂停消费端应用，再运行生产端，观察到一开始消息在正常队列中</p>
-<p><img src="https://api.codetool.top/img/15840968203071.png" alt></p>
+<p><img src="https://api.codetool.top/img/15840968203071.png"></p>
 <p>过了十秒，消息进入死信队列</p>
-<p><img src="https://api.codetool.top/img/15840969404135.png" alt></p>
+<p><img src="https://api.codetool.top/img/15840969404135.png"></p>
 <p>再次运行消费端应用，看到控制台输出消息</p>
-<pre><code>消费的路由键：dlx.save
+<pre class="language-none"><code class="language-none">消费的路由键：dlx.save
 消费的内容类型：null
 消费的消息体内容：
 Hello RabbitMQ </code></pre>
@@ -908,9 +912,9 @@ Hello RabbitMQ </code></pre>
                     <div class="summary block-with-text">
                         
                             1 Spring-rabbit使用Spring-rabbit，maven依赖：
-&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.amqp&lt;/groupId&gt;
- 
+&lt;dependency>
+    &lt;groupId>org.springframework.amqp&lt;/groupId>
+    &lt;ar
                         
                     </div>
                     <div class="publish-info">
@@ -1146,7 +1150,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

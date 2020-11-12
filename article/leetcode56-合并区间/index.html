@@ -30,6 +30,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -404,7 +405,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    435
+                    452
                 </div>
                 
 
@@ -422,83 +423,84 @@
 <blockquote>
 <p><strong>输入:</strong> [[1,3],[2,6],[8,10],[15,18]]<br><strong>输出:</strong> [[1,6],[8,10],[15,18]]<br><strong>解释:</strong> 区间 [1,3] 和 [2,6] 重叠, 将它们合并为 [1,6].</p>
 </blockquote>
-<p><strong>示例 2:</strong></p>
+<p><strong>示例 2:</strong></p>
 <blockquote>
 <p><strong>输入:</strong> [[1,4],[4,5]]<br><strong>输出:</strong> [[1,5]]<br><strong>解释:</strong> 区间 [1,4] 和 [4,5] 可被视为重叠区间。</p>
 </blockquote>
-<h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>这道题和<a href="../leetcode435-无重叠区间">leetcode435-无重叠区间</a>方法有一点类似，先排序，再处理区间。</p>
-<h2 id="代码">2.2 代码</h2><h3 id="Java">2.2.1 Java</h3><pre><code class="java">class Solution {
-    public int[][] merge(int[][] intervals) {
-        if(intervals.length&lt;2) return intervals;
-        Arrays.sort(intervals, (array1,array2)-&gt;{
-            return array1[0]-array2[0];
-        });
-        int lastIndex = 0;
-        int cur = 1;
-        List&lt;int[]&gt; list = new ArrayList&lt;&gt;();
-        while(cur &lt; intervals.length){
-            //如果两个区间没有重叠部分，都保留
-            if(intervals[lastIndex][1]&lt;intervals[cur][0]){
-                list.add(intervals[lastIndex]);
-                lastIndex = cur;
-                cur++;
-            //如果两个区间重叠，合并两个区间
-            }else{
-                intervals[lastIndex][1] = Math.max(intervals[lastIndex][1],intervals[cur][1]);
-                cur++;
-            }
-        }
-        list.add(intervals[lastIndex]);
-        int[][] ans = new int[list.size()][2];
-        for(int i = 0;i&lt;list.size();i++){
-            ans[i] = list.get(i);
-        }
-        return ans;
-    }
-}</code></pre>
-<h3 id="Go（2020-07-05）">2.2.2 Go（2020/07/05）</h3><pre><code class="go">func merge(intervals [][]int) [][]int {
-    if len(intervals) &lt; 2 {return intervals}
-    sort.Slice(intervals, func(i, j int) bool {
-        return intervals[i][0]&lt;intervals[j][0]
-    })
-    lastIndex := 0
-    cur := 1
-    var list [][]int
-    for cur &lt; len(intervals){
-        if intervals[lastIndex][1]&lt;intervals[cur][0]{
-            list = append(list, intervals[lastIndex])
-            lastIndex = cur
-            cur++
-        }else{
-            intervals[lastIndex][1] = int(math.Max(float64(intervals[lastIndex][1]), float64(intervals[cur][1])))
-            cur++
-        }
-    }
-    list = append(list, intervals[lastIndex])
-    return list
-}</code></pre>
-<h3 id="Python（2020-07-05）">2.2.3 Python（2020/07/05）</h3><pre><code class="python">class Solution(object):
-    def merge(self, intervals):
-        &quot;&quot;&quot;
+<h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>这道题和<a href="../leetcode435-%E6%97%A0%E9%87%8D%E5%8F%A0%E5%8C%BA%E9%97%B4">leetcode435-无重叠区间</a>方法有一点类似，先排序，再处理区间。</p>
+<h2 id="代码">2.2 代码</h2><h3 id="Java">2.2.1 Java</h3><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">public</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">merge</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span> intervals<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>intervals<span class="token punctuation">.</span>length<span class="token operator">&lt;</span><span class="token number">2</span><span class="token punctuation">)</span> <span class="token keyword">return</span> intervals<span class="token punctuation">;</span>
+        <span class="token class-name">Arrays</span><span class="token punctuation">.</span><span class="token function">sort</span><span class="token punctuation">(</span>intervals<span class="token punctuation">,</span> <span class="token punctuation">(</span>array1<span class="token punctuation">,</span>array2<span class="token punctuation">)</span><span class="token operator">-></span><span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> array1<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token operator">-</span>array2<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> lastIndex <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> cur <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token class-name">List</span><span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span> list <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">while</span><span class="token punctuation">(</span>cur <span class="token operator">&lt;</span> intervals<span class="token punctuation">.</span>length<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token comment">//如果两个区间没有重叠部分，都保留</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>intervals<span class="token punctuation">[</span>lastIndex<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token operator">&lt;</span>intervals<span class="token punctuation">[</span>cur<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                list<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>intervals<span class="token punctuation">[</span>lastIndex<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                lastIndex <span class="token operator">=</span> cur<span class="token punctuation">;</span>
+                cur<span class="token operator">++</span><span class="token punctuation">;</span>
+            <span class="token comment">//如果两个区间重叠，合并两个区间</span>
+            <span class="token punctuation">&#125;</span><span class="token keyword">else</span><span class="token punctuation">&#123;</span>
+                intervals<span class="token punctuation">[</span>lastIndex<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token class-name">Math</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span>intervals<span class="token punctuation">[</span>lastIndex<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span>intervals<span class="token punctuation">[</span>cur<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                cur<span class="token operator">++</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+        list<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>intervals<span class="token punctuation">[</span>lastIndex<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span> ans <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">int</span><span class="token punctuation">[</span>list<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>list<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            ans<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> list<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">return</span> ans<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h3 id="Go（2020-07-05）">2.2.2 Go（2020/07/05）</h3><pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token function">merge</span><span class="token punctuation">(</span>intervals <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">int</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token function">len</span><span class="token punctuation">(</span>intervals<span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">2</span> <span class="token punctuation">&#123;</span><span class="token keyword">return</span> intervals<span class="token punctuation">&#125;</span>
+    sort<span class="token punctuation">.</span><span class="token function">Slice</span><span class="token punctuation">(</span>intervals<span class="token punctuation">,</span> <span class="token keyword">func</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span> j <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token builtin">bool</span> <span class="token punctuation">&#123;</span>
+		<span class="token keyword">return</span> intervals<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token operator">&lt;</span>intervals<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
+	<span class="token punctuation">&#125;</span><span class="token punctuation">)</span>
+	lastIndex <span class="token operator">:=</span> <span class="token number">0</span>
+	cur <span class="token operator">:=</span> <span class="token number">1</span>
+	<span class="token keyword">var</span> list <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">int</span>
+	<span class="token keyword">for</span> cur <span class="token operator">&lt;</span> <span class="token function">len</span><span class="token punctuation">(</span>intervals<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+		<span class="token keyword">if</span> intervals<span class="token punctuation">[</span>lastIndex<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token operator">&lt;</span>intervals<span class="token punctuation">[</span>cur<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">&#123;</span>
+			list <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>list<span class="token punctuation">,</span> intervals<span class="token punctuation">[</span>lastIndex<span class="token punctuation">]</span><span class="token punctuation">)</span>
+			lastIndex <span class="token operator">=</span> cur
+			cur<span class="token operator">++</span>
+		<span class="token punctuation">&#125;</span><span class="token keyword">else</span><span class="token punctuation">&#123;</span>
+			intervals<span class="token punctuation">[</span>lastIndex<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token function">int</span><span class="token punctuation">(</span>math<span class="token punctuation">.</span><span class="token function">Max</span><span class="token punctuation">(</span><span class="token function">float64</span><span class="token punctuation">(</span>intervals<span class="token punctuation">[</span>lastIndex<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">float64</span><span class="token punctuation">(</span>intervals<span class="token punctuation">[</span>cur<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+			cur<span class="token operator">++</span>
+		<span class="token punctuation">&#125;</span>
+	<span class="token punctuation">&#125;</span>
+	list <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>list<span class="token punctuation">,</span> intervals<span class="token punctuation">[</span>lastIndex<span class="token punctuation">]</span><span class="token punctuation">)</span>
+	<span class="token keyword">return</span> list
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h3 id="Python（2020-07-05）">2.2.3 Python（2020/07/05）</h3><pre class="language-python" data-language="python"><code class="language-python"><span class="token keyword">class</span> <span class="token class-name">Solution</span><span class="token punctuation">(</span><span class="token builtin">object</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">merge</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> intervals<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token triple-quoted-string string">"""
         :type intervals: List[List[int]]
         :rtype: List[List[int]]
-        &quot;&quot;&quot;
-        if len(intervals) &lt; 2: return intervals
-        intervals = sorted(intervals, key=lambda e: e[0])
-        lastIndex = 0
-        cur = 1
-        list = []
-        while cur &lt; len(intervals):
-            if intervals[lastIndex][1] &lt; intervals[cur][0]:
-                list.append(intervals[lastIndex])
-                lastIndex = cur
-                cur += 1
-            else:
-                intervals[lastIndex][1] = max(intervals[lastIndex][1], intervals[cur][1])
-                cur += 1
-        list.append(intervals[lastIndex])
-        return list</code></pre>
-
+        """</span>
+        <span class="token keyword">if</span> <span class="token builtin">len</span><span class="token punctuation">(</span>intervals<span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">2</span><span class="token punctuation">:</span> <span class="token keyword">return</span> intervals
+        intervals <span class="token operator">=</span> <span class="token builtin">sorted</span><span class="token punctuation">(</span>intervals<span class="token punctuation">,</span> key<span class="token operator">=</span><span class="token keyword">lambda</span> e<span class="token punctuation">:</span> e<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+        lastIndex <span class="token operator">=</span> <span class="token number">0</span>
+        cur <span class="token operator">=</span> <span class="token number">1</span>
+        <span class="token builtin">list</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+        <span class="token keyword">while</span> cur <span class="token operator">&lt;</span> <span class="token builtin">len</span><span class="token punctuation">(</span>intervals<span class="token punctuation">)</span><span class="token punctuation">:</span>
+            <span class="token keyword">if</span> intervals<span class="token punctuation">[</span>lastIndex<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">&lt;</span> intervals<span class="token punctuation">[</span>cur<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">:</span>
+                <span class="token builtin">list</span><span class="token punctuation">.</span>append<span class="token punctuation">(</span>intervals<span class="token punctuation">[</span>lastIndex<span class="token punctuation">]</span><span class="token punctuation">)</span>
+                lastIndex <span class="token operator">=</span> cur
+                cur <span class="token operator">+=</span> <span class="token number">1</span>
+            <span class="token keyword">else</span><span class="token punctuation">:</span>
+                intervals<span class="token punctuation">[</span>lastIndex<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token builtin">max</span><span class="token punctuation">(</span>intervals<span class="token punctuation">[</span>lastIndex<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> intervals<span class="token punctuation">[</span>cur<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+                cur <span class="token operator">+=</span> <span class="token number">1</span>
+        <span class="token builtin">list</span><span class="token punctuation">.</span>append<span class="token punctuation">(</span>intervals<span class="token punctuation">[</span>lastIndex<span class="token punctuation">]</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token builtin">list</span></code></pre>
             </div>
             <hr/>
 
@@ -1106,7 +1108,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

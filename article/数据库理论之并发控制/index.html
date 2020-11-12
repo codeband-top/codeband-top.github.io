@@ -31,6 +31,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -460,18 +461,18 @@
 <h3 id="一级封锁协议">2.1.1 一级封锁协议</h3><p><strong>事务 T 在修改数据 R 之前，必须先对其加 X 锁，直到事务结束（commit/rollback）才释放。</strong></p>
 <p>一级封锁协议可以防止丢失修改。</p>
 <p><strong>如果是读数据，不需要加锁，所以它不能保证可重复读和不读“脏”数据。</strong></p>
-<p><img src="https://api.codetool.top/img/15825236965916.png" alt></p>
-<p><img src="https://api.codetool.top/img/15825294522854.png" alt></p>
+<p><img src="https://api.codetool.top/img/15825236965916.png"></p>
+<p><img src="https://api.codetool.top/img/15825294522854.png"></p>
 <h3 id="二级封锁协议">2.1.2 二级封锁协议</h3><p><strong>在一级封锁协议的基础（写要加 X 锁，事务结束释放）上，增加事务 T 在读入数据 R 之前必须先对其加 S 锁，读完后即可释放 S 锁。（读要加 S 锁，读完即释放）</strong></p>
 <p>二级封锁协议除了可以防止丢失修改，还可以防止读脏数据</p>
 <p>由于读完数据即释放 S 锁， 不能保证不可重复读</p>
-<p><img src="https://api.codetool.top/img/15825297612341.png" alt></p>
+<p><img src="https://api.codetool.top/img/15825297612341.png"></p>
 <h3 id="三级封锁协议">2.1.3 三级封锁协议</h3><p>注意事务的隔离级别，如果事务的隔离级别是重复读（即MySQL默认的隔离级别，那么二级封锁协议和三级封锁协议没有区别，因为在T1执行的时候T2不能操作）</p>
 <p>在一级封锁协议基础上增加事务 T 在读取数据 R 之前必须先对其加 S 锁，<strong>直到事务结束后释放。</strong></p>
 <p>三级封锁协议除了可以防止丢失修改和读脏数据外，还防止了不可重复读。</p>
-<p><img src="https://api.codetool.top/img/15825301047305.png" alt></p>
+<p><img src="https://api.codetool.top/img/15825301047305.png"></p>
 <h1 id="饥饿和死锁">3 饥饿和死锁</h1><h2 id="饥饿">3.1 饥饿</h2><p>事务 T1 封锁了数据 R，事务 T2 又请求封锁 R，于是 T2 等待。T3 也请求封锁 R，当<br>T1 释放了 R 上的封锁之后，系统首先批准了 T3 的请求，T2 仍然等待。 T4 又请求封锁 R，<br>当 T3 释放了 R 上的封锁之后系统又批准了 T4 的请求……T2 有可能永远等待，这就是饥饿<br>的情形</p>
-<p><img src="https://api.codetool.top/img/15825318081699.png" alt></p>
+<p><img src="https://api.codetool.top/img/15825318081699.png"></p>
 <p><strong>避免饥饿的方法：先来先服务</strong></p>
 <p>当多个事务请求封锁同一数据对象时，按请求封锁的先后次序对这些事务排队。<br>该数据对象上的锁一旦释放，首先批准申请队列中第一个事务获得锁。</p>
 <h2 id="死锁">3.2 死锁</h2><p>死锁：事务 T1 封锁了数据 R1，T2 封锁了数据 R2。T1 又请求封锁 R2，因 T2 已封锁了 R2， 于是 T1 等待 T2 释放 R2 上的锁。接着 T2 又申请封锁 R1 ，因 T1 已封锁了 R1 ，T2 也只能等待 T1 释放 R1 上的锁。这样 T1 在等待 T2，而 T2 又在等待 T1 ，T1 和 T2 两个事务永远不能结束，形成死锁。</p>
@@ -514,7 +515,7 @@
 <p>不同事务的冲突操作和同一事务的两个操作是不能交换的。</p>
 <p>我们用R<sub>i</sub>(x)表示事务Ti读x，W<sub>i</sub>(x)表示事务Ti写x。则R<sub>i</sub>(x)和 W<sub>j</sub>(x)不可交换，W<sub>i</sub>(x)和W<sub>j</sub>(x)不可交换</p>
 <p><strong>冲突可串行化调度：</strong><br>一个调度 <code>Sc</code> 在保证冲突操作的次序不变的情况下，通过交换两个事务不冲突操作的次序得到另一个调度 <code>Sc’</code> ，如果 <code>Sc’</code> 是串行的，称调度 <code>Sc</code> 为冲突可串行化的调度。</p>
-<p><img src="https://api.codetool.top/img/15825408805403.png" alt></p>
+<p><img src="https://api.codetool.top/img/15825408805403.png"></p>
 <p>若一个调度是冲突可串行化，则一定是可串行化的。冲突可串行化调度是可串行化调度的充分条件而非必要条件，同样存在不满足冲突可串行化调度的可串行化调度。</p>
 <h1 id="两段锁协议">5 两段锁协议</h1><p>DBMS 的并发控制机制必须提供一定的手段来保证调度是可串行化的。目前 DBMS 普遍采用两段锁协议（TwoPhase Locking，简称 2PL）的方法来显示并发调度的可串行性。</p>
 <p>两段锁协议是指所有<strong>事务必须分两个阶段对数据对象进行加锁和解锁：</strong></p>
@@ -525,7 +526,7 @@
 <p>“两段” 锁的含义：事务分为两个阶段:</p>
 <p><strong>第一阶段是获得封锁，也称为扩展阶段</strong><br>事务可以申请获得任何数据对象上的任何类型的锁，但是不能释放任何锁 </p>
 <p><strong>第二阶段是释放封锁，也称为收缩阶段</strong><br>事务可以释放任何数据对象上的任何类型的锁，但是不能再申请任何锁</p>
-<p><img src="https://api.codetool.top/img/15825411925304.png" alt></p>
+<p><img src="https://api.codetool.top/img/15825411925304.png"></p>
 <p><strong>事务遵守两段锁协议是可串行化调度的充分条件，而不是必要条件。</strong><br>若并发事务都遵守两段锁协议，则对这些事务的任何并发调度策略都是可串行化的<br>若并发事务的一个调度是可串行化的，不一定所有事务都符合两段锁协议  </p>
 <p><strong>两段锁协议与防止死锁的一次封锁法:</strong></p>
 <p>一次封锁法要求每个事务必须一次将所有要使用的数据全部加锁，否则就不能继续执行，因此一次封锁法遵守两段锁协议</p>
@@ -538,7 +539,7 @@
 <li>封锁的粒度越大，数据库所能够封锁的数据单元就越少，并发度就越低，系统开销也越小；</li>
 <li>封锁的粒度越小，并发度较高，但系统开销也就越大。</li>
 </ul>
-<p><img src="https://api.codetool.top/img/15825478053271.png" alt></p>
+<p><img src="https://api.codetool.top/img/15825478053271.png"></p>
 <h2 id="多粒度封锁">6.1 多粒度封锁</h2><p>如果在一个系统中同时支持多种封锁粒度供不同的事务选择，这种封锁方法称为多粒度封锁。（multiple granularity locking）</p>
 <p>选择封锁粒度应该同时考虑封锁开销和并发度两个因素，适当选择封锁粒度以求得最优的效果。</p>
 <ul>
@@ -548,7 +549,7 @@
 </ul>
 <p><strong>多粒度树：</strong></p>
 <p>以树形结构来表示多级封锁粒度。根结点是整个数据库，表示最大的数据粒度，叶结点表示最小的数据粒度</p>
-<p><img src="https://api.codetool.top/img/15825479887217.png" alt></p>
+<p><img src="https://api.codetool.top/img/15825479887217.png"></p>
 <p><strong>多粒度封锁协议：</strong>允许多粒度树中的每个节点被独立地加锁，对一个节点加锁意味着这个节点的所有子节点也被加以同样类型的锁。因此，在多粒度封锁中一个数据对象可能以显式封锁和隐式封锁两种方式封锁。</p>
 <ul>
 <li>显式封锁：直接加到数据对象上的封锁</li>
@@ -1189,7 +1190,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

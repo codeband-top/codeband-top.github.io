@@ -30,6 +30,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -418,8 +419,8 @@
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <p>推荐阅读：</p>
-<p><a href="../分布式一致性理论和一致性协议2PC、3PC">分布式一致性理论和一致性协议2PC、3PC</a></p>
-<p><a href="../拜占庭将军问题和共识算法Paxos、Raft">拜占庭将军问题和共识算法Paxos、Raft</a></p>
+<p><a href="../%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E7%90%86%E8%AE%BA%E5%92%8C%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE2PC%E3%80%813PC">分布式一致性理论和一致性协议2PC、3PC</a></p>
+<p><a href="../%E6%8B%9C%E5%8D%A0%E5%BA%AD%E5%B0%86%E5%86%9B%E9%97%AE%E9%A2%98%E5%92%8C%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95Paxos%E3%80%81Raft">拜占庭将军问题和共识算法Paxos、Raft</a></p>
 <h1 id="Zookeeper概述">1 Zookeeper概述</h1><p>Zookeeper 为分布式应用提供了高效且可靠的分布式协调服务，提供了诸如统一命名服务、发布订阅、负载均衡、配置管理和分布式锁等分布式的基础服务。</p>
 <p>设计目标是将那些复杂且容易出错的分布式一致性服务封装起来，构成一个高效可靠的原语集，并以一系列简单易用的接口提供给用户使用。</p>
 <p>可以保证以下特性：</p>
@@ -462,42 +463,57 @@
 <li>leader 接收到过半ack后，leader向所有的follower发送commit，通知每个follower执行本地事务</li>
 </ul>
 <p>更多Raft对比ZAB相关可以参考：</p>
-<p><a href="https://my.oschina.net/pingpangkuangmo/blog/782702" target="_blank" rel="noopener">Raft对比ZAB协议 - 乒乓狂魔 - OSCHINA</a></p>
+<p><a target="_blank" rel="noopener" href="https://my.oschina.net/pingpangkuangmo/blog/782702">Raft对比ZAB协议 - 乒乓狂魔 - OSCHINA</a></p>
 <h1 id="Zookeeper集群搭建">3 Zookeeper集群搭建</h1><p>zookeeper下载：</p>
-<pre><code class="shell">wget https://mirrors.tuna.tsinghua.edu.cn/apache/zookeeper/zookeeper-3.5.7/apache-zookeeper-3.5.7-bin.tar.gz</code></pre>
+<pre class="language-shell" data-language="shell"><code class="language-shell">wget https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;apache&#x2F;zookeeper&#x2F;zookeeper-3.5.7&#x2F;apache-zookeeper-3.5.7-bin.tar.gz</code></pre>
+
 <p>下载完成后解压：</p>
-<pre><code class="shell">tar -zxvf apache-zookeeper-3.5.7-bin.tar.gz</code></pre>
-<p>进入文件夹并创建一个data目录：</p>
-<pre><code class="shell">cd apache-zookeeper-3.5.7-bin
+<pre class="language-shell" data-language="shell"><code class="language-shell">tar -zxvf apache-zookeeper-3.5.7-bin.tar.gz
+&#96;&#96;&#96; 
+
+进入文件夹并创建一个data目录：
+
+&#96;&#96;&#96;shell
+cd apache-zookeeper-3.5.7-bin
 mkdir data</code></pre>
+
 <p>我们在单机使用三个zookeeper进程来搭建伪集群：</p>
-<pre><code class="shell">cd ..
+<pre class="language-shell" data-language="shell"><code class="language-shell">cd ..
 mv apache-zookeeper-3.5.7-bin zookeeper-01
 cp -r zookeeper-01 zookeeper-02
 cp -r zookeeper-01 zookeeper-03</code></pre>
+
 <p>为每个zookeeper文件夹下的data文件夹新建一个myid文件，内容分别为1、2、3</p>
-<pre><code class="shell">cd zookeeper-01/data
+<pre class="language-shell" data-language="shell"><code class="language-shell">cd zookeeper-01&#x2F;data
 vim myid</code></pre>
+
 <p>将每一个zookeeper文件夹下的<code>conf/zoo_sample.cfg</code>重命名为<code>zoo.cfg</code>，并修改内容：</p>
-<pre><code class="shell">mv zoo_sample.cfg zoo.cfg
+<pre class="language-shell" data-language="shell"><code class="language-shell">mv zoo_sample.cfg zoo.cfg
 vim zoo.cfg</code></pre>
+
 <p>配置文件中默认<code>dataDir=/temp/zookeeper</code>，修改为各自目录下的data文件夹，并将zookeeper02、zookeeper03的端口号修改为2182和2183（默认为2181）</p>
-<pre><code class="conf"># 安装的文件夹
-dataDir=/root/zookeeper-02/data
-clientPort=2182</code></pre>
+<pre class="language-conf" data-language="conf"><code class="language-conf"># 安装的文件夹
+dataDir&#x3D;&#x2F;root&#x2F;zookeeper-02&#x2F;data
+clientPort&#x3D;2182</code></pre>
+
 <p>并在末尾添加：</p>
-<pre><code>server.1=192.168.91.1:2881:3881
-server.2=192.168.91.1:2882:3882
-server.3=192.168.91.1:2883:3883</code></pre><p>它的格式是：<code>server.服务器ID=服务器IP地址：服务器之间通信端口：服务器之间投票选举端口</code></p>
+<pre class="language-none"><code class="language-none">server.1&#x3D;192.168.91.1:2881:3881
+server.2&#x3D;192.168.91.1:2882:3882
+server.3&#x3D;192.168.91.1:2883:3883</code></pre>
+
+<p>它的格式是：<code>server.服务器ID=服务器IP地址：服务器之间通信端口：服务器之间投票选举端口</code></p>
 <p>保存并退出，依次启动1、2、3：</p>
-<pre><code class="shell">bin/zkServer.sh start</code></pre>
+<pre class="language-shell" data-language="shell"><code class="language-shell">bin&#x2F;zkServer.sh start</code></pre>
+
 <p>按照ZAB的投票机制，2号主机将会成为leader：</p>
-<pre><code>root@DESKTOP-TTLFG6F:~/zookeeper-02# bin/zkServer.sh status
-/usr/bin/java
+<pre class="language-none"><code class="language-none">root@DESKTOP-TTLFG6F:~&#x2F;zookeeper-02# bin&#x2F;zkServer.sh status
+&#x2F;usr&#x2F;bin&#x2F;java
 ZooKeeper JMX enabled by default
-Using config: /root/zookeeper-02/bin/../conf/zoo.cfg
+Using config: &#x2F;root&#x2F;zookeeper-02&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
 Client port found: 2182. Client address: localhost.
 Mode: leader</code></pre>
+
+
             </div>
             <hr/>
 
@@ -930,8 +946,8 @@ Z
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题给你一份『词汇表』（字符串数组） words 和一张『字母表』（字符串） chars。
-假如你可以用 chars 中的『字母』（字符）拼写出 words 中的某个『单词』（字符串），那么我们就认为你掌握了这个单词。
+                            1 原题给你一份『词汇表』（字符串数组） words 和一张『字母表』（字符串） chars。
+假如你可以用 chars 中的『字母』（字符）拼写出 words 中的某个『单词』（字符串），那么我们就认为你掌握了这个单词。
 注意：每次拼写时
                         
                     </div>
@@ -1109,7 +1125,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

@@ -30,6 +30,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -415,108 +416,116 @@
             <div id="articleContent">
                 <p>SpringBoot配置与自动配置原理</p>
 <h1 id="自动配置原理">1 自动配置原理</h1><p>SpringBoot启动的时候加载主配置类，开启了自动配置功能 <code>@EnableAutoConfiguration</code>：</p>
-<pre><code class="java">@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-@SpringBootConfiguration 
-@EnableAutoConfiguration //!!!
-@ComponentScan(excludeFilters = { @Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class),
-        @Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class) })
-public @interface SpringBootApplication</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@Target</span><span class="token punctuation">(</span><span class="token class-name">ElementType</span><span class="token punctuation">.</span>TYPE<span class="token punctuation">)</span>
+<span class="token annotation punctuation">@Retention</span><span class="token punctuation">(</span><span class="token class-name">RetentionPolicy</span><span class="token punctuation">.</span>RUNTIME<span class="token punctuation">)</span>
+<span class="token annotation punctuation">@Documented</span>
+<span class="token annotation punctuation">@Inherited</span>
+<span class="token annotation punctuation">@SpringBootConfiguration</span> 
+<span class="token annotation punctuation">@EnableAutoConfiguration</span> <span class="token comment">//!!!</span>
+<span class="token annotation punctuation">@ComponentScan</span><span class="token punctuation">(</span>excludeFilters <span class="token operator">=</span> <span class="token punctuation">&#123;</span> <span class="token annotation punctuation">@Filter</span><span class="token punctuation">(</span>type <span class="token operator">=</span> <span class="token class-name">FilterType</span><span class="token punctuation">.</span>CUSTOM<span class="token punctuation">,</span> classes <span class="token operator">=</span> <span class="token class-name">TypeExcludeFilter</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+		<span class="token annotation punctuation">@Filter</span><span class="token punctuation">(</span>type <span class="token operator">=</span> <span class="token class-name">FilterType</span><span class="token punctuation">.</span>CUSTOM<span class="token punctuation">,</span> classes <span class="token operator">=</span> <span class="token class-name">AutoConfigurationExcludeFilter</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span> <span class="token punctuation">&#125;</span><span class="token punctuation">)</span>
+<span class="token keyword">public</span> <span class="token annotation punctuation">@interface</span> <span class="token class-name">SpringBootApplication</span></code></pre>
+
+
+
 <p><code>@EnableAutoConfiguration</code> 的作用：</p>
 <ul>
-<li>利用<code>EnableAutoConfigurationImportSelector</code>给容器中导入一些组件</li>
+<li> 利用<code>EnableAutoConfigurationImportSelector</code>给容器中导入一些组件</li>
 </ul>
-<pre><code class="java">@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-@AutoConfigurationPackage
-@Import(AutoConfigurationImportSelector.class)  //!!!
-public @interface EnableAutoConfiguration</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@Target</span><span class="token punctuation">(</span><span class="token class-name">ElementType</span><span class="token punctuation">.</span>TYPE<span class="token punctuation">)</span>
+<span class="token annotation punctuation">@Retention</span><span class="token punctuation">(</span><span class="token class-name">RetentionPolicy</span><span class="token punctuation">.</span>RUNTIME<span class="token punctuation">)</span>
+<span class="token annotation punctuation">@Documented</span>
+<span class="token annotation punctuation">@Inherited</span>
+<span class="token annotation punctuation">@AutoConfigurationPackage</span>
+<span class="token annotation punctuation">@Import</span><span class="token punctuation">(</span><span class="token class-name">AutoConfigurationImportSelector</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span>  <span class="token comment">//!!!</span>
+<span class="token keyword">public</span> <span class="token annotation punctuation">@interface</span> <span class="token class-name">EnableAutoConfiguration</span></code></pre>
+
 <ul>
-<li>可以查看<code>AutoConfigurationImportSelector.selectImports()</code>方法的内容；</li>
+<li> 可以查看<code>AutoConfigurationImportSelector.selectImports()</code>方法的内容；</li>
 </ul>
-<pre><code class="java">public String[] selectImports(AnnotationMetadata annotationMetadata) {
-    if (!isEnabled(annotationMetadata)) {
-        return NO_IMPORTS;
-    }
-    AutoConfigurationMetadata autoConfigurationMetadata = AutoConfigurationMetadataLoader
-            .loadMetadata(this.beanClassLoader);
-    AutoConfigurationEntry autoConfigurationEntry = getAutoConfigurationEntry(autoConfigurationMetadata,
-            annotationMetadata);//!!!
-    return StringUtils.toStringArray(autoConfigurationEntry.getConfigurations());
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">selectImports</span><span class="token punctuation">(</span><span class="token class-name">AnnotationMetadata</span> annotationMetadata<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">isEnabled</span><span class="token punctuation">(</span>annotationMetadata<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> NO_IMPORTS<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token class-name">AutoConfigurationMetadata</span> autoConfigurationMetadata <span class="token operator">=</span> <span class="token class-name">AutoConfigurationMetadataLoader</span>
+            <span class="token punctuation">.</span><span class="token function">loadMetadata</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>beanClassLoader<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">AutoConfigurationEntry</span> autoConfigurationEntry <span class="token operator">=</span> <span class="token function">getAutoConfigurationEntry</span><span class="token punctuation">(</span>autoConfigurationMetadata<span class="token punctuation">,</span>
+            annotationMetadata<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//!!!</span>
+    <span class="token keyword">return</span> <span class="token class-name">StringUtils</span><span class="token punctuation">.</span><span class="token function">toStringArray</span><span class="token punctuation">(</span>autoConfigurationEntry<span class="token punctuation">.</span><span class="token function">getConfigurations</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <ul>
 <li><code>getAutoConfigurationEntry()</code>方法：</li>
 </ul>
-<pre><code class="java">protected AutoConfigurationEntry getAutoConfigurationEntry(AutoConfigurationMetadata autoConfigurationMetadata,
-        AnnotationMetadata annotationMetadata) {
-    if (!isEnabled(annotationMetadata)) {
-        return EMPTY_ENTRY;
-    }
-    AnnotationAttributes attributes = getAttributes(annotationMetadata);
-    List&lt;String&gt; configurations = getCandidateConfigurations(annotationMetadata, attributes);//!!!
-    configurations = removeDuplicates(configurations);
-    Set&lt;String&gt; exclusions = getExclusions(annotationMetadata, attributes);
-    checkExcludedClasses(configurations, exclusions);
-    configurations.removeAll(exclusions);
-    configurations = filter(configurations, autoConfigurationMetadata);
-    fireAutoConfigurationImportEvents(configurations, exclusions);
-    return new AutoConfigurationEntry(configurations, exclusions);
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">protected</span> <span class="token class-name">AutoConfigurationEntry</span> <span class="token function">getAutoConfigurationEntry</span><span class="token punctuation">(</span><span class="token class-name">AutoConfigurationMetadata</span> autoConfigurationMetadata<span class="token punctuation">,</span>
+        <span class="token class-name">AnnotationMetadata</span> annotationMetadata<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">isEnabled</span><span class="token punctuation">(</span>annotationMetadata<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> EMPTY_ENTRY<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token class-name">AnnotationAttributes</span> attributes <span class="token operator">=</span> <span class="token function">getAttributes</span><span class="token punctuation">(</span>annotationMetadata<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">List</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> configurations <span class="token operator">=</span> <span class="token function">getCandidateConfigurations</span><span class="token punctuation">(</span>annotationMetadata<span class="token punctuation">,</span> attributes<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//!!!</span>
+    configurations <span class="token operator">=</span> <span class="token function">removeDuplicates</span><span class="token punctuation">(</span>configurations<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">Set</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> exclusions <span class="token operator">=</span> <span class="token function">getExclusions</span><span class="token punctuation">(</span>annotationMetadata<span class="token punctuation">,</span> attributes<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">checkExcludedClasses</span><span class="token punctuation">(</span>configurations<span class="token punctuation">,</span> exclusions<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    configurations<span class="token punctuation">.</span><span class="token function">removeAll</span><span class="token punctuation">(</span>exclusions<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    configurations <span class="token operator">=</span> <span class="token function">filter</span><span class="token punctuation">(</span>configurations<span class="token punctuation">,</span> autoConfigurationMetadata<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">fireAutoConfigurationImportEvents</span><span class="token punctuation">(</span>configurations<span class="token punctuation">,</span> exclusions<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">AutoConfigurationEntry</span><span class="token punctuation">(</span>configurations<span class="token punctuation">,</span> exclusions<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <ul>
 <li><code>getCandidateConfigurations()</code>方法：</li>
 </ul>
-<pre><code class="java">protected List&lt;String&gt; getCandidateConfigurations(AnnotationMetadata metadata, AnnotationAttributes attributes) {
-    List&lt;String&gt; configurations = SpringFactoriesLoader.loadFactoryNames(getSpringFactoriesLoaderFactoryClass(),
-            getBeanClassLoader());
-    Assert.notEmpty(configurations, &quot;No auto configuration classes found in META-INF/spring.factories. If you &quot;
-            + &quot;are using a custom packaging, make sure that file is correct.&quot;);
-    return configurations;
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">protected</span> <span class="token class-name">List</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> <span class="token function">getCandidateConfigurations</span><span class="token punctuation">(</span><span class="token class-name">AnnotationMetadata</span> metadata<span class="token punctuation">,</span> <span class="token class-name">AnnotationAttributes</span> attributes<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">List</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> configurations <span class="token operator">=</span> <span class="token class-name">SpringFactoriesLoader</span><span class="token punctuation">.</span><span class="token function">loadFactoryNames</span><span class="token punctuation">(</span><span class="token function">getSpringFactoriesLoaderFactoryClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            <span class="token function">getBeanClassLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">Assert</span><span class="token punctuation">.</span><span class="token function">notEmpty</span><span class="token punctuation">(</span>configurations<span class="token punctuation">,</span> <span class="token string">"No auto configuration classes found in META-INF/spring.factories. If you "</span>
+            <span class="token operator">+</span> <span class="token string">"are using a custom packaging, make sure that file is correct."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> configurations<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>从META-INF下面找<code>spring.factories</code>文件，将里面配置的所有EnableAutoConfiguration的值加入到了容器中</p>
-<p><img src="https://api.codetool.top/img/15836660223144.png" alt></p>
+<p><img src="https://api.codetool.top/img/15836660223144.png"></p>
 <p>每一个这样的<code>xxxAutoConfiguration</code>类都是容器中的一个组件，都加入到容器中；用他们来做自动配置。</p>
 <p>例如：自动配置类<code>DispatcherServletAutoConfiguration</code></p>
 <p>（节选内部类DispatcherServletConfiguration）</p>
-<pre><code class="java">//配置文件
-@Configuration(proxyBeanMethods = false)
-//配置条件满足类DefaultDispatcherServletCondition的验证
-@Conditional(DefaultDispatcherServletCondition.class)
-//如果存在ServletRegistration类则进行配置
-@ConditionalOnClass(ServletRegistration.class)
-//如果存在对应的属性配置（WebMvcProperties对应的是spring.mvc.*）则启用配置
-@EnableConfigurationProperties({ HttpProperties.class, WebMvcProperties.class })
-protected static class DispatcherServletConfiguration {
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">//配置文件</span>
+<span class="token annotation punctuation">@Configuration</span><span class="token punctuation">(</span>proxyBeanMethods <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">)</span>
+<span class="token comment">//配置条件满足类DefaultDispatcherServletCondition的验证</span>
+<span class="token annotation punctuation">@Conditional</span><span class="token punctuation">(</span><span class="token class-name">DefaultDispatcherServletCondition</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span>
+<span class="token comment">//如果存在ServletRegistration类则进行配置</span>
+<span class="token annotation punctuation">@ConditionalOnClass</span><span class="token punctuation">(</span><span class="token class-name">ServletRegistration</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span>
+<span class="token comment">//如果存在对应的属性配置（WebMvcProperties对应的是spring.mvc.*）则启用配置</span>
+<span class="token annotation punctuation">@EnableConfigurationProperties</span><span class="token punctuation">(</span><span class="token punctuation">&#123;</span> <span class="token class-name">HttpProperties</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">,</span> <span class="token class-name">WebMvcProperties</span><span class="token punctuation">.</span><span class="token keyword">class</span> <span class="token punctuation">&#125;</span><span class="token punctuation">)</span>
+<span class="token keyword">protected</span> <span class="token keyword">static</span> <span class="token keyword">class</span> <span class="token class-name">DispatcherServletConfiguration</span> <span class="token punctuation">&#123;</span>
 
-    @Bean(name = DEFAULT_DISPATCHER_SERVLET_BEAN_NAME)
-    public DispatcherServlet dispatcherServlet(HttpProperties httpProperties, WebMvcProperties webMvcProperties) {
-        DispatcherServlet dispatcherServlet = new DispatcherServlet();
-        //注意
-        dispatcherServlet.setDispatchOptionsRequest(webMvcProperties.isDispatchOptionsRequest());
-        dispatcherServlet.setDispatchTraceRequest(webMvcProperties.isDispatchTraceRequest());
-        dispatcherServlet.setThrowExceptionIfNoHandlerFound(webMvcProperties.isThrowExceptionIfNoHandlerFound());
-        dispatcherServlet.setPublishEvents(webMvcProperties.isPublishRequestHandledEvents());
-        dispatcherServlet.setEnableLoggingRequestDetails(httpProperties.isLogRequestDetails());
-        return dispatcherServlet;
-    }
+    <span class="token annotation punctuation">@Bean</span><span class="token punctuation">(</span>name <span class="token operator">=</span> DEFAULT_DISPATCHER_SERVLET_BEAN_NAME<span class="token punctuation">)</span>
+    <span class="token keyword">public</span> <span class="token class-name">DispatcherServlet</span> <span class="token function">dispatcherServlet</span><span class="token punctuation">(</span><span class="token class-name">HttpProperties</span> httpProperties<span class="token punctuation">,</span> <span class="token class-name">WebMvcProperties</span> webMvcProperties<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">DispatcherServlet</span> dispatcherServlet <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DispatcherServlet</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//注意</span>
+        dispatcherServlet<span class="token punctuation">.</span><span class="token function">setDispatchOptionsRequest</span><span class="token punctuation">(</span>webMvcProperties<span class="token punctuation">.</span><span class="token function">isDispatchOptionsRequest</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        dispatcherServlet<span class="token punctuation">.</span><span class="token function">setDispatchTraceRequest</span><span class="token punctuation">(</span>webMvcProperties<span class="token punctuation">.</span><span class="token function">isDispatchTraceRequest</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        dispatcherServlet<span class="token punctuation">.</span><span class="token function">setThrowExceptionIfNoHandlerFound</span><span class="token punctuation">(</span>webMvcProperties<span class="token punctuation">.</span><span class="token function">isThrowExceptionIfNoHandlerFound</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        dispatcherServlet<span class="token punctuation">.</span><span class="token function">setPublishEvents</span><span class="token punctuation">(</span>webMvcProperties<span class="token punctuation">.</span><span class="token function">isPublishRequestHandledEvents</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        dispatcherServlet<span class="token punctuation">.</span><span class="token function">setEnableLoggingRequestDetails</span><span class="token punctuation">(</span>httpProperties<span class="token punctuation">.</span><span class="token function">isLogRequestDetails</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> dispatcherServlet<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    @Bean
-    //如果存在类定义则配置
-    @ConditionalOnBean(MultipartResolver.class)
-    //判断如果不存在bean名称为DispatcherServlet.MULTIPART_RESOLVER_BEAN_NAME，则配置 bean
-    @ConditionalOnMissingBean(name = DispatcherServlet.MULTIPART_RESOLVER_BEAN_NAME)
-    public MultipartResolver multipartResolver(MultipartResolver resolver) {
-        // Detect if the user has created a MultipartResolver but named it incorrectly
-        return resolver;
-    }
+    <span class="token annotation punctuation">@Bean</span>
+    <span class="token comment">//如果存在类定义则配置</span>
+    <span class="token annotation punctuation">@ConditionalOnBean</span><span class="token punctuation">(</span><span class="token class-name">MultipartResolver</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span>
+    <span class="token comment">//判断如果不存在bean名称为DispatcherServlet.MULTIPART_RESOLVER_BEAN_NAME，则配置 bean</span>
+    <span class="token annotation punctuation">@ConditionalOnMissingBean</span><span class="token punctuation">(</span>name <span class="token operator">=</span> <span class="token class-name">DispatcherServlet</span><span class="token punctuation">.</span>MULTIPART_RESOLVER_BEAN_NAME<span class="token punctuation">)</span>
+    <span class="token keyword">public</span> <span class="token class-name">MultipartResolver</span> <span class="token function">multipartResolver</span><span class="token punctuation">(</span><span class="token class-name">MultipartResolver</span> resolver<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">// Detect if the user has created a MultipartResolver but named it incorrectly</span>
+        <span class="token keyword">return</span> resolver<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-}</code></pre>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>通过上面的代码,可以看到这个自动配置类使用了许多<code>@Conditional**</code>注解来条件性地加载配置（比如说是否存在指定的类），配置的默认值从一个<code>**Properties</code>类中取出，如果用户配置了自定义属性，会覆盖掉<code>**Properties</code>中的默认值。</p>
 <p>到这里,应该明白为什么几乎在没有任何配置下就能用Spring Boot启动 Spring MVC项目。但是有时候,我们需要对这些默认的环境进行修改以适应个性化的要求,这些在 Spring Boot中也是非常简单的,正如<code>@EnableConfigurationProperties</code>注解那样，它允许读入配置文件的内容来自定义自动初始化所需的内容。</p>
-<h1 id="Spring-Boot配置文件">2 Spring Boot配置文件</h1><p>Spring Boot的所有的AutoConfiguration属性项可以在 <a href="https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#common-application-properties" target="_blank" rel="noopener">https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#common-application-properties</a> 看到。这一节我们主要介绍自定义配置。</p>
+<h1 id="Spring-Boot配置文件">2 Spring Boot配置文件</h1><p>Spring Boot的所有的AutoConfiguration属性项可以在 <a target="_blank" rel="noopener" href="https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#common-application-properties">https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#common-application-properties</a> 看到。这一节我们主要介绍自定义配置。</p>
 <h2 id="yaml语法">2.1 yaml语法</h2><p>配置文件推荐使用yaml语法来写，通过缩进来表达数据关系。</p>
 <h2 id="字符串">2.2 字符串</h2><p>字符串​可以不加引号，如果加引号：</p>
 <ul>
@@ -529,66 +538,73 @@ protected static class DispatcherServletConfiguration {
 </ul>
 </li>
 </ul>
-<h2 id="对象、Map">2.3 对象、Map</h2><pre><code class="yaml">friends:
-    lastName: zhangsan
-    age: 20</code></pre>
+<h2 id="对象、Map">2.3 对象、Map</h2><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">friends</span><span class="token punctuation">:</span>
+    <span class="token key atrule">lastName</span><span class="token punctuation">:</span> zhangsan
+    <span class="token key atrule">age</span><span class="token punctuation">:</span> <span class="token number">20</span></code></pre>
+
 <p>行内写法：</p>
-<pre><code class="yaml">friends: {lastName: zhangsan,age: 18}</code></pre>
-<h3 id="数组（List、Set）">2.3.1 数组（List、Set）</h3><pre><code class="yaml">pets:
-    - cat
-    - dog
-    - pig</code></pre>
+<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">friends</span><span class="token punctuation">:</span> <span class="token punctuation">&#123;</span><span class="token key atrule">lastName</span><span class="token punctuation">:</span> zhangsan<span class="token punctuation">,</span><span class="token key atrule">age</span><span class="token punctuation">:</span> <span class="token number">18</span><span class="token punctuation">&#125;</span></code></pre>
+
+<h3 id="数组（List、Set）">2.3.1 数组（List、Set）</h3><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">pets</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> cat
+    <span class="token punctuation">-</span> dog
+    <span class="token punctuation">-</span> pig</code></pre>
+
 <p>行内写法：</p>
-<pre><code class="yaml">pets: [cat,dog,pig]</code></pre>
+<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">pets</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>cat<span class="token punctuation">,</span>dog<span class="token punctuation">,</span>pig<span class="token punctuation">]</span></code></pre>
+
 <h2 id="自定义属性配置">2.4 自定义属性配置</h2><p>可以在类上加上<code>@ConfigurationProperties(prefix=&quot;&quot;)</code>注解，把本类中所有属性和配置文件中相关的配置进行绑定。</p>
 <p>只有这个组件是容器中的组件，才能容器提供的@ConfigurationProperties功能。</p>
 <p>例：</p>
 <p>JavaBean</p>
-<pre><code class="java">@Component
-@ConfigurationProperties(prefix = &quot;person&quot;)
-public class Person {
-    private String lastName;
-    private Integer age;
-    private Boolean boss;
-    private Date birth;
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@Component</span>
+<span class="token annotation punctuation">@ConfigurationProperties</span><span class="token punctuation">(</span>prefix <span class="token operator">=</span> <span class="token string">"person"</span><span class="token punctuation">)</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Person</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">private</span> <span class="token class-name">String</span> lastName<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">Integer</span> age<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">Boolean</span> boss<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">Date</span> birth<span class="token punctuation">;</span>
 
-    private Map&lt;String,Object&gt; maps;
-    private List&lt;Object&gt; lists;
-    private Dog dog;
+    <span class="token keyword">private</span> <span class="token class-name">Map</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">,</span><span class="token class-name">Object</span><span class="token punctuation">></span></span> maps<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">List</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Object</span><span class="token punctuation">></span></span> lists<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">Dog</span> dog<span class="token punctuation">;</span>
 
-    //getter and setter...
-}</code></pre>
+    <span class="token comment">//getter and setter...</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>配置：</p>
-<pre><code class="yaml">person:
-    lastName: hello
-    age: 18
-    boss: false
-    birth: 2000/01/01
-    maps: {k1: v1,k2: 12}
-    lists:
-      - lisi
-      - zhaoliu
-    dog:
-      name: 小狗
-      age: 7</code></pre>
-<p>它默认从全局配置中获取值，可以使用<code>@PropertySource(value={})</code>来指定配置文件。</p>
+<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">person</span><span class="token punctuation">:</span>
+    <span class="token key atrule">lastName</span><span class="token punctuation">:</span> hello
+    <span class="token key atrule">age</span><span class="token punctuation">:</span> <span class="token number">18</span>
+    <span class="token key atrule">boss</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
+    <span class="token key atrule">birth</span><span class="token punctuation">:</span> 2000/01/01
+    <span class="token key atrule">maps</span><span class="token punctuation">:</span> <span class="token punctuation">&#123;</span><span class="token key atrule">k1</span><span class="token punctuation">:</span> v1<span class="token punctuation">,</span><span class="token key atrule">k2</span><span class="token punctuation">:</span> <span class="token number">12</span><span class="token punctuation">&#125;</span>
+    <span class="token key atrule">lists</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> lisi
+      <span class="token punctuation">-</span> zhaoliu
+    <span class="token key atrule">dog</span><span class="token punctuation">:</span>
+      <span class="token key atrule">name</span><span class="token punctuation">:</span> 小狗
+      <span class="token key atrule">age</span><span class="token punctuation">:</span> <span class="token number">7</span></code></pre>
+
+<p>它默认从全局配置中获取值，可以使用<code>@PropertySource(value=&#123;&#125;)</code>来指定配置文件。</p>
 <p>还有一种方法是使用<code>@Value</code>，它必须配合SpEL来指定对应配置的名称，不支持松散语法绑定（即大小写等不匹配）。</p>
 <h2 id="配置文件占位符">2.5 配置文件占位符</h2><h3 id="随机数">2.5.1 随机数</h3><ul>
-<li><code>${random.value}</code></li>
-<li><code>${random.int}</code></li>
-<li><code>${random.long}</code></li>
-<li><code>${random.int(10)}</code></li>
-<li><code>${random.int[1024,65536]}</code></li>
+<li><code>$&#123;random.value&#125;</code></li>
+<li><code>$&#123;random.int&#125;</code></li>
+<li><code>$&#123;random.long&#125;</code></li>
+<li><code>$&#123;random.int(10)&#125; </code></li>
+<li><code>$&#123;random.int[1024,65536]&#125;</code></li>
 </ul>
-<h3 id="占位符获取之前配置的值，如果没有可以是用-指定默认值">2.5.2 占位符获取之前配置的值，如果没有可以是用:指定默认值</h3><pre><code class="properties">person.last-name=张三${random.uuid}
-person.age=${random.int}
-person.birth=2017/12/15
-person.boss=false
-person.maps.k1=v1
-person.maps.k2=14
-person.lists=a,b,c
-person.dog.name=${person.hello:hello}_dog
-person.dog.age=15</code></pre>
+<h3 id="占位符获取之前配置的值，如果没有可以是用-指定默认值">2.5.2 占位符获取之前配置的值，如果没有可以是用:指定默认值</h3><pre class="language-properties" data-language="properties"><code class="language-properties"><span class="token attr-name">person.last-name</span><span class="token punctuation">=</span><span class="token attr-value">张三$&#123;random.uuid&#125;</span>
+<span class="token attr-name">person.age</span><span class="token punctuation">=</span><span class="token attr-value">$&#123;random.int&#125;</span>
+<span class="token attr-name">person.birth</span><span class="token punctuation">=</span><span class="token attr-value">2017/12/15</span>
+<span class="token attr-name">person.boss</span><span class="token punctuation">=</span><span class="token attr-value">false</span>
+<span class="token attr-name">person.maps.k1</span><span class="token punctuation">=</span><span class="token attr-value">v1</span>
+<span class="token attr-name">person.maps.k2</span><span class="token punctuation">=</span><span class="token attr-value">14</span>
+<span class="token attr-name">person.lists</span><span class="token punctuation">=</span><span class="token attr-value">a,b,c</span>
+<span class="token attr-name">person.dog.name</span><span class="token punctuation">=</span><span class="token attr-value">$&#123;person.hello:hello&#125;_dog</span>
+<span class="token attr-name">person.dog.age</span><span class="token punctuation">=</span><span class="token attr-value">15</span></code></pre>
+
 <h2 id="配置文件加载位置">2.6 配置文件加载位置</h2><p>springboot 启动会扫描以下位置的application.properties或者application.yml文件作为Spring boot的默认配置文件</p>
 <ul>
 <li><code>file:./config/</code></li>
@@ -600,45 +616,48 @@ person.dog.age=15</code></pre>
 <p>SpringBoot会从这四个位置全部加载主配置文件，<strong>互补配置</strong></p>
 <p>我们还可以通过<code>spring.config.location</code>来改变默认的配置文件位置。</p>
 <p><strong>项目打包好以后，我们可以使用命令行参数的形式，启动项目的时候来指定配置文件的新位置；指定配置文件和默认加载的这些配置文件共同起作用形成互补配置；</strong></p>
-<pre><code class="shell">java -jar spring-boot-02-config-02-0.0.1-SNAPSHOT.jar --spring.config.location=G:/application.properties</code></pre>
+<pre class="language-shell" data-language="shell"><code class="language-shell">java -jar spring-boot-02-config-02-0.0.1-SNAPSHOT.jar --spring.config.location&#x3D;G:&#x2F;application.properties</code></pre>
+
 <p>SpringBoot支持的所有的外部配置文件加载方法见：</p>
-<p><a href="https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-external-config" target="_blank" rel="noopener">https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-external-config</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-external-config">https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-external-config</a></p>
 <h2 id="ImportResource注解">2.7 @ImportResource注解</h2><p><code>@ImportResource</code>可以帮助导入传统xml类型的配置，例如springcontext配置，直接将它写在启动类上就行了。</p>
-<pre><code class="java">//导入Spring的配置文件让其生效
-@ImportResource(locations = {&quot;classpath:beans.xml&quot;})
-@SpringBootApplication
-public class BootHelloworldApplication {
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">//导入Spring的配置文件让其生效</span>
+<span class="token annotation punctuation">@ImportResource</span><span class="token punctuation">(</span>locations <span class="token operator">=</span> <span class="token punctuation">&#123;</span><span class="token string">"classpath:beans.xml"</span><span class="token punctuation">&#125;</span><span class="token punctuation">)</span>
+<span class="token annotation punctuation">@SpringBootApplication</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">BootHelloworldApplication</span> <span class="token punctuation">&#123;</span>
 
-    public static void main(String[] args) {
-        SpringApplication.run(BootHelloworldApplication.class, args);
-    }
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">SpringApplication</span><span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token class-name">BootHelloworldApplication</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">,</span> args<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-}</code></pre>
-<h2 id="多环境化配置Profile">2.8 多环境化配置Profile</h2><h3 id="properties">2.8.1 properties</h3><p>在真实的应用中，常常会有多个环境（如：开发，测试，生产等），不同的环境数据库连接都不一样，这个时候就需要用到spring.profile.active的强大功能了，它的格式为 <code>application-{profile}.properties</code>，这里的 application 为前缀不能改，<code>{profile}</code>是我们自己定义的。</p>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h2 id="多环境化配置Profile">2.8 多环境化配置Profile</h2><h3 id="properties">2.8.1 properties</h3><p>在真实的应用中，常常会有多个环境（如：开发，测试，生产等），不同的环境数据库连接都不一样，这个时候就需要用到spring.profile.active的强大功能了，它的格式为 <code>application-&#123;profile&#125;.properties</code>，这里的 application 为前缀不能改，<code>&#123;profile&#125;</code>是我们自己定义的。</p>
 <p>application.properties就是默认的配置文件。</p>
 <p>在 <code>application.properties</code> 配置文件中写入 <code>spring.profiles.active=dev</code>，就可以指定使用profile为dev的配置文件。</p>
 <p>也可以使用虚拟机参数<code>-Dspring.profiles.active=dev</code>指定</p>
-<h3 id="yaml文档块">2.8.2 yaml文档块</h3><pre><code class="yaml"># document 1
-server:
-  port: 8081
-spring:
-  profiles:
-    active: prod
+<h3 id="yaml文档块">2.8.2 yaml文档块</h3><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token comment"># document 1</span>
+<span class="token key atrule">server</span><span class="token punctuation">:</span>
+  <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">8081</span>
+<span class="token key atrule">spring</span><span class="token punctuation">:</span>
+  <span class="token key atrule">profiles</span><span class="token punctuation">:</span>
+    <span class="token key atrule">active</span><span class="token punctuation">:</span> prod
 
----
-# document 2
-server:
-  port: 8083
-spring:
-  profiles: dev
+<span class="token punctuation">---</span>
+<span class="token comment"># document 2</span>
+<span class="token key atrule">server</span><span class="token punctuation">:</span>
+  <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">8083</span>
+<span class="token key atrule">spring</span><span class="token punctuation">:</span>
+  <span class="token key atrule">profiles</span><span class="token punctuation">:</span> dev
 
----
-# document 3
-server:
-  port: 8084
-spring:
-  profiles: prod  #指定属于哪个环境
+<span class="token punctuation">---</span>
+<span class="token comment"># document 3</span>
+<span class="token key atrule">server</span><span class="token punctuation">:</span>
+  <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">8084</span>
+<span class="token key atrule">spring</span><span class="token punctuation">:</span>
+  <span class="token key atrule">profiles</span><span class="token punctuation">:</span> prod  <span class="token comment">#指定属于哪个环境</span>
 </code></pre>
+
 <p>文档块之间使用<code>---</code>分隔，第一个文档块为默认使用的配置。</p>
 
             </div>
@@ -1012,7 +1031,7 @@ spring:
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题给定一个数组，它的第 i 个元素是一支给定股票第 i 天的价格。
+                            1 原题给定一个数组，它的第 i 个元素是一支给定股票第 i 天的价格。
 如果你最多只允许完成一笔交易（即买入和卖出一支股票），设计一个算法来计算你所能获取的最大利润。
 注意你不能在买入股票前卖出股票。
 示例 1:
@@ -1070,7 +1089,7 @@ spring:
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题给定不同面额的硬币 coins 和一个总金额 amount。编写一个函数来计算可以凑成总金额所需的最少的硬币个数。如果没有任何一种硬币组合能组成总金额，返回 -1。
+                            1 原题给定不同面额的硬币 coins 和一个总金额 amount。编写一个函数来计算可以凑成总金额所需的最少的硬币个数。如果没有任何一种硬币组合能组成总金额，返回 -1。
 示例 1:
 
 输入: coins = [1, 2, 5], amo
@@ -1250,7 +1269,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

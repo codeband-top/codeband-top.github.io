@@ -28,6 +28,7 @@ public class TestHttpSer">
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -398,7 +399,7 @@ public class TestHttpSer">
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    859
+                    854
                 </div>
                 
 
@@ -412,92 +413,96 @@ public class TestHttpSer">
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <h1 id="简单案例">1 简单案例</h1><p>先照常写一个Handler，注意收到的是HttpObject（实际上是一个DefaultHttpRequest）类型。它附带了客户端的请求信息（uri、请求method、请求头）</p>
-<pre><code class="java">public class TestHttpServerHandler extends SimpleChannelInboundHandler&lt;HttpObject&gt; {
-    //读取事件
-    protected void channelRead0(ChannelHandlerContext ctx, HttpObject msg) throws Exception {
-        if(msg instanceof HttpRequest){
-            System.out.println(&quot;msg 类型=&quot;+msg.getClass());
-            System.out.println(&quot;客户端地址&quot; + ctx.channel().remoteAddress());
-            //构建HttpResponse
-            ByteBuf content = Unpooled.copiedBuffer(&quot;hello,我是服务器&quot;, CharsetUtil.UTF_8);
-            DefaultFullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, content);
-            //设置响应头
-            response.headers().set(HttpHeaderNames.CONTENT_TYPE,&quot;text/plain; charset=utf-8&quot;);
-            response.headers().set(HttpHeaderNames.CONTENT_LENGTH,content.readableBytes());
-            //返回response
-            ctx.writeAndFlush(response);
-        }
-    }
-}</code></pre>
-<p>在ChannelInitializer这里，为channel的pipeline添加上面写的handler。注意在前面添加一个HttpServerCodec，是Netty提供的基于HTTP的编解码器。</p>
-<pre><code class="java">public class TestServerInitializer extends ChannelInitializer&lt;SocketChannel&gt; {
-    protected void initChannel(SocketChannel ch) throws Exception {
-        //向管道加入处理器
-        //得到管道
-        ChannelPipeline pipeline = ch.pipeline();
-        //加入netty提供的httpServerCodec （coder+decoder）
-        //基于HTTP的编解码器
-        pipeline.addLast(&quot;MyHttpServerCodec&quot;,new HttpServerCodec());
-        pipeline.addLast(&quot;MyTestHttpServerHandler&quot;,new TestHttpServerHandler());
-    }
-}</code></pre>
-<p>启动服务端的代码：</p>
-<pre><code class="java">public class TestHttpServer {
-    public void bind(int port) throws Exception{
-        //配置服务器的NIO线程组
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        try{
-            ServerBootstrap serverBootstrap = new ServerBootstrap();
-            serverBootstrap.group(bossGroup,workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .option(ChannelOption.SO_BACKLOG, 1024)
-                    .childHandler(new TestServerInitializer());
-            System.out.println(&quot;---------服务器正在启动---------&quot;);
-            ChannelFuture future = serverBootstrap.bind(port).sync();
-            //等待服务端监听端口关闭
-            future.channel().closeFuture().sync();
-        }finally {
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
-        }
-    }
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">TestHttpServerHandler</span> <span class="token keyword">extends</span> <span class="token class-name">SimpleChannelInboundHandler</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">HttpObject</span><span class="token punctuation">></span></span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">//读取事件</span>
+    <span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">channelRead0</span><span class="token punctuation">(</span><span class="token class-name">ChannelHandlerContext</span> ctx<span class="token punctuation">,</span> <span class="token class-name">HttpObject</span> msg<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>msg <span class="token keyword">instanceof</span> <span class="token class-name">HttpRequest</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"msg 类型="</span><span class="token operator">+</span>msg<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"客户端地址"</span> <span class="token operator">+</span> ctx<span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">remoteAddress</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">//构建HttpResponse</span>
+            <span class="token class-name">ByteBuf</span> content <span class="token operator">=</span> <span class="token class-name">Unpooled</span><span class="token punctuation">.</span><span class="token function">copiedBuffer</span><span class="token punctuation">(</span><span class="token string">"hello,我是服务器"</span><span class="token punctuation">,</span> <span class="token class-name">CharsetUtil</span><span class="token punctuation">.</span>UTF_8<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">DefaultFullHttpResponse</span> response <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DefaultFullHttpResponse</span><span class="token punctuation">(</span><span class="token class-name">HttpVersion</span><span class="token punctuation">.</span>HTTP_1_1<span class="token punctuation">,</span> <span class="token class-name">HttpResponseStatus</span><span class="token punctuation">.</span>OK<span class="token punctuation">,</span> content<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">//设置响应头</span>
+            response<span class="token punctuation">.</span><span class="token function">headers</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token class-name">HttpHeaderNames</span><span class="token punctuation">.</span>CONTENT_TYPE<span class="token punctuation">,</span><span class="token string">"text/plain; charset=utf-8"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            response<span class="token punctuation">.</span><span class="token function">headers</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token class-name">HttpHeaderNames</span><span class="token punctuation">.</span>CONTENT_LENGTH<span class="token punctuation">,</span>content<span class="token punctuation">.</span><span class="token function">readableBytes</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">//返回response</span>
+            ctx<span class="token punctuation">.</span><span class="token function">writeAndFlush</span><span class="token punctuation">(</span>response<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-    public static void main(String[] args) throws Exception {
-        int port = 8080;
-        new TestHttpServer().bind(8080);
-    }
-}</code></pre>
+<p>在ChannelInitializer这里，为channel的pipeline添加上面写的handler。注意在前面添加一个HttpServerCodec，是Netty提供的基于HTTP的编解码器。</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">TestServerInitializer</span> <span class="token keyword">extends</span> <span class="token class-name">ChannelInitializer</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">SocketChannel</span><span class="token punctuation">></span></span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">initChannel</span><span class="token punctuation">(</span><span class="token class-name">SocketChannel</span> ch<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">//向管道加入处理器</span>
+        <span class="token comment">//得到管道</span>
+        <span class="token class-name">ChannelPipeline</span> pipeline <span class="token operator">=</span> ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//加入netty提供的httpServerCodec （coder+decoder）</span>
+        <span class="token comment">//基于HTTP的编解码器</span>
+        pipeline<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token string">"MyHttpServerCodec"</span><span class="token punctuation">,</span><span class="token keyword">new</span> <span class="token class-name">HttpServerCodec</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        pipeline<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token string">"MyTestHttpServerHandler"</span><span class="token punctuation">,</span><span class="token keyword">new</span> <span class="token class-name">TestHttpServerHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>启动服务端的代码：</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">TestHttpServer</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">int</span> port<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span><span class="token punctuation">&#123;</span>
+        <span class="token comment">//配置服务器的NIO线程组</span>
+        <span class="token class-name">EventLoopGroup</span> bossGroup <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">NioEventLoopGroup</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">EventLoopGroup</span> workerGroup <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">NioEventLoopGroup</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">try</span><span class="token punctuation">&#123;</span>
+            <span class="token class-name">ServerBootstrap</span> serverBootstrap <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ServerBootstrap</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            serverBootstrap<span class="token punctuation">.</span><span class="token function">group</span><span class="token punctuation">(</span>bossGroup<span class="token punctuation">,</span>workerGroup<span class="token punctuation">)</span>
+                    <span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token class-name">NioServerSocketChannel</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span>
+                    <span class="token punctuation">.</span><span class="token function">option</span><span class="token punctuation">(</span><span class="token class-name">ChannelOption</span><span class="token punctuation">.</span>SO_BACKLOG<span class="token punctuation">,</span> <span class="token number">1024</span><span class="token punctuation">)</span>
+                    <span class="token punctuation">.</span><span class="token function">childHandler</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">TestServerInitializer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"---------服务器正在启动---------"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">ChannelFuture</span> future <span class="token operator">=</span> serverBootstrap<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span>port<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">sync</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">//等待服务端监听端口关闭</span>
+            future<span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">closeFuture</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">sync</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span><span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+            bossGroup<span class="token punctuation">.</span><span class="token function">shutdownGracefully</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            workerGroup<span class="token punctuation">.</span><span class="token function">shutdownGracefully</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">int</span> port <span class="token operator">=</span> <span class="token number">8080</span><span class="token punctuation">;</span>
+        <span class="token keyword">new</span> <span class="token class-name">TestHttpServer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token number">8080</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>这样一个简单案例就实现了，只要客户端向该服务端的主机、端口发起HTTP请求，就会收到对应的响应，而由于没有判断请求方法、uri，无论什么请求都会收到一样的响应。</p>
 <h1 id="对请求资源（uri）进行过滤">2 对请求资源（uri）进行过滤</h1><p>浏览器在对某网站发起get请求的时候，通常还会发起对该网站<code>/favicon.ico</code>的请求，如果我们不想对这个请求做出404回应，可以这样写：</p>
-<pre><code class="java">public class TestHttpServerHandler extends SimpleChannelInboundHandler&lt;HttpObject&gt; {
-    //读取事件
-    protected void channelRead0(ChannelHandlerContext ctx, HttpObject msg) throws Exception {
-        if(msg instanceof HttpRequest){
-            System.out.println(&quot;msg 类型=&quot;+msg.getClass());
-            System.out.println(&quot;客户端地址&quot; + ctx.channel().remoteAddress());
-            //获取到请求URI
-            HttpRequest httpRequest = (HttpRequest) msg;
-            URI uri = new URI(httpRequest.uri());
-            if(&quot;/favicon.ico&quot;.equals(uri.getPath())){
-                System.out.println(&quot;请求了图标，返回404&quot;);
-                ByteBuf error = Unpooled.copiedBuffer(&quot;该资源不存在&quot;, CharsetUtil.UTF_8);
-                DefaultFullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND, error);
-                response.headers().set(HttpHeaderNames.CONTENT_TYPE,&quot;text/plain; charset=utf-8&quot;);
-                response.headers().set(HttpHeaderNames.CONTENT_LENGTH,error.readableBytes());
-                ctx.writeAndFlush(response);
-                return;
-            }
-            //构建HttpResponse
-            ByteBuf content = Unpooled.copiedBuffer(&quot;hello,我是服务器&quot;, CharsetUtil.UTF_8);
-            DefaultFullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, content);
-            response.headers().set(HttpHeaderNames.CONTENT_TYPE,&quot;text/plain; charset=utf-8&quot;);
-            response.headers().set(HttpHeaderNames.CONTENT_LENGTH,content.readableBytes());
-            //返回response
-            ctx.writeAndFlush(response);
-        }
-    }
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">TestHttpServerHandler</span> <span class="token keyword">extends</span> <span class="token class-name">SimpleChannelInboundHandler</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">HttpObject</span><span class="token punctuation">></span></span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">//读取事件</span>
+    <span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">channelRead0</span><span class="token punctuation">(</span><span class="token class-name">ChannelHandlerContext</span> ctx<span class="token punctuation">,</span> <span class="token class-name">HttpObject</span> msg<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>msg <span class="token keyword">instanceof</span> <span class="token class-name">HttpRequest</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"msg 类型="</span><span class="token operator">+</span>msg<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"客户端地址"</span> <span class="token operator">+</span> ctx<span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">remoteAddress</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">//获取到请求URI</span>
+            <span class="token class-name">HttpRequest</span> httpRequest <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">HttpRequest</span><span class="token punctuation">)</span> msg<span class="token punctuation">;</span>
+            <span class="token class-name">URI</span> uri <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token function">URI</span><span class="token punctuation">(</span>httpRequest<span class="token punctuation">.</span><span class="token function">uri</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token string">"/favicon.ico"</span><span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span>uri<span class="token punctuation">.</span><span class="token function">getPath</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"请求了图标，返回404"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token class-name">ByteBuf</span> error <span class="token operator">=</span> <span class="token class-name">Unpooled</span><span class="token punctuation">.</span><span class="token function">copiedBuffer</span><span class="token punctuation">(</span><span class="token string">"该资源不存在"</span><span class="token punctuation">,</span> <span class="token class-name">CharsetUtil</span><span class="token punctuation">.</span>UTF_8<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token class-name">DefaultFullHttpResponse</span> response <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DefaultFullHttpResponse</span><span class="token punctuation">(</span><span class="token class-name">HttpVersion</span><span class="token punctuation">.</span>HTTP_1_1<span class="token punctuation">,</span> <span class="token class-name">HttpResponseStatus</span><span class="token punctuation">.</span>NOT_FOUND<span class="token punctuation">,</span> error<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                response<span class="token punctuation">.</span><span class="token function">headers</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token class-name">HttpHeaderNames</span><span class="token punctuation">.</span>CONTENT_TYPE<span class="token punctuation">,</span><span class="token string">"text/plain; charset=utf-8"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                response<span class="token punctuation">.</span><span class="token function">headers</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token class-name">HttpHeaderNames</span><span class="token punctuation">.</span>CONTENT_LENGTH<span class="token punctuation">,</span>error<span class="token punctuation">.</span><span class="token function">readableBytes</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                ctx<span class="token punctuation">.</span><span class="token function">writeAndFlush</span><span class="token punctuation">(</span>response<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">return</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+            <span class="token comment">//构建HttpResponse</span>
+            <span class="token class-name">ByteBuf</span> content <span class="token operator">=</span> <span class="token class-name">Unpooled</span><span class="token punctuation">.</span><span class="token function">copiedBuffer</span><span class="token punctuation">(</span><span class="token string">"hello,我是服务器"</span><span class="token punctuation">,</span> <span class="token class-name">CharsetUtil</span><span class="token punctuation">.</span>UTF_8<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">DefaultFullHttpResponse</span> response <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DefaultFullHttpResponse</span><span class="token punctuation">(</span><span class="token class-name">HttpVersion</span><span class="token punctuation">.</span>HTTP_1_1<span class="token punctuation">,</span> <span class="token class-name">HttpResponseStatus</span><span class="token punctuation">.</span>OK<span class="token punctuation">,</span> content<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            response<span class="token punctuation">.</span><span class="token function">headers</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token class-name">HttpHeaderNames</span><span class="token punctuation">.</span>CONTENT_TYPE<span class="token punctuation">,</span><span class="token string">"text/plain; charset=utf-8"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            response<span class="token punctuation">.</span><span class="token function">headers</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token class-name">HttpHeaderNames</span><span class="token punctuation">.</span>CONTENT_LENGTH<span class="token punctuation">,</span>content<span class="token punctuation">.</span><span class="token function">readableBytes</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">//返回response</span>
+            ctx<span class="token punctuation">.</span><span class="token function">writeAndFlush</span><span class="token punctuation">(</span>response<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>这里通过HttpRequest来获取了客户端请求的uri，除了uri外，通过HttpRequest还可以获取：</p>
 <ul>
 <li><code>httpRequest.method()</code>：获取请求方法，这些方法在HttpMethod中被枚举</li>
@@ -1105,7 +1110,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

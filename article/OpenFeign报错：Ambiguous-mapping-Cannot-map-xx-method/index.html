@@ -28,6 +28,7 @@ Ambiguous mapping. Cannot map &amp;#39;com.guli.vod.feign.VodFeign&amp;#39; ">
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -368,12 +369,12 @@ Ambiguous mapping. Cannot map &amp;#39;com.guli.vod.feign.VodFeign&amp;#39; ">
                                 <span class="chip bg-color">日常</span>
                             </a>
                         
-                            <a href="/tags/Hystrix/">
-                                <span class="chip bg-color">Hystrix</span>
-                            </a>
-                        
                             <a href="/tags/OpenFeign/">
                                 <span class="chip bg-color">OpenFeign</span>
+                            </a>
+                        
+                            <a href="/tags/Hystrix/">
+                                <span class="chip bg-color">Hystrix</span>
                             </a>
                         
                     </div>
@@ -406,7 +407,7 @@ Ambiguous mapping. Cannot map &amp;#39;com.guli.vod.feign.VodFeign&amp;#39; ">
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    348
+                    340
                 </div>
                 
 
@@ -420,45 +421,48 @@ Ambiguous mapping. Cannot map &amp;#39;com.guli.vod.feign.VodFeign&amp;#39; ">
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <p>今天做项目的时候，feign调用的时候写了一个Hystrix的服务降级处理类，但是运行时报了以下错误：</p>
-<pre><code>Ambiguous mapping. Cannot map &#39;com.guli.vod.feign.VodFeign&#39; method 
+<pre class="language-none"><code class="language-none">Ambiguous mapping. Cannot map &#39;com.guli.vod.feign.VodFeign&#39; method 
 com.guli.vod.feign.VodFeign#removeVideo(String)
-to {DELETE /vod/video/{id}}: There is already &#39;vodFallback&#39; bean method
-com.guli.vod.fallback.VodFallback#removeVideo(String) mapped.</code></pre><p>原来写的FeignClient：(这里吐槽一下，Restful api根本没办法设计批量删除的路径嘛，DELETE方法又不推荐使用请求体，而且将资源id放在请求体里也不符合Restful url的语义)</p>
-<pre><code class="java">@Component
-@FeignClient(value = &quot;service-vod&quot;,fallback = VodFallback.class)
-@RequestMapping(&quot;/vod&quot;)
-public interface VodFeign {
-    @DeleteMapping(value = &quot;/video/{id}&quot;)
-    public Result removeVideo(@PathVariable(&quot;id&quot;) String videoId);
+to &#123;DELETE &#x2F;vod&#x2F;video&#x2F;&#123;id&#125;&#125;: There is already &#39;vodFallback&#39; bean method
+com.guli.vod.fallback.VodFallback#removeVideo(String) mapped.</code></pre>
 
-    @DeleteMapping(value = &quot;/video/delete-batch&quot;)
-    public Result removeVideoList(@RequestParam(&quot;videoIdList&quot;) List&lt;String&gt; videoIdList);
-}</code></pre>
+<p>原来写的FeignClient：(这里吐槽一下，Restful api根本没办法设计批量删除的路径嘛，DELETE方法又不推荐使用请求体，而且将资源id放在请求体里也不符合Restful url的语义)</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@Component</span>
+<span class="token annotation punctuation">@FeignClient</span><span class="token punctuation">(</span>value <span class="token operator">=</span> <span class="token string">"service-vod"</span><span class="token punctuation">,</span>fallback <span class="token operator">=</span> <span class="token class-name">VodFallback</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span>
+<span class="token annotation punctuation">@RequestMapping</span><span class="token punctuation">(</span><span class="token string">"/vod"</span><span class="token punctuation">)</span>
+<span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">VodFeign</span> <span class="token punctuation">&#123;</span>
+    <span class="token annotation punctuation">@DeleteMapping</span><span class="token punctuation">(</span>value <span class="token operator">=</span> <span class="token string">"/video/&#123;id&#125;"</span><span class="token punctuation">)</span>
+    <span class="token keyword">public</span> <span class="token class-name">Result</span> <span class="token function">removeVideo</span><span class="token punctuation">(</span><span class="token annotation punctuation">@PathVariable</span><span class="token punctuation">(</span><span class="token string">"id"</span><span class="token punctuation">)</span> <span class="token class-name">String</span> videoId<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token annotation punctuation">@DeleteMapping</span><span class="token punctuation">(</span>value <span class="token operator">=</span> <span class="token string">"/video/delete-batch"</span><span class="token punctuation">)</span>
+    <span class="token keyword">public</span> <span class="token class-name">Result</span> <span class="token function">removeVideoList</span><span class="token punctuation">(</span><span class="token annotation punctuation">@RequestParam</span><span class="token punctuation">(</span><span class="token string">"videoIdList"</span><span class="token punctuation">)</span> <span class="token class-name">List</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> videoIdList<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>服务降级处理类：</p>
-<pre><code class="java">@Component
-public class VodFallback implements VodFeign {
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@Component</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">VodFallback</span> <span class="token keyword">implements</span> <span class="token class-name">VodFeign</span> <span class="token punctuation">&#123;</span>
 
-    @Override
-    public Result removeVideo(String videoId) {
-        return Result.error().msg(&quot;time out&quot;);
-    }
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> <span class="token class-name">Result</span> <span class="token function">removeVideo</span><span class="token punctuation">(</span><span class="token class-name">String</span> videoId<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token class-name">Result</span><span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">msg</span><span class="token punctuation">(</span><span class="token string">"time out"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    @Override
-    public Result removeVideoList(List&lt;String&gt; videoIdList) {
-        return Result.error().msg(&quot;time out&quot;);
-    }
-}</code></pre>
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> <span class="token class-name">Result</span> <span class="token function">removeVideoList</span><span class="token punctuation">(</span><span class="token class-name">List</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> videoIdList<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token class-name">Result</span><span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">msg</span><span class="token punctuation">(</span><span class="token string">"time out"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>原因在于<code>VodFallback</code>实现了<code>VodFeign</code>接口后，把<code>@RequestMapping</code>的路径映射也继承了过去，而两个类都会注册bean实例对象，就会出现映射冲突的问题，最后我是将FeignClient的<code>@RequestMapping</code>都写在了方法上，成功解决：</p>
-<pre><code class="java">@Component
-@FeignClient(value = &quot;service-vod&quot;,fallback = VodFallback.class)
-public interface VodFeign {
-    @DeleteMapping(value = &quot;/vod/video/{id}&quot;)
-    public Result removeVideo(@PathVariable(&quot;id&quot;) String videoId);
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@Component</span>
+<span class="token annotation punctuation">@FeignClient</span><span class="token punctuation">(</span>value <span class="token operator">=</span> <span class="token string">"service-vod"</span><span class="token punctuation">,</span>fallback <span class="token operator">=</span> <span class="token class-name">VodFallback</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span>
+<span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">VodFeign</span> <span class="token punctuation">&#123;</span>
+    <span class="token annotation punctuation">@DeleteMapping</span><span class="token punctuation">(</span>value <span class="token operator">=</span> <span class="token string">"/vod/video/&#123;id&#125;"</span><span class="token punctuation">)</span>
+    <span class="token keyword">public</span> <span class="token class-name">Result</span> <span class="token function">removeVideo</span><span class="token punctuation">(</span><span class="token annotation punctuation">@PathVariable</span><span class="token punctuation">(</span><span class="token string">"id"</span><span class="token punctuation">)</span> <span class="token class-name">String</span> videoId<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    @DeleteMapping(value = &quot;/vod/video/delete-batch&quot;)
-    public Result removeVideoList(@RequestParam(&quot;videoIdList&quot;) List&lt;String&gt; videoIdList);
-}</code></pre>
-
+    <span class="token annotation punctuation">@DeleteMapping</span><span class="token punctuation">(</span>value <span class="token operator">=</span> <span class="token string">"/vod/video/delete-batch"</span><span class="token punctuation">)</span>
+    <span class="token keyword">public</span> <span class="token class-name">Result</span> <span class="token function">removeVideoList</span><span class="token punctuation">(</span><span class="token annotation punctuation">@RequestParam</span><span class="token punctuation">(</span><span class="token string">"videoIdList"</span><span class="token punctuation">)</span> <span class="token class-name">List</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> videoIdList<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
             </div>
             <hr/>
 
@@ -515,12 +519,12 @@ public interface VodFeign {
                                     <span class="chip bg-color">日常</span>
                                 </a>
                             
-                                <a href="/tags/Hystrix/">
-                                    <span class="chip bg-color">Hystrix</span>
-                                </a>
-                            
                                 <a href="/tags/OpenFeign/">
                                     <span class="chip bg-color">OpenFeign</span>
+                                </a>
+                            
+                                <a href="/tags/Hystrix/">
+                                    <span class="chip bg-color">Hystrix</span>
                                 </a>
                             
                         </div>
@@ -846,7 +850,7 @@ public interface VodFeign {
 5.     111221
 
 
-1 被读作  &quot
+1 被读作  &quot
                         
                     </div>
                     <div class="publish-info">
@@ -899,15 +903,16 @@ public interface VodFeign {
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题编写一个高效的算法来判断 m x n 矩阵中，是否存在一个目标值。该矩阵具有如下特性：
+                            1 原题编写一个高效的算法来判断 m x n 矩阵中，是否存在一个目标值。该矩阵具有如下特性：
 
 每行中的整数从左到右按升序排列。
 每行的第一个整数大于前一行的最后一个整数。
+ 
 
 示例1:
 输入:
 matrix = [
-  [1,   3, 
+  [1,   3
                         
                     </div>
                     <div class="publish-info">
@@ -1084,7 +1089,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

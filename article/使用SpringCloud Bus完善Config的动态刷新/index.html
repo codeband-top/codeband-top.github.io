@@ -29,6 +29,7 @@ Bus 目前只支持RabbitMQ和Kafka
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -403,7 +404,7 @@ Bus 目前只支持RabbitMQ和Kafka
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.1k
+                    1k
                 </div>
                 
 
@@ -420,7 +421,7 @@ Bus 目前只支持RabbitMQ和Kafka
 <p><strong>Bus 目前只支持RabbitMQ和Kafka</strong></p>
 <h2 id="什么是总线">1.1 什么是总线</h2><p>在微服务架构的系统中，通常会<strong>使用轻量级的消息代理来构建一个共用的消息主题, 并让系统中所有微服务实例都连接上来</strong>。由于该主题中产生的消息会被所有实例监听和消费，所以称它为消息总线。<strong>在总线上的各个实例，都可以方便地广播一些需要让其他连接在该主题上的实例都知道的消息。</strong></p>
 <h2 id="基本原理">1.2 基本原理</h2><p>ConfigClient实例都监听MQ中同一个topic(默认是<code>springCloudBus</code>)。 当-个服务刷新数据的时候,它会把这个信息放入到Topic中,这样其它监听同一Topic的服务就能得到通知，然后去更新自身的配置。</p>
-<h1 id="使用SpringCloud-Bus解决Config的动态刷新问题">2 使用SpringCloud Bus解决Config的动态刷新问题</h1><p>在上篇文章<a href="../SpringCloud%20Config配置中心的使用">SpringCloud Config配置中心的使用</a>中留下了一个问题，如果有多个config的使用者，如何在配置修改的时候通知它们？</p>
+<h1 id="使用SpringCloud-Bus解决Config的动态刷新问题">2 使用SpringCloud Bus解决Config的动态刷新问题</h1><p>在上篇文章<a href="../SpringCloud%20Config%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E7%9A%84%E4%BD%BF%E7%94%A8">SpringCloud Config配置中心的使用</a>中留下了一个问题，如果有多个config的使用者，如何在配置修改的时候通知它们？</p>
 <p>设计思路：</p>
 <ul>
 <li>利用消息总线触发一个客户端<code>/bus/refresh</code>，而刷新所有客户端的配置</li>
@@ -433,100 +434,103 @@ Bus 目前只支持RabbitMQ和Kafka
 <li>有一定的局限性。例如，微服务在迁移时，它的网络地址常常会发生变化，此时如果想要做到自动刷新，那就会增加更多的修改</li>
 </ul>
 <p>我们新建模块<code>cloud-config-client3366</code>作为config的第二个使用者，将它和<code>cloud-config-client3355</code>的pom依赖都修改为如下（为config服务器也添加<code>spring-cloud-starter-bus-amqp</code>依赖）：</p>
-<pre><code class="xml">&lt;!-- 添加rabbitmq 总线支持 --&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-cloud-starter-bus-amqp&lt;/artifactId&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-cloud-starter-config&lt;/artifactId&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-cloud-starter-netflix-eureka-client&lt;/artifactId&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.projectlombok&lt;/groupId&gt;
-    &lt;artifactId&gt;lombok&lt;/artifactId&gt;
-    &lt;optional&gt;true&lt;/optional&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
-    &lt;scope&gt;test&lt;/scope&gt;
-&lt;/dependency&gt;</code></pre>
+<pre class="language-xml" data-language="xml"><code class="language-xml"><span class="token comment">&lt;!-- 添加rabbitmq 总线支持 --></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework.cloud<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-cloud-starter-bus-amqp<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework.cloud<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-cloud-starter-config<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework.cloud<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-cloud-starter-netflix-eureka-client<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework.boot<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-boot-starter-web<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework.boot<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-boot-starter-actuator<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.projectlombok<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>lombok<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>optional</span><span class="token punctuation">></span></span>true<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>optional</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework.boot<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-boot-starter-test<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>scope</span><span class="token punctuation">></span></span>test<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>scope</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span></code></pre>
+
 <p>yaml配置：（文件名也要是<code>bootstrap.yml</code>）</p>
-<pre><code class="yaml">server:
-  port: 3366
+<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">server</span><span class="token punctuation">:</span>
+  <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">3366</span>
 
-spring:
-  application:
-    name: config-client
-  cloud:
-    config:
-      label: master # 分支名称
-      name: config # 配置文件名称
-      profile: dev # 读取的profile
-      uri: http://localhost:3344 #配置中心的地址
+<span class="token key atrule">spring</span><span class="token punctuation">:</span>
+  <span class="token key atrule">application</span><span class="token punctuation">:</span>
+    <span class="token key atrule">name</span><span class="token punctuation">:</span> config<span class="token punctuation">-</span>client
+  <span class="token key atrule">cloud</span><span class="token punctuation">:</span>
+    <span class="token key atrule">config</span><span class="token punctuation">:</span>
+      <span class="token key atrule">label</span><span class="token punctuation">:</span> master <span class="token comment"># 分支名称</span>
+      <span class="token key atrule">name</span><span class="token punctuation">:</span> config <span class="token comment"># 配置文件名称</span>
+      <span class="token key atrule">profile</span><span class="token punctuation">:</span> dev <span class="token comment"># 读取的profile</span>
+      <span class="token key atrule">uri</span><span class="token punctuation">:</span> http<span class="token punctuation">:</span>//localhost<span class="token punctuation">:</span><span class="token number">3344</span> <span class="token comment">#配置中心的地址</span>
 
-  rabbitmq: #rabbitmq相关配置，请为3355也添加这一部分
-    port: 5672
-    host: localhost
-    username: guest
-    password: guest
+  <span class="token key atrule">rabbitmq</span><span class="token punctuation">:</span> <span class="token comment">#rabbitmq相关配置，请为3355也添加这一部分</span>
+    <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">5672</span>
+    <span class="token key atrule">host</span><span class="token punctuation">:</span> localhost
+    <span class="token key atrule">username</span><span class="token punctuation">:</span> guest
+    <span class="token key atrule">password</span><span class="token punctuation">:</span> guest
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://eureka7001.com:7001/eureka</code></pre>
+<span class="token key atrule">eureka</span><span class="token punctuation">:</span>
+  <span class="token key atrule">client</span><span class="token punctuation">:</span>
+    <span class="token key atrule">service-url</span><span class="token punctuation">:</span>
+      <span class="token key atrule">defaultZone</span><span class="token punctuation">:</span> http<span class="token punctuation">:</span>//eureka7001.com<span class="token punctuation">:</span>7001/eureka</code></pre>
+
 <p>启动类和controller的写法和3355一样。</p>
 <p><code>cloud-config-center-3344</code>的yaml配置修改为：</p>
-<pre><code class="yaml">server:
-  port: 3344
-spring:
-  application:
-    name: cloud-config-center
-  cloud:
-    config:
-      server:
-        git:
-          uri: http://git.codetool.top/RhettPeng/springcloud-config.git # 仓库地址
-          search-paths:
-            - springcloud-config
-      label: master   # 读取分支
-  # 添加rabbitmq相关
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">server</span><span class="token punctuation">:</span>
+  <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">3344</span>
+<span class="token key atrule">spring</span><span class="token punctuation">:</span>
+  <span class="token key atrule">application</span><span class="token punctuation">:</span>
+    <span class="token key atrule">name</span><span class="token punctuation">:</span> cloud<span class="token punctuation">-</span>config<span class="token punctuation">-</span>center
+  <span class="token key atrule">cloud</span><span class="token punctuation">:</span>
+    <span class="token key atrule">config</span><span class="token punctuation">:</span>
+      <span class="token key atrule">server</span><span class="token punctuation">:</span>
+        <span class="token key atrule">git</span><span class="token punctuation">:</span>
+          <span class="token key atrule">uri</span><span class="token punctuation">:</span> http<span class="token punctuation">:</span>//git.codetool.top/RhettPeng/springcloud<span class="token punctuation">-</span>config.git <span class="token comment"># 仓库地址</span>
+          <span class="token key atrule">search-paths</span><span class="token punctuation">:</span>
+            <span class="token punctuation">-</span> springcloud<span class="token punctuation">-</span>config
+      <span class="token key atrule">label</span><span class="token punctuation">:</span> master   <span class="token comment"># 读取分支</span>
+  <span class="token comment"># 添加rabbitmq相关</span>
+  <span class="token key atrule">rabbitmq</span><span class="token punctuation">:</span>
+    <span class="token key atrule">host</span><span class="token punctuation">:</span> localhost
+    <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">5672</span>
+    <span class="token key atrule">username</span><span class="token punctuation">:</span> guest
+    <span class="token key atrule">password</span><span class="token punctuation">:</span> guest
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:7001/eureka
+<span class="token key atrule">eureka</span><span class="token punctuation">:</span>
+  <span class="token key atrule">client</span><span class="token punctuation">:</span>
+    <span class="token key atrule">service-url</span><span class="token punctuation">:</span>
+      <span class="token key atrule">defaultZone</span><span class="token punctuation">:</span> http<span class="token punctuation">:</span>//localhost<span class="token punctuation">:</span>7001/eureka
 
-# 暴露bus刷新的端点
-management:
-  endpoints:
-    web:
-      exposure:
-        include: &#39;bus-refresh&#39;</code></pre>
-<p>到此配置成功，只要git仓库中的配置文件修改的时候向 <a href="http://localhost:3344/actuator/bus-refresh" target="_blank" rel="noopener">http://localhost:3344/actuator/bus-refresh</a> 发出post请求（可以使用webhook），就能通知所有的配置使用者刷新配置。</p>
+<span class="token comment"># 暴露bus刷新的端点</span>
+<span class="token key atrule">management</span><span class="token punctuation">:</span>
+  <span class="token key atrule">endpoints</span><span class="token punctuation">:</span>
+    <span class="token key atrule">web</span><span class="token punctuation">:</span>
+      <span class="token key atrule">exposure</span><span class="token punctuation">:</span>
+        <span class="token key atrule">include</span><span class="token punctuation">:</span> <span class="token string">'bus-refresh'</span></code></pre>
+
+<p>到此配置成功，只要git仓库中的配置文件修改的时候向 <a target="_blank" rel="noopener" href="http://localhost:3344/actuator/bus-refresh">http://localhost:3344/actuator/bus-refresh</a> 发出post请求（可以使用webhook），就能通知所有的配置使用者刷新配置。</p>
 <p>查看rabbitmq的exchange：</p>
-<p><img src="https://api.codetool.top/img/15848841263639.png" alt></p>
+<p><img src="https://api.codetool.top/img/15848841263639.png"></p>
 <p><strong>补充：定点通知</strong></p>
-<p>bus可以指定通知具体一个实例而不是全部。只需要在 <a href="http://localhost:3344/actuator/bus-refresh" target="_blank" rel="noopener">http://localhost:3344/actuator/bus-refresh</a> 后面加上 <code>/destination</code>，其中destination为服务ID。之前有介绍可以通过<code>eureka.instance.instance-id</code>指定。</p>
-<p>例如post <a href="http://localhost:3344/actuator/bus-refresh/config-client:3355" target="_blank" rel="noopener">http://localhost:3344/actuator/bus-refresh/config-client:3355</a> 即可只通知3355，而不通知其他使用者。 <img src="https://api.codetool.top/img/15848848825797.png" alt></p>
+<p>bus可以指定通知具体一个实例而不是全部。只需要在 <a target="_blank" rel="noopener" href="http://localhost:3344/actuator/bus-refresh">http://localhost:3344/actuator/bus-refresh</a> 后面加上 <code>/destination</code>，其中destination为服务ID。之前有介绍可以通过<code>eureka.instance.instance-id</code>指定。</p>
+<p>例如post <a target="_blank" rel="noopener" href="http://localhost:3344/actuator/bus-refresh/config-client:3355">http://localhost:3344/actuator/bus-refresh/config-client:3355</a> 即可只通知3355，而不通知其他使用者。 <img src="https://api.codetool.top/img/15848848825797.png"></p>
 
             </div>
             <hr/>
@@ -1138,7 +1142,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

@@ -30,6 +30,7 @@ CPU体系结构之cache小结_运维_Hober-CSDN博客
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -415,16 +416,16 @@ CPU体系结构之cache小结_运维_Hober-CSDN博客
             <div id="articleContent">
                 <p>明明记得在哪里学过这部分内容，还看到过一个贼好的图。。今天找了很久又没找着，这就是学了不记笔记的后果。。</p>
 <p>本文参考资源：</p>
-<p><a href="https://blog.csdn.net/yhb1047818384/article/details/79604976" target="_blank" rel="noopener">CPU体系结构之cache小结_运维_Hober-CSDN博客</a></p>
-<p><a href="https://www.cnblogs.com/bjlhx/p/10658938.html" target="_blank" rel="noopener">001-CPU多级缓存架构 - bjlhx15 - 博客园</a></p>
-<p><a href="https://blog.csdn.net/qq_26222859/article/details/52240256" target="_blank" rel="noopener">volatile与内存屏障_Java_weiqing的博客-CSDN博客</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/yhb1047818384/article/details/79604976">CPU体系结构之cache小结_运维_Hober-CSDN博客</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/bjlhx/p/10658938.html">001-CPU多级缓存架构 - bjlhx15 - 博客园</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_26222859/article/details/52240256">volatile与内存屏障_Java_weiqing的博客-CSDN博客</a></p>
 <p>极客时间《深入浅出计算机组成原理》</p>
 <h1 id="缓存一致性问题">1 缓存一致性问题</h1><p>在现代的CPU（大多数）上，所有的内存访问都需要通过层层的缓存来进行。也有些例外，比如，对映射成内存地址的I/O口、写合并（Write-combined）内存，这些访问至少会绕开这个流程的一部分。但这两者都是罕见的场景（意味着绝大多数的用户态代码都不会遇到这两种情况）。并且由于程序通常具有良好的时间局部性和空间局部性，缓存对提高程序运行的效率起到很大帮助。</p>
 <p><img src="https://api.codetool.top/img/15866064656454.png" alt="存储器层次"></p>
 <p>然而上面这张图没有表示清楚的是，三级缓存和CPU核心之间的关系：（由于没有找到之前看过的那张图特意找了三张图好表示清楚）</p>
-<p><img src="https://api.codetool.top/img/15866065781911.png" alt></p>
-<p><img src="https://api.codetool.top/img/15866062735456.png" alt></p>
-<p><img src="https://api.codetool.top/img/158660677492.png" alt></p>
+<p><img src="https://api.codetool.top/img/15866065781911.png"></p>
+<p><img src="https://api.codetool.top/img/15866062735456.png"></p>
+<p><img src="https://api.codetool.top/img/158660677492.png"></p>
 <p>L1是最接近CPU的，它容量最小，速度最快，<strong>每个核上都有一个L1 Cache（准确地说每个核上有两个L1 Cache，一个存数据 L1d Cache，一个存指令 L1i Cache）</strong></p>
 <p>L2 Cache 更大一些，例如256K，速度要慢一些，一般情况下<strong>每个核上都有一个独立的L2 Cache</strong>；二级缓存就是一级缓存的缓冲器：一级缓存制造成本很高因此它的容量有限，二级缓存的作用就是存储那些CPU处理时需要用到、一级缓存又无法存储的数据。</p>
 <p>L3 Cache是三级缓存中最大的一级，例如12MB，同时也是最慢的一级，<strong>在同一个CPU插槽之间的核共享一个L3 Cache</strong>。三级缓存和内存可以看作是二级缓存的缓冲器，它们的容量递增，但单位制造成本却递减。</p>
@@ -642,7 +643,7 @@ CPU体系结构之cache小结_运维_Hober-CSDN博客
 </tr></tbody></table>
 
 
-<h1 id="MESI协议与java-volatile关键字的关系">3 MESI协议与java volatile关键字的关系</h1><p><a href="https://www.zhihu.com/question/296949412" target="_blank" rel="noopener">既然CPU有缓存一致性协议（MESI），为什么JMM还需要volatile关键字？ - 知乎</a></p>
+<h1 id="MESI协议与java-volatile关键字的关系">3 MESI协议与java volatile关键字的关系</h1><p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/296949412">既然CPU有缓存一致性协议（MESI），为什么JMM还需要volatile关键字？ - 知乎</a></p>
 <p>volatile的语义有：</p>
 <ol>
 <li>保证了不同线程对这个变量进行操作时的可见性，即一个线程修改了某个变量的值，这新值对其他线程来说是立即可见的。</li>
@@ -650,7 +651,9 @@ CPU体系结构之cache小结_运维_Hober-CSDN博客
 </ol>
 <p>对于x86的体系结构，voltile变量的访问代码会被java编译器生成不乱序的，带有lock指令前缀的机器码。而lock的实现还要区分，这个数据在不在CPU核心的专有缓存中（一般是指L1/L2）。如果在，MESI才有用武之地。如果不满足就会要用其他手段，涉及到内存屏障。</p>
 <p>通过反汇编可以发现，Java中volatile变量修饰的共享变量在进行写操作时候会多出一行汇编：</p>
-<pre><code>lock addl $0×0,(%esp);</code></pre><p>在x86架构中，Lock前缀指令可以用作storeLoad barrier，在支持SSE2拓展指令集的cpu上还可以使用mfence指令。在多核处理器环境中，lock前缀指令保证了某个处理器对共享内存的独占使用。<strong>内存屏障不仅仅是MESI这么简单。</strong></p>
+<pre class="language-none"><code class="language-none">lock addl $0×0,(%esp);</code></pre>
+
+<p>在x86架构中，Lock前缀指令可以用作storeLoad barrier，在支持SSE2拓展指令集的cpu上还可以使用mfence指令。在多核处理器环境中，lock前缀指令保证了某个处理器对共享内存的独占使用。<strong>内存屏障不仅仅是MESI这么简单。</strong></p>
 <p>多处理器总线嗅探:</p>
 <ol>
 <li>为了提高处理速度,处理器不直接和内存进行通信,而是先将系统内存的数据读到内部缓存后在进行操作,但<strong>写回操作</strong>不知道这个更改何时回写到内存。</li>
@@ -1266,7 +1269,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

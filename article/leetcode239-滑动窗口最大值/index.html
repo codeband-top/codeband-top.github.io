@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="keywords" content="leetcode239-滑动窗口最大值, 代码段小站">
-    <meta name="description" content="1 原题给定一个数组 nums，有一个大小为 k 的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 k 个数字。滑动窗口每次只向右移动一位。
+    <meta name="description" content="1 原题给定一个数组 nums，有一个大小为 k 的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 k 个数字。滑动窗口每次只向右移动一位。
 返回滑动窗口中的最大值。
 进阶：
 你能在线性时间复杂度内解决此题吗？
@@ -31,6 +31,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -405,7 +406,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    746
+                    766
                 </div>
                 
 
@@ -418,7 +419,7 @@
         <hr class="clearfix">
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h1 id="原题">1 原题</h1><p>给定一个数组 nums，有一个大小为 k 的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 k 个数字。滑动窗口每次只向右移动一位。</p>
+                <h1 id="原题">1 原题</h1><p>给定一个数组 nums，有一个大小为 k 的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 k 个数字。滑动窗口每次只向右移动一位。</p>
 <p>返回滑动窗口中的最大值。</p>
 <p><strong>进阶：</strong></p>
 <p>你能在线性时间复杂度内解决此题吗？</p>
@@ -447,59 +448,60 @@ pre > *,pre,code > *{
 <ul>
 <li><code>1 &lt;= nums.length &lt;= 10^5</code></li>
 <li><code>-10^4 &lt;= nums[i] &lt;= 10^4</code></li>
-<li><code>1 &lt;= k &lt;= nums.length</code></li>
+<li><code>1 &lt;= k &lt;= nums.length</code>
+ </li>
 </ul>
 <h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>使用一个双端队列维护一个单调递减队列（但实际上存放的是数组的下标），每滑动一次窗口，如果进来的元素比队尾下标对应的元素小，则进入队尾，否则将队列尾比该元素小的元素都弹出（类似单调栈的思想），再进入队尾，那么任意时刻队首元素即为当前最大元素的下标，而如果滑动窗口后队首元素的下标等于<code>当前下标-k</code>，说明队首元素过期，应该从队列首部弹出。</p>
-<h2 id="代码">2.2 代码</h2><pre><code class="java">class Solution {
-    public int[] maxSlidingWindow(int[] nums, int k) {
-        Deque&lt;Integer&gt; qmax = new LinkedList&lt;&gt;();
-        int[] ans = new int[nums.length-k+1];
-        int index = 0;
-        for(int i = 0;i&lt;nums.length;i++){
-            while(!qmax.isEmpty()&amp;&amp;nums[qmax.peekLast()]&lt;=nums[i]){
-                qmax.pollLast();
-            }
-            qmax.addLast(i);
-            if(qmax.peekFirst()==i-k){
-                qmax.pollFirst();
-            }
-            if(i&gt;=k-1){
-                ans[index++] = nums[qmax.peekFirst()];
-            }
-        }
-        return ans;
-    }
-}</code></pre>
-<p>下面这种方法的思想是记录当前窗口内最大元素的下标，如果滑出去了重新选举最大值，如果没滑出去将进来的元素与当前最大元素比较。它和暴力又不太一样，因为其实重新选举的次数较少，实际leetcode中这种方法反而更快，可能是因为数据量的原因：</p>
-<pre><code class="java">class Solution {
-    public int[] maxSlidingWindow(int[] nums, int k) {
-        if(nums == null || nums.length == 0 || k &lt; 1)return new int[0];
-        if(k == 1)return nums;
-        int[] maxes = new int[nums.length - k + 1];
-        int maxIdx = 0;
-        //求出前k个元素的最大值索引
-        for(int i = 1; i &lt; k; i++){
-            if(nums[i] &gt; nums[maxIdx])maxIdx = i;
-        }
-        //li是滑动窗口的最左端
-        for(int li = 0; li &lt; maxes.length; li++){
-            //ri是滑动窗口的最右端的索引
-            int ri = li + k- 1;
-            if(maxIdx &lt; li){//最大值的索引不在滑动窗口范围内
-                maxIdx = li;
-                //求出[li, ri]范围内最大值的索引
-                for(int i = li + 1; i &lt;= ri; i++){
-                    if(nums[i] &gt; nums[maxIdx])maxIdx = i;
-                }
-            }else if(nums[ri] &gt;= nums[maxIdx]){//最大值的索引在滑动窗口的范围内，并且大于最大值
-                maxIdx = ri;
-            }
-            maxes[li] = nums[maxIdx];
-        }
-        return maxes;
-    }
-}</code></pre>
+<h2 id="代码">2.2 代码</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">public</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">maxSlidingWindow</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> nums<span class="token punctuation">,</span> <span class="token keyword">int</span> k<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">Deque</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Integer</span><span class="token punctuation">></span></span> qmax <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">LinkedList</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> ans <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">int</span><span class="token punctuation">[</span>nums<span class="token punctuation">.</span>length<span class="token operator">-</span>k<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> index <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>nums<span class="token punctuation">.</span>length<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token operator">!</span>qmax<span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">&amp;&amp;</span>nums<span class="token punctuation">[</span>qmax<span class="token punctuation">.</span><span class="token function">peekLast</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token operator">&lt;=</span>nums<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                qmax<span class="token punctuation">.</span><span class="token function">pollLast</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+            qmax<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>qmax<span class="token punctuation">.</span><span class="token function">peekFirst</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">==</span>i<span class="token operator">-</span>k<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                qmax<span class="token punctuation">.</span><span class="token function">pollFirst</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>i<span class="token operator">>=</span>k<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                ans<span class="token punctuation">[</span>index<span class="token operator">++</span><span class="token punctuation">]</span> <span class="token operator">=</span> nums<span class="token punctuation">[</span>qmax<span class="token punctuation">.</span><span class="token function">peekFirst</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">return</span> ans<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
+<p>下面这种方法的思想是记录当前窗口内最大元素的下标，如果滑出去了重新选举最大值，如果没滑出去将进来的元素与当前最大元素比较。它和暴力又不太一样，因为其实重新选举的次数较少，实际leetcode中这种方法反而更快，可能是因为数据量的原因：</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">public</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">maxSlidingWindow</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> nums<span class="token punctuation">,</span> <span class="token keyword">int</span> k<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>nums <span class="token operator">==</span> <span class="token keyword">null</span> <span class="token operator">||</span> nums<span class="token punctuation">.</span>length <span class="token operator">==</span> <span class="token number">0</span> <span class="token operator">||</span> k <span class="token operator">&lt;</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+		<span class="token keyword">if</span><span class="token punctuation">(</span>k <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token keyword">return</span> nums<span class="token punctuation">;</span>
+		<span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> maxes <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">int</span><span class="token punctuation">[</span>nums<span class="token punctuation">.</span>length <span class="token operator">-</span> k <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+		<span class="token keyword">int</span> maxIdx <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+		<span class="token comment">//求出前k个元素的最大值索引</span>
+		<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> k<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+			<span class="token keyword">if</span><span class="token punctuation">(</span>nums<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">></span> nums<span class="token punctuation">[</span>maxIdx<span class="token punctuation">]</span><span class="token punctuation">)</span>maxIdx <span class="token operator">=</span> i<span class="token punctuation">;</span>
+		<span class="token punctuation">&#125;</span>
+		<span class="token comment">//li是滑动窗口的最左端</span>
+		<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> li <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> li <span class="token operator">&lt;</span> maxes<span class="token punctuation">.</span>length<span class="token punctuation">;</span> li<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+			<span class="token comment">//ri是滑动窗口的最右端的索引</span>
+			<span class="token keyword">int</span> ri <span class="token operator">=</span> li <span class="token operator">+</span> k<span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span>
+			<span class="token keyword">if</span><span class="token punctuation">(</span>maxIdx <span class="token operator">&lt;</span> li<span class="token punctuation">)</span><span class="token punctuation">&#123;</span><span class="token comment">//最大值的索引不在滑动窗口范围内</span>
+				maxIdx <span class="token operator">=</span> li<span class="token punctuation">;</span>
+				<span class="token comment">//求出[li, ri]范围内最大值的索引</span>
+				<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> li <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span> i <span class="token operator">&lt;=</span> ri<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+					<span class="token keyword">if</span><span class="token punctuation">(</span>nums<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">></span> nums<span class="token punctuation">[</span>maxIdx<span class="token punctuation">]</span><span class="token punctuation">)</span>maxIdx <span class="token operator">=</span> i<span class="token punctuation">;</span>
+				<span class="token punctuation">&#125;</span>
+			<span class="token punctuation">&#125;</span><span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span>nums<span class="token punctuation">[</span>ri<span class="token punctuation">]</span> <span class="token operator">>=</span> nums<span class="token punctuation">[</span>maxIdx<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span><span class="token comment">//最大值的索引在滑动窗口的范围内，并且大于最大值</span>
+				maxIdx <span class="token operator">=</span> ri<span class="token punctuation">;</span>
+			<span class="token punctuation">&#125;</span>
+			maxes<span class="token punctuation">[</span>li<span class="token punctuation">]</span> <span class="token operator">=</span> nums<span class="token punctuation">[</span>maxIdx<span class="token punctuation">]</span><span class="token punctuation">;</span>
+		<span class="token punctuation">&#125;</span>
+		<span class="token keyword">return</span> maxes<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
             </div>
             <hr/>
 
@@ -929,7 +931,7 @@ pre > *,pre,code > *{
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题给你一个整数数组 nums 和一个整数 k。
+                            1 原题给你一个整数数组 nums 和一个整数 k。
 如果某个 连续 子数组中恰好有 k 个奇数数字，我们就认为这个子数组是「优美子数组」。
 请返回这个数组中「优美子数组」的数目。
 示例 1:
@@ -1111,7 +1113,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

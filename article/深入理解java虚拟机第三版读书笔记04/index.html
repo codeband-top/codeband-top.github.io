@@ -29,6 +29,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -422,7 +423,7 @@
 <p>特点：虽然占用了一些额外的内存空间来进行计数，但它的原理简单，判定效率也很高，在大多数情况下它都是一个不错的算法。<br>但是，在Java 领域，至少主流的Java虚拟机里面都没有选用引用计数算法来管理内存，主要原因是，这个看似简单的算法<strong>有很多例外情况要考虑</strong>，必须要配合大量额外处理才能保证正确地工作，譬如单纯的引用计数就很难解决对象之间相互循环引用的问题。</p>
 <h2 id="可达性分析算法">2.2 可达性分析算法</h2><p>这个算法的基本思路就是通过一系列称为 <strong>“GC Roots”</strong> 的根对象作为起始节点集，从这些节点开始，根据引用关系向下搜索，搜索过程所走过的路径称为“引用链”，如果某个对象到GC Roots间没有任何引用链相连，或者用图论的话来说就是从GC Roots到这个对象不可达时，则证明此对象是不可能再被使用的。</p>
 <p>如图所示，对象object 5、object 6、object 7虽然互有关联，但是它们到GC Roots是不可达的，因此它们将会被判定为可回收的对象。</p>
-<p><img src="https://api.codetool.top/img/15784962041632.jpg" alt></p>
+<p><img src="https://api.codetool.top/img/15784962041632.jpg"></p>
 <p>固定可作为GC Roots的对象包括以下几种：</p>
 <ul>
 <li>在<strong>虚拟机栈（栈帧中的本地变量表）中引用的对象</strong>，譬如各个线程被调用的方法堆栈中使用到的参数、局部变量、临时变量等。</li>
@@ -521,7 +522,7 @@
 </tr>
 </tbody></table>
 <h2 id="标记-清除算法">3.2 标记-清除算法</h2><p>分为“标记”和“清除”两个阶段：首先标记出所有需要回收的对象，在标记完成后，统一回收掉所有被标记的对象。</p>
-<p><img src="https://api.codetool.top/img/15787540607981.jpg" alt></p>
+<p><img src="https://api.codetool.top/img/15787540607981.jpg"></p>
 <p>主要缺点：</p>
 <ul>
 <li>执行效率不稳定，如果Java堆中包含大量对象，而且其中大部分是需要被回收的，这时必须进行大量标记和清除的动作，导致标记和清除两个过程的执行效率都随对象数量增长而降低</li>
@@ -529,12 +530,12 @@
 </ul>
 <h2 id="标记-复制算法">3.3 标记-复制算法</h2><p>将可用内存按容量划分为大小相等的两块，每次只使用其中的一块。当这一块的内存用完了，就将还存活着的对象复制到另外一块上面，然后再把已使用过的内存空间一次清理掉。</p>
 <p>适用于多数对象是可回收的，缺点是可用内存缩小为了原来的一半，空间浪费太多。</p>
-<p><img src="https://api.codetool.top/img/15787556646765.jpg" alt></p>
+<p><img src="https://api.codetool.top/img/15787556646765.jpg"></p>
 <p>现在的商用Java虚拟机大多都优先采用了这种收集算法去回收新生代。</p>
 <p>一种更优化的半区复制分代策略:“Appel式回收”，HotSpot虚拟机的<code>Serial、ParNew</code>等新生代收集器均采用了这种策略来设计新生代的内存布局：</p>
 <p>把<strong>新生代分为一块较大的Eden空间和两块较小的Survivor空间，每次分配内存只使用Eden和其中一块Survivor。</strong>发生垃圾搜集时，将Eden和Survivor中仍然存活的对象一次性复制到另外一块Survivor空间上，然后直接清理掉Eden和已用过的那块Survivor空间。HotSpot虚拟机默认Eden和Survivor的大小比例是8∶1，也即每次新生代中可用内存空间为整个新生代容量的90%（Eden的80%加上一个Survivor的10%），只有一个Survivor空间，即10%的新生代是会被“浪费”的。还有一个充当罕见情况的“逃生门”的安全设计，<strong>当Survivor空间不足以容纳一次Minor GC之后存活的对象时，就需要依赖其他内存区域（实际上大多就是老年代）进行分配担保。</strong></p>
 <h2 id="标记-整理算法">3.4 标记-整理算法</h2><p>针对老年代的存亡特征设计的，其中的标记过程仍然与“标记-清除”算法一样，但后续步骤不是直接对可<br>回收对象进行清理，而是让所有存活的对象都向内存空间一端移动，然后直接清理掉边界以外的内存。</p>
-<p><img src="https://api.codetool.top/img/15787582143293.jpg" alt></p>
+<p><img src="https://api.codetool.top/img/15787582143293.jpg"></p>
 <p>如果移动存活对象，尤其是在老年代这种每次回收都有大量对象存活区域，移动存活对象并更新所有引用这些对象的地方将会是一种极为负重的操作，而且这种对象移动操作必须全程暂停用户应用程序才能进行（最新的ZGC和Shenandoah收集器使用读屏障技术实现了整理过程与用户线程的并发执行）；但如果跟标记-清除算法那样完全不考虑移动和整理存活对象的话，弥散于堆中的存活对象导致的空间碎片化问题就只能依赖更为复杂的内存分配器和内存访问器来解决。</p>
 <p><strong>移动则内存回收时会更复杂，不移动则内存分配时会更复杂</strong>。HotSpot虚拟机里面<strong>关注吞吐量的Parallel Scavenge收集器是基于标记-整理算法的，而关注延迟的CMS收集器则是基于标记-清除算法的。</strong></p>
 <p>还有一种解决方案是让虚拟机平时<strong>多数时间都采用标记-清除算法，暂时容忍内存碎片的存在，直到内存空间的碎片化程度已经大到影响对象分配时，再采用标记-整理算法收集一次</strong>，以获得规整的内存空间。基于标记-清除算法的CMS收集器面临空间碎片过多时采用的就是这种处理办法。</p>
@@ -915,9 +916,9 @@
                     <div class="summary block-with-text">
                         
                             这道题我没想出符合条件的思路
-1 原题给定两个大小为 m 和 n 的有序数组 nums1 和 nums2。
-请你找出这两个有序数组的中位数，并且要求算法的时间复杂度为 O(log(m + n))。
-你可以假设 nums1 和 nums2 不
+1 原题给定两个大小为 m 和 n 的有序数组 nums1 和 nums2。
+请你找出这两个有序数组的中位数，并且要求算法的时间复杂度为 O(log(m + n))。
+你可以假设 nums1 和 nums2 不
                         
                     </div>
                     <div class="publish-info">
@@ -970,7 +971,7 @@
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题给定一个包含 n + 1 个整数的数组 nums ，其数字都在 1 到 n 之间（包括 1 和 n），可知至少存在一个重复的整数。假设只有一个重复的整数，找出这个重复的数。
+                            1 原题给定一个包含 n + 1 个整数的数组 nums ，其数字都在 1 到 n 之间（包括 1 和 n），可知至少存在一个重复的整数。假设只有一个重复的整数，找出这个重复的数。
 示例1：
 
 输入: [1,3,4,2,2]输出: 2  
@@ -1151,7 +1152,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

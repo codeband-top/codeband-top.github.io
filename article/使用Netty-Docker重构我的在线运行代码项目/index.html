@@ -29,6 +29,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -425,7 +426,7 @@
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <h1 id="项目介绍">1 项目介绍</h1><p>很久很久以前，做过一个在线运行代码的项目，见：</p>
-<p><a href="../在线运行C++、java、python代码的小项目实现">在线运行C++、java、python代码的小项目实现</a></p>
+<p><a href="../%E5%9C%A8%E7%BA%BF%E8%BF%90%E8%A1%8CC++%E3%80%81java%E3%80%81python%E4%BB%A3%E7%A0%81%E7%9A%84%E5%B0%8F%E9%A1%B9%E7%9B%AE%E5%AE%9E%E7%8E%B0">在线运行C++、java、python代码的小项目实现</a></p>
 <p>做这个项目的初衷，是可以在博客里嵌入一段可运行的代码，提升阅读体验。不过后来发现，除了一些Java的基础知识，也没什么知识点是单个文件可以演示出来的，所以到后面用的就不多了。</p>
 <p>不过还是一直想把这个项目更新重构一下，毕竟之前做的那个版本安全问题太严重了（只需要写一段空循环代码，就能让CPU长时间处于100%负载，甚至还可以通过文件API去控制修改我服务器上的一些文件，而我之前是一直把这个项目跑在主力服务器上的，只是因为我的博客访问量太小，也没什么人会用这个东西，而且即使会用通常也不会想着搞点破坏，才让我这个安全漏洞百出的项目跑了这么久）</p>
 <h1 id="技术点">2 技术点</h1><p>重构之后，我使用了 <code>Netty + Websocket + Docker</code> 的技术点，<code>WebSocket</code>用于提升一些功能性，因为有一些代码的运行时间是可以很长的（例如循环输出代码），而用户不能等待很长一段时间都没有响应，于是可以通过<code>Websocket</code>在程序运行期间即时返回一些已输出信息。</p>
@@ -433,259 +434,264 @@
 <p>使用<code>Docker</code>的原因则是考虑安全性了，因为使用<code>Docker</code>可以实现隔离式地运行代码，每次运行一段代码都即时创建一个容器来完成，这样即使一次运行破坏了容器也没有关系，缺点就是创建容器比较消耗时间，响应时间比较长。而对于空循环消耗系统资源的情况，目前是考虑使用超时机制来保障安全，限制一段代码最多只能运行10秒，以后可以进一步进行优化。</p>
 <h1 id="连接Docker的关键技术——docker-java">3 连接Docker的关键技术——docker-java</h1><p>Docker服务可以通过监听端口，通过TCP、HTTP连接暴露API，供远程调用。</p>
 <p>maven依赖：</p>
-<pre><code class="xml">&lt;dependency&gt;
-    &lt;groupId&gt;com.github.docker-java&lt;/groupId&gt;
-    &lt;artifactId&gt;docker-java&lt;/artifactId&gt;
-    &lt;version&gt;3.2.1&lt;/version&gt;
-&lt;/dependency&gt;</code></pre>
+<pre class="language-xml" data-language="xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>com.github.docker-java<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>docker-java<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>3.2.1<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span></code></pre>
+
 <p>我学习这个的使用主要是通过下面这两篇文章：</p>
 <ul>
-<li><a href="https://blog.csdn.net/qq_36956154/article/details/81335886" target="_blank" rel="noopener">Docker-java在java中连接Docker（一）–简单连接_杨-CSDN博客_docker-java</a></li>
-<li><a href="https://blog.csdn.net/qq_36956154/article/details/82180551" target="_blank" rel="noopener">Docker-java在java中连接Docker（二）–安全连接_杨-CSDN博客_docker-javax509</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_36956154/article/details/81335886">Docker-java在java中连接Docker（一）–简单连接_杨-CSDN博客_docker-java</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_36956154/article/details/82180551">Docker-java在java中连接Docker（二）–安全连接_杨-CSDN博客_docker-javax509</a></li>
 </ul>
 <p>主要是看第二篇文章，让服务器上的Docker服务暴露一个端口，供远程连接，并通过证书来保证安全连接。</p>
-<h1 id="开发WebSocket服务端">4 开发WebSocket服务端</h1><p>这部分可以看以前的文章：<a href="../Netty心跳检测和基于Websocket协议的服务端开发">Netty心跳检测和基于Websocket协议的服务端开发</a></p>
+<h1 id="开发WebSocket服务端">4 开发WebSocket服务端</h1><p>这部分可以看以前的文章：<a href="../Netty%E5%BF%83%E8%B7%B3%E6%A3%80%E6%B5%8B%E5%92%8C%E5%9F%BA%E4%BA%8EWebsocket%E5%8D%8F%E8%AE%AE%E7%9A%84%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91">Netty心跳检测和基于Websocket协议的服务端开发</a></p>
 <p>启动类：</p>
-<pre><code class="java">public class WebsocketServer {
-    private static final int port = 7000;
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">WebsocketServer</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">int</span> port <span class="token operator">=</span> <span class="token number">7000</span><span class="token punctuation">;</span>
 
-    /**
+    <span class="token comment">/**
      * 绑定端口并启动服务器
      * @param port
      * @throws Exception
-     */
-    public void bind(int port) throws Exception{
-        //配置服务器的NIO线程组
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        try{
-            ServerBootstrap serverBootstrap = new ServerBootstrap();
-            serverBootstrap.group(bossGroup,workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .option(ChannelOption.SO_BACKLOG, 1024)
-                    .childHandler(new WebSocketChannelInitializer());
-            System.out.println(&quot;---------服务器正在启动---------&quot;);
-            ChannelFuture future = serverBootstrap.bind(port).sync();
-            //等待服务端监听端口关闭
-            future.channel().closeFuture().sync();
-        }finally {
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
-        }
-    }
+     */</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">int</span> port<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span><span class="token punctuation">&#123;</span>
+        <span class="token comment">//配置服务器的NIO线程组</span>
+        <span class="token class-name">EventLoopGroup</span> bossGroup <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">NioEventLoopGroup</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">EventLoopGroup</span> workerGroup <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">NioEventLoopGroup</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">try</span><span class="token punctuation">&#123;</span>
+            <span class="token class-name">ServerBootstrap</span> serverBootstrap <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ServerBootstrap</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            serverBootstrap<span class="token punctuation">.</span><span class="token function">group</span><span class="token punctuation">(</span>bossGroup<span class="token punctuation">,</span>workerGroup<span class="token punctuation">)</span>
+                    <span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token class-name">NioServerSocketChannel</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span>
+                    <span class="token punctuation">.</span><span class="token function">option</span><span class="token punctuation">(</span><span class="token class-name">ChannelOption</span><span class="token punctuation">.</span>SO_BACKLOG<span class="token punctuation">,</span> <span class="token number">1024</span><span class="token punctuation">)</span>
+                    <span class="token punctuation">.</span><span class="token function">childHandler</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">WebSocketChannelInitializer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"---------服务器正在启动---------"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">ChannelFuture</span> future <span class="token operator">=</span> serverBootstrap<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span>port<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">sync</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">//等待服务端监听端口关闭</span>
+            future<span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">closeFuture</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">sync</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span><span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+            bossGroup<span class="token punctuation">.</span><span class="token function">shutdownGracefully</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            workerGroup<span class="token punctuation">.</span><span class="token function">shutdownGracefully</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
 
-    public static void main(String[] args) throws Exception {
-        new WebsocketServer().bind(port);
-    }
-}</code></pre>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">new</span> <span class="token class-name">WebsocketServer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span>port<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>通道初始化：</p>
-<pre><code class="java">public class WebSocketChannelInitializer extends ChannelInitializer&lt;SocketChannel&gt; {
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">WebSocketChannelInitializer</span> <span class="token keyword">extends</span> <span class="token class-name">ChannelInitializer</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">SocketChannel</span><span class="token punctuation">></span></span> <span class="token punctuation">&#123;</span>
 
-    @Override
-    protected void initChannel(SocketChannel ch) throws Exception {
-        //向管道加入处理器
-        //得到管道
-        ChannelPipeline pipeline = ch.pipeline();
-        //基于HTTP的编解码器
-        pipeline.addLast(new HttpServerCodec());
-        //以块方式传输数据
-        pipeline.addLast(new ChunkedWriteHandler());
-        //HTTP数据在传输过程中是分段，HttpObjectAggregator可以将多个段聚合
-        pipeline.addLast(new HttpObjectAggregator(1024));
-        //将http协议升级为websocket协议，参数代表请求的uri
-        pipeline.addLast(new WebSocketServerProtocolHandler(&quot;/runcode&quot;));
-        pipeline.addLast(new TextWebsocketFrameHandler());
-    }
-}</code></pre>
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">initChannel</span><span class="token punctuation">(</span><span class="token class-name">SocketChannel</span> ch<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">//向管道加入处理器</span>
+        <span class="token comment">//得到管道</span>
+        <span class="token class-name">ChannelPipeline</span> pipeline <span class="token operator">=</span> ch<span class="token punctuation">.</span><span class="token function">pipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//基于HTTP的编解码器</span>
+        pipeline<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">HttpServerCodec</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//以块方式传输数据</span>
+        pipeline<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ChunkedWriteHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//HTTP数据在传输过程中是分段，HttpObjectAggregator可以将多个段聚合</span>
+        pipeline<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">HttpObjectAggregator</span><span class="token punctuation">(</span><span class="token number">1024</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//将http协议升级为websocket协议，参数代表请求的uri</span>
+        pipeline<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">WebSocketServerProtocolHandler</span><span class="token punctuation">(</span><span class="token string">"/runcode"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        pipeline<span class="token punctuation">.</span><span class="token function">addLast</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">TextWebsocketFrameHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>自定义一个WebSocket帧的处理器：</p>
-<pre><code class="java">public class TextWebsocketFrameHandler extends SimpleChannelInboundHandler&lt;TextWebSocketFrame&gt; {
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">TextWebsocketFrameHandler</span> <span class="token keyword">extends</span> <span class="token class-name">SimpleChannelInboundHandler</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">TextWebSocketFrame</span><span class="token punctuation">></span></span> <span class="token punctuation">&#123;</span>
 
 
-    private DockerJavaClient dockerJavaClient = new DockerJavaClient();
+    <span class="token keyword">private</span> <span class="token class-name">DockerJavaClient</span> dockerJavaClient <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DockerJavaClient</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    /**
+    <span class="token comment">/**
      * 读取Websocket客户端发来的信息
      * @param ctx
      * @param msg
      * @throws Exception
-     */
-    @Override
-    protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
-        try{
-            CodeWrapper codeWrapper = CodeWrapperUtil.fromJson(msg.text());
-            dockerJavaClient.exec(CodeLang.valueOf(codeWrapper.getLangType().toUpperCase()),codeWrapper.getContent(),ctx);
-            log.info(&quot;收到客户端信息：&quot;+msg.text());
+     */</span>
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">channelRead0</span><span class="token punctuation">(</span><span class="token class-name">ChannelHandlerContext</span> ctx<span class="token punctuation">,</span> <span class="token class-name">TextWebSocketFrame</span> msg<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">try</span><span class="token punctuation">&#123;</span>
+            <span class="token class-name">CodeWrapper</span> codeWrapper <span class="token operator">=</span> <span class="token class-name">CodeWrapperUtil</span><span class="token punctuation">.</span><span class="token function">fromJson</span><span class="token punctuation">(</span>msg<span class="token punctuation">.</span><span class="token function">text</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            dockerJavaClient<span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token class-name">CodeLang</span><span class="token punctuation">.</span><span class="token function">valueOf</span><span class="token punctuation">(</span>codeWrapper<span class="token punctuation">.</span><span class="token function">getLangType</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toUpperCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>codeWrapper<span class="token punctuation">.</span><span class="token function">getContent</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>ctx<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            log<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"收到客户端信息："</span><span class="token operator">+</span>msg<span class="token punctuation">.</span><span class="token function">text</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        }catch (Exception e){
-            log.warn(&quot;执行过程中出现异常：&quot;);
-            e.printStackTrace();
-            ctx.channel().writeAndFlush(new TextWebSocketFrame(&quot;发生意外，运行出错！&quot;));
-        }
-    }
+        <span class="token punctuation">&#125;</span><span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            log<span class="token punctuation">.</span><span class="token function">warn</span><span class="token punctuation">(</span><span class="token string">"执行过程中出现异常："</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            ctx<span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">writeAndFlush</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">TextWebSocketFrame</span><span class="token punctuation">(</span><span class="token string">"发生意外，运行出错！"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
 
 
-    /**
+    <span class="token comment">/**
      * 建立连接
      * @param ctx
      * @throws Exception
-     */
-    @Override
-    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-        log.info(&quot;与客户端建立连接&quot;);
-    }
+     */</span>
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">handlerAdded</span><span class="token punctuation">(</span><span class="token class-name">ChannelHandlerContext</span> ctx<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        log<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"与客户端建立连接"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    /**
+    <span class="token comment">/**
      * 连接关闭
      * @param ctx
      * @throws Exception
-     */
-    @Override
-    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-        log.info(&quot;与客户端断开连接&quot;);
-    }
+     */</span>
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">handlerRemoved</span><span class="token punctuation">(</span><span class="token class-name">ChannelHandlerContext</span> ctx<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        log<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"与客户端断开连接"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    /**
+    <span class="token comment">/**
      * 捕获异常
      * @param ctx
      * @param cause
      * @throws Exception
-     */
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        log.error(&quot;异常发生&quot;+cause.getMessage());
-        ctx.close();//关闭连接
-    }
-}</code></pre>
+     */</span>
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">exceptionCaught</span><span class="token punctuation">(</span><span class="token class-name">ChannelHandlerContext</span> ctx<span class="token punctuation">,</span> <span class="token class-name">Throwable</span> cause<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">&#123;</span>
+        log<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span><span class="token string">"异常发生"</span><span class="token operator">+</span>cause<span class="token punctuation">.</span><span class="token function">getMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ctx<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//关闭连接</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <h1 id="各种编程语言的枚举">5 各种编程语言的枚举</h1><p>直接看代码：</p>
-<pre><code class="java">/**
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">/**
  * 编程语言及其相关属性的枚举
  * @author RhettPeng
- */
+ */</span>
 
-public enum CodeLang {
-    /**
+<span class="token keyword">public</span> <span class="token keyword">enum</span> <span class="token class-name">CodeLang</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">/**
      * Python语言
-     */
-    PYTHON3{
-        @Override
-        public String getImageName() {
-            return &quot;python:3&quot;;
-        }
+     */</span>
+    PYTHON3<span class="token punctuation">&#123;</span>
+        <span class="token annotation punctuation">@Override</span>
+        <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getImageName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> <span class="token string">"python:3"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-        @Override
-        public String getContainerNamePrefix() {
-            return &quot;python-running-script-&quot;;
-        }
+        <span class="token annotation punctuation">@Override</span>
+        <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getContainerNamePrefix</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> <span class="token string">"python-running-script-"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-        @Override
-        public String[][] getExecCommand(String fileName) {
-            return new String[][]{{"python",fileName}};
-        }
+        <span class="token annotation punctuation">@Override</span>
+        <span class="token keyword">public</span> <span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">getExecCommand</span><span class="token punctuation">(</span><span class="token class-name">String</span> fileName<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#123;</span><span class="token string">"python"</span><span class="token punctuation">,</span>fileName<span class="token punctuation">&#125;</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-        @Override
-        public String getFileName() {
-            return &quot;temp.py&quot;;
-        }
-    },
-    /**
+        <span class="token annotation punctuation">@Override</span>
+        <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getFileName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> <span class="token string">"temp.py"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+    <span class="token comment">/**
      * C++语言
-     */
-    CPP{
-        @Override
-        public String getImageName() {
-            return &quot;gcc:7.3&quot;;
-        }
+     */</span>
+    CPP<span class="token punctuation">&#123;</span>
+        <span class="token annotation punctuation">@Override</span>
+        <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getImageName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> <span class="token string">"gcc:7.3"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-        @Override
-        public String getContainerNamePrefix() {
-            return &quot;cpp-running-file-&quot;;
-        }
+        <span class="token annotation punctuation">@Override</span>
+        <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getContainerNamePrefix</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> <span class="token string">"cpp-running-file-"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-        @Override
-        public String[][] getExecCommand(String fileName) {
-            return new String[][]{{"g++",fileName,"-o","temp"},{"./temp"}};
-        }
+        <span class="token annotation punctuation">@Override</span>
+        <span class="token keyword">public</span> <span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">getExecCommand</span><span class="token punctuation">(</span><span class="token class-name">String</span> fileName<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#123;</span><span class="token string">"g++"</span><span class="token punctuation">,</span>fileName<span class="token punctuation">,</span><span class="token string">"-o"</span><span class="token punctuation">,</span><span class="token string">"temp"</span><span class="token punctuation">&#125;</span><span class="token punctuation">,</span><span class="token punctuation">&#123;</span><span class="token string">"./temp"</span><span class="token punctuation">&#125;</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-        @Override
-        public String getFileName() {
-            return &quot;temp.cpp&quot;;
-        }
-    },
-    /**
+        <span class="token annotation punctuation">@Override</span>
+        <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getFileName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> <span class="token string">"temp.cpp"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+    <span class="token comment">/**
      * JAVA语言
-     */
-    JAVA{
-        @Override
-        public String getImageName() {
-            return &quot;openjdk:11&quot;;
-        }
+     */</span>
+    JAVA<span class="token punctuation">&#123;</span>
+        <span class="token annotation punctuation">@Override</span>
+        <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getImageName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> <span class="token string">"openjdk:11"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-        @Override
-        public String getContainerNamePrefix() {
-            return &quot;java-running-file-&quot;;
-        }
+        <span class="token annotation punctuation">@Override</span>
+        <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getContainerNamePrefix</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> <span class="token string">"java-running-file-"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        
+        <span class="token annotation punctuation">@Override</span>
+        <span class="token keyword">public</span> <span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">getExecCommand</span><span class="token punctuation">(</span><span class="token class-name">String</span> fileName<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token comment">// jdk11可以不经过javac</span>
+            <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#123;</span><span class="token string">"java"</span><span class="token punctuation">,</span>fileName<span class="token punctuation">&#125;</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-        @Override
-        public String[][] getExecCommand(String fileName) {
-            // jdk11可以不经过javac
-            return new String[][]{{"java",fileName}};
-        }
+        <span class="token annotation punctuation">@Override</span>
+        <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getFileName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> <span class="token string">"Untitled.java"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-        @Override
-        public String getFileName() {
-            return &quot;Untitled.java&quot;;
-        }
-
-    },
-    /**
+    <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+    <span class="token comment">/**
      * Go语言
-     */
-    GOLANG{
-        @Override
-        public String getImageName() {
-            return &quot;golang:1.14&quot;;
-        }
+     */</span>
+    GOLANG<span class="token punctuation">&#123;</span>
+        <span class="token annotation punctuation">@Override</span>
+        <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getImageName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> <span class="token string">"golang:1.14"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-        @Override
-        public String getContainerNamePrefix() {
-            return &quot;golang-running-file-&quot;;
-        }
+        <span class="token annotation punctuation">@Override</span>
+        <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getContainerNamePrefix</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> <span class="token string">"golang-running-file-"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-        @Override
-        public String[][] getExecCommand(String fileName) {
-            // Go可不经过编译
-            return new String[][]{{"go","run",fileName}};
-        }
+        <span class="token annotation punctuation">@Override</span>
+        <span class="token keyword">public</span> <span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">getExecCommand</span><span class="token punctuation">(</span><span class="token class-name">String</span> fileName<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token comment">// Go可不经过编译</span>
+            <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#123;</span><span class="token string">"go"</span><span class="token punctuation">,</span><span class="token string">"run"</span><span class="token punctuation">,</span>fileName<span class="token punctuation">&#125;</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-        @Override
-        public String getFileName() {
-            return &quot;temp.go&quot;;
-        }
+        <span class="token annotation punctuation">@Override</span>
+        <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getFileName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> <span class="token string">"temp.go"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-    };
+    <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
 
-    private static final String SRC_PATH = &quot;/root/sourcecode/&quot;;
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token class-name">String</span> SRC_PATH <span class="token operator">=</span> <span class="token string">"/root/sourcecode/"</span><span class="token punctuation">;</span>
 
-    public String getImageName(){
-        return null;
-    }
+    <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getImageName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    public String getContainerNamePrefix(){
-        return null;
-    }
+    <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getContainerNamePrefix</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    // 代表将一个文件运行起来需要执行的指令，供Docker EXEC调用
-    public String[][] getExecCommand(String fileName){
-        return null;
-    }
+    <span class="token comment">// 代表将一个文件运行起来需要执行的指令，供Docker EXEC调用</span>
+    <span class="token keyword">public</span> <span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">getExecCommand</span><span class="token punctuation">(</span><span class="token class-name">String</span> fileName<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    public String getFileName(){return null;}
-}</code></pre>
+    <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getFileName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span><span class="token keyword">return</span> <span class="token keyword">null</span><span class="token punctuation">;</span><span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>这部分的功能，我一开始是考虑使用接口或枚举二者选其一来完成，后来还是选择了枚举，虽然使用接口实现更容易拓展，但枚举一可以实现单例，二能避免写很多冗杂的小类。</p>
 <h1 id="Docker客户端的开发">6 Docker客户端的开发</h1><p>这个类是实现核心功能的类了，我一开始的思路是，在宿主机上创建几个用于存放用户源代码的目录，接收用户传来的代码后通过File API在宿主机上创建对应的文件，然后创建容器时通过数据卷绑定，让容器运行源文件。</p>
 <p>但是这样的思路我在实现的时候遇到了一些问题，例如多个用户同时运行一段Java代码，会创建多个Java容器，由于多个容器之间是共享数据卷的，因此创建的文件名不能相同，否则会冲突，而Java文件的命名要求又必须和public类相同，因此会比较麻烦。</p>
 <p>最终我通过创建容器的时候通过EXEC，直接将代码写入容器中的一个文件，而不经过宿主机，得到了更高的隔离性，不过这样也遇到了一些麻烦，比如我一开始是这样写的：</p>
-<pre><code class="java">/**
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">/**
 * 将程序代码写入容器中的一个文件
 * @param dockerClient
 * @param containerId
@@ -693,27 +699,28 @@ public enum CodeLang {
 * @param sourcecode
 * @return 文件名
 * @throws InterruptedException
-*/
-private String writeFileToContainer(DockerClient dockerClient,String containerId,CodeLang langType,String sourcecode) throws InterruptedException {
-    String workDir = &quot;/usr/src/myapp&quot;;
-    String fileName = langType.getFileName();
-    String path = workDir + &quot;/&quot; + fileName;
+*/</span>
+<span class="token keyword">private</span> <span class="token class-name">String</span> <span class="token function">writeFileToContainer</span><span class="token punctuation">(</span><span class="token class-name">DockerClient</span> dockerClient<span class="token punctuation">,</span><span class="token class-name">String</span> containerId<span class="token punctuation">,</span><span class="token class-name">CodeLang</span> langType<span class="token punctuation">,</span><span class="token class-name">String</span> sourcecode<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">InterruptedException</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">String</span> workDir <span class="token operator">=</span> <span class="token string">"/usr/src/myapp"</span><span class="token punctuation">;</span>
+    <span class="token class-name">String</span> fileName <span class="token operator">=</span> langType<span class="token punctuation">.</span><span class="token function">getFileName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">String</span> path <span class="token operator">=</span> workDir <span class="token operator">+</span> <span class="token string">"/"</span> <span class="token operator">+</span> fileName<span class="token punctuation">;</span>
 
-    // 创建一个指令请求
-    ExecCreateCmdResponse createCmdResponse = dockerClient.execCreateCmd(containerId)
-            // 通过重定向符写入文件
-            .withCmd(&quot;echo&quot;, &quot;&#39;&quot;+sourcecode+&quot;&#39;&quot;, &quot;&gt;&quot; , path)
-            .exec();
+    <span class="token comment">// 创建一个指令请求</span>
+    <span class="token class-name">ExecCreateCmdResponse</span> createCmdResponse <span class="token operator">=</span> dockerClient<span class="token punctuation">.</span><span class="token function">execCreateCmd</span><span class="token punctuation">(</span>containerId<span class="token punctuation">)</span>
+            <span class="token comment">// 通过重定向符写入文件</span>
+            <span class="token punctuation">.</span><span class="token function">withCmd</span><span class="token punctuation">(</span><span class="token string">"echo"</span><span class="token punctuation">,</span> <span class="token string">"'"</span><span class="token operator">+</span>sourcecode<span class="token operator">+</span><span class="token string">"'"</span><span class="token punctuation">,</span> <span class="token string">">"</span> <span class="token punctuation">,</span> path<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    // 执行指令
-    dockerClient.execStartCmd(createCmdResponse.getId())
-            .exec(new ExecStartResultCallback(System.out,System.err))
-            .awaitCompletion();
-    return fileName;
-}</code></pre>
+    <span class="token comment">// 执行指令</span>
+    dockerClient<span class="token punctuation">.</span><span class="token function">execStartCmd</span><span class="token punctuation">(</span>createCmdResponse<span class="token punctuation">.</span><span class="token function">getId</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ExecStartResultCallback</span><span class="token punctuation">(</span><span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">,</span><span class="token class-name">System</span><span class="token punctuation">.</span>err<span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">awaitCompletion</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> fileName<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>主要思路是通过<code>echo</code>+重定向符，将源代码写入容器中的一个文件，但是这样写最终却发现没有创建任何文件!</p>
 <p>后来通过搜索发现，<strong>使用<code>Docker EXEC</code>的时候，重定向符确实会失效，这是因为EXEC的环境其实不在用户SHELL中</strong>，如果要使用重定向符，需要这样修改：</p>
-<pre><code class="java">/**
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">/**
 * 将程序代码写入容器中的一个文件
 * @param dockerClient
 * @param containerId
@@ -721,70 +728,71 @@ private String writeFileToContainer(DockerClient dockerClient,String containerId
 * @param sourcecode
 * @return
 * @throws InterruptedException
-*/
-private String writeFileToContainer(DockerClient dockerClient,String containerId,CodeLang langType,String sourcecode) throws InterruptedException {
-    String workDir = &quot;/usr/src/myapp&quot;;
-    String fileName = langType.getFileName();
-    String path = workDir + &quot;/&quot; + fileName;
-    // 通过重定向符写入文件，注意必须要带前面两个参数，否则重定向符会失效，和Docker CMD的机制有关
-    ExecCreateCmdResponse createCmdResponse = dockerClient.execCreateCmd(containerId)
-            .withCmd(&quot;/bin/sh&quot;,&quot;-c&quot;, &quot;echo &#39;&quot;+sourcecode+&quot;&#39; &gt; &quot;+path)
-            .exec();
-    dockerClient.execStartCmd(createCmdResponse.getId())
-            .exec(new ExecStartResultCallback(System.out,System.err))
-            .awaitCompletion();
-    return fileName;
-}</code></pre>
-<p>最终整个类：</p>
-<pre><code class="java">/**
- * @author RhettPeng
- */
-public class DockerJavaClient {
-    /**
-     * 计数器，用于给容器名取后缀
-     */
-    private static int counter = 0;
+*/</span>
+<span class="token keyword">private</span> <span class="token class-name">String</span> <span class="token function">writeFileToContainer</span><span class="token punctuation">(</span><span class="token class-name">DockerClient</span> dockerClient<span class="token punctuation">,</span><span class="token class-name">String</span> containerId<span class="token punctuation">,</span><span class="token class-name">CodeLang</span> langType<span class="token punctuation">,</span><span class="token class-name">String</span> sourcecode<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">InterruptedException</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">String</span> workDir <span class="token operator">=</span> <span class="token string">"/usr/src/myapp"</span><span class="token punctuation">;</span>
+    <span class="token class-name">String</span> fileName <span class="token operator">=</span> langType<span class="token punctuation">.</span><span class="token function">getFileName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">String</span> path <span class="token operator">=</span> workDir <span class="token operator">+</span> <span class="token string">"/"</span> <span class="token operator">+</span> fileName<span class="token punctuation">;</span>
+    <span class="token comment">// 通过重定向符写入文件，注意必须要带前面两个参数，否则重定向符会失效，和Docker CMD的机制有关</span>
+    <span class="token class-name">ExecCreateCmdResponse</span> createCmdResponse <span class="token operator">=</span> dockerClient<span class="token punctuation">.</span><span class="token function">execCreateCmd</span><span class="token punctuation">(</span>containerId<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">withCmd</span><span class="token punctuation">(</span><span class="token string">"/bin/sh"</span><span class="token punctuation">,</span><span class="token string">"-c"</span><span class="token punctuation">,</span> <span class="token string">"echo '"</span><span class="token operator">+</span>sourcecode<span class="token operator">+</span><span class="token string">"' > "</span><span class="token operator">+</span>path<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    dockerClient<span class="token punctuation">.</span><span class="token function">execStartCmd</span><span class="token punctuation">(</span>createCmdResponse<span class="token punctuation">.</span><span class="token function">getId</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ExecStartResultCallback</span><span class="token punctuation">(</span><span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">,</span><span class="token class-name">System</span><span class="token punctuation">.</span>err<span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">awaitCompletion</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> fileName<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-    /**
+<p>最终整个类：</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">/**
+ * @author RhettPeng
+ */</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">DockerJavaClient</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">/**
+     * 计数器，用于给容器名取后缀
+     */</span>
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">int</span> counter <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+
+    <span class="token comment">/**
      * 获取一个docker连接
      * @return
-     */
-    public DockerClient getDockerClient(){
-        DockerCmdExecFactory dockerCmdExecFactory = new JerseyDockerCmdExecFactory().withReadTimeout(10000)
-                .withConnectTimeout(2000);
+     */</span>
+    <span class="token keyword">public</span> <span class="token class-name">DockerClient</span> <span class="token function">getDockerClient</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token class-name">DockerCmdExecFactory</span> dockerCmdExecFactory <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">JerseyDockerCmdExecFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">withReadTimeout</span><span class="token punctuation">(</span><span class="token number">10000</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">withConnectTimeout</span><span class="token punctuation">(</span><span class="token number">2000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
-                .withDockerHost(&quot;tcp://8.129.170.210:2375&quot;)
-                .withDockerTlsVerify(true)
-                .withDockerCertPath(&quot;D:\\certs\\docker&quot;)
-                .withDockerConfig(&quot;D:\\certs\\docker&quot;)
-                .withRegistryUrl(&quot;https://index.docker.io/v1/&quot;)
-                .withRegistryUsername(&quot;Rhett&quot;)
-                .withRegistryPassword(&quot;123456&quot;)
-                .withRegistryEmail(&quot;995632825@qq.com&quot;)
-                .build();
-        return DockerClientBuilder.getInstance(config)
-                .withDockerCmdExecFactory(dockerCmdExecFactory).build();
-    }
+        <span class="token class-name">DockerClientConfig</span> config <span class="token operator">=</span> <span class="token class-name">DefaultDockerClientConfig</span><span class="token punctuation">.</span><span class="token function">createDefaultConfigBuilder</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">withDockerHost</span><span class="token punctuation">(</span><span class="token string">"tcp://8.129.170.210:2375"</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">withDockerTlsVerify</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">withDockerCertPath</span><span class="token punctuation">(</span><span class="token string">"D:\\certs\\docker"</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">withDockerConfig</span><span class="token punctuation">(</span><span class="token string">"D:\\certs\\docker"</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">withRegistryUrl</span><span class="token punctuation">(</span><span class="token string">"https://index.docker.io/v1/"</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">withRegistryUsername</span><span class="token punctuation">(</span><span class="token string">"Rhett"</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">withRegistryPassword</span><span class="token punctuation">(</span><span class="token string">"123456"</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">withRegistryEmail</span><span class="token punctuation">(</span><span class="token string">"995632825@qq.com"</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">build</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token class-name">DockerClientBuilder</span><span class="token punctuation">.</span><span class="token function">getInstance</span><span class="token punctuation">(</span>config<span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">withDockerCmdExecFactory</span><span class="token punctuation">(</span>dockerCmdExecFactory<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">build</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    /**
+    <span class="token comment">/**
      * 创建运行代码的容器
      * @param dockerClient
      * @param langType
      * @return
-     */
-    private String createContainer(DockerClient dockerClient,CodeLang langType){
-        // 创建容器请求
-        CreateContainerResponse containerResponse = dockerClient.createContainerCmd(langType.getImageName())
-                .withName(langType.getContainerNamePrefix()+counter)
-                .withWorkingDir(&quot;/usr/src/myapp&quot;)
-                .withStdinOpen(true)
-                .exec();
+     */</span>
+    <span class="token keyword">private</span> <span class="token class-name">String</span> <span class="token function">createContainer</span><span class="token punctuation">(</span><span class="token class-name">DockerClient</span> dockerClient<span class="token punctuation">,</span><span class="token class-name">CodeLang</span> langType<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token comment">// 创建容器请求</span>
+        <span class="token class-name">CreateContainerResponse</span> containerResponse <span class="token operator">=</span> dockerClient<span class="token punctuation">.</span><span class="token function">createContainerCmd</span><span class="token punctuation">(</span>langType<span class="token punctuation">.</span><span class="token function">getImageName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">withName</span><span class="token punctuation">(</span>langType<span class="token punctuation">.</span><span class="token function">getContainerNamePrefix</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">+</span>counter<span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">withWorkingDir</span><span class="token punctuation">(</span><span class="token string">"/usr/src/myapp"</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">withStdinOpen</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        return containerResponse.getId();
-    }
+        <span class="token keyword">return</span> containerResponse<span class="token punctuation">.</span><span class="token function">getId</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    /**
+    <span class="token comment">/**
      * 将程序代码写入容器中的一个文件
      * @param dockerClient
      * @param containerId
@@ -792,22 +800,22 @@ public class DockerJavaClient {
      * @param sourcecode
      * @return
      * @throws InterruptedException
-     */
-    private String writeFileToContainer(DockerClient dockerClient,String containerId,CodeLang langType,String sourcecode) throws InterruptedException {
-        String workDir = &quot;/usr/src/myapp&quot;;
-        String fileName = langType.getFileName();
-        String path = workDir + &quot;/&quot; + fileName;
-        // 通过重定向符写入文件，注意必须要带前面两个参数，否则重定向符会失效，和Docker CMD的机制有关
-        ExecCreateCmdResponse createCmdResponse = dockerClient.execCreateCmd(containerId)
-                .withCmd(&quot;/bin/sh&quot;,&quot;-c&quot;, &quot;echo &#39;&quot;+sourcecode+&quot;&#39; &gt; &quot;+path)
-                .exec();
-        dockerClient.execStartCmd(createCmdResponse.getId())
-                .exec(new ExecStartResultCallback(System.out,System.err))
-                .awaitCompletion();
-        return fileName;
-    }
+     */</span>
+    <span class="token keyword">private</span> <span class="token class-name">String</span> <span class="token function">writeFileToContainer</span><span class="token punctuation">(</span><span class="token class-name">DockerClient</span> dockerClient<span class="token punctuation">,</span><span class="token class-name">String</span> containerId<span class="token punctuation">,</span><span class="token class-name">CodeLang</span> langType<span class="token punctuation">,</span><span class="token class-name">String</span> sourcecode<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">InterruptedException</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">String</span> workDir <span class="token operator">=</span> <span class="token string">"/usr/src/myapp"</span><span class="token punctuation">;</span>
+        <span class="token class-name">String</span> fileName <span class="token operator">=</span> langType<span class="token punctuation">.</span><span class="token function">getFileName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">String</span> path <span class="token operator">=</span> workDir <span class="token operator">+</span> <span class="token string">"/"</span> <span class="token operator">+</span> fileName<span class="token punctuation">;</span>
+        <span class="token comment">// 通过重定向符写入文件，注意必须要带前面两个参数，否则重定向符会失效，和Docker CMD的机制有关</span>
+        <span class="token class-name">ExecCreateCmdResponse</span> createCmdResponse <span class="token operator">=</span> dockerClient<span class="token punctuation">.</span><span class="token function">execCreateCmd</span><span class="token punctuation">(</span>containerId<span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">withCmd</span><span class="token punctuation">(</span><span class="token string">"/bin/sh"</span><span class="token punctuation">,</span><span class="token string">"-c"</span><span class="token punctuation">,</span> <span class="token string">"echo '"</span><span class="token operator">+</span>sourcecode<span class="token operator">+</span><span class="token string">"' > "</span><span class="token operator">+</span>path<span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        dockerClient<span class="token punctuation">.</span><span class="token function">execStartCmd</span><span class="token punctuation">(</span>createCmdResponse<span class="token punctuation">.</span><span class="token function">getId</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ExecStartResultCallback</span><span class="token punctuation">(</span><span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">,</span><span class="token class-name">System</span><span class="token punctuation">.</span>err<span class="token punctuation">)</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">awaitCompletion</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> fileName<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    /**
+    <span class="token comment">/**
      * 在容器上EXEC一条CMD命令
      * @param dockerClient docker客户端
      * @param command 命令，EXEC数组
@@ -816,106 +824,106 @@ public class DockerJavaClient {
      * @param ctx
      * @param isFinal 是否是最后一条指令
      * @throws InterruptedException
-     */
-    private void runCommandOnContainer(DockerClient dockerClient, String[] command, String containerId,
-                                       int timeout,ChannelHandlerContext ctx,boolean isFinal) throws InterruptedException {
-        ExecCreateCmdResponse createCmdResponse = dockerClient.execCreateCmd(containerId)
-                .withAttachStdout(true)
-                .withAttachStderr(true)
-                .withCmd(command)
-                .exec();
-        dockerClient.execStartCmd(createCmdResponse.getId())
-                .exec(new RunCodeResultCallback(ctx,isFinal))
-                .awaitCompletion(timeout,TimeUnit.SECONDS);
-    }
+     */</span>
+    <span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">runCommandOnContainer</span><span class="token punctuation">(</span><span class="token class-name">DockerClient</span> dockerClient<span class="token punctuation">,</span> <span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> command<span class="token punctuation">,</span> <span class="token class-name">String</span> containerId<span class="token punctuation">,</span>
+                                       <span class="token keyword">int</span> timeout<span class="token punctuation">,</span><span class="token class-name">ChannelHandlerContext</span> ctx<span class="token punctuation">,</span><span class="token keyword">boolean</span> isFinal<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">InterruptedException</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">ExecCreateCmdResponse</span> createCmdResponse <span class="token operator">=</span> dockerClient<span class="token punctuation">.</span><span class="token function">execCreateCmd</span><span class="token punctuation">(</span>containerId<span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">withAttachStdout</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">withAttachStderr</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">withCmd</span><span class="token punctuation">(</span>command<span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        dockerClient<span class="token punctuation">.</span><span class="token function">execStartCmd</span><span class="token punctuation">(</span>createCmdResponse<span class="token punctuation">.</span><span class="token function">getId</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">RunCodeResultCallback</span><span class="token punctuation">(</span>ctx<span class="token punctuation">,</span>isFinal<span class="token punctuation">)</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">awaitCompletion</span><span class="token punctuation">(</span>timeout<span class="token punctuation">,</span><span class="token class-name">TimeUnit</span><span class="token punctuation">.</span>SECONDS<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    /**
+    <span class="token comment">/**
      * 执行一个程序
      * @param langType 编程语言类型
      * @param sourcecode 源代码
      * @throws InterruptedException
      * @throws IOException
-     */
-    public void exec(CodeLang langType, String sourcecode, ChannelHandlerContext ctx){
-        DockerClient dockerClient = getDockerClient();
-        // 计数器加一
-        counter++;
+     */</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">exec</span><span class="token punctuation">(</span><span class="token class-name">CodeLang</span> langType<span class="token punctuation">,</span> <span class="token class-name">String</span> sourcecode<span class="token punctuation">,</span> <span class="token class-name">ChannelHandlerContext</span> ctx<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token class-name">DockerClient</span> dockerClient <span class="token operator">=</span> <span class="token function">getDockerClient</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">// 计数器加一</span>
+        counter<span class="token operator">++</span><span class="token punctuation">;</span>
 
-        // 创建容器
-        String containerId = createContainer(dockerClient, langType);
+        <span class="token comment">// 创建容器</span>
+        <span class="token class-name">String</span> containerId <span class="token operator">=</span> <span class="token function">createContainer</span><span class="token punctuation">(</span>dockerClient<span class="token punctuation">,</span> langType<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        // 运行容器
-        dockerClient.startContainerCmd(containerId).exec();
+        <span class="token comment">// 运行容器</span>
+        dockerClient<span class="token punctuation">.</span><span class="token function">startContainerCmd</span><span class="token punctuation">(</span>containerId<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        try {
-            writeFileToContainer(dockerClient, containerId, langType, sourcecode);
-            String[][] commands = langType.getExecCommand(langType.getFileName());
-            for(int i = 0;i&lt;commands.length;i++){
-                runCommandOnContainer(dockerClient, commands[i], containerId, 10, ctx,i==commands.length-1);
-            }
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            <span class="token function">writeFileToContainer</span><span class="token punctuation">(</span>dockerClient<span class="token punctuation">,</span> containerId<span class="token punctuation">,</span> langType<span class="token punctuation">,</span> sourcecode<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span> commands <span class="token operator">=</span> langType<span class="token punctuation">.</span><span class="token function">getExecCommand</span><span class="token punctuation">(</span>langType<span class="token punctuation">.</span><span class="token function">getFileName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>commands<span class="token punctuation">.</span>length<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                <span class="token function">runCommandOnContainer</span><span class="token punctuation">(</span>dockerClient<span class="token punctuation">,</span> commands<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> containerId<span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">,</span> ctx<span class="token punctuation">,</span>i<span class="token operator">==</span>commands<span class="token punctuation">.</span>length<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
 
 
-        }catch (Exception e){
-            e.printStackTrace();
-        }finally {
-            // 移除容器
-            dockerClient.killContainerCmd(containerId).exec();
-            dockerClient.removeContainerCmd(containerId).exec();
-            counter--;
-            try {
-                dockerClient.close();
-            } catch (IOException exception) {
-                exception.printStackTrace();
-            }
-        }
-    }
-}</code></pre>
+        <span class="token punctuation">&#125;</span><span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span><span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+            <span class="token comment">// 移除容器</span>
+            dockerClient<span class="token punctuation">.</span><span class="token function">killContainerCmd</span><span class="token punctuation">(</span>containerId<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            dockerClient<span class="token punctuation">.</span><span class="token function">removeContainerCmd</span><span class="token punctuation">(</span>containerId<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            counter<span class="token operator">--</span><span class="token punctuation">;</span>
+            <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+                dockerClient<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> exception<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                exception<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <h1 id="将Docker的响应返回给用户">7 将Docker的响应返回给用户</h1><p>至于怎么将Docker的响应返回给用户，就是在EXEC执行指令的时候，通过一个结果回调，让它持有WebSocket处理器的一个引用，这样收到一个响应就能立刻返回给用户：</p>
-<pre><code class="java">/**
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">/**
  * 接收到docker信息的回调
  * @author RhettPeng
- */
-@Slf4j
-public class RunCodeResultCallback extends ResultCallbackTemplate&lt;ExecStartResultCallback, Frame&gt; {
+ */</span>
+<span class="token annotation punctuation">@Slf4j</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">RunCodeResultCallback</span> <span class="token keyword">extends</span> <span class="token class-name">ResultCallbackTemplate</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">ExecStartResultCallback</span><span class="token punctuation">,</span> <span class="token class-name">Frame</span><span class="token punctuation">></span></span> <span class="token punctuation">&#123;</span>
 
-    private ChannelHandlerContext ctx;
-    private boolean isFinal;
-    private long startTime;
+    <span class="token keyword">private</span> <span class="token class-name">ChannelHandlerContext</span> ctx<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token keyword">boolean</span> isFinal<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token keyword">long</span> startTime<span class="token punctuation">;</span>
 
-    public RunCodeResultCallback(ChannelHandlerContext ctx,boolean isFinal) {
-        this.ctx = ctx;
-        this.isFinal = isFinal;
-        if(isFinal) {
-            startTime = System.currentTimeMillis();
-        }
-    }
+    <span class="token keyword">public</span> <span class="token class-name">RunCodeResultCallback</span><span class="token punctuation">(</span><span class="token class-name">ChannelHandlerContext</span> ctx<span class="token punctuation">,</span><span class="token keyword">boolean</span> isFinal<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>ctx <span class="token operator">=</span> ctx<span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>isFinal <span class="token operator">=</span> isFinal<span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>isFinal<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            startTime <span class="token operator">=</span> <span class="token class-name">System</span><span class="token punctuation">.</span><span class="token function">currentTimeMillis</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
 
-    @Override
-    public void onNext(Frame frame) {
-        log.info(&quot;收到docker响应&quot;);
-        if (frame != null) {
-            String msg = new String(frame.getPayload());
-            switch (frame.getStreamType()) {
-                case STDOUT:
-                case RAW:
-                case STDERR:
-                    ctx.channel().writeAndFlush(new TextWebSocketFrame(msg));
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">onNext</span><span class="token punctuation">(</span><span class="token class-name">Frame</span> frame<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        log<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"收到docker响应"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>frame <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token class-name">String</span> msg <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">String</span><span class="token punctuation">(</span>frame<span class="token punctuation">.</span><span class="token function">getPayload</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">switch</span> <span class="token punctuation">(</span>frame<span class="token punctuation">.</span><span class="token function">getStreamType</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                <span class="token keyword">case</span> STDOUT<span class="token operator">:</span>
+                <span class="token keyword">case</span> RAW<span class="token operator">:</span>
+                <span class="token keyword">case</span> STDERR<span class="token operator">:</span>
+                    ctx<span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">writeAndFlush</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">TextWebSocketFrame</span><span class="token punctuation">(</span>msg<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token keyword">break</span><span class="token punctuation">;</span>
+                <span class="token keyword">default</span><span class="token operator">:</span>
+                    <span class="token keyword">break</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
 
-    @Override
-    public void onComplete() {
-        if(isFinal){
-            long endTime = System.currentTimeMillis();
-            ctx.channel().writeAndFlush(new TextWebSocketFrame(&quot;程序运行结束，总耗费时间：&quot;+(endTime-startTime)/1000.0+&quot;s&quot;));
-        }
-    }
-}</code></pre>
-
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">onComplete</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>isFinal<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token keyword">long</span> endTime <span class="token operator">=</span> <span class="token class-name">System</span><span class="token punctuation">.</span><span class="token function">currentTimeMillis</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            ctx<span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">writeAndFlush</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">TextWebSocketFrame</span><span class="token punctuation">(</span><span class="token string">"程序运行结束，总耗费时间："</span><span class="token operator">+</span><span class="token punctuation">(</span>endTime<span class="token operator">-</span>startTime<span class="token punctuation">)</span><span class="token operator">/</span><span class="token number">1000.0</span><span class="token operator">+</span><span class="token string">"s"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
             </div>
             <hr/>
 
@@ -1549,7 +1557,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

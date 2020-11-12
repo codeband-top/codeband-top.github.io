@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="keywords" content="leetcode380-常数时间插入、删除和获取随机元素, 代码段小站">
-    <meta name="description" content="1 原题设计一个支持在平均 时间复杂度 O(1) 下，执行以下操作的数据结构。
+    <meta name="description" content="1 原题设计一个支持在平均 时间复杂度 O(1) 下，执行以下操作的数据结构。
 
 insert(val)：当元素 val 不存在时，向集合中插入该项。
 remove(val)：元素 val 存在时，从集合中移除该项。
@@ -31,6 +31,7 @@ getRandom：随">
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -367,12 +368,12 @@ getRandom：随">
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
-                                <span class="chip bg-color">数据结构</span>
-                            </a>
-                        
                             <a href="/tags/leetcode/">
                                 <span class="chip bg-color">leetcode</span>
+                            </a>
+                        
+                            <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
+                                <span class="chip bg-color">数据结构</span>
                             </a>
                         
                     </div>
@@ -418,11 +419,11 @@ getRandom：随">
         <hr class="clearfix">
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h1 id="原题">1 原题</h1><p>设计一个支持在平均 时间复杂度 <strong><em>O(1)</em></strong> 下，执行以下操作的数据结构。</p>
+                <h1 id="原题">1 原题</h1><p>设计一个支持在平均 时间复杂度 <strong><em>O(1)</em></strong> 下，执行以下操作的数据结构。</p>
 <ol>
 <li><code>insert(val)</code>：当元素 val 不存在时，向集合中插入该项。</li>
 <li><code>remove(val)</code>：元素 val 存在时，从集合中移除该项。</li>
-<li><code>getRandom</code>：随机返回现有集合中的一项。每个元素应该有<strong><em>相同的概率</em></strong>被返回。</li>
+<li><code>getRandom</code>：随机返回现有集合中的一项。每个元素应该有**<em>相同的概率**</em>被返回。</li>
 </ol>
 <p><strong>示例：</strong></p>
 <blockquote>
@@ -439,111 +440,111 @@ getRandom：随">
 <p>哈希表插入和删除都是<code>O(1)</code>，而顺序表随机访问则是<code>O(1)</code>，可以使用ArrayList来存储所有的数据。但是必须解决ArrayList删除元素的<code>O(n)</code>问题。  </p>
 <p>于是可以：</p>
 <p>在哈希表中用value-index来记录值和在list中的下标的对应关系，如图所示</p>
-<p><img src="https://api.codetool.top/img/15775470173323.png" alt></p>
+<p><img src="https://api.codetool.top/img/15775470173323.png"></p>
 <p>当删除元素时，size减一，用list中最后那个元素替换要删除的那个元素，并且将哈希表中的对应关系改过来（用要删除的元素的index替换list中最后那个元素对应的index）：</p>
-<p><img src="https://api.codetool.top/img/1577547151755.png" alt></p>
+<p><img src="https://api.codetool.top/img/1577547151755.png"></p>
 <p>此时若要随机访问元素，只需获取list中前3(size)个元素中的一个。</p>
 <p>那么如果需要继续插入元素，只需从list中下标为3(size)处替换掉后面那个元素或是在后面那个元素之前插入（这里如果用插入是使用add(index,value)方法，个人觉得比起set会增加时间复杂度，因为使用add后面的元素都需要向后移动，虽然jdk源码中使用了System.arraycopy即内存拷贝来优化，但是也比直接替换的时间复杂度更高）：</p>
-<p><img src="https://api.codetool.top/img/15775473303971.png" alt title="该图显示的是替换"></p>
+<p><img src="https://api.codetool.top/img/15775473303971.png" title="该图显示的是替换"></p>
 <p>如果不是替换元素而是add操作，这里会变成<code>1-4-2-8-4</code>。</p>
 <h2 id="代码">2.2 代码</h2><ol>
 <li>初始想法</li>
 </ol>
-<pre><code class="java">class RandomizedSet {
-    Object none = new Object();
-    HashMap&lt;Integer,Object&gt; map;
-    Random random;
-    /** Initialize your data structure here. */
-    public RandomizedSet() {
-        map = new HashMap&lt;&gt;();
-        random = new Random();
-    }
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">RandomizedSet</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">Object</span> none <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Object</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">HashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Integer</span><span class="token punctuation">,</span><span class="token class-name">Object</span><span class="token punctuation">></span></span> map<span class="token punctuation">;</span>
+    <span class="token class-name">Random</span> random<span class="token punctuation">;</span>
+    <span class="token comment">/** Initialize your data structure here. */</span>
+    <span class="token keyword">public</span> <span class="token class-name">RandomizedSet</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        map <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        random <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Random</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    
+    <span class="token comment">/** Inserts a value to the set. Returns true if the set did not already contain the specified element. */</span>
+    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">insert</span><span class="token punctuation">(</span><span class="token keyword">int</span> val<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>map<span class="token punctuation">.</span><span class="token function">containsKey</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+        map<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>val<span class="token punctuation">,</span>none<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    
+    <span class="token comment">/** Removes a value from the set. Returns true if the set contained the specified element. */</span>
+    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">remove</span><span class="token punctuation">(</span><span class="token keyword">int</span> val<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>map<span class="token punctuation">.</span><span class="token function">containsKey</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+        map<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    
+    <span class="token comment">/** Get a random element from the set. */</span>
+    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">getRandom</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">int</span> ran <span class="token operator">=</span> random<span class="token punctuation">.</span><span class="token function">nextInt</span><span class="token punctuation">(</span>map<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+        <span class="token keyword">int</span> n <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token class-name">Map</span><span class="token punctuation">.</span><span class="token class-name">Entry</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Integer</span><span class="token punctuation">,</span><span class="token class-name">Object</span><span class="token punctuation">></span></span> i<span class="token operator">:</span>map<span class="token punctuation">.</span><span class="token function">entrySet</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>n<span class="token operator">==</span>ran<span class="token punctuation">)</span> <span class="token keyword">return</span> i<span class="token punctuation">.</span><span class="token function">getKey</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            n<span class="token operator">++</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
 
-    /** Inserts a value to the set. Returns true if the set did not already contain the specified element. */
-    public boolean insert(int val) {
-        if(map.containsKey(val)) return false;
-        map.put(val,none);
-        return true;
-    }
-
-    /** Removes a value from the set. Returns true if the set contained the specified element. */
-    public boolean remove(int val) {
-        if(!map.containsKey(val)) return false;
-        map.remove(val);
-        return true;
-    }
-
-    /** Get a random element from the set. */
-    public int getRandom() {
-        int ran = random.nextInt(map.size());  
-        int n = 0;
-        for(Map.Entry&lt;Integer,Object&gt; i:map.entrySet()){
-            if(n==ran) return i.getKey();
-            n++;
-        }
-        return 0;
-    }
-}
-
-/**
+<span class="token comment">/**
  * Your RandomizedSet object will be instantiated and called as such:
  * RandomizedSet obj = new RandomizedSet();
  * boolean param_1 = obj.insert(val);
  * boolean param_2 = obj.remove(val);
  * int param_3 = obj.getRandom();
- */</code></pre>
+ */</span></code></pre>
+
 <ol start="2">
 <li>正确解法（来源：leetcode用户，添加元素时是直接插入）</li>
 </ol>
-<pre><code class="java">class RandomizedSet {
-
-    Map&lt;Integer,Integer&gt; map; // 存放值和在 list 的下标位置的映射
-    List&lt;Integer&gt; list;       // 存放要插入数据的结构
-    int size;                 // 数据的长度
-    /** Initialize your data structure here. */
-    public RandomizedSet() {
-        map = new HashMap&lt;&gt;();
-        list = new ArrayList&lt;&gt;();
-        size = 0;
-    }
-
-    /** Inserts a value to the set. Returns true if the set did not already contain the specified element. */
-    public boolean insert(int val) {
-        if(map.containsKey(val)) return false;
-        else{
-            // 插入数据，并更新 map 的映射后将长度加一
-            list.add(size,val);
-            map.put(val,size++);
-            return true;
-        }
-    }
-
-    /** Removes a value from the set. Returns true if the set contained the specified element. */
-    public boolean remove(int val) {
-        if(!map.containsKey(val)) return false;
-        else if( size == 0 ){ map.remove(val);}
-        else{
-            // 取到 list 末尾的数据
-            int tailKey = list.get(size-1);
-            // 然后将要原先 map 中得 val-index 映射改为 tailKey-index
-            map.put(tailKey,map.get(val));
-            // 在 map 中取得 val 在 list 的位置，然后根据这个位置用末尾元素 tailKey 替代
-            list.set(map.get(val),tailKey);
-            // 在 map 中删除 val 的映射
-            map.remove(val);
-            size--;
-        }
-        return true;
-    }
-
-    /** Get a random element from the set. */
-    public int getRandom() {
-        Random rand = new Random();
-         // rand.nextInt(size) 产生的是 0 到 size（不包括 size） 的数据
-        return list.get(rand.nextInt(size));
-    }
-}</code></pre>
-
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">RandomizedSet</span> <span class="token punctuation">&#123;</span>
+ 
+    <span class="token class-name">Map</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Integer</span><span class="token punctuation">,</span><span class="token class-name">Integer</span><span class="token punctuation">></span></span> map<span class="token punctuation">;</span> <span class="token comment">// 存放值和在 list 的下标位置的映射</span>
+    <span class="token class-name">List</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Integer</span><span class="token punctuation">></span></span> list<span class="token punctuation">;</span>       <span class="token comment">// 存放要插入数据的结构</span>
+    <span class="token keyword">int</span> size<span class="token punctuation">;</span>                 <span class="token comment">// 数据的长度</span>
+    <span class="token comment">/** Initialize your data structure here. */</span>
+    <span class="token keyword">public</span> <span class="token class-name">RandomizedSet</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        map <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        list <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        size <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    
+    <span class="token comment">/** Inserts a value to the set. Returns true if the set did not already contain the specified element. */</span>
+    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">insert</span><span class="token punctuation">(</span><span class="token keyword">int</span> val<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>map<span class="token punctuation">.</span><span class="token function">containsKey</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+        <span class="token keyword">else</span><span class="token punctuation">&#123;</span>
+            <span class="token comment">// 插入数据，并更新 map 的映射后将长度加一</span>
+            list<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>size<span class="token punctuation">,</span>val<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            map<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>val<span class="token punctuation">,</span>size<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+    
+    <span class="token comment">/** Removes a value from the set. Returns true if the set contained the specified element. */</span>
+    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">remove</span><span class="token punctuation">(</span><span class="token keyword">int</span> val<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>map<span class="token punctuation">.</span><span class="token function">containsKey</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+        <span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span> size <span class="token operator">==</span> <span class="token number">0</span> <span class="token punctuation">)</span><span class="token punctuation">&#123;</span> map<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token punctuation">&#125;</span>
+        <span class="token keyword">else</span><span class="token punctuation">&#123;</span>
+            <span class="token comment">// 取到 list 末尾的数据</span>
+            <span class="token keyword">int</span> tailKey <span class="token operator">=</span> list<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>size<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">// 然后将要原先 map 中得 val-index 映射改为 tailKey-index</span>
+            map<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>tailKey<span class="token punctuation">,</span>map<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">// 在 map 中取得 val 在 list 的位置，然后根据这个位置用末尾元素 tailKey 替代</span>
+            list<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>map<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">,</span>tailKey<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">// 在 map 中删除 val 的映射</span>
+            map<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            size<span class="token operator">--</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    
+    <span class="token comment">/** Get a random element from the set. */</span>
+    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">getRandom</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">Random</span> rand <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Random</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+         <span class="token comment">// rand.nextInt(size) 产生的是 0 到 size（不包括 size） 的数据</span>
+        <span class="token keyword">return</span> list<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>rand<span class="token punctuation">.</span><span class="token function">nextInt</span><span class="token punctuation">(</span>size<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
             </div>
             <hr/>
 
@@ -596,12 +597,12 @@ getRandom：随">
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
-                                    <span class="chip bg-color">数据结构</span>
-                                </a>
-                            
                                 <a href="/tags/leetcode/">
                                     <span class="chip bg-color">leetcode</span>
+                                </a>
+                            
+                                <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
+                                    <span class="chip bg-color">数据结构</span>
                                 </a>
                             
                         </div>
@@ -1159,7 +1160,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

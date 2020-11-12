@@ -27,6 +27,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -405,7 +406,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    3.8k
+                    3.6k
                 </div>
                 
 
@@ -422,7 +423,7 @@
 <p>当面对一个有 SQL 性能问题的数据库时，我们应该从何处入手来进行系统的分析，使得能够尽快定位问题 SQL 并尽快解决问题。</p>
 <h1 id="查看SQL执行频率">1 查看SQL执行频率</h1><p>MySQL 客户端连接成功后，通过 <code>show [session|global] status</code> 命令可以提供服务器状态信息。<code>show [session|global] status</code> 可以<strong>根据需要加上参数“session”或者“global”来显示 session 级（当前连接）的计结果和 global 级（自数据库上次启动至今）的统计结果</strong>。如果不写，默认使用参数是“session”。</p>
 <p>下面的命令显示了当前 session 中所有统计参数的值：</p>
-<pre><code>mysql&gt; show status like &#39;Com_______&#39;;
+<pre class="language-none"><code class="language-none">mysql&gt; show status like &#39;Com_______&#39;;
 +---------------+-------+
 | Variable_name | Value |
 +---------------+-------+
@@ -437,8 +438,10 @@
 | Com_update    | 11    |
 | Com_xa_end    | 0     |
 +---------------+-------+
-10 rows in set (0.00 sec)</code></pre><p>global:</p>
-<pre><code>mysql&gt; show global status like &#39;Com_______&#39;;
+10 rows in set (0.00 sec)</code></pre>
+
+<p>global:</p>
+<pre class="language-none"><code class="language-none">mysql&gt; show global status like &#39;Com_______&#39;;
 +---------------+-------+
 | Variable_name | Value |
 +---------------+-------+
@@ -453,8 +456,10 @@
 | Com_update    | 0     |
 | Com_xa_end    | 0     |
 +---------------+-------+
-10 rows in set (0.00 sec)</code></pre><p>下面这条语句则只会查看使用innodb引擎表的操作次数：</p>
-<pre><code>mysql&gt; show status like &#39;Innodb_rows_%&#39;;
+10 rows in set (0.00 sec)</code></pre>
+
+<p>下面这条语句则只会查看使用innodb引擎表的操作次数：</p>
+<pre class="language-none"><code class="language-none">mysql&gt; show status like &#39;Innodb_rows_%&#39;;
 +----------------------+-------+
 | Variable_name        | Value |
 +----------------------+-------+
@@ -463,7 +468,9 @@
 | Innodb_rows_read     | 382   |
 | Innodb_rows_updated  | 17    |
 +----------------------+-------+
-4 rows in set (0.00 sec)</code></pre><table>
+4 rows in set (0.00 sec)</code></pre>
+
+<table>
 <thead>
 <tr>
 <th align="left">参数</th>
@@ -505,7 +512,7 @@
 </tbody></table>
 <h1 id="定位低效SQL">2 定位低效SQL</h1><p>可以通过以下两种方式定位执行效率较低的 SQL 语句。</p>
 <ul>
-<li>慢查询日志 : 通过慢查询日志定位那些执行效率较低的 SQL 语句，用–log-slow-queries[=file_name]选项启动时，mysqld 写一个包含所有执行时间超过 long_query_time 秒的 SQL 语句的日志文件。这方面的配置见<a href="../MySQL之日志配置全解">MySQL之日志配置全解</a></li>
+<li>慢查询日志 : 通过慢查询日志定位那些执行效率较低的 SQL 语句，用–log-slow-queries[=file_name]选项启动时，mysqld 写一个包含所有执行时间超过 long_query_time 秒的 SQL 语句的日志文件。这方面的配置见<a href="../MySQL%E4%B9%8B%E6%97%A5%E5%BF%97%E9%85%8D%E7%BD%AE%E5%85%A8%E8%A7%A3">MySQL之日志配置全解</a></li>
 <li>show processlist  : 慢查询日志在查询结束以后才纪录，所以在应用反映执行效率出现问题的时候查询慢查询日志并不能定位问题，可以使用show processlist命令查看当前MySQL在进行的线程，包括线程的状态、是否锁表等，可以实时地查看 SQL 的执行情况，同时对一些锁表操作进行优化。</li>
 </ul>
 <p>show processlist的结果：</p>
@@ -551,10 +558,12 @@
 </tbody></table>
 <h1 id="explain分析执行计划">3 explain分析执行计划</h1><p>通过以上步骤查询到效率低的 SQL 语句后，可以通过 EXPLAIN或者 DESC命令获取 MySQL如何执行 SELECT 语句的信息，包括在 SELECT 语句执行过程中表如何连接和连接的顺序。</p>
 <p>查询SQL语句的执行计划 ： </p>
-<pre><code class="sql">explain  select * from tb_item where id = 1;</code></pre>
-<p><img src="https://api.codetool.top/img/15833935425677.png" alt></p>
-<pre><code class="sql">explain  select * from tb_item where title = &#39;阿尔卡特 (OT-979) 冰川白 联通3G手机3&#39;;</code></pre>
-<p><img src="https://api.codetool.top/img/15833935895541.png" alt></p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">explain</span>  <span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> tb_item <span class="token keyword">where</span> id <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span></code></pre>
+
+<p><img src="https://api.codetool.top/img/15833935425677.png"></p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">explain</span>  <span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> tb_item <span class="token keyword">where</span> title <span class="token operator">=</span> <span class="token string">'阿尔卡特 (OT-979) 冰川白 联通3G手机3'</span><span class="token punctuation">;</span></code></pre>
+
+<p><img src="https://api.codetool.top/img/15833935895541.png"></p>
 <table>
 <thead>
 <tr>
@@ -600,10 +609,10 @@
 </tr>
 </tbody></table>
 <p>准备三张如图所示的表：</p>
-<p><img src="https://api.codetool.top/img/15833941692933.png" alt></p>
+<p><img src="https://api.codetool.top/img/15833941692933.png"></p>
 <h2 id="explain-之-id">3.1 explain 之 id</h2><p>id 字段是 select查询的序列号，是一组数字，表示的是查询中执行select子句或者是操作表的顺序。id 情况有三种 ： </p>
 <p>1） id相同表示加载表的顺序是从上到下。</p>
-<pre><code>mysql&gt; explain select * from t_role r, t_user u, user_role ur where r.id = ur.role_id and u.id = ur.user_id ;
+<pre class="language-none"><code class="language-none">mysql&gt; explain select * from t_role r, t_user u, user_role ur where r.id &#x3D; ur.role_id and u.id &#x3D; ur.user_id ;
 +----+-------------+-------+------------+--------+-----------------------------+---------+---------+-----------------+------+----------+----------------------------------------------------+    
 | id | select_type | table | partitions | type   | possible_keys               | key     | key_len | ref             | rows | filtered | Extra                                              |
 +----+-------------+-------+------------+--------+-----------------------------+---------+---------+-----------------+------+----------+----------------------------------------------------+
@@ -611,8 +620,10 @@
 |  1 | SIMPLE      | ur    | NULL       | ALL    | fk_ur_user_id,fk_ur_role_id | NULL    | NULL    | NULL            |    6 |    20.00 | Using where; Using join buffer (Block Nested Loop) |
 |  1 | SIMPLE      | u     | NULL       | eq_ref | PRIMARY                     | PRIMARY | 98      | test.ur.user_id |    1 |   100.00 | NULL                                               |
 +----+-------------+-------+------------+--------+-----------------------------+---------+---------+-----------------+------+----------+----------------------------------------------------+
-3 rows in set, 1 warning (0.01 sec)</code></pre><p>2） id 不同id值越大，优先级越高，越先被执行。 </p>
-<pre><code>mysql&gt; EXPLAIN SELECT * FROM t_role WHERE id = (SELECT role_id FROM user_role WHERE user_id = (SELECT id FROM t_user WHERE username = &#39;stu1&#39;));
+3 rows in set, 1 warning (0.01 sec)</code></pre>
+
+<p>2） id 不同id值越大，优先级越高，越先被执行。 </p>
+<pre class="language-none"><code class="language-none">mysql&gt; EXPLAIN SELECT * FROM t_role WHERE id &#x3D; (SELECT role_id FROM user_role WHERE user_id &#x3D; (SELECT id FROM t_user WHERE username &#x3D; &#39;stu1&#39;));
 +----+-------------+-----------+------------+-------+----------------------+----------------------+---------+-------+------+----------+-------------+
 | id | select_type | table     | partitions | type  | possible_keys        | key                  | key_len | ref   | rows | filtered | Extra       |
 +----+-------------+-----------+------------+-------+----------------------+----------------------+---------+-------+------+----------+-------------+
@@ -620,7 +631,9 @@
 |  2 | SUBQUERY    | user_role | NULL       | ref   | fk_ur_user_id        | fk_ur_user_id        | 99      | const |    1 |   100.00 | Using where |
 |  3 | SUBQUERY    | t_user    | NULL       | const | unique_user_username | unique_user_username | 137     | const |    1 |   100.00 | Using index |
 +----+-------------+-----------+------------+-------+----------------------+----------------------+---------+-------+------+----------+-------------+
-3 rows in set, 1 warning (0.00 sec)</code></pre><p>3） id 有相同，也有不同，同时存在。id相同的可以认为是一组，从上往下顺序执行；在所有的组中，id的值越大，优先级越高，越先执行。</p>
+3 rows in set, 1 warning (0.00 sec)</code></pre>
+
+<p>3） id 有相同，也有不同，同时存在。id相同的可以认为是一组，从上往下顺序执行；在所有的组中，id的值越大，优先级越高，越先执行。</p>
 <h2 id="explain-之-select-type">3.2 explain 之 select_type</h2><p>表示 SELECT 的类型，常见的取值，如下表所示：</p>
 <table>
 <thead>
@@ -654,14 +667,16 @@
 <td>从UNION表获取结果的SELECT</td>
 </tr>
 </tbody></table>
-<pre><code>mysql&gt; explain select * from t_user where id = (select id from user_role where role_id = &#39;9&#39;);
+<pre class="language-none"><code class="language-none">mysql&gt; explain select * from t_user where id &#x3D; (select id from user_role where role_id &#x3D; &#39;9&#39;);
 +----+-------------+-----------+------------+------+---------------+---------------+---------+-------+------+----------+-------------+
 | id | select_type | table     | partitions | type | possible_keys | key           | key_len | ref   | rows | filtered | Extra       |
 +----+-------------+-----------+------------+------+---------------+---------------+---------+-------+------+----------+-------------+
 |  1 | PRIMARY     | t_user    | NULL       | ALL  | PRIMARY       | NULL          | NULL    | NULL  |    6 |    16.67 | Using where |
 |  2 | SUBQUERY    | user_role | NULL       | ref  | fk_ur_role_id | fk_ur_role_id | 99      | const |    1 |   100.00 | Using index |
 +----+-------------+-----------+------------+------+---------------+---------------+---------+-------+------+----------+-------------+
-2 rows in set, 3 warnings (0.00 sec)</code></pre><pre><code>mysql&gt; explain select * from t_user where id = &#39;1&#39; union select * from t_user where id = &#39;2&#39;;
+2 rows in set, 3 warnings (0.00 sec)</code></pre>
+
+<pre class="language-none"><code class="language-none">mysql&gt; explain select * from t_user where id &#x3D; &#39;1&#39; union select * from t_user where id &#x3D; &#39;2&#39;;
 +----+--------------+------------+------------+-------+---------------+---------+---------+-------+------+----------+-----------------+
 | id | select_type  | table      | partitions | type  | possible_keys | key     | key_len | ref   | rows | filtered | Extra           |
 +----+--------------+------------+------------+-------+---------------+---------+---------+-------+------+----------+-----------------+
@@ -669,7 +684,9 @@
 |  2 | UNION        | t_user     | NULL       | const | PRIMARY       | PRIMARY | 98      | const |    1 |   100.00 | NULL            |
 | NULL | UNION RESULT | &lt;union1,2&gt; | NULL       | ALL   | NULL          | NULL    | NULL    | NULL  | NULL |     NULL | Using temporary |
 +----+--------------+------------+------------+-------+---------------+---------+---------+-------+------+----------+-----------------+
-3 rows in set, 1 warning (0.01 sec)</code></pre><p><strong>注：</strong> MySQL5.7中对Derived table做了一个新特性。该特性允许将符合条件的Derived table中的子表与父查询的表合并进行直接JOIN。<strong>体现为simple查询</strong></p>
+3 rows in set, 1 warning (0.01 sec)</code></pre>
+
+<p><strong>注：</strong> MySQL5.7中对Derived table做了一个新特性。该特性允许将符合条件的Derived table中的子表与父查询的表合并进行直接JOIN。<strong>体现为simple查询</strong></p>
 <h2 id="explain-之-table">3.3 explain 之 table</h2><p>展示这一行的数据是关于哪一张表的 </p>
 <h2 id="explain-之-type">3.4 explain 之 type</h2><p>type 显示的是访问类型，是较为重要的一个指标，可取值为： </p>
 <table>
@@ -721,10 +738,12 @@
 </tr>
 </tbody></table>
 <p>结果值从最好到最坏以此是：</p>
-<pre><code>NULL &gt; system &gt; const &gt; eq_ref &gt; ref &gt; fulltext &gt; ref_or_null &gt; index_merge &gt; unique_subquery &gt; index_subquery &gt; range &gt; index &gt; ALL
+<pre class="language-none"><code class="language-none">NULL &gt; system &gt; const &gt; eq_ref &gt; ref &gt; fulltext &gt; ref_or_null &gt; index_merge &gt; unique_subquery &gt; index_subquery &gt; range &gt; index &gt; ALL
 
 
-system &gt; const &gt; eq_ref &gt; ref &gt; range &gt; index &gt; ALL</code></pre><p>==一般来说， 我们需要保证查询至少达到 range 级别， 最好达到ref 。==</p>
+system &gt; const &gt; eq_ref &gt; ref &gt; range &gt; index &gt; ALL</code></pre>
+
+<p>==一般来说， 我们需要保证查询至少达到 range 级别， 最好达到ref 。==</p>
 <h2 id="explain-之-key">3.5 explain 之 key</h2><p>possible_keys : 显示可能应用在这张表的索引， 一个或多个。 </p>
 <p>key ： 实际使用的索引， 如果为NULL， 则没有使用索引。</p>
 <p>key_len : 表示索引中使用的字节数， 该值为索引字段最大可能长度，并非实际使用长度，在不损失精确性的前提下，长度越短越好。</p>
@@ -753,24 +772,30 @@ system &gt; const &gt; eq_ref &gt; ref &gt; range &gt; index &gt; ALL</code></pr
 <h1 id="show-profile分析SQL">4 show profile分析SQL</h1><p>Mysql从5.0.37版本开始增加了对 show profiles 和 show profile 语句的支持。show profiles 能够在做SQL优化时帮助我们了解时间都耗费到哪里去了。</p>
 <p>(5.7版本后推荐使用performance_schema工具)</p>
 <p>通过 have_profiling 参数，能够看到当前MySQL是否支持profile：</p>
-<pre><code>mysql&gt; select @@have_profiling;
+<pre class="language-none"><code class="language-none">mysql&gt; select @@have_profiling;
 +------------------+
 | @@have_profiling |
 +------------------+
 | YES              |
 +------------------+
-1 row in set, 1 warning (0.00 sec)</code></pre><p>默认profiling是关闭的，可以通过set语句在Session级别开启profiling：</p>
-<pre><code>mysql&gt; set profiling=1;
-Query OK, 0 rows affected, 1 warning (0.00 sec)</code></pre><p>查看是否开启：</p>
-<pre><code>mysql&gt; select @@profiling;
+1 row in set, 1 warning (0.00 sec)</code></pre>
+
+<p>默认profiling是关闭的，可以通过set语句在Session级别开启profiling：</p>
+<pre class="language-none"><code class="language-none">mysql&gt; set profiling&#x3D;1;
+Query OK, 0 rows affected, 1 warning (0.00 sec)</code></pre>
+
+<p>查看是否开启：</p>
+<pre class="language-none"><code class="language-none">mysql&gt; select @@profiling;
 +-------------+
 | @@profiling |
 +-------------+
 |           1 |
 +-------------+
-1 row in set, 1 warning (0.00 sec)</code></pre><p>通过profile，我们能够更清楚地了解SQL执行的过程。</p>
+1 row in set, 1 warning (0.00 sec)</code></pre>
+
+<p>通过profile，我们能够更清楚地了解SQL执行的过程。</p>
 <p>首先，我们可以执行一系列的操作，如：</p>
-<pre><code>show databases;
+<pre class="language-none"><code class="language-none">show databases;
 
 use db01;
 
@@ -778,13 +803,15 @@ show tables;
 
 select * from tb_item where id &lt; 5;
 
-select count(*) from tb_item;</code></pre><p>执行完上述命令之后，再执行show profiles 指令， 来查看SQL语句执行的耗时：</p>
-<p><img src="https://api.codetool.top/img/15833986524423.png" alt></p>
+select count(*) from tb_item;</code></pre>
+
+<p>执行完上述命令之后，再执行show profiles 指令， 来查看SQL语句执行的耗时：</p>
+<p><img src="https://api.codetool.top/img/15833986524423.png"></p>
 <p>通过<code>show profile for query query_id</code>语句可以查看到该SQL执行过程中每个线程的状态和消耗的时间：</p>
-<p><img src="https://api.codetool.top/img/15833987009481.png" alt></p>
+<p><img src="https://api.codetool.top/img/15833987009481.png"></p>
 <p>Sending data 状态表示MySQL线程开始访问数据行并把结果返回给客户端，而不仅仅是返回个客户端。由于在Sending data状态下，MySQL线程往往需要做大量的磁盘读取操作，所以经常是整各查询中耗时最长的状态。</p>
 <p>在获取到最消耗时间的线程状态后，MySQL支持进一步选择all、cpu、block io 、context switch、page faults等明细类型类查看MySQL在使用什么资源上耗费了过高的时间。例如，选择查看CPU的耗费时间：</p>
-<p><img src="https://api.codetool.top/img/15833987633054.png" alt></p>
+<p><img src="https://api.codetool.top/img/15833987633054.png"></p>
 <table>
 <thead>
 <tr>
@@ -811,183 +838,185 @@ select count(*) from tb_item;</code></pre><p>执行完上述命令之后，再�
 </tbody></table>
 <h1 id="trace分析优化器执行计划">5 trace分析优化器执行计划</h1><p>MySQL5.6提供了对SQL的跟踪trace, 通过trace文件能够进一步了解为什么优化器选择A计划, 而不是选择B计划。</p>
 <p>打开trace ，设置格式为 JSON，并设置trace最大能够使用的内存大小，避免解析过程中因为默认内存过小而不能够完整展示。</p>
-<pre><code class="sql">SET optimizer_trace=&quot;enabled=on&quot;,end_markers_in_json=on;
-set optimizer_trace_max_mem_size=1000000;</code></pre>
-<p>执行SQL语句 ：</p>
-<pre><code class="sql">select * from tb_item where id &lt; 4;</code></pre>
-<p>最后， 检查information_schema.optimizer_trace就可以知道MySQL是如何执行SQL的 ：</p>
-<pre><code class="sql">select * from information_schema.optimizer_trace\G;</code></pre>
-<pre><code class="json">*************************** 1. row ***************************
-QUERY: select * from tb_item where id &lt; 4
-TRACE: {
-  &quot;steps&quot;: [
-    {
-      &quot;join_preparation&quot;: {
-        &quot;select#&quot;: 1,
-        &quot;steps&quot;: [
-          {
-            &quot;expanded_query&quot;: &quot;/* select#1 */ select `tb_item`.`id` AS `id`,`tb_item`.`title` AS `title`,`tb_item`.`price` AS `price`,`tb_item`.`num` AS `num`,`tb_item`.`categoryid` AS `categoryid`,`tb_item`.`status` AS `status`,`tb_item`.`sellerid` AS `sellerid`,`tb_item`.`createtime` AS `createtime`,`tb_item`.`updatetime` AS `updatetime` from `tb_item` where (`tb_item`.`id` &lt; 4)&quot;
-          }
-        ] /* steps */
-      } /* join_preparation */
-    },
-    {
-      &quot;join_optimization&quot;: {
-        &quot;select#&quot;: 1,
-        &quot;steps&quot;: [
-          {
-            &quot;condition_processing&quot;: {
-              &quot;condition&quot;: &quot;WHERE&quot;,
-              &quot;original_condition&quot;: &quot;(`tb_item`.`id` &lt; 4)&quot;,
-              &quot;steps&quot;: [
-                {
-                  &quot;transformation&quot;: &quot;equality_propagation&quot;,
-                  &quot;resulting_condition&quot;: &quot;(`tb_item`.`id` &lt; 4)&quot;
-                },
-                {
-                  &quot;transformation&quot;: &quot;constant_propagation&quot;,
-                  &quot;resulting_condition&quot;: &quot;(`tb_item`.`id` &lt; 4)&quot;
-                },
-                {
-                  &quot;transformation&quot;: &quot;trivial_condition_removal&quot;,
-                  &quot;resulting_condition&quot;: &quot;(`tb_item`.`id` &lt; 4)&quot;
-                }
-              ] /* steps */
-            } /* condition_processing */
-          },
-          {
-            &quot;table_dependencies&quot;: [
-              {
-                &quot;table&quot;: &quot;`tb_item`&quot;,
-                &quot;row_may_be_null&quot;: false,
-                &quot;map_bit&quot;: 0,
-                &quot;depends_on_map_bits&quot;: [
-                ] /* depends_on_map_bits */
-              }
-            ] /* table_dependencies */
-          },
-          {
-            &quot;ref_optimizer_key_uses&quot;: [
-            ] /* ref_optimizer_key_uses */
-          },
-          {
-            &quot;rows_estimation&quot;: [
-              {
-                &quot;table&quot;: &quot;`tb_item`&quot;,
-                &quot;range_analysis&quot;: {
-                  &quot;table_scan&quot;: {
-                    &quot;rows&quot;: 9816098,
-                    &quot;cost&quot;: 2.04e6
-                  } /* table_scan */,
-                  &quot;potential_range_indices&quot;: [
-                    {
-                      &quot;index&quot;: &quot;PRIMARY&quot;,
-                      &quot;usable&quot;: true,
-                      &quot;key_parts&quot;: [
-                        &quot;id&quot;
-                      ] /* key_parts */
-                    }
-                  ] /* potential_range_indices */,
-                  &quot;setup_range_conditions&quot;: [
-                  ] /* setup_range_conditions */,
-                  &quot;group_index_range&quot;: {
-                    &quot;chosen&quot;: false,
-                    &quot;cause&quot;: &quot;not_group_by_or_distinct&quot;
-                  } /* group_index_range */,
-                  &quot;analyzing_range_alternatives&quot;: {
-                    &quot;range_scan_alternatives&quot;: [
-                      {
-                        &quot;index&quot;: &quot;PRIMARY&quot;,
-                        &quot;ranges&quot;: [
-                          &quot;id &lt; 4&quot;
-                        ] /* ranges */,
-                        &quot;index_dives_for_eq_ranges&quot;: true,
-                        &quot;rowid_ordered&quot;: true,
-                        &quot;using_mrr&quot;: false,
-                        &quot;index_only&quot;: false,
-                        &quot;rows&quot;: 3,
-                        &quot;cost&quot;: 1.6154,
-                        &quot;chosen&quot;: true
-                      }
-                    ] /* range_scan_alternatives */,
-                    &quot;analyzing_roworder_intersect&quot;: {
-                      &quot;usable&quot;: false,
-                      &quot;cause&quot;: &quot;too_few_roworder_scans&quot;
-                    } /* analyzing_roworder_intersect */
-                  } /* analyzing_range_alternatives */,
-                  &quot;chosen_range_access_summary&quot;: {
-                    &quot;range_access_plan&quot;: {
-                      &quot;type&quot;: &quot;range_scan&quot;,
-                      &quot;index&quot;: &quot;PRIMARY&quot;,
-                      &quot;rows&quot;: 3,
-                      &quot;ranges&quot;: [
-                        &quot;id &lt; 4&quot;
-                      ] /* ranges */
-                    } /* range_access_plan */,
-                    &quot;rows_for_plan&quot;: 3,
-                    &quot;cost_for_plan&quot;: 1.6154,
-                    &quot;chosen&quot;: true
-                  } /* chosen_range_access_summary */
-                } /* range_analysis */
-              }
-            ] /* rows_estimation */
-          },
-          {
-            &quot;considered_execution_plans&quot;: [
-              {
-                &quot;plan_prefix&quot;: [
-                ] /* plan_prefix */,
-                &quot;table&quot;: &quot;`tb_item`&quot;,
-                &quot;best_access_path&quot;: {
-                  &quot;considered_access_paths&quot;: [
-                    {
-                      &quot;access_type&quot;: &quot;range&quot;,
-                      &quot;rows&quot;: 3,
-                      &quot;cost&quot;: 2.2154,
-                      &quot;chosen&quot;: true
-                    }
-                  ] /* considered_access_paths */
-                } /* best_access_path */,
-                &quot;cost_for_plan&quot;: 2.2154,
-                &quot;rows_for_plan&quot;: 3,
-                &quot;chosen&quot;: true
-              }
-            ] /* considered_execution_plans */
-          },
-          {
-            &quot;attaching_conditions_to_tables&quot;: {
-              &quot;original_condition&quot;: &quot;(`tb_item`.`id` &lt; 4)&quot;,
-              &quot;attached_conditions_computation&quot;: [
-              ] /* attached_conditions_computation */,
-              &quot;attached_conditions_summary&quot;: [
-                {
-                  &quot;table&quot;: &quot;`tb_item`&quot;,
-                  &quot;attached&quot;: &quot;(`tb_item`.`id` &lt; 4)&quot;
-                }
-              ] /* attached_conditions_summary */
-            } /* attaching_conditions_to_tables */
-          },
-          {
-            &quot;refine_plan&quot;: [
-              {
-                &quot;table&quot;: &quot;`tb_item`&quot;,
-                &quot;access_type&quot;: &quot;range&quot;
-              }
-            ] /* refine_plan */
-          }
-        ] /* steps */
-      } /* join_optimization */
-    },
-    {
-      &quot;join_execution&quot;: {
-        &quot;select#&quot;: 1,
-        &quot;steps&quot;: [
-        ] /* steps */
-      } /* join_execution */
-    }
-  ] /* steps */
-}</code></pre>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">SET</span> optimizer_trace<span class="token operator">=</span><span class="token string">"enabled=on"</span><span class="token punctuation">,</span>end_markers_in_json<span class="token operator">=</span><span class="token keyword">on</span><span class="token punctuation">;</span>
+<span class="token keyword">set</span> optimizer_trace_max_mem_size<span class="token operator">=</span><span class="token number">1000000</span><span class="token punctuation">;</span></code></pre>
 
+<p>执行SQL语句 ：</p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> tb_item <span class="token keyword">where</span> id <span class="token operator">&lt;</span> <span class="token number">4</span><span class="token punctuation">;</span></code></pre>
+
+<p>最后， 检查information_schema.optimizer_trace就可以知道MySQL是如何执行SQL的 ：</p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> information_schema<span class="token punctuation">.</span>optimizer_trace\G<span class="token punctuation">;</span></code></pre>
+
+<pre class="language-json" data-language="json"><code class="language-json">*************************** <span class="token number">1</span>. row ***************************
+QUERY<span class="token operator">:</span> select * from tb_item where id &lt; <span class="token number">4</span>
+TRACE<span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+  <span class="token property">"steps"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">&#123;</span>
+      <span class="token property">"join_preparation"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+        <span class="token property">"select#"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+        <span class="token property">"steps"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token punctuation">&#123;</span>
+            <span class="token property">"expanded_query"</span><span class="token operator">:</span> <span class="token string">"/* select#1 */ select `tb_item`.`id` AS `id`,`tb_item`.`title` AS `title`,`tb_item`.`price` AS `price`,`tb_item`.`num` AS `num`,`tb_item`.`categoryid` AS `categoryid`,`tb_item`.`status` AS `status`,`tb_item`.`sellerid` AS `sellerid`,`tb_item`.`createtime` AS `createtime`,`tb_item`.`updatetime` AS `updatetime` from `tb_item` where (`tb_item`.`id` &lt; 4)"</span>
+          <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">]</span> <span class="token comment">/* steps */</span>
+      <span class="token punctuation">&#125;</span> <span class="token comment">/* join_preparation */</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+    <span class="token punctuation">&#123;</span>
+      <span class="token property">"join_optimization"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+        <span class="token property">"select#"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+        <span class="token property">"steps"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token punctuation">&#123;</span>
+            <span class="token property">"condition_processing"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+              <span class="token property">"condition"</span><span class="token operator">:</span> <span class="token string">"WHERE"</span><span class="token punctuation">,</span>
+              <span class="token property">"original_condition"</span><span class="token operator">:</span> <span class="token string">"(`tb_item`.`id` &lt; 4)"</span><span class="token punctuation">,</span>
+              <span class="token property">"steps"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+                <span class="token punctuation">&#123;</span>
+                  <span class="token property">"transformation"</span><span class="token operator">:</span> <span class="token string">"equality_propagation"</span><span class="token punctuation">,</span>
+                  <span class="token property">"resulting_condition"</span><span class="token operator">:</span> <span class="token string">"(`tb_item`.`id` &lt; 4)"</span>
+                <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+                <span class="token punctuation">&#123;</span>
+                  <span class="token property">"transformation"</span><span class="token operator">:</span> <span class="token string">"constant_propagation"</span><span class="token punctuation">,</span>
+                  <span class="token property">"resulting_condition"</span><span class="token operator">:</span> <span class="token string">"(`tb_item`.`id` &lt; 4)"</span>
+                <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+                <span class="token punctuation">&#123;</span>
+                  <span class="token property">"transformation"</span><span class="token operator">:</span> <span class="token string">"trivial_condition_removal"</span><span class="token punctuation">,</span>
+                  <span class="token property">"resulting_condition"</span><span class="token operator">:</span> <span class="token string">"(`tb_item`.`id` &lt; 4)"</span>
+                <span class="token punctuation">&#125;</span>
+              <span class="token punctuation">]</span> <span class="token comment">/* steps */</span>
+            <span class="token punctuation">&#125;</span> <span class="token comment">/* condition_processing */</span>
+          <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+          <span class="token punctuation">&#123;</span>
+            <span class="token property">"table_dependencies"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+              <span class="token punctuation">&#123;</span>
+                <span class="token property">"table"</span><span class="token operator">:</span> <span class="token string">"`tb_item`"</span><span class="token punctuation">,</span>
+                <span class="token property">"row_may_be_null"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+                <span class="token property">"map_bit"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+                <span class="token property">"depends_on_map_bits"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+                <span class="token punctuation">]</span> <span class="token comment">/* depends_on_map_bits */</span>
+              <span class="token punctuation">&#125;</span>
+            <span class="token punctuation">]</span> <span class="token comment">/* table_dependencies */</span>
+          <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+          <span class="token punctuation">&#123;</span>
+            <span class="token property">"ref_optimizer_key_uses"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">]</span> <span class="token comment">/* ref_optimizer_key_uses */</span>
+          <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+          <span class="token punctuation">&#123;</span>
+            <span class="token property">"rows_estimation"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+              <span class="token punctuation">&#123;</span>
+                <span class="token property">"table"</span><span class="token operator">:</span> <span class="token string">"`tb_item`"</span><span class="token punctuation">,</span>
+                <span class="token property">"range_analysis"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+                  <span class="token property">"table_scan"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+                    <span class="token property">"rows"</span><span class="token operator">:</span> <span class="token number">9816098</span><span class="token punctuation">,</span>
+                    <span class="token property">"cost"</span><span class="token operator">:</span> <span class="token number">2.04e6</span>
+                  <span class="token punctuation">&#125;</span> <span class="token comment">/* table_scan */</span><span class="token punctuation">,</span>
+                  <span class="token property">"potential_range_indices"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+                    <span class="token punctuation">&#123;</span>
+                      <span class="token property">"index"</span><span class="token operator">:</span> <span class="token string">"PRIMARY"</span><span class="token punctuation">,</span>
+                      <span class="token property">"usable"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+                      <span class="token property">"key_parts"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+                        <span class="token string">"id"</span>
+                      <span class="token punctuation">]</span> <span class="token comment">/* key_parts */</span>
+                    <span class="token punctuation">&#125;</span>
+                  <span class="token punctuation">]</span> <span class="token comment">/* potential_range_indices */</span><span class="token punctuation">,</span>
+                  <span class="token property">"setup_range_conditions"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+                  <span class="token punctuation">]</span> <span class="token comment">/* setup_range_conditions */</span><span class="token punctuation">,</span>
+                  <span class="token property">"group_index_range"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+                    <span class="token property">"chosen"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+                    <span class="token property">"cause"</span><span class="token operator">:</span> <span class="token string">"not_group_by_or_distinct"</span>
+                  <span class="token punctuation">&#125;</span> <span class="token comment">/* group_index_range */</span><span class="token punctuation">,</span>
+                  <span class="token property">"analyzing_range_alternatives"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+                    <span class="token property">"range_scan_alternatives"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+                      <span class="token punctuation">&#123;</span>
+                        <span class="token property">"index"</span><span class="token operator">:</span> <span class="token string">"PRIMARY"</span><span class="token punctuation">,</span>
+                        <span class="token property">"ranges"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+                          <span class="token string">"id &lt; 4"</span>
+                        <span class="token punctuation">]</span> <span class="token comment">/* ranges */</span><span class="token punctuation">,</span>
+                        <span class="token property">"index_dives_for_eq_ranges"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+                        <span class="token property">"rowid_ordered"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+                        <span class="token property">"using_mrr"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+                        <span class="token property">"index_only"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+                        <span class="token property">"rows"</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span>
+                        <span class="token property">"cost"</span><span class="token operator">:</span> <span class="token number">1.6154</span><span class="token punctuation">,</span>
+                        <span class="token property">"chosen"</span><span class="token operator">:</span> <span class="token boolean">true</span>
+                      <span class="token punctuation">&#125;</span>
+                    <span class="token punctuation">]</span> <span class="token comment">/* range_scan_alternatives */</span><span class="token punctuation">,</span>
+                    <span class="token property">"analyzing_roworder_intersect"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+                      <span class="token property">"usable"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+                      <span class="token property">"cause"</span><span class="token operator">:</span> <span class="token string">"too_few_roworder_scans"</span>
+                    <span class="token punctuation">&#125;</span> <span class="token comment">/* analyzing_roworder_intersect */</span>
+                  <span class="token punctuation">&#125;</span> <span class="token comment">/* analyzing_range_alternatives */</span><span class="token punctuation">,</span>
+                  <span class="token property">"chosen_range_access_summary"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+                    <span class="token property">"range_access_plan"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+                      <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"range_scan"</span><span class="token punctuation">,</span>
+                      <span class="token property">"index"</span><span class="token operator">:</span> <span class="token string">"PRIMARY"</span><span class="token punctuation">,</span>
+                      <span class="token property">"rows"</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span>
+                      <span class="token property">"ranges"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+                        <span class="token string">"id &lt; 4"</span>
+                      <span class="token punctuation">]</span> <span class="token comment">/* ranges */</span>
+                    <span class="token punctuation">&#125;</span> <span class="token comment">/* range_access_plan */</span><span class="token punctuation">,</span>
+                    <span class="token property">"rows_for_plan"</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span>
+                    <span class="token property">"cost_for_plan"</span><span class="token operator">:</span> <span class="token number">1.6154</span><span class="token punctuation">,</span>
+                    <span class="token property">"chosen"</span><span class="token operator">:</span> <span class="token boolean">true</span>
+                  <span class="token punctuation">&#125;</span> <span class="token comment">/* chosen_range_access_summary */</span>
+                <span class="token punctuation">&#125;</span> <span class="token comment">/* range_analysis */</span>
+              <span class="token punctuation">&#125;</span>
+            <span class="token punctuation">]</span> <span class="token comment">/* rows_estimation */</span>
+          <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+          <span class="token punctuation">&#123;</span>
+            <span class="token property">"considered_execution_plans"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+              <span class="token punctuation">&#123;</span>
+                <span class="token property">"plan_prefix"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+                <span class="token punctuation">]</span> <span class="token comment">/* plan_prefix */</span><span class="token punctuation">,</span>
+                <span class="token property">"table"</span><span class="token operator">:</span> <span class="token string">"`tb_item`"</span><span class="token punctuation">,</span>
+                <span class="token property">"best_access_path"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+                  <span class="token property">"considered_access_paths"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+                    <span class="token punctuation">&#123;</span>
+                      <span class="token property">"access_type"</span><span class="token operator">:</span> <span class="token string">"range"</span><span class="token punctuation">,</span>
+                      <span class="token property">"rows"</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span>
+                      <span class="token property">"cost"</span><span class="token operator">:</span> <span class="token number">2.2154</span><span class="token punctuation">,</span>
+                      <span class="token property">"chosen"</span><span class="token operator">:</span> <span class="token boolean">true</span>
+                    <span class="token punctuation">&#125;</span>
+                  <span class="token punctuation">]</span> <span class="token comment">/* considered_access_paths */</span>
+                <span class="token punctuation">&#125;</span> <span class="token comment">/* best_access_path */</span><span class="token punctuation">,</span>
+                <span class="token property">"cost_for_plan"</span><span class="token operator">:</span> <span class="token number">2.2154</span><span class="token punctuation">,</span>
+                <span class="token property">"rows_for_plan"</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span>
+                <span class="token property">"chosen"</span><span class="token operator">:</span> <span class="token boolean">true</span>
+              <span class="token punctuation">&#125;</span>
+            <span class="token punctuation">]</span> <span class="token comment">/* considered_execution_plans */</span>
+          <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+          <span class="token punctuation">&#123;</span>
+            <span class="token property">"attaching_conditions_to_tables"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+              <span class="token property">"original_condition"</span><span class="token operator">:</span> <span class="token string">"(`tb_item`.`id` &lt; 4)"</span><span class="token punctuation">,</span>
+              <span class="token property">"attached_conditions_computation"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+              <span class="token punctuation">]</span> <span class="token comment">/* attached_conditions_computation */</span><span class="token punctuation">,</span>
+              <span class="token property">"attached_conditions_summary"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+                <span class="token punctuation">&#123;</span>
+                  <span class="token property">"table"</span><span class="token operator">:</span> <span class="token string">"`tb_item`"</span><span class="token punctuation">,</span>
+                  <span class="token property">"attached"</span><span class="token operator">:</span> <span class="token string">"(`tb_item`.`id` &lt; 4)"</span>
+                <span class="token punctuation">&#125;</span>
+              <span class="token punctuation">]</span> <span class="token comment">/* attached_conditions_summary */</span>
+            <span class="token punctuation">&#125;</span> <span class="token comment">/* attaching_conditions_to_tables */</span>
+          <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+          <span class="token punctuation">&#123;</span>
+            <span class="token property">"refine_plan"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+              <span class="token punctuation">&#123;</span>
+                <span class="token property">"table"</span><span class="token operator">:</span> <span class="token string">"`tb_item`"</span><span class="token punctuation">,</span>
+                <span class="token property">"access_type"</span><span class="token operator">:</span> <span class="token string">"range"</span>
+              <span class="token punctuation">&#125;</span>
+            <span class="token punctuation">]</span> <span class="token comment">/* refine_plan */</span>
+          <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">]</span> <span class="token comment">/* steps */</span>
+      <span class="token punctuation">&#125;</span> <span class="token comment">/* join_optimization */</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+    <span class="token punctuation">&#123;</span>
+      <span class="token property">"join_execution"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+        <span class="token property">"select#"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+        <span class="token property">"steps"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">]</span> <span class="token comment">/* steps */</span>
+      <span class="token punctuation">&#125;</span> <span class="token comment">/* join_execution */</span>
+    <span class="token punctuation">&#125;</span>
+  <span class="token punctuation">]</span> <span class="token comment">/* steps */</span>
+<span class="token punctuation">&#125;</span></code></pre>
             </div>
             <hr/>
 
@@ -1428,7 +1457,7 @@ TRACE: {
                         
                             1 原题排排坐，分糖果。
 我们买了一些糖果 candies，打算把它们分给排好队的 n = num_people 个小朋友。
-给第一个小朋友 1 颗糖果，第二个小朋友 2 颗，依此类推，直到给最后一个小朋友 n 颗糖果。
+给第一个小朋友 1 颗糖果，第二个小朋友 2 颗，依此类推，直到给最后一个小朋友 n 颗糖果。
 然后，我们再回到队
                         
                     </div>
@@ -1606,7 +1635,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

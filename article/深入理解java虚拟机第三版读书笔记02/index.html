@@ -31,6 +31,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -419,7 +420,7 @@
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <p>以下是<strong>第二章 Java内存区域与内存溢出异常</strong>的内容</p>
-<h1 id="运行时数据区域">1 运行时数据区域</h1><p><img src="https://api.codetool.top/img/15782333435215.jpg" alt></p>
+<h1 id="运行时数据区域">1 运行时数据区域</h1><p><img src="https://api.codetool.top/img/15782333435215.jpg"></p>
 <h2 id="程序计数器">1.1 程序计数器</h2><h3 id="特点">1.1.1 特点</h3><ul>
 <li>程序计数器是一块较小的内存空间，它可以看作是当前线程所执行的字节码的行号指示器。</li>
 <li>程序计数器是线程私有的，线程轮换之后通过程序计数器确定要执行的指令位置。</li>
@@ -441,85 +442,87 @@
 </ul>
 <p>代码演示：通过<code>-Xss</code>参数来设定栈的大小</p>
 <p>（无限递归导致栈帧过多）</p>
-<pre><code class="java">/**
-*    VM Args：-Xss128k
-*    @author zzm
- */
-public class JavaVMStackSOF {     
-    private int stackLength = 1;
-    public void stackLeak() {         
-        stackLength++;         
-        stackLeak();
-    }
-    public static void main(String[] args) throws Throwable {
-        JavaVMStackSOF oom = new JavaVMStackSOF();         
-        try {
-            oom.stackLeak();         
-        } catch (Throwable e) {
-            System.out.println(&quot;stack length:&quot; + oom.stackLength);
-            throw e;
-        }
-    }
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">/**
+*	VM Args：-Xss128k
+*	@author zzm
+ */</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">JavaVMStackSOF</span> <span class="token punctuation">&#123;</span>     
+    <span class="token keyword">private</span> <span class="token keyword">int</span> stackLength <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">stackLeak</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>         
+        stackLength<span class="token operator">++</span><span class="token punctuation">;</span>         
+        <span class="token function">stackLeak</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Throwable</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">JavaVMStackSOF</span> oom <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">JavaVMStackSOF</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>         
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            oom<span class="token punctuation">.</span><span class="token function">stackLeak</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>         
+        <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Throwable</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"stack length:"</span> <span class="token operator">+</span> oom<span class="token punctuation">.</span>stackLength<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">throw</span> e<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>（栈帧太大）</p>
-<pre><code class="java">/**
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">/**
  * @author zzm
- */
-public class JavaVMStackSOF {     
-    private static int stackLength = 0;
-    public static void test() {
-        long unused1, unused2, unused3, unused4, unused5,
-        unused6, unused7, unused8, unused9, unused10,              
-        unused11, unused12, unused13, unused14, unused15,
-        unused16, unused17, unused18, unused19, unused20,
-        unused21, unused22, unused23, unused24, unused25,
-        unused26, unused27, unused28, unused29, unused30,
-        unused31, unused32, unused33, unused34, unused35,
-        unused36, unused37, unused38, unused39, unused40, 
-        unused41, unused42, unused43, unused44, unused45,
-        unused46, unused47, unused48, unused49, unused50, 
-        unused51, unused52, unused53, unused54, unused55, 
-        unused56, unused57, unused58, unused59, unused60,
-        unused61, unused62, unused63, unused64, unused65,
-        unused66, unused67, unused68, unused69, unused70,
-        unused71, unused72, unused73, unused74, unused75,
-        unused76, unused77, unused78, unused79, unused80,
-        unused81, unused82, unused83, unused84, unused85,
-        unused86, unused87, unused88, unused89, unused90,
-        unused91, unused92, unused93, unused94, unused95,
-        unused96, unused97, unused98, unused99, unused100;
-        stackLength ++;
-        test();
-        unused1 = unused2 = unused3 = unused4 = unused5 =
-        unused6 = unused7 = unused8 = unused9 = unused10 = 
-        unused11 = unused12 = unused13 = unused14 = unused15 =
-        unused16 = unused17 = unused18 = unused19 = unused20 =
-        unused21 = unused22 = unused23 = unused24 = unused25 =
-        unused26 = unused27 = unused28 = unused29 = unused30 =
-        unused31 = unused32 = unused33 = unused34 = unused35 =
-        unused36 = unused37 = unused38 = unused39 = unused40 =
-        unused41 = unused42 = unused43 = unused44 = unused45 = 
-        unused46 = unused47 = unused48 = unused49 = unused50 =
-        unused51 = unused52 = unused53 = unused54 = unused55 =
-        unused56 = unused57 = unused58 = unused59 = unused60 =
-        unused61 = unused62 = unused63 = unused64 = unused65 =
-        unused66 = unused67 = unused68 = unused69 = unused70 =
-        unused71 = unused72 = unused73 = unused74 = unused75 =
-        unused76 = unused77 = unused78 = unused79 = unused80 =
-        unused81 = unused82 = unused83 = unused84 = unused85 =
-        unused86 = unused87 = unused88 = unused89 = unused90 =
-        unused91 = unused92 = unused93 = unused94 = unused95 =
-        unused96 = unused97 = unused98 = unused99 = unused100 = 0;
-    }
-    public static void main(String[] args) {
-        try {             
-            test();         
-        }catch (Error e){
-            System.out.println(&quot;stack length:&quot; + stackLength);
-            throw e;
-        }
-    }
-}</code></pre>
+ */</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">JavaVMStackSOF</span> <span class="token punctuation">&#123;</span>     
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">int</span> stackLength <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">long</span> unused1<span class="token punctuation">,</span> unused2<span class="token punctuation">,</span> unused3<span class="token punctuation">,</span> unused4<span class="token punctuation">,</span> unused5<span class="token punctuation">,</span>
+        unused6<span class="token punctuation">,</span> unused7<span class="token punctuation">,</span> unused8<span class="token punctuation">,</span> unused9<span class="token punctuation">,</span> unused10<span class="token punctuation">,</span>              
+        unused11<span class="token punctuation">,</span> unused12<span class="token punctuation">,</span> unused13<span class="token punctuation">,</span> unused14<span class="token punctuation">,</span> unused15<span class="token punctuation">,</span>
+        unused16<span class="token punctuation">,</span> unused17<span class="token punctuation">,</span> unused18<span class="token punctuation">,</span> unused19<span class="token punctuation">,</span> unused20<span class="token punctuation">,</span>
+        unused21<span class="token punctuation">,</span> unused22<span class="token punctuation">,</span> unused23<span class="token punctuation">,</span> unused24<span class="token punctuation">,</span> unused25<span class="token punctuation">,</span>
+        unused26<span class="token punctuation">,</span> unused27<span class="token punctuation">,</span> unused28<span class="token punctuation">,</span> unused29<span class="token punctuation">,</span> unused30<span class="token punctuation">,</span>
+        unused31<span class="token punctuation">,</span> unused32<span class="token punctuation">,</span> unused33<span class="token punctuation">,</span> unused34<span class="token punctuation">,</span> unused35<span class="token punctuation">,</span>
+        unused36<span class="token punctuation">,</span> unused37<span class="token punctuation">,</span> unused38<span class="token punctuation">,</span> unused39<span class="token punctuation">,</span> unused40<span class="token punctuation">,</span> 
+        unused41<span class="token punctuation">,</span> unused42<span class="token punctuation">,</span> unused43<span class="token punctuation">,</span> unused44<span class="token punctuation">,</span> unused45<span class="token punctuation">,</span>
+        unused46<span class="token punctuation">,</span> unused47<span class="token punctuation">,</span> unused48<span class="token punctuation">,</span> unused49<span class="token punctuation">,</span> unused50<span class="token punctuation">,</span> 
+        unused51<span class="token punctuation">,</span> unused52<span class="token punctuation">,</span> unused53<span class="token punctuation">,</span> unused54<span class="token punctuation">,</span> unused55<span class="token punctuation">,</span> 
+        unused56<span class="token punctuation">,</span> unused57<span class="token punctuation">,</span> unused58<span class="token punctuation">,</span> unused59<span class="token punctuation">,</span> unused60<span class="token punctuation">,</span>
+        unused61<span class="token punctuation">,</span> unused62<span class="token punctuation">,</span> unused63<span class="token punctuation">,</span> unused64<span class="token punctuation">,</span> unused65<span class="token punctuation">,</span>
+        unused66<span class="token punctuation">,</span> unused67<span class="token punctuation">,</span> unused68<span class="token punctuation">,</span> unused69<span class="token punctuation">,</span> unused70<span class="token punctuation">,</span>
+        unused71<span class="token punctuation">,</span> unused72<span class="token punctuation">,</span> unused73<span class="token punctuation">,</span> unused74<span class="token punctuation">,</span> unused75<span class="token punctuation">,</span>
+        unused76<span class="token punctuation">,</span> unused77<span class="token punctuation">,</span> unused78<span class="token punctuation">,</span> unused79<span class="token punctuation">,</span> unused80<span class="token punctuation">,</span>
+        unused81<span class="token punctuation">,</span> unused82<span class="token punctuation">,</span> unused83<span class="token punctuation">,</span> unused84<span class="token punctuation">,</span> unused85<span class="token punctuation">,</span>
+        unused86<span class="token punctuation">,</span> unused87<span class="token punctuation">,</span> unused88<span class="token punctuation">,</span> unused89<span class="token punctuation">,</span> unused90<span class="token punctuation">,</span>
+        unused91<span class="token punctuation">,</span> unused92<span class="token punctuation">,</span> unused93<span class="token punctuation">,</span> unused94<span class="token punctuation">,</span> unused95<span class="token punctuation">,</span>
+        unused96<span class="token punctuation">,</span> unused97<span class="token punctuation">,</span> unused98<span class="token punctuation">,</span> unused99<span class="token punctuation">,</span> unused100<span class="token punctuation">;</span>
+        stackLength <span class="token operator">++</span><span class="token punctuation">;</span>
+        <span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        unused1 <span class="token operator">=</span> unused2 <span class="token operator">=</span> unused3 <span class="token operator">=</span> unused4 <span class="token operator">=</span> unused5 <span class="token operator">=</span>
+        unused6 <span class="token operator">=</span> unused7 <span class="token operator">=</span> unused8 <span class="token operator">=</span> unused9 <span class="token operator">=</span> unused10 <span class="token operator">=</span> 
+        unused11 <span class="token operator">=</span> unused12 <span class="token operator">=</span> unused13 <span class="token operator">=</span> unused14 <span class="token operator">=</span> unused15 <span class="token operator">=</span>
+        unused16 <span class="token operator">=</span> unused17 <span class="token operator">=</span> unused18 <span class="token operator">=</span> unused19 <span class="token operator">=</span> unused20 <span class="token operator">=</span>
+        unused21 <span class="token operator">=</span> unused22 <span class="token operator">=</span> unused23 <span class="token operator">=</span> unused24 <span class="token operator">=</span> unused25 <span class="token operator">=</span>
+        unused26 <span class="token operator">=</span> unused27 <span class="token operator">=</span> unused28 <span class="token operator">=</span> unused29 <span class="token operator">=</span> unused30 <span class="token operator">=</span>
+        unused31 <span class="token operator">=</span> unused32 <span class="token operator">=</span> unused33 <span class="token operator">=</span> unused34 <span class="token operator">=</span> unused35 <span class="token operator">=</span>
+        unused36 <span class="token operator">=</span> unused37 <span class="token operator">=</span> unused38 <span class="token operator">=</span> unused39 <span class="token operator">=</span> unused40 <span class="token operator">=</span>
+        unused41 <span class="token operator">=</span> unused42 <span class="token operator">=</span> unused43 <span class="token operator">=</span> unused44 <span class="token operator">=</span> unused45 <span class="token operator">=</span> 
+        unused46 <span class="token operator">=</span> unused47 <span class="token operator">=</span> unused48 <span class="token operator">=</span> unused49 <span class="token operator">=</span> unused50 <span class="token operator">=</span>
+        unused51 <span class="token operator">=</span> unused52 <span class="token operator">=</span> unused53 <span class="token operator">=</span> unused54 <span class="token operator">=</span> unused55 <span class="token operator">=</span>
+        unused56 <span class="token operator">=</span> unused57 <span class="token operator">=</span> unused58 <span class="token operator">=</span> unused59 <span class="token operator">=</span> unused60 <span class="token operator">=</span>
+        unused61 <span class="token operator">=</span> unused62 <span class="token operator">=</span> unused63 <span class="token operator">=</span> unused64 <span class="token operator">=</span> unused65 <span class="token operator">=</span>
+        unused66 <span class="token operator">=</span> unused67 <span class="token operator">=</span> unused68 <span class="token operator">=</span> unused69 <span class="token operator">=</span> unused70 <span class="token operator">=</span>
+        unused71 <span class="token operator">=</span> unused72 <span class="token operator">=</span> unused73 <span class="token operator">=</span> unused74 <span class="token operator">=</span> unused75 <span class="token operator">=</span>
+        unused76 <span class="token operator">=</span> unused77 <span class="token operator">=</span> unused78 <span class="token operator">=</span> unused79 <span class="token operator">=</span> unused80 <span class="token operator">=</span>
+        unused81 <span class="token operator">=</span> unused82 <span class="token operator">=</span> unused83 <span class="token operator">=</span> unused84 <span class="token operator">=</span> unused85 <span class="token operator">=</span>
+        unused86 <span class="token operator">=</span> unused87 <span class="token operator">=</span> unused88 <span class="token operator">=</span> unused89 <span class="token operator">=</span> unused90 <span class="token operator">=</span>
+        unused91 <span class="token operator">=</span> unused92 <span class="token operator">=</span> unused93 <span class="token operator">=</span> unused94 <span class="token operator">=</span> unused95 <span class="token operator">=</span>
+        unused96 <span class="token operator">=</span> unused97 <span class="token operator">=</span> unused98 <span class="token operator">=</span> unused99 <span class="token operator">=</span> unused100 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>             
+            <span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>         
+        <span class="token punctuation">&#125;</span><span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Error</span> e<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"stack length:"</span> <span class="token operator">+</span> stackLength<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">throw</span> e<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <h2 id="本地方法栈">1.3 本地方法栈</h2><p>是java虚拟机栈的native方法版。<br>HotSpot虚拟机中并不区分虚拟机栈和本地方法栈</p>
 <h2 id="Java堆">1.4 Java堆</h2><h3 id="特点-2">1.4.1 特点</h3><ul>
 <li>是各个线程共享的。</li>
@@ -529,20 +532,21 @@ public class JavaVMStackSOF {
 </ul>
 <h3 id="异常-1">1.4.2 异常</h3><p>如果在Java堆中没有内存完成实例分配，并且堆也无法再扩展时，Java虚拟机将会抛出<code>OutOfMemoryError</code>异常。</p>
 <p>代码演示：<br>(将堆的最小值<code>-Xms</code>参数与最大值<code>-Xmx</code>参数设置为一样即可避免堆自动扩展，通过参数<code>-XX：+HeapDumpOnOutOf-MemoryError</code>可以让虚拟机在出现内存溢出异常的时候Dump出当前的内存堆转储快照以便进行事后分析)</p>
-<pre><code class="java">/**·
-*    VM Args：-Xms20m -Xmx20m -XX:+HeapDumpOnOutOfMemoryError
-*    @author zzm
-*/
-public class HeapOOM {
-    static class OOMObject {
-    }
-    public static void main(String[] args) {
-        List&lt;OOMObject&gt; list = new ArrayList&lt;OOMObject&gt;();
-        while (true) {
-            list.add(new OOMObject());
-        }
-    }
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">/**·
+*	VM Args：-Xms20m -Xmx20m -XX:+HeapDumpOnOutOfMemoryError
+*	@author zzm
+*/</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">HeapOOM</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">static</span> <span class="token keyword">class</span> <span class="token class-name">OOMObject</span> <span class="token punctuation">&#123;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">List</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">OOMObject</span><span class="token punctuation">></span></span> list <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">OOMObject</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            list<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">OOMObject</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <h2 id="方法区">1.5 方法区</h2><h3 id="特点-3">1.5.1 特点</h3><ul>
 <li>是各个进程共享的。</li>
 <li>它用于存储<strong>已被虚拟机加载的类型信息、常量、静态变量、即时编译器编译后的代码缓存</strong>等数据。</li>
@@ -559,14 +563,14 @@ public class HeapOOM {
 <li>Java语言并不要求常量一定只有编译期才能产生，String类的intern方法可以将字符串常量放进字符串常量池表。</li>
 </ul>
 <h3 id="异常-3">1.6.1 异常</h3><p>常量池无法再申请到内存时会抛出OutOfMemoryError异常。</p>
-<h3 id="intern方法有意思的点">1.6.2 intern方法有意思的点</h3><pre><code class="java">public class RuntimeConstantPoolOOM {
-    public static void main(String[] args) {
-        String str1 = new StringBuilder(&quot;计算机&quot;).append(&quot;软件&quot;).toString();
-        System.out.println(str1.intern() == str1);
-        String str2 = new StringBuilder(&quot;ja&quot;).append(&quot;va&quot;).toString();
-        System.out.println(str2.intern() == str2);
-    }
-}</code></pre>
+<h3 id="intern方法有意思的点">1.6.2 intern方法有意思的点</h3><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">RuntimeConstantPoolOOM</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">String</span> str1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StringBuilder</span><span class="token punctuation">(</span><span class="token string">"计算机"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token string">"软件"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>str1<span class="token punctuation">.</span><span class="token function">intern</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> str1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">String</span> str2 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StringBuilder</span><span class="token punctuation">(</span><span class="token string">"ja"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token string">"va"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>str2<span class="token punctuation">.</span><span class="token function">intern</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> str2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 <p>这段代码在JDK 6中运行，会得到两个false，而在JDK 7中运行，会得到一个true和一个false。产生差异的原因是，在JDK 6中，intern()方法会把首次遇到的字符串实例复制到永久代的字符串常量池中存储，返回的也是永久代里面这个字符串实例的引用，而由StringBuilder创建的字符串对象实例在 Java堆上，所以必然不可能是同一个引用，结果将返回false。</p>
 <p>而JDK 7（以及部分其他虚拟机，例如JRockit）的<strong>intern()方法实现就不需要再拷贝字符串的实例到永久代</strong>了，既然字符串常量池已经移到Java堆中，那只需要在常量池里记录一下首次出现的实例引用即可，因此intern()返回的引用和由StringBuilder创建的那个字符串实例就是同一个。而对str2比较返回false，这是因为“java”这个字符串在执行String-Builder.toString()之前就已经出现过了（sun.misc.Version类中加载），字符串常量池中已经有它的引用，不符合intern()方法要求“首次遇到”的原则，“计算机软件”这个字符串则是首次出现的，因此结果返回true。</p>
 <h2 id="直接内存">1.7 直接内存</h2><h3 id="特点-4">1.7.1 特点</h3><ul>
@@ -1010,8 +1014,8 @@ public class HeapOOM {
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题给定一个只包含小写字母的有序数组letters 和一个目标字母 target，寻找有序数组里面比目标字母大的最小字母。
-数组里字母的顺序是循环的。举个例子，如果目标字母target = &#39;z&#39; 并且有序数组为 let
+                            1 原题给定一个只包含小写字母的有序数组letters 和一个目标字母 target，寻找有序数组里面比目标字母大的最小字母。
+数组里字母的顺序是循环的。举个例子，如果目标字母target = &#39;z&#39; 并且有序数组为 let
                         
                     </div>
                     <div class="publish-info">
@@ -1188,7 +1192,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

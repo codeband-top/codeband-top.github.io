@@ -29,6 +29,7 @@ volumes：Docke">
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -399,7 +400,7 @@ volumes：Docke">
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    770
+                    792
                 </div>
                 
 
@@ -418,9 +419,13 @@ volumes：Docke">
 <li>bind mounts：意为着可以存储在宿主机系统的任意位置；（比较常用的方式）<br>但是，bind mount在不同的宿主机系统时不可移植的，比如Windows和Linux的目录结构是不一样的，bind mount所指向的host目录也不能一样。这也是为什么bind mount不能出现在Dockerfile中的原因，因为这样Dockerfile就不可移植了。</li>
 <li>tmpfs：挂载存储在宿主机系统的内存中，而不会写入宿主机的文件系统；（一般都不会用的方式）</li>
 </ol>
-<h1 id="Volumes">1 Volumes</h1><h2 id="创建数据卷">1.1 创建数据卷</h2><pre><code>docker volume create edc-nginx-vol # 创建一个自定义容器卷
+<h1 id="Volumes">1 Volumes</h1><h2 id="创建数据卷">1.1 创建数据卷</h2><pre class="language-none"><code class="language-none">docker volume create edc-nginx-vol # 创建一个自定义容器卷
 docker volume ls # 查看所有容器卷
-docker volume inspect edc-nginx-vol # 查看指定容器卷详情信息</code></pre><h2 id="启动容器时挂载数据卷">1.2 启动容器时挂载数据卷</h2><pre><code>docker run -d -it --name=edc-nginx -p 8800:80 -v edc-nginx-vol:/usr/share/nginx/html nginx</code></pre><p>其中，<code>edc-nginx-vol</code>指的是创建数据卷的名称，<code>/usr/share/nginx/html</code>指的是要挂载到的容器中的路径名，如果不填写<code>edc-nginx-vol:</code>即省略数据卷名称，则会分配一个匿名的数据卷。</p>
+docker volume inspect edc-nginx-vol # 查看指定容器卷详情信息</code></pre>
+
+<h2 id="启动容器时挂载数据卷">1.2 启动容器时挂载数据卷</h2><pre class="language-none"><code class="language-none">docker run -d -it --name&#x3D;edc-nginx -p 8800:80 -v edc-nginx-vol:&#x2F;usr&#x2F;share&#x2F;nginx&#x2F;html nginx</code></pre>
+
+<p>其中，<code>edc-nginx-vol</code>指的是创建数据卷的名称，<code>/usr/share/nginx/html</code>指的是要挂载到的容器中的路径名，如果不填写<code>edc-nginx-vol:</code>即省略数据卷名称，则会分配一个匿名的数据卷。</p>
 <p>需要注意的是：</p>
 <ul>
 <li>数据卷是宿主机中的一个目录或文件</li>
@@ -429,19 +434,27 @@ docker volume inspect edc-nginx-vol # 查看指定容器卷详情信息</code></
 <li>一个容器也可以被挂载多个数据卷</li>
 <li>如果目录不存在，会自动创建</li>
 </ul>
-<h2 id="清理卷">1.3 清理卷</h2><pre><code>docker stop edc-nginx # 暂停容器实例
+<h2 id="清理卷">1.3 清理卷</h2><pre class="language-none"><code class="language-none">docker stop edc-nginx # 暂停容器实例
 docker rm edc-nginx # 移除容器实例
-docker volume rm edc-nginx-vol # 删除自定义数据卷</code></pre><h1 id="bind-mounts">2 bind mounts</h1><p>bind mounts可以挂载宿主机的任意位置，语法：</p>
-<pre><code>docker run -d -it --name=edc-nginx -v /app/wwwroot:/usr/share/nginx/html nginx</code></pre><p>其中<code>/app/wwwroot</code>指的是宿主机中的路径，<code>/usr/share/nginx/html</code>指的是要挂载到容器中的路径。</p>
+docker volume rm edc-nginx-vol # 删除自定义数据卷</code></pre>
+
+<h1 id="bind-mounts">2 bind mounts</h1><p>bind mounts可以挂载宿主机的任意位置，语法：</p>
+<pre class="language-none"><code class="language-none">docker run -d -it --name&#x3D;edc-nginx -v &#x2F;app&#x2F;wwwroot:&#x2F;usr&#x2F;share&#x2F;nginx&#x2F;html nginx</code></pre>
+
+<p>其中<code>/app/wwwroot</code>指的是宿主机中的路径，<code>/usr/share/nginx/html</code>指的是要挂载到容器中的路径。</p>
 <p>注意： 必须是绝对路径</p>
 <p>通过<code>docker inspect edc-nginx</code>可以看到容器相关信息，包括binds信息。</p>
 <p>数据卷挂载的另一个应用是可以多个容器挂载同一个数据卷从而实现容器间的数据交换。</p>
 <h1 id="数据卷容器">3 数据卷容器</h1><p>为了有效地维护多容器的数据共享，可以维护一个数据卷容器，挂载数据卷，其他容器通过<code>--volumes-from</code>从该容器获取数据卷配置。</p>
-<p><img src="https://api.codetool.top/img/15854548494585.png" alt></p>
+<p><img src="https://api.codetool.top/img/15854548494585.png"></p>
 <p>例：</p>
-<pre><code>docker run –it --name=c3 –v /volume centos:7 /bin/bash </code></pre><pre><code>docker run –it --name=c1 --volumes-from c3 centos:7 /bin/bash
+<pre class="language-none"><code class="language-none">docker run –it --name&#x3D;c3 –v &#x2F;volume centos:7 &#x2F;bin&#x2F;bash </code></pre>
 
-docker run –it --name=c2 --volumes-from c3 centos:7 /bin/bash  </code></pre><p>有点像继承c3的数据卷配置，当c3的数据卷配置修改时c1和c2也会修改。</p>
+<pre class="language-none"><code class="language-none">docker run –it --name&#x3D;c1 --volumes-from c3 centos:7 &#x2F;bin&#x2F;bash
+
+docker run –it --name&#x3D;c2 --volumes-from c3 centos:7 &#x2F;bin&#x2F;bash  </code></pre>
+
+<p>有点像继承c3的数据卷配置，当c3的数据卷配置修改时c1和c2也会修改。</p>
 
             </div>
             <hr/>
@@ -868,7 +881,7 @@ docker run –it --name=c2 --volumes-from c3 centos:7 /bin/bash  </code></pre><p
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题你现在手里有一份大小为 N x N 的『地图』（网格） grid，上面的每个『区域』（单元格）都用 0 和 1 标记好了。其中 0 代表海洋，1 代表陆地，你知道距离陆地区域最远的海洋区域是是哪一个吗？请返回该海洋区域到离它最近的陆
+                            1 原题你现在手里有一份大小为 N x N 的『地图』（网格） grid，上面的每个『区域』（单元格）都用 0 和 1 标记好了。其中 0 代表海洋，1 代表陆地，你知道距离陆地区域最远的海洋区域是是哪一个吗？请返回该海洋区域到离它最近的陆
                         
                     </div>
                     <div class="publish-info">
@@ -1045,7 +1058,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

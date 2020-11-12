@@ -41,6 +41,7 @@ add(e">
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -437,7 +438,7 @@ add(e">
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <p>阻塞队列是生产者消费者模式的经典体现。</p>
-<p>我们在曾在<a href="../Java线程池详解">Java线程池详解</a>中自己实现过一个阻塞队列，这篇文章我们来研究一下JDK中的阻塞队列：</p>
+<p>我们在曾在<a href="../Java%E7%BA%BF%E7%A8%8B%E6%B1%A0%E8%AF%A6%E8%A7%A3">Java线程池详解</a>中自己实现过一个阻塞队列，这篇文章我们来研究一下JDK中的阻塞队列：</p>
 <h1 id="BlockingQueue接口主要方法">1 BlockingQueue接口主要方法</h1><table>
 <thead>
 <tr>
@@ -473,159 +474,167 @@ add(e">
 <p>其中<strong>抛出异常</strong>和<strong>特殊值</strong>都是来自父接口的方法，它们都是非阻塞的，分别代表如果操作不成功抛出 <code>IllegalStateException</code> 异常、如果操作不成功返回false。</p>
 <p>而“阻塞”一列会一直保持等待直到操作成功，但是等待过程中可以被interrupt打断。</p>
 <p>“超时”一列只等待一个限定时间，时间内没有操作成功则返回false。</p>
-<h1 id="ArrayBlockingQueue">2 ArrayBlockingQueue</h1><h2 id="内部结构">2.1 内部结构</h2><pre><code class="java">/** The queued items */
-final Object[] items;
+<h1 id="ArrayBlockingQueue">2 ArrayBlockingQueue</h1><h2 id="内部结构">2.1 内部结构</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">/** The queued items */</span>
+<span class="token keyword">final</span> <span class="token class-name">Object</span><span class="token punctuation">[</span><span class="token punctuation">]</span> items<span class="token punctuation">;</span>
 
-/** items index for next take, poll, peek or remove */
-int takeIndex;
+<span class="token comment">/** items index for next take, poll, peek or remove */</span>
+<span class="token keyword">int</span> takeIndex<span class="token punctuation">;</span>
 
-/** items index for next put, offer, or add */
-int putIndex;
+<span class="token comment">/** items index for next put, offer, or add */</span>
+<span class="token keyword">int</span> putIndex<span class="token punctuation">;</span>
 
-/** Main lock guarding all access */
-final ReentrantLock lock;
+<span class="token comment">/** Main lock guarding all access */</span>
+<span class="token keyword">final</span> <span class="token class-name">ReentrantLock</span> lock<span class="token punctuation">;</span>
 
-/** Condition for waiting takes */
-private final Condition notEmpty;
+<span class="token comment">/** Condition for waiting takes */</span>
+<span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token class-name">Condition</span> notEmpty<span class="token punctuation">;</span>
 
-/** Condition for waiting puts */
-private final Condition notFull;</code></pre>
+<span class="token comment">/** Condition for waiting puts */</span>
+<span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token class-name">Condition</span> notFull<span class="token punctuation">;</span></code></pre>
+
 <p>ArrayBlockingQueue内部使用数组来实现队列操作，有两个指针takeIndex和putIndex分别指向要取出的位置（队列头）和要放入的位置（队列尾），实现了一个类似于循环队列的结构。使用一把锁管理出队、入队操作。</p>
 <h2 id="入队、出队原理">2.2 入队、出队原理</h2><p>入队通过enqueue函数实现：</p>
-<pre><code class="java">private void enqueue(E x) {
-    // assert lock.getHoldCount() == 1;
-    // assert items[putIndex] == null;
-    final Object[] items = this.items;
-    items[putIndex] = x;
-    //如果队列尾超过数组尾部指向数组头
-    if (++putIndex == items.length)
-        putIndex = 0;
-    count++;
-    notEmpty.signal();
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">enqueue</span><span class="token punctuation">(</span><span class="token class-name">E</span> x<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// assert lock.getHoldCount() == 1;</span>
+    <span class="token comment">// assert items[putIndex] == null;</span>
+    <span class="token keyword">final</span> <span class="token class-name">Object</span><span class="token punctuation">[</span><span class="token punctuation">]</span> items <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>items<span class="token punctuation">;</span>
+    items<span class="token punctuation">[</span>putIndex<span class="token punctuation">]</span> <span class="token operator">=</span> x<span class="token punctuation">;</span>
+    <span class="token comment">//如果队列尾超过数组尾部指向数组头</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">++</span>putIndex <span class="token operator">==</span> items<span class="token punctuation">.</span>length<span class="token punctuation">)</span>
+        putIndex <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    count<span class="token operator">++</span><span class="token punctuation">;</span>
+    notEmpty<span class="token punctuation">.</span><span class="token function">signal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>入队完成之后调用<code>notEmpty.signal()</code>唤醒一个消费者线程。</p>
 <p>出队通过dequeue函数实现：</p>
-<pre><code class="java">private E dequeue() {
-    // assert lock.getHoldCount() == 1;
-    // assert items[takeIndex] != null;
-    final Object[] items = this.items;
-    @SuppressWarnings(&quot;unchecked&quot;)
-    E x = (E) items[takeIndex];
-    items[takeIndex] = null;
-    if (++takeIndex == items.length)
-        takeIndex = 0;
-    count--;
-    if (itrs != null)
-        itrs.elementDequeued();
-    notFull.signal();
-    return x;
-}</code></pre>
-<p>出队完成后调用<code>notFull.signal();</code>唤醒一个生产者线程。</p>
-<h2 id="构造方法及特点总结">2.3 构造方法及特点总结</h2><pre><code class="java">public ArrayBlockingQueue(int capacity) {
-    this(capacity, false);
-}
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token class-name">E</span> <span class="token function">dequeue</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// assert lock.getHoldCount() == 1;</span>
+    <span class="token comment">// assert items[takeIndex] != null;</span>
+    <span class="token keyword">final</span> <span class="token class-name">Object</span><span class="token punctuation">[</span><span class="token punctuation">]</span> items <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>items<span class="token punctuation">;</span>
+    <span class="token annotation punctuation">@SuppressWarnings</span><span class="token punctuation">(</span><span class="token string">"unchecked"</span><span class="token punctuation">)</span>
+    <span class="token class-name">E</span> x <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">E</span><span class="token punctuation">)</span> items<span class="token punctuation">[</span>takeIndex<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    items<span class="token punctuation">[</span>takeIndex<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">++</span>takeIndex <span class="token operator">==</span> items<span class="token punctuation">.</span>length<span class="token punctuation">)</span>
+        takeIndex <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    count<span class="token operator">--</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>itrs <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span>
+        itrs<span class="token punctuation">.</span><span class="token function">elementDequeued</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    notFull<span class="token punctuation">.</span><span class="token function">signal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> x<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-public ArrayBlockingQueue(int capacity, boolean fair) {
-    if (capacity &lt;= 0)
-        throw new IllegalArgumentException();
-    this.items = new Object[capacity];
-    lock = new ReentrantLock(fair);
-    notEmpty = lock.newCondition();
-    notFull =  lock.newCondition();
-}</code></pre>
+<p>出队完成后调用<code>notFull.signal();</code>唤醒一个生产者线程。</p>
+<h2 id="构造方法及特点总结">2.3 构造方法及特点总结</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">ArrayBlockingQueue</span><span class="token punctuation">(</span><span class="token keyword">int</span> capacity<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">this</span><span class="token punctuation">(</span>capacity<span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">public</span> <span class="token class-name">ArrayBlockingQueue</span><span class="token punctuation">(</span><span class="token keyword">int</span> capacity<span class="token punctuation">,</span> <span class="token keyword">boolean</span> fair<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>capacity <span class="token operator">&lt;=</span> <span class="token number">0</span><span class="token punctuation">)</span>
+        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IllegalArgumentException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>items <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Object</span><span class="token punctuation">[</span>capacity<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    lock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ReentrantLock</span><span class="token punctuation">(</span>fair<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    notEmpty <span class="token operator">=</span> lock<span class="token punctuation">.</span><span class="token function">newCondition</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    notFull <span class="token operator">=</span>  lock<span class="token punctuation">.</span><span class="token function">newCondition</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <ul>
 <li>ArrayBlockingQueue的锁可以设置为公平或非公平的，默认为非公平的</li>
 <li>ArrayBlockingQueue构造时必须设置容量，容量不会变化。</li>
 <li>ArrayBlockingQueue的入队、出队共用一把锁，不能同时进行</li>
 </ul>
-<h1 id="LinkedBlockingQueue">3 LinkedBlockingQueue</h1><h2 id="内部结构-1">3.1 内部结构</h2><pre><code class="java">static class Node&lt;E&gt; {
-    E item;
-    Node&lt;E&gt; next;
-    Node(E x) { item = x; }
-}
+<h1 id="LinkedBlockingQueue">3 LinkedBlockingQueue</h1><h2 id="内部结构-1">3.1 内部结构</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">static</span> <span class="token keyword">class</span> <span class="token class-name">Node</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">E</span><span class="token punctuation">></span></span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">E</span> item<span class="token punctuation">;</span>
+    <span class="token class-name">Node</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">E</span><span class="token punctuation">></span></span> next<span class="token punctuation">;</span>
+    <span class="token class-name">Node</span><span class="token punctuation">(</span><span class="token class-name">E</span> x<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> item <span class="token operator">=</span> x<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
 
-transient Node&lt;E&gt; head;
-private transient Node&lt;E&gt; last;
-/** The capacity bound, or Integer.MAX_VALUE if none */
-private final int capacity;
+<span class="token keyword">transient</span> <span class="token class-name">Node</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">E</span><span class="token punctuation">></span></span> head<span class="token punctuation">;</span>
+<span class="token keyword">private</span> <span class="token keyword">transient</span> <span class="token class-name">Node</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">E</span><span class="token punctuation">></span></span> last<span class="token punctuation">;</span>
+<span class="token comment">/** The capacity bound, or Integer.MAX_VALUE if none */</span>
+<span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token keyword">int</span> capacity<span class="token punctuation">;</span>
 
-/** Current number of elements */
-private final AtomicInteger count = new AtomicInteger();
+<span class="token comment">/** Current number of elements */</span>
+<span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token class-name">AtomicInteger</span> count <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AtomicInteger</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-/** Lock held by take, poll, etc */
-private final ReentrantLock takeLock = new ReentrantLock();
+<span class="token comment">/** Lock held by take, poll, etc */</span>
+<span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token class-name">ReentrantLock</span> takeLock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ReentrantLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-/** Wait queue for waiting takes */
-private final Condition notEmpty = takeLock.newCondition();
+<span class="token comment">/** Wait queue for waiting takes */</span>
+<span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token class-name">Condition</span> notEmpty <span class="token operator">=</span> takeLock<span class="token punctuation">.</span><span class="token function">newCondition</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-/** Lock held by put, offer, etc */
-private final ReentrantLock putLock = new ReentrantLock();
+<span class="token comment">/** Lock held by put, offer, etc */</span>
+<span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token class-name">ReentrantLock</span> putLock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ReentrantLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-/** Wait queue for waiting puts */
-private final Condition notFull = putLock.newCondition();</code></pre>
+<span class="token comment">/** Wait queue for waiting puts */</span>
+<span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token class-name">Condition</span> notFull <span class="token operator">=</span> putLock<span class="token punctuation">.</span><span class="token function">newCondition</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
 <p>LinkedBlockingQueue内部使用链表来实现队列操作，有两个节点指针head和last分别指向哨兵节点、数组的尾节点。与ArrayBlockingQueue不同的是使用了两把锁分别管理入队和出队。</p>
 <h2 id="入队、出队原理-1">3.2 入队、出队原理</h2><p>入队：</p>
-<pre><code class="java">public void put(E e) throws InterruptedException {
-    if (e == null) throw new NullPointerException();
-    int c = -1;
-    Node&lt;E&gt; node = new Node&lt;E&gt;(e);
-    final ReentrantLock putLock = this.putLock;
-    final AtomicInteger count = this.count;
-    putLock.lockInterruptibly();
-    try {
-        //由于count使用的是AtomicInteger，即使出队操作冲突了也没关系
-        while (count.get() == capacity) {
-            notFull.await();
-        }
-        //enqueue函数中就是简单的把节点连接到链表尾
-        enqueue(node);
-        c = count.getAndIncrement();
-        if (c + 1 &lt; capacity)
-            //如果插入后容量未满，则通知一个生产者
-            notFull.signal();
-    } finally {
-        putLock.unlock();
-    }
-    //如果插入前容量是0则通知一个消费者
-    if (c == 0)
-        signalNotEmpty();
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">put</span><span class="token punctuation">(</span><span class="token class-name">E</span> e<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">InterruptedException</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>e <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">NullPointerException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> c <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token class-name">Node</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">E</span><span class="token punctuation">></span></span> node <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Node</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">E</span><span class="token punctuation">></span></span><span class="token punctuation">(</span>e<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">final</span> <span class="token class-name">ReentrantLock</span> putLock <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>putLock<span class="token punctuation">;</span>
+    <span class="token keyword">final</span> <span class="token class-name">AtomicInteger</span> count <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>count<span class="token punctuation">;</span>
+    putLock<span class="token punctuation">.</span><span class="token function">lockInterruptibly</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">//由于count使用的是AtomicInteger，即使出队操作冲突了也没关系</span>
+        <span class="token keyword">while</span> <span class="token punctuation">(</span>count<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> capacity<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            notFull<span class="token punctuation">.</span><span class="token function">await</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token comment">//enqueue函数中就是简单的把节点连接到链表尾</span>
+        <span class="token function">enqueue</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        c <span class="token operator">=</span> count<span class="token punctuation">.</span><span class="token function">getAndIncrement</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>c <span class="token operator">+</span> <span class="token number">1</span> <span class="token operator">&lt;</span> capacity<span class="token punctuation">)</span>
+            <span class="token comment">//如果插入后容量未满，则通知一个生产者</span>
+            notFull<span class="token punctuation">.</span><span class="token function">signal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+        putLock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token comment">//如果插入前容量是0则通知一个消费者</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>c <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span>
+        <span class="token function">signalNotEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>出队：</p>
-<pre><code class="java">public E take() throws InterruptedException {
-    E x;
-    int c = -1;
-    final AtomicInteger count = this.count;
-    final ReentrantLock takeLock = this.takeLock;
-    takeLock.lockInterruptibly();
-    try {
-        while (count.get() == 0) {
-            notEmpty.await();
-        }
-        //dequeue中就是直接将head.next指向了next.next
-        x = dequeue();
-        c = count.getAndDecrement();
-        if (c &gt; 1)
-            //如果出队前容量大于1，则通知一个消费者
-            notEmpty.signal();
-    } finally {
-        takeLock.unlock();
-    }
-    if (c == capacity)
-        //如果出队前容量是满的，则通知一个生产者
-        signalNotFull();
-    return x;
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">E</span> <span class="token function">take</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">InterruptedException</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">E</span> x<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> c <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token keyword">final</span> <span class="token class-name">AtomicInteger</span> count <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>count<span class="token punctuation">;</span>
+    <span class="token keyword">final</span> <span class="token class-name">ReentrantLock</span> takeLock <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>takeLock<span class="token punctuation">;</span>
+    takeLock<span class="token punctuation">.</span><span class="token function">lockInterruptibly</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">while</span> <span class="token punctuation">(</span>count<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            notEmpty<span class="token punctuation">.</span><span class="token function">await</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token comment">//dequeue中就是直接将head.next指向了next.next</span>
+        x <span class="token operator">=</span> <span class="token function">dequeue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        c <span class="token operator">=</span> count<span class="token punctuation">.</span><span class="token function">getAndDecrement</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>c <span class="token operator">></span> <span class="token number">1</span><span class="token punctuation">)</span>
+            <span class="token comment">//如果出队前容量大于1，则通知一个消费者</span>
+            notEmpty<span class="token punctuation">.</span><span class="token function">signal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+        takeLock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>c <span class="token operator">==</span> capacity<span class="token punctuation">)</span>
+        <span class="token comment">//如果出队前容量是满的，则通知一个生产者</span>
+        <span class="token function">signalNotFull</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> x<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>可以看出LinkedBlockingQueue的并发粒度相较于ArrayBlockingQueue有所提高，可以让入队出队同时进行，signal的条件和时机也是考虑到了入队出队的并发执行。</p>
-<h2 id="构造方法及特点总结-1">3.3 构造方法及特点总结</h2><pre><code class="java">public LinkedBlockingQueue() {
-    this(Integer.MAX_VALUE);
-}
+<h2 id="构造方法及特点总结-1">3.3 构造方法及特点总结</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">LinkedBlockingQueue</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">this</span><span class="token punctuation">(</span><span class="token class-name">Integer</span><span class="token punctuation">.</span>MAX_VALUE<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
 
 
-public LinkedBlockingQueue(int capacity) {
-    if (capacity &lt;= 0) throw new IllegalArgumentException();
-    this.capacity = capacity;
-    last = head = new Node&lt;E&gt;(null);
-}</code></pre>
+<span class="token keyword">public</span> <span class="token class-name">LinkedBlockingQueue</span><span class="token punctuation">(</span><span class="token keyword">int</span> capacity<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>capacity <span class="token operator">&lt;=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IllegalArgumentException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>capacity <span class="token operator">=</span> capacity<span class="token punctuation">;</span>
+    last <span class="token operator">=</span> head <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Node</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">E</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <ul>
 <li>LinkedBlockingQueue的head始终指向哨兵节点</li>
 <li>LinkedBlockingQueue构造时可以设置容量，默认为int的最大值</li>
@@ -1252,7 +1261,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

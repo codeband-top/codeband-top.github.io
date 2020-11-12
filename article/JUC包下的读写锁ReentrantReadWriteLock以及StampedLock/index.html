@@ -28,6 +28,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -421,134 +422,137 @@
             <div id="articleContent">
                 <h1 id="ReentrantReadWriteLock">1 ReentrantReadWriteLock</h1><h2 id="概述">1.1 概述</h2><p>当读操作远远高于写操作时，这时候使用 <code>读写锁</code> 让 <code>读-读</code> 可以并发，提高性能。 类似于数据库中的 <code>select ... from ... lock in share mode</code></p>
 <p>提供一个 <code>数据容器类</code> 内部分别使用读锁保护数据的 <code>read()</code> 方法，写锁保护数据的 <code>write()</code> 方法</p>
-<pre><code class="java">class DataContainer {
-    private Object data;
-    private ReentrantReadWriteLock rw = new ReentrantReadWriteLock();
-    private ReentrantReadWriteLock.ReadLock r = rw.readLock();
-    private ReentrantReadWriteLock.WriteLock w = rw.writeLock();
-    public Object read() {
-        log.debug(&quot;获取读锁...&quot;);
-        r.lock();
-        try {
-            log.debug(&quot;读取&quot;);
-            sleep(1);
-            return data;
-        } finally {
-            log.debug(&quot;释放读锁...&quot;);
-            r.unlock();
-        }
-    }
-    public void write() {
-        log.debug(&quot;获取写锁...&quot;);
-        w.lock();
-        try {
-            log.debug(&quot;写入&quot;);
-            sleep(1);
-        } finally {
-            log.debug(&quot;释放写锁...&quot;);
-            w.unlock();
-        }
-    }
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">DataContainer</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">private</span> <span class="token class-name">Object</span> data<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">ReentrantReadWriteLock</span> rw <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ReentrantReadWriteLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">ReentrantReadWriteLock</span><span class="token punctuation">.</span><span class="token class-name">ReadLock</span> r <span class="token operator">=</span> rw<span class="token punctuation">.</span><span class="token function">readLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">ReentrantReadWriteLock</span><span class="token punctuation">.</span><span class="token class-name">WriteLock</span> w <span class="token operator">=</span> rw<span class="token punctuation">.</span><span class="token function">writeLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token class-name">Object</span> <span class="token function">read</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"获取读锁..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        r<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"读取"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> data<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"释放读锁..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            r<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">write</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"获取写锁..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        w<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"写入"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"释放写锁..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            w<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p><strong>注意事项</strong></p>
 <ul>
 <li>读锁不支持条件变量</li>
 <li>重入时升级不支持：即持有读锁的情况下去获取写锁，会导致获取写锁永久等待（必须先释放读锁）</li>
 </ul>
-<pre><code class="java">r.lock();//获取读锁
-try {
-    // 获取写锁，不支持
-    w.lock();
-    try {
-        // ...
-    } finally{
-        w.unlock();
-    }
-} finally{
-    r.unlock();
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java">r<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//获取读锁</span>
+<span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 获取写锁，不支持</span>
+    w<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">// ...</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">finally</span><span class="token punctuation">&#123;</span>
+        w<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span> <span class="token keyword">finally</span><span class="token punctuation">&#123;</span>
+    r<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <ul>
 <li>重入时降级支持：即持有写锁的情况下去获取读锁</li>
 </ul>
 <h2 id="读写锁应用之缓存一致性">1.2 读写锁应用之缓存一致性</h2><p>在多线程环境下，数据库缓存可能会出现不一致：</p>
 <p>先清空缓存：</p>
-<p><img src="https://api.codetool.top/img/1580902769862.png" alt></p>
+<p><img src="https://api.codetool.top/img/1580902769862.png"></p>
 <p>先更新数据库：</p>
-<p><img src="https://api.codetool.top/img/15809028019284.png" alt></p>
-<pre><code class="java">class GenericCachedDao&lt;T&gt; {
-    // HashMap 作为缓存非线程安全, 需要保护
-    HashMap&lt;SqlPair, T&gt; map = new HashMap&lt;&gt;();
+<p><img src="https://api.codetool.top/img/15809028019284.png"></p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">GenericCachedDao</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">T</span><span class="token punctuation">></span></span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// HashMap 作为缓存非线程安全, 需要保护</span>
+    <span class="token class-name">HashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">SqlPair</span><span class="token punctuation">,</span> <span class="token class-name">T</span><span class="token punctuation">></span></span> map <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-    GenericDao genericDao = new GenericDao();
-    public int update(String sql, Object... params) {
-        SqlPair key = new SqlPair(sql, params);
-        // 加写锁, 防止其它线程对缓存读取和更改
-        lock.writeLock().lock();
-        try {
-            int rows = genericDao.update(sql, params);
-            map.clear();
-            return rows;
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-    public T queryOne(Class&lt;T&gt; beanClass, String sql, Object... params) {
-        SqlPair key = new SqlPair(sql, params);
-        // 加读锁, 防止其它线程对缓存更改
-        lock.readLock().lock();
-        try {
-            T value = map.get(key);
-            if (value != null) {
-                return value;
-            }
-        } finally {
-            lock.readLock().unlock();
-        }
-        // 加写锁, 防止其它线程对缓存读取和更改
-        lock.writeLock().lock();
-        try {
-            // get 方法上面部分是可能多个线程进来的, 可能已经向缓存填充了数据
-            // 为防止重复查询数据库, 再次验证
-            T value = map.get(key);
-            if (value == null) {
-                // 如果没有, 查询数据库
-                value = genericDao.queryOne(beanClass, sql, params);
-                map.put(key, value);
-            }
-            return value;
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-    // 作为 key 保证其是不可变的
-    class SqlPair {
-        private String sql;
-        private Object[] params;
-        public SqlPair(String sql, Object[] params) {
-            this.sql = sql;
-            this.params = params;
-        }
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            SqlPair sqlPair = (SqlPair) o;
-            return sql.equals(sqlPair.sql) &amp;&amp;
-            Arrays.equals(params, sqlPair.params);
-        }
-        @Override
-        public int hashCode() {
-            int result = Objects.hash(sql);
-            result = 31 * result + Arrays.hashCode(params);
-            return result;
-        }
-    }
-}</code></pre>
+    <span class="token class-name">ReentrantReadWriteLock</span> lock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ReentrantReadWriteLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">GenericDao</span> genericDao <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">GenericDao</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">update</span><span class="token punctuation">(</span><span class="token class-name">String</span> sql<span class="token punctuation">,</span> <span class="token class-name">Object</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> params<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">SqlPair</span> key <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SqlPair</span><span class="token punctuation">(</span>sql<span class="token punctuation">,</span> params<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">// 加写锁, 防止其它线程对缓存读取和更改</span>
+        lock<span class="token punctuation">.</span><span class="token function">writeLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">int</span> rows <span class="token operator">=</span> genericDao<span class="token punctuation">.</span><span class="token function">update</span><span class="token punctuation">(</span>sql<span class="token punctuation">,</span> params<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            map<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> rows<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+            lock<span class="token punctuation">.</span><span class="token function">writeLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">public</span> <span class="token class-name">T</span> <span class="token function">queryOne</span><span class="token punctuation">(</span><span class="token class-name">Class</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">T</span><span class="token punctuation">></span></span> beanClass<span class="token punctuation">,</span> <span class="token class-name">String</span> sql<span class="token punctuation">,</span> <span class="token class-name">Object</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> params<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">SqlPair</span> key <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SqlPair</span><span class="token punctuation">(</span>sql<span class="token punctuation">,</span> params<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">// 加读锁, 防止其它线程对缓存更改</span>
+        lock<span class="token punctuation">.</span><span class="token function">readLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            <span class="token class-name">T</span> value <span class="token operator">=</span> map<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>value <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                <span class="token keyword">return</span> value<span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+            lock<span class="token punctuation">.</span><span class="token function">readLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token comment">// 加写锁, 防止其它线程对缓存读取和更改</span>
+        lock<span class="token punctuation">.</span><span class="token function">writeLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            <span class="token comment">// get 方法上面部分是可能多个线程进来的, 可能已经向缓存填充了数据</span>
+            <span class="token comment">// 为防止重复查询数据库, 再次验证</span>
+            <span class="token class-name">T</span> value <span class="token operator">=</span> map<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>value <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                <span class="token comment">// 如果没有, 查询数据库</span>
+                value <span class="token operator">=</span> genericDao<span class="token punctuation">.</span><span class="token function">queryOne</span><span class="token punctuation">(</span>beanClass<span class="token punctuation">,</span> sql<span class="token punctuation">,</span> params<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                map<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> value<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+            <span class="token keyword">return</span> value<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+            lock<span class="token punctuation">.</span><span class="token function">writeLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token comment">// 作为 key 保证其是不可变的</span>
+    <span class="token keyword">class</span> <span class="token class-name">SqlPair</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">private</span> <span class="token class-name">String</span> sql<span class="token punctuation">;</span>
+        <span class="token keyword">private</span> <span class="token class-name">Object</span><span class="token punctuation">[</span><span class="token punctuation">]</span> params<span class="token punctuation">;</span>
+        <span class="token keyword">public</span> <span class="token class-name">SqlPair</span><span class="token punctuation">(</span><span class="token class-name">String</span> sql<span class="token punctuation">,</span> <span class="token class-name">Object</span><span class="token punctuation">[</span><span class="token punctuation">]</span> params<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">this</span><span class="token punctuation">.</span>sql <span class="token operator">=</span> sql<span class="token punctuation">;</span>
+            <span class="token keyword">this</span><span class="token punctuation">.</span>params <span class="token operator">=</span> params<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token annotation punctuation">@Override</span>
+        <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">equals</span><span class="token punctuation">(</span><span class="token class-name">Object</span> o<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span> <span class="token operator">==</span> o<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>o <span class="token operator">==</span> <span class="token keyword">null</span> <span class="token operator">||</span> <span class="token function">getClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">!=</span> o<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+            <span class="token class-name">SqlPair</span> sqlPair <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">SqlPair</span><span class="token punctuation">)</span> o<span class="token punctuation">;</span>
+            <span class="token keyword">return</span> sql<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span>sqlPair<span class="token punctuation">.</span>sql<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span>
+            <span class="token class-name">Arrays</span><span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span>params<span class="token punctuation">,</span> sqlPair<span class="token punctuation">.</span>params<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token annotation punctuation">@Override</span>
+        <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">hashCode</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">int</span> result <span class="token operator">=</span> <span class="token class-name">Objects</span><span class="token punctuation">.</span><span class="token function">hash</span><span class="token punctuation">(</span>sql<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            result <span class="token operator">=</span> <span class="token number">31</span> <span class="token operator">*</span> result <span class="token operator">+</span> <span class="token class-name">Arrays</span><span class="token punctuation">.</span><span class="token function">hashCode</span><span class="token punctuation">(</span>params<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> result<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>注意：</p>
 <ul>
 <li>以上实现体现的是读写锁的应用，保证缓存和数据库的一致性，但有下面的问题没有考虑<ul>
@@ -563,90 +567,97 @@ try {
 <li>可以使用乐观锁实现：用 CAS 去更新</li>
 </ul>
 <h2 id="读写锁原理">1.3 读写锁原理</h2><p>读写锁将AQS的state分为高16位和低16位。读锁用高16位，表示持有读锁的线程数，写锁用低16位，表示写锁的重入次数。</p>
-<p>参考：<a href="https://www.cnblogs.com/xiaoxi/p/9140541.html" target="_blank" rel="noopener">https://www.cnblogs.com/xiaoxi/p/9140541.html</a></p>
+<p>参考：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/xiaoxi/p/9140541.html">https://www.cnblogs.com/xiaoxi/p/9140541.html</a></p>
 <h1 id="StampedLock">2 StampedLock</h1><p>该类自 JDK 8 加入，是为了进一步优化读性能，它的特点是在使用读锁、写锁时都必须配合【戳】使用</p>
 <p>加解读锁</p>
-<pre><code class="java">long stamp = lock.readLock();
-lock.unlockRead(stamp);</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">long</span> stamp <span class="token operator">=</span> lock<span class="token punctuation">.</span><span class="token function">readLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+lock<span class="token punctuation">.</span><span class="token function">unlockRead</span><span class="token punctuation">(</span>stamp<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
 <p>加解写锁</p>
-<pre><code class="java">long stamp = lock.writeLock();
-lock.unlockWrite(stamp);</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">long</span> stamp <span class="token operator">=</span> lock<span class="token punctuation">.</span><span class="token function">writeLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+lock<span class="token punctuation">.</span><span class="token function">unlockWrite</span><span class="token punctuation">(</span>stamp<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
 <p>乐观读，StampedLock 支持 <code>tryOptimisticRead()</code> 方法（乐观读），读取完毕后需要做一次 戳校验 如果校验通<br>过，表示这期间确实没有写操作，数据可以安全使用，如果校验没通过，需要重新获取读锁，保证数据安全。</p>
 <p>提供一个 数据容器类 内部分别使用读锁保护数据的 <code>read()</code> 方法，写锁保护数据的 <code>write()</code> 方法</p>
-<pre><code class="java">class DataContainerStamped {
-    private int data;
-    private final StampedLock lock = new StampedLock();
-    public DataContainerStamped(int data) {
-        this.data = data;
-    }
-    public int read(int readTime) {
-        long stamp = lock.tryOptimisticRead();
-        log.debug(&quot;optimistic read locking...{}&quot;, stamp);
-        sleep(readTime);
-        if (lock.validate(stamp)) {
-            log.debug(&quot;read finish...{}, data:{}&quot;, stamp, data);
-            return data;
-        }
-        // 锁升级 - 读锁
-        log.debug(&quot;updating to read lock... {}&quot;, stamp);
-        try {
-            stamp = lock.readLock();
-            log.debug(&quot;read lock {}&quot;, stamp);
-            sleep(readTime);
-            log.debug(&quot;read finish...{}, data:{}&quot;, stamp, data);
-            return data;
-        } finally {
-            log.debug(&quot;read unlock {}&quot;, stamp);
-            lock.unlockRead(stamp);
-        }
-    }
-    public void write(int newData) {
-        long stamp = lock.writeLock();
-        log.debug(&quot;write lock {}&quot;, stamp);
-        try {
-            sleep(2);
-            this.data = newData;
-        } finally {
-            log.debug(&quot;write unlock {}&quot;, stamp);
-            lock.unlockWrite(stamp);
-        }
-    }
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">DataContainerStamped</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">private</span> <span class="token keyword">int</span> data<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token class-name">StampedLock</span> lock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StampedLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token class-name">DataContainerStamped</span><span class="token punctuation">(</span><span class="token keyword">int</span> data<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>data <span class="token operator">=</span> data<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">read</span><span class="token punctuation">(</span><span class="token keyword">int</span> readTime<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">long</span> stamp <span class="token operator">=</span> lock<span class="token punctuation">.</span><span class="token function">tryOptimisticRead</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"optimistic read locking...&#123;&#125;"</span><span class="token punctuation">,</span> stamp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">sleep</span><span class="token punctuation">(</span>readTime<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>lock<span class="token punctuation">.</span><span class="token function">validate</span><span class="token punctuation">(</span>stamp<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"read finish...&#123;&#125;, data:&#123;&#125;"</span><span class="token punctuation">,</span> stamp<span class="token punctuation">,</span> data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> data<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token comment">// 锁升级 - 读锁</span>
+        log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"updating to read lock... &#123;&#125;"</span><span class="token punctuation">,</span> stamp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            stamp <span class="token operator">=</span> lock<span class="token punctuation">.</span><span class="token function">readLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"read lock &#123;&#125;"</span><span class="token punctuation">,</span> stamp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token function">sleep</span><span class="token punctuation">(</span>readTime<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"read finish...&#123;&#125;, data:&#123;&#125;"</span><span class="token punctuation">,</span> stamp<span class="token punctuation">,</span> data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> data<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"read unlock &#123;&#125;"</span><span class="token punctuation">,</span> stamp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            lock<span class="token punctuation">.</span><span class="token function">unlockRead</span><span class="token punctuation">(</span>stamp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">write</span><span class="token punctuation">(</span><span class="token keyword">int</span> newData<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">long</span> stamp <span class="token operator">=</span> lock<span class="token punctuation">.</span><span class="token function">writeLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"write lock &#123;&#125;"</span><span class="token punctuation">,</span> stamp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            <span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">this</span><span class="token punctuation">.</span>data <span class="token operator">=</span> newData<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+            log<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"write unlock &#123;&#125;"</span><span class="token punctuation">,</span> stamp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            lock<span class="token punctuation">.</span><span class="token function">unlockWrite</span><span class="token punctuation">(</span>stamp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>测试 <code>读-读</code> 可以优化：（只有线程进行读操作，戳不会变化，不会加锁）</p>
-<pre><code class="java">public static void main(String[] args) {
-    DataContainerStamped dataContainer = new DataContainerStamped(1);
-    new Thread(() -&gt; {
-        dataContainer.read(1);
-    }, &quot;t1&quot;).start();
-    sleep(0.5);
-    new Thread(() -&gt; {
-        dataContainer.read(0);
-    }, &quot;t2&quot;).start();
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">DataContainerStamped</span> dataContainer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DataContainerStamped</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-></span> <span class="token punctuation">&#123;</span>
+        dataContainer<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">,</span> <span class="token string">"t1"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-></span> <span class="token punctuation">&#123;</span>
+        dataContainer<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">,</span> <span class="token string">"t2"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>输出结果：</p>
-<pre><code class="java">15:58:50.217 c.DataContainerStamped [t1] - optimistic read locking...256
-15:58:50.717 c.DataContainerStamped [t2] - optimistic read locking...256
-15:58:50.717 c.DataContainerStamped [t2] - read finish...256, data:1
-15:58:51.220 c.DataContainerStamped [t1] - read finish...256, data:1 </code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token number">15</span><span class="token operator">:</span><span class="token number">58</span><span class="token operator">:</span><span class="token number">50.217</span> c<span class="token punctuation">.</span><span class="token class-name">DataContainerStamped</span> <span class="token punctuation">[</span>t1<span class="token punctuation">]</span> <span class="token operator">-</span> optimistic read locking<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token number">.256</span>
+<span class="token number">15</span><span class="token operator">:</span><span class="token number">58</span><span class="token operator">:</span><span class="token number">50.717</span> c<span class="token punctuation">.</span><span class="token class-name">DataContainerStamped</span> <span class="token punctuation">[</span>t2<span class="token punctuation">]</span> <span class="token operator">-</span> optimistic read locking<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token number">.256</span>
+<span class="token number">15</span><span class="token operator">:</span><span class="token number">58</span><span class="token operator">:</span><span class="token number">50.717</span> c<span class="token punctuation">.</span><span class="token class-name">DataContainerStamped</span> <span class="token punctuation">[</span>t2<span class="token punctuation">]</span> <span class="token operator">-</span> read finish<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token number">.256</span><span class="token punctuation">,</span> data<span class="token operator">:</span><span class="token number">1</span>
+<span class="token number">15</span><span class="token operator">:</span><span class="token number">58</span><span class="token operator">:</span><span class="token number">51.220</span> c<span class="token punctuation">.</span><span class="token class-name">DataContainerStamped</span> <span class="token punctuation">[</span>t1<span class="token punctuation">]</span> <span class="token operator">-</span> read finish<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token number">.256</span><span class="token punctuation">,</span> data<span class="token operator">:</span><span class="token number">1</span> </code></pre>
+
 <p>测试 <code>读-写</code> 时优化读补加读锁：</p>
-<pre><code class="java">public static void main(String[] args) {
-    DataContainerStamped dataContainer = new DataContainerStamped(1);
-    new Thread(() -&gt; {
-        dataContainer.read(1);
-    }, &quot;t1&quot;).start();
-    sleep(0.5);
-    new Thread(() -&gt; {
-        dataContainer.write(100);
-    }, &quot;t2&quot;).start();
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">DataContainerStamped</span> dataContainer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DataContainerStamped</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-></span> <span class="token punctuation">&#123;</span>
+        dataContainer<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">,</span> <span class="token string">"t1"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-></span> <span class="token punctuation">&#123;</span>
+        dataContainer<span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">,</span> <span class="token string">"t2"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>输出结果：</p>
-<pre><code class="java">15:57:00.219 c.DataContainerStamped [t1] - optimistic read locking...256
-15:57:00.717 c.DataContainerStamped [t2] - write lock 384
-15:57:01.225 c.DataContainerStamped [t1] - updating to read lock... 256
-15:57:02.719 c.DataContainerStamped [t2] - write unlock 384
-15:57:02.719 c.DataContainerStamped [t1] - read lock 513
-15:57:03.719 c.DataContainerStamped [t1] - read finish...513, data:1000
-15:57:03.719 c.DataContainerStamped [t1] - read unlock 513 </code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token number">15</span><span class="token operator">:</span><span class="token number">57</span><span class="token operator">:</span><span class="token number">00.219</span> c<span class="token punctuation">.</span><span class="token class-name">DataContainerStamped</span> <span class="token punctuation">[</span>t1<span class="token punctuation">]</span> <span class="token operator">-</span> optimistic read locking<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token number">.256</span>
+<span class="token number">15</span><span class="token operator">:</span><span class="token number">57</span><span class="token operator">:</span><span class="token number">00.717</span> c<span class="token punctuation">.</span><span class="token class-name">DataContainerStamped</span> <span class="token punctuation">[</span>t2<span class="token punctuation">]</span> <span class="token operator">-</span> write lock <span class="token number">384</span>
+<span class="token number">15</span><span class="token operator">:</span><span class="token number">57</span><span class="token operator">:</span><span class="token number">01.225</span> c<span class="token punctuation">.</span><span class="token class-name">DataContainerStamped</span> <span class="token punctuation">[</span>t1<span class="token punctuation">]</span> <span class="token operator">-</span> updating <span class="token keyword">to</span> <span class="token namespace">read</span> lock<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token number">256</span>
+<span class="token number">15</span><span class="token operator">:</span><span class="token number">57</span><span class="token operator">:</span><span class="token number">02.719</span> c<span class="token punctuation">.</span><span class="token class-name">DataContainerStamped</span> <span class="token punctuation">[</span>t2<span class="token punctuation">]</span> <span class="token operator">-</span> write unlock <span class="token number">384</span>
+<span class="token number">15</span><span class="token operator">:</span><span class="token number">57</span><span class="token operator">:</span><span class="token number">02.719</span> c<span class="token punctuation">.</span><span class="token class-name">DataContainerStamped</span> <span class="token punctuation">[</span>t1<span class="token punctuation">]</span> <span class="token operator">-</span> read lock <span class="token number">513</span>
+<span class="token number">15</span><span class="token operator">:</span><span class="token number">57</span><span class="token operator">:</span><span class="token number">03.719</span> c<span class="token punctuation">.</span><span class="token class-name">DataContainerStamped</span> <span class="token punctuation">[</span>t1<span class="token punctuation">]</span> <span class="token operator">-</span> read finish<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token number">.513</span><span class="token punctuation">,</span> data<span class="token operator">:</span><span class="token number">1000</span>
+<span class="token number">15</span><span class="token operator">:</span><span class="token number">57</span><span class="token operator">:</span><span class="token number">03.719</span> c<span class="token punctuation">.</span><span class="token class-name">DataContainerStamped</span> <span class="token punctuation">[</span>t1<span class="token punctuation">]</span> <span class="token operator">-</span> read unlock <span class="token number">513</span> </code></pre>
+
 <p><strong>注意</strong></p>
 <ul>
 <li>StampedLock 不支持条件变量</li>
@@ -1093,7 +1104,7 @@ lock.unlockWrite(stamp);</code></pre>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题给定一个大小为 n 的数组，找到其中的多数元素。多数元素是指在数组中出现次数大于 ⌊ n/2 ⌋ 的元素。
+                            1 原题给定一个大小为 n 的数组，找到其中的多数元素。多数元素是指在数组中出现次数大于 ⌊ n/2 ⌋ 的元素。
 你可以假设数组是非空的，并且给定的数组总是存在多数元素。
 示例1:
 
@@ -1277,7 +1288,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

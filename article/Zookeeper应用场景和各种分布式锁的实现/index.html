@@ -29,6 +29,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -403,7 +404,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    3.5k
+                    3.4k
                 </div>
                 
 
@@ -417,18 +418,19 @@
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <p>该文参考资源：</p>
-<p><a href="https://blog.csdn.net/dingjianmin/article/details/82763871" target="_blank" rel="noopener">浅谈分布式锁–基于数据库实现篇_数据库_powerful的博客-CSDN博客</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/dingjianmin/article/details/82763871">浅谈分布式锁–基于数据库实现篇_数据库_powerful的博客-CSDN博客</a></p>
 <h1 id="配置中心">1 配置中心</h1><p>在平常的业务开发过程中，我们通常需要将系统的一些通用的<strong>全局配置</strong>，例如机器列表配置，运行时开关配置，数据库配置信息等统-集中存储，让集群所有机器共享配置信息，系统在启动会首先从配置中心读取配置信息,进行初始化。传统的实现方式将配置存储在本地文件和内存中，一旦机器规模更大,配置变更频繁情况下，本地文件和内存方式的配置维护成本较高，使用zookeeper作为分布式的配置中心就可以解决这个问题。</p>
 <p>我们将配置信息存在zk中的一个节点中，同时给该节点注册一个数据节点变更的watcher监听，一旦节点数据发生变更，所有的订阅该节点的客户端都可以获取数据变更通知。</p>
 <h1 id="负载均衡">2 负载均衡</h1><p>建立server节点，并建立监听器监视servers子节点的状态（用于在服务器增添时及时同步当前集群中服务器列表）。<strong>在每个服务器启动时，在servers节点下建立具体服务器地址的子节点,并在对应的子节点下存入服务器的相关信息。</strong>这样，我们<strong>在zookeeper服务器上可以获取当前集群中的服务器列表及相关信息</strong>，可以自定义一个负载均衡算法，在每个请求过来时从zookeeper服务器中获取当前集群服务器列表，根据算法选出其中一个服务器来处理请求。</p>
 <h1 id="命名服务">3 命名服务</h1><p>命名服务是分布式系统中的基本功能之一。被命名的实体通常可以是集群中的机器、提供的服务地址或者远程对象，这些都可以称作为名字。常见的就是一些分布式服务框架（RPC、RMI）中的服务地址列表，通过使用名称服务客户端可以获取资源的实体、服务地址和提供者信息。<strong>命名服务就是通过一个资源引用的方式来实现对资源的定位和使用。在分布式环境中，上层应用仅仅需要一个全局唯一名称，就像数据库中的主键。</strong></p>
 <p>在单库单表系统中可以通过自增ID来标识每一条记录，但是随着规模变大分库分表很常见，那么自增ID有仅能针对单一表生成ID，所以在这种情况下无法依靠这个来标识唯一ID。UUID就是一种全局唯一标识符。但是长度过长不易识别。</p>
 <p>在 Zookeeper中通过创建顺序节点就可以实现，所有客户端都会根据自己的任务类型来创建一个顺<br>序节点，例如 job-00000001。</p>
-<p><img src="https://api.codetool.top/img/15845162034318.jpg" alt></p>
-<pre><code class="java">//CreateMode.PERSISTENT_SEQUENTIAL可以在第一个参数path后面附加一个八位的全局递增的数字
-String path = zooKeeper.create(&quot;/type1/iob&quot;, &quot;app2Value&quot;.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT_SEQUENTIAL);
+<p><img src="https://api.codetool.top/img/15845162034318.jpg"></p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">//CreateMode.PERSISTENT_SEQUENTIAL可以在第一个参数path后面附加一个八位的全局递增的数字</span>
+<span class="token class-name">String</span> path <span class="token operator">=</span> zooKeeper<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span><span class="token string">"/type1/iob"</span><span class="token punctuation">,</span> <span class="token string">"app2Value"</span><span class="token punctuation">.</span><span class="token function">getBytes</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token class-name">ZooDefs</span><span class="token punctuation">.</span><span class="token class-name">Ids</span><span class="token punctuation">.</span>OPEN_ACL_UNSAFE<span class="token punctuation">,</span> <span class="token class-name">CreateMode</span><span class="token punctuation">.</span>PERSISTENT_SEQUENTIAL<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-System.out.println(path);</code></pre>
+<span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
 <h1 id="DNS服务">4 DNS服务</h1><h2 id="域名配置">4.1 域名配置</h2><p>在分布式系统应用中，每一个应用都需要分配一个域名，日常开发中，往往使用本地HOST绑定域名解析，开发阶段可以随时修改域名和IP的映射，大大提高开发的调试效率。如果应用的机器规模达到一定程度后，需要频繁更新域名时，需要在规模的集群中变更，无法保证实时性。所有我们在zk上创建一个节点来进行域名配置。</p>
 <h2 id="域名解析">4.2 域名解析</h2><p>应用解析时，首先从zk域名节点中获取域名映射的IP和端口。</p>
 <h2 id="域名变更">4.3 域名变更</h2><p>每个应用都会在在对应的域名节点注册一个数据变更的watcher监听，一旦监听的域名节点数据变更， zk会向所有订阅的客户端发送域名变更通知。</p>
@@ -436,19 +438,20 @@ System.out.println(path);</code></pre>
 <h2 id="机器上下线">5.1 机器上下线</h2><p>新增机器的时候，将Agent部署到新增的机器上，当Agent部署启动时，会向zookeeper指定的节点下创建一个临时子节点，当Agent在zk上创建完这个临时节点后，当关注的节点<code>zookeeper/machines</code>下的子节点加入新的节点时或删除都会发送通知，这样就对机器的上下线进行监控。</p>
 <h2 id="机器监控">5.2 机器监控</h2><p>在机器运行过程中，Agent会定时将主机的的运行状态信息写入到/machines/hostn主机节点，监控中心通过订阅这些节点的数据变化来获取主机的运行信息。</p>
 <h1 id="分布式锁">6 分布式锁</h1><p>分布式锁的实现方式通常有三种：数据库、redis、zookeeper</p>
-<h2 id="数据库悲观锁">6.1 数据库悲观锁</h2><p>这部分的原理参考<a href="../MySQL之表锁、行锁、MVCC详解/#toc-heading-7">MySQL之表锁、行锁、MVCC详解</a></p>
+<h2 id="数据库悲观锁">6.1 数据库悲观锁</h2><p>这部分的原理参考<a href="../MySQL%E4%B9%8B%E8%A1%A8%E9%94%81%E3%80%81%E8%A1%8C%E9%94%81%E3%80%81MVCC%E8%AF%A6%E8%A7%A3/#toc-heading-7">MySQL之表锁、行锁、MVCC详解</a></p>
 <h3 id="insert自动加锁">6.1.1 insert自动加锁</h3><p>思想是，当我们要锁住某个方法或资源时，我们就在该表中增加一条记录，想要释放锁的时候就删除这条记录。</p>
 <p>对于UPDATE、DELETE和INSERT语句，InnoDB会自动给涉及的数据集加排他锁</p>
 <p>创建数据库：</p>
-<pre><code class="sql">CREATE TABLE `methodLock` (
-    `id` int(11) NOT NULL AUTO_INCREMENT COMMENT &#39;主键&#39;,
-    `method_name` varchar(64) UNIQUE NOT NULL DEFAULT &#39;&#39; COMMENT &#39;锁定的方法名&#39;,
-    `desc` varchar(1024) NOT NULL DEFAULT &#39;备注信息&#39;,
-    `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE
-    CURRENT_TIMESTAMP COMMENT &#39;保存数据时间，自动生成&#39;,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uidx_method_name` (`method_name `)
-) DEFAULT CHARSET=utf8 COMMENT=&#39;锁定中的方法&#39;;</code></pre>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">TABLE</span> <span class="token punctuation">`</span>methodLock<span class="token punctuation">`</span> <span class="token punctuation">(</span>
+    <span class="token punctuation">`</span>id<span class="token punctuation">`</span> <span class="token keyword">int</span><span class="token punctuation">(</span><span class="token number">11</span><span class="token punctuation">)</span> <span class="token operator">NOT</span> <span class="token boolean">NULL</span> <span class="token keyword">AUTO_INCREMENT</span> <span class="token keyword">COMMENT</span> <span class="token string">'主键'</span><span class="token punctuation">,</span>
+    <span class="token punctuation">`</span>method_name<span class="token punctuation">`</span> <span class="token keyword">varchar</span><span class="token punctuation">(</span><span class="token number">64</span><span class="token punctuation">)</span> <span class="token keyword">UNIQUE</span> <span class="token operator">NOT</span> <span class="token boolean">NULL</span> <span class="token keyword">DEFAULT</span> <span class="token string">''</span> <span class="token keyword">COMMENT</span> <span class="token string">'锁定的方法名'</span><span class="token punctuation">,</span>
+    <span class="token punctuation">`</span><span class="token keyword">desc</span><span class="token punctuation">`</span> <span class="token keyword">varchar</span><span class="token punctuation">(</span><span class="token number">1024</span><span class="token punctuation">)</span> <span class="token operator">NOT</span> <span class="token boolean">NULL</span> <span class="token keyword">DEFAULT</span> <span class="token string">'备注信息'</span><span class="token punctuation">,</span>
+    <span class="token punctuation">`</span>update_time<span class="token punctuation">`</span> <span class="token keyword">timestamp</span> <span class="token operator">NOT</span> <span class="token boolean">NULL</span> <span class="token keyword">DEFAULT</span> <span class="token keyword">CURRENT_TIMESTAMP</span> <span class="token keyword">ON</span> <span class="token keyword">UPDATE</span>
+    <span class="token keyword">CURRENT_TIMESTAMP</span> <span class="token keyword">COMMENT</span> <span class="token string">'保存数据时间，自动生成'</span><span class="token punctuation">,</span>
+    <span class="token keyword">PRIMARY</span> <span class="token keyword">KEY</span> <span class="token punctuation">(</span><span class="token punctuation">`</span>id<span class="token punctuation">`</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token keyword">UNIQUE</span> <span class="token keyword">KEY</span> <span class="token punctuation">`</span>uidx_method_name<span class="token punctuation">`</span> <span class="token punctuation">(</span><span class="token punctuation">`</span>method_name <span class="token punctuation">`</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span> <span class="token keyword">DEFAULT</span> <span class="token keyword">CHARSET</span><span class="token operator">=</span>utf8 <span class="token keyword">COMMENT</span><span class="token operator">=</span><span class="token string">'锁定中的方法'</span><span class="token punctuation">;</span></code></pre>
+
 <p>注意<code>method_name</code>必须是唯一索引，否则锁的是全表而不是记录本身。</p>
 <p>获得锁:</p>
 <p><code>insert into methodLock(method_name,desc) values (&#39;method_name&#39;,&#39;desc&#39;);</code></p>
@@ -463,24 +466,28 @@ System.out.println(path);</code></pre>
 </ol>
 <h3 id="select手动加锁">6.1.2 select手动加锁</h3><p><code>select ... for update</code>如果记录存在，会给记录加上行锁实现一致性锁定读。</p>
 <p>获得锁：</p>
-<p><code>select * from methodLock where method_name = #{currentMethod} for update;</code></p>
+<p><code>select * from methodLock where method_name = #&#123;currentMethod&#125; for update;</code></p>
 <p>释放锁：</p>
 <p><code>commit</code></p>
 <p><strong>这个方法的问题是，如果查询的记录不存在，mysql会加上间隙锁，而间隙锁是共享锁，也就是允许读操作，不会阻塞，所以当查询的记录不存在这种方法是不适用的。</strong></p>
 <p>这里还可能存在另外一个问题，虽然我们对 <code>method_name</code> 使用了唯一索引，并且显示使用for update 来使用行级锁。但是，MySql 会对查询进行优化，即便在条件中使用了索引字段，但是否使用索引来检索数据是由 MySQL 通过判断不同执行计划的代价来决定的，<strong>如果MySQL 认为全表扫效率更高，比如对一些很小的表，它就不会使用索引，这种情况下InnoDB 将使用表锁，而不是行锁。</strong></p>
 <h2 id="数据库乐观锁">6.2 数据库乐观锁</h2><p>数据库的乐观锁认为大多数时候操作都不会冲突，它给数据添加一个版本号，读取出数据时，将此版本号一同读出，之后更新时，对此版本号加1。在更新过程中，会对版本号进行比较，如果是一致的，没有发生改变，则会成功执行本次操作；如果版本号不一致，则会更新失败。</p>
 <p>获得锁：</p>
-<pre><code class="sql">select state,version from methodLock where method_name = &#39;currentMethod&#39;;
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> state<span class="token punctuation">,</span>version <span class="token keyword">from</span> methodLock <span class="token keyword">where</span> method_name <span class="token operator">=</span> <span class="token string">'currentMethod'</span><span class="token punctuation">;</span>
 
-update methodLock set state = &#39;locked&#39;,version = version + 1 where
-method_name = &#39;currentMethod&#39; and state = &#39;unlock&#39; and version = &#39;version&#39;;</code></pre>
+<span class="token keyword">update</span> methodLock <span class="token keyword">set</span> state <span class="token operator">=</span> <span class="token string">'locked'</span><span class="token punctuation">,</span>version <span class="token operator">=</span> version <span class="token operator">+</span> <span class="token number">1</span> <span class="token keyword">where</span>
+method_name <span class="token operator">=</span> <span class="token string">'currentMethod'</span> <span class="token operator">and</span> state <span class="token operator">=</span> <span class="token string">'unlock'</span> <span class="token operator">and</span> version <span class="token operator">=</span> <span class="token string">'version'</span><span class="token punctuation">;</span></code></pre>
+
 <p>释放锁：</p>
-<pre><code class="sql">update methodLock set state = &#39;unlock&#39; where method_name = &#39;currentMethod&#39; and state = &#39;locked&#39;;</code></pre>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">update</span> methodLock <span class="token keyword">set</span> state <span class="token operator">=</span> <span class="token string">'unlock'</span> <span class="token keyword">where</span> method_name <span class="token operator">=</span> <span class="token string">'currentMethod'</span> <span class="token operator">and</span> state <span class="token operator">=</span> <span class="token string">'locked'</span><span class="token punctuation">;</span></code></pre>
+
 <p>乐观锁只能解决持久化是 DB 数据的一次更新问题。假如你的数据不是在 DB，或者一个过程有三个数据的更新操作，线程 A 更新了数据 1 和数据 2，线程 B 更新了数据 3，乐观锁就不能起作用。</p>
 <h2 id="Redis">6.3 Redis</h2><p>redis分布式锁的实现和数据库的思想差不多，它是基于<code>setnx</code>（set if not exists）实现的，设置成功，返回1；设置失败，返回0，释放锁的操作通过del指令来完成。</p>
 <p>如果设置锁后在执行中间过程时，程序抛出异常，导致del指令没有调用，锁永远无法释放，这样就会陷入死锁。所以我们拿到锁之后会给锁加上一个过期时间，这样即使中间出现异常，过期时间到后会自动释放锁。</p>
 <p>同时在<code>setnx</code> 和 <code>expire</code> 如果进程挂掉，expire不能执行也会死锁。所以要保证setnx和expire是一个原子性操作即可。redis 2.8之后推出了setnx和expire的组合指令</p>
-<pre><code>set key value ex 5 nx</code></pre><p>redis 实现分布式锁存在的问题：为了解决redis单点问题，我们会部署redis集群，<strong>在 Sentinel 集群中，主节点突然挂掉了。同时主节点中有把锁还没有来得及同步到从节点。这样就会导致系统中同样一把锁被两个客户端同时持有，不安全性由此产生</strong>。redis官方为了解决这个问题，推出了Redlock 算法解决这个问题。但是带来的网络消耗较大。</p>
+<pre class="language-none"><code class="language-none">set key value ex 5 nx</code></pre>
+
+<p>redis 实现分布式锁存在的问题：为了解决redis单点问题，我们会部署redis集群，<strong>在 Sentinel 集群中，主节点突然挂掉了。同时主节点中有把锁还没有来得及同步到从节点。这样就会导致系统中同样一把锁被两个客户端同时持有，不安全性由此产生</strong>。redis官方为了解决这个问题，推出了Redlock 算法解决这个问题。但是带来的网络消耗较大。</p>
 <p>使用redisson（一个redis的作用于java的第三方库）可以解决这个问题。</p>
 <h2 id="Zookeeper">6.4 Zookeeper</h2><p><strong>原理:</strong> </p>
 <p>zookeeper通过创建<strong>临时序列节点</strong>来实现分布式锁，适用于顺序执行的程序，大体思路就是创建临时序列节点,找出最小的序列节点,获取分布式锁,程序执行完成之后此序列节点消失，<strong>通过watch来监控自己前一个节点的删除，当自己为序列中编号最小的节点的时候，获得分布式锁。</strong>当释放锁的时候，只需将这个瞬时节点删除即可。同时，其可以避免服务宕机导致的锁无法释放，而产生的死锁问题。</p>
@@ -500,7 +507,7 @@ method_name = &#39;currentMethod&#39; and state = &#39;unlock&#39; and version =
 <li>比较自己节点是否是序号最小的节点，如果不是，则等待其他节点出队列，在序号最小的节点注册watcher</li>
 <li>获取watcher通知后，重复步骤</li>
 </ul>
-<p><img src="https://api.codetool.top/img/15845314156477.png" alt></p>
+<p><img src="https://api.codetool.top/img/15845314156477.png"></p>
 
             </div>
             <hr/>
@@ -1113,7 +1120,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

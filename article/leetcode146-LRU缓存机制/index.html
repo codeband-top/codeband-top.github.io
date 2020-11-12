@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="keywords" content="leetcode146-LRU缓存机制, 代码段小站">
-    <meta name="description" content="1 原题运用你所掌握的数据结构，设计和实现一个  LRU (最近最少使用) 缓存机制。它应该支持以下操作： 获取数据 get 和 写入数据 put 。
+    <meta name="description" content="1 原题运用你所掌握的数据结构，设计和实现一个  LRU (最近最少使用) 缓存机制。它应该支持以下操作： 获取数据 get 和 写入数据 put 。
 获取数据 get(key) - 如果密钥 (key) 存在于缓存中，则获取密钥的值（总是">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -28,6 +28,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -402,7 +403,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    499
+                    507
                 </div>
                 
 
@@ -415,7 +416,7 @@
         <hr class="clearfix">
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h1 id="原题">1 原题</h1><p>运用你所掌握的数据结构，设计和实现一个  <a href="https://baike.baidu.com/item/LRU" target="_blank" rel="noopener">LRU (最近最少使用) 缓存机制</a>。它应该支持以下操作： 获取数据 <code>get</code> 和 写入数据 <code>put</code> 。</p>
+                <h1 id="原题">1 原题</h1><p>运用你所掌握的数据结构，设计和实现一个  <a target="_blank" rel="noopener" href="https://baike.baidu.com/item/LRU">LRU (最近最少使用) 缓存机制</a>。它应该支持以下操作： 获取数据 <code>get</code> 和 写入数据 <code>put</code> 。</p>
 <p>获取数据 <code>get(key)</code> - 如果密钥 (key) 存在于缓存中，则获取密钥的值（总是正数），否则返回 -1。<br>写入数据 <code>put(key, value)</code> - 如果密钥已经存在，则变更其数据值；如果密钥不存在，则插入该组「密钥/数据值」。当缓存容量达到上限时，它应该在写入新数据之前删除最久未使用的数据值，从而为新的数据值留出空间。</p>
 <p><strong>进阶:</strong></p>
 <p>你是否可以在 <strong>O(1)</strong> 时间复杂度内完成这两种操作？</p>
@@ -434,30 +435,29 @@ cache.get(4);       // 返回  4
 </pre>
 
 <h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>如果不限制 <code>O(1)</code> 时间复杂度，用链表就能完成了，但是限制时间复杂度就需要解决链表顺序访问的问题。</p>
-<p>可以通过哈希表+链表解决，如果看过LinkedHashMap的源码就知道，LinkedHashMap本身就可以拓展成LRU缓存，这个我也在<a href="../LinkedHashMap源码分析">LinkedHashMap源码分析</a>中提过。</p>
-<h2 id="代码">2.2 代码</h2><pre><code class="java">class LRUCache extends LinkedHashMap&lt;Integer,Integer&gt;{
-    private int capacity;
-    public LRUCache(int capacity) {
-        // 初始大小设为1024，避免leetcode上执行扩容带来的时间损耗
-        // 最后一个参数设为true，代表按访问顺序连接
-        super(1024,0.75f,true);
-        this.capacity = capacity;
-    }
+<p>可以通过哈希表+链表解决，如果看过LinkedHashMap的源码就知道，LinkedHashMap本身就可以拓展成LRU缓存，这个我也在<a href="../LinkedHashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90">LinkedHashMap源码分析</a>中提过。</p>
+<h2 id="代码">2.2 代码</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">LRUCache</span> <span class="token keyword">extends</span> <span class="token class-name">LinkedHashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Integer</span><span class="token punctuation">,</span><span class="token class-name">Integer</span><span class="token punctuation">></span></span><span class="token punctuation">&#123;</span>
+    <span class="token keyword">private</span> <span class="token keyword">int</span> capacity<span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token class-name">LRUCache</span><span class="token punctuation">(</span><span class="token keyword">int</span> capacity<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">// 初始大小设为1024，避免leetcode上执行扩容带来的时间损耗</span>
+        <span class="token comment">// 最后一个参数设为true，代表按访问顺序连接</span>
+        <span class="token keyword">super</span><span class="token punctuation">(</span><span class="token number">1024</span><span class="token punctuation">,</span><span class="token number">0.75f</span><span class="token punctuation">,</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>capacity <span class="token operator">=</span> capacity<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    
+    <span class="token comment">// 重写该方法，可以在每一次添加元素后判断要不要移除队列首部的元素</span>
+    <span class="token keyword">protected</span> <span class="token keyword">boolean</span> <span class="token function">removeEldestEntry</span><span class="token punctuation">(</span><span class="token class-name">Map</span><span class="token punctuation">.</span><span class="token class-name">Entry</span> eldest<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">></span> capacity<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    // 重写该方法，可以在每一次添加元素后判断要不要移除队列首部的元素
-    protected boolean removeEldestEntry(Map.Entry eldest) {
-        return size() &gt; capacity;
-    }
+    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">get</span><span class="token punctuation">(</span><span class="token keyword">int</span> key<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token function">getOrDefault</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    public int get(int key) {
-        return getOrDefault(key,-1);
-    }
-
-    public void put(int key, int value) {
-        super.put(key,value);
-    }
-}</code></pre>
-
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">put</span><span class="token punctuation">(</span><span class="token keyword">int</span> key<span class="token punctuation">,</span> <span class="token keyword">int</span> value<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">super</span><span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span>value<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
             </div>
             <hr/>
 
@@ -889,9 +889,10 @@ Which of the following can be applied to
                     <div class="summary block-with-text">
                         
                             1 提要最近复习看到一道题目很有意思啊：
-String s = new String(&quot;123&quot;);
+String s = new String("123");
+
 问这样一行代码创建了几个String对象？
-乍一看我其实以为和JDK的版本有关系，因为在深入理解java虚拟机第三版读
+乍一看我其实以为和JDK的版本有关系，因为在深入理解java虚拟机第三版读书笔记02中1.6
                         
                     </div>
                     <div class="publish-info">
@@ -1068,7 +1069,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

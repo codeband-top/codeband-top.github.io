@@ -8,8 +8,8 @@
     <meta name="description" content="按启动流程分析
 
 位于QuorumPeerMain中的main方法
-public static void main(String[] args) {
-    QuorumPeerMain main = new QuorumPeerMain(">
+public static void main(String[] args) &amp;#123;
+    QuorumPeerMain main = new QuorumPeer">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -31,6 +31,7 @@ public static void main(String[] args) {
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -405,7 +406,7 @@ public static void main(String[] args) {
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.7k
+                    1.8k
                 </div>
                 
 
@@ -421,413 +422,421 @@ public static void main(String[] args) {
                 <p>按启动流程分析</p>
 <p><img src="https://api.codetool.top/img/15845001013701.png" alt="zkServer.sh"></p>
 <p>位于QuorumPeerMain中的main方法</p>
-<pre><code class="java">public static void main(String[] args) {
-    QuorumPeerMain main = new QuorumPeerMain();
-    try {
-            main.initializeAndRun(args);
-    }
-    //catch...
-}</code></pre>
-<pre><code class="java">protected void initializeAndRun(String[] args)
-    throws ConfigException, IOException, AdminServerException
-{
-    //加载配置文件zoo.cfg
-    QuorumPeerConfig config = new QuorumPeerConfig();
-    if (args.length == 1) {
-        config.parse(args[0]);
-    }
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">QuorumPeerMain</span> main <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">QuorumPeerMain</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            main<span class="token punctuation">.</span><span class="token function">initializeAndRun</span><span class="token punctuation">(</span>args<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token comment">//catch...</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-    // 启动清除任务，主要清除旧的快照和日志文件
-    DatadirCleanupManager purgeMgr = new DatadirCleanupManager(config
-            .getDataDir(), config.getDataLogDir(), config
-            .getSnapRetainCount(), config.getPurgeInterval());
-    purgeMgr.start();
-    // 单机启动和集群启动
-    if (args.length == 1 &amp;&amp; config.isDistributed()) {
-        runFromConfig(config);
-    } else {
-        LOG.warn(&quot;Either no config or no quorum defined in config, running &quot;
-                + &quot; in standalone mode&quot;);
-        // there is only server in the quorum -- run as standalone
-        ZooKeeperServerMain.main(args);
-    }
-}</code></pre>
-<h1 id="单机启动">1 单机启动</h1><pre><code class="java">public static void main(String[] args) {
-    ZooKeeperServerMain main = new ZooKeeperServerMain();
-    try {
-        main.initializeAndRun(args);
-    } 
-    //catch...
-}</code></pre>
-<pre><code class="java">protected void initializeAndRun(String[] args)
-    throws ConfigException, IOException, AdminServerException
-{
-    try {
-        //日志相关工具的加载
-        ManagedUtil.registerLog4jMBeans();
-    } catch (JMException e) {
-        LOG.warn(&quot;Unable to register log4j JMX control&quot;, e);
-    }
-    //包装config
-    ServerConfig config = new ServerConfig();
-    if (args.length == 1) {
-        config.parse(args[0]);
-    } else {
-        config.parse(args);
-    }
-    //使用config启动
-    runFromConfig(config);
-}</code></pre>
-<pre><code class="java">public void runFromConfig(ServerConfig config)
-        throws IOException, AdminServerException {
-    LOG.info(&quot;Starting server&quot;);
-    FileTxnSnapLog txnLog = null;
-    try {
-        // 创建FileTxnLog和FileSnap实例，并保存刚启动时候日志数据
-        txnLog = new FileTxnSnapLog(config.dataLogDir, config.dataDir);
-        // 创建服务器
-        final ZooKeeperServer zkServer = new ZooKeeperServer(txnLog,
-                config.tickTime, config.minSessionTimeout, config.maxSessionTimeout, null);
-        txnLog.setServerStats(zkServer.serverStats());
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">initializeAndRun</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span>
+    <span class="token keyword">throws</span> <span class="token class-name">ConfigException</span><span class="token punctuation">,</span> <span class="token class-name">IOException</span><span class="token punctuation">,</span> <span class="token class-name">AdminServerException</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token comment">//加载配置文件zoo.cfg</span>
+    <span class="token class-name">QuorumPeerConfig</span> config <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">QuorumPeerConfig</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>args<span class="token punctuation">.</span>length <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        config<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>args<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-        // 注册关闭服务器的处理器
-        final CountDownLatch shutdownLatch = new CountDownLatch(1);
-        zkServer.registerServerShutdownHandler(
-                new ZooKeeperServerShutdownHandler(shutdownLatch));
+    <span class="token comment">// 启动清除任务，主要清除旧的快照和日志文件</span>
+    <span class="token class-name">DatadirCleanupManager</span> purgeMgr <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DatadirCleanupManager</span><span class="token punctuation">(</span>config
+            <span class="token punctuation">.</span><span class="token function">getDataDir</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> config<span class="token punctuation">.</span><span class="token function">getDataLogDir</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> config
+            <span class="token punctuation">.</span><span class="token function">getSnapRetainCount</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> config<span class="token punctuation">.</span><span class="token function">getPurgeInterval</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    purgeMgr<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// 单机启动和集群启动</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>args<span class="token punctuation">.</span>length <span class="token operator">==</span> <span class="token number">1</span> <span class="token operator">&amp;&amp;</span> config<span class="token punctuation">.</span><span class="token function">isDistributed</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">runFromConfig</span><span class="token punctuation">(</span>config<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+        LOG<span class="token punctuation">.</span><span class="token function">warn</span><span class="token punctuation">(</span><span class="token string">"Either no config or no quorum defined in config, running "</span>
+                <span class="token operator">+</span> <span class="token string">" in standalone mode"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">// there is only server in the quorum -- run as standalone</span>
+        <span class="token class-name">ZooKeeperServerMain</span><span class="token punctuation">.</span><span class="token function">main</span><span class="token punctuation">(</span>args<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-        // 启动 Admin server
-        adminServer = AdminServerFactory.createAdminServer();
-        adminServer.setZooKeeperServer(zkServer);
-        adminServer.start();
+<h1 id="单机启动">1 单机启动</h1><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">ZooKeeperServerMain</span> main <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ZooKeeperServerMain</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+        main<span class="token punctuation">.</span><span class="token function">initializeAndRun</span><span class="token punctuation">(</span>args<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> 
+    <span class="token comment">//catch...</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-        //启动NIOServerCnxnFactory
-        boolean needStartZKServer = true;
-        //从解析出的配置中配置NIOServerCnxnFactory
-        if (config.getClientPortAddress() != null) {
-            cnxnFactory = ServerCnxnFactory.createFactory();
-            cnxnFactory.configure(config.getClientPortAddress(), config.getMaxClientCnxns(), false);
-            //启动zookeeper server
-            cnxnFactory.startup(zkServer);
-            needStartZKServer = false;
-        }
-        if (config.getSecureClientPortAddress() != null) {
-            secureCnxnFactory = ServerCnxnFactory.createFactory();
-            secureCnxnFactory.configure(config.getSecureClientPortAddress(), config.getMaxClientCnxns(), true);
-            secureCnxnFactory.startup(zkServer, needStartZKServer);
-        }
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">initializeAndRun</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span>
+    <span class="token keyword">throws</span> <span class="token class-name">ConfigException</span><span class="token punctuation">,</span> <span class="token class-name">IOException</span><span class="token punctuation">,</span> <span class="token class-name">AdminServerException</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">//日志相关工具的加载</span>
+        <span class="token class-name">ManagedUtil</span><span class="token punctuation">.</span><span class="token function">registerLog4jMBeans</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">JMException</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        LOG<span class="token punctuation">.</span><span class="token function">warn</span><span class="token punctuation">(</span><span class="token string">"Unable to register log4j JMX control"</span><span class="token punctuation">,</span> e<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token comment">//包装config</span>
+    <span class="token class-name">ServerConfig</span> config <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ServerConfig</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>args<span class="token punctuation">.</span>length <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        config<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>args<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+        config<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>args<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token comment">//使用config启动</span>
+    <span class="token function">runFromConfig</span><span class="token punctuation">(</span>config<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-        containerManager = new ContainerManager(zkServer.getZKDatabase(), zkServer.firstProcessor,
-                Integer.getInteger(&quot;znode.container.checkIntervalMs&quot;, (int) TimeUnit.MINUTES.toMillis(1)),
-                Integer.getInteger(&quot;znode.container.maxPerMinute&quot;, 10000)
-        );
-        containerManager.start();
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">runFromConfig</span><span class="token punctuation">(</span><span class="token class-name">ServerConfig</span> config<span class="token punctuation">)</span>
+        <span class="token keyword">throws</span> <span class="token class-name">IOException</span><span class="token punctuation">,</span> <span class="token class-name">AdminServerException</span> <span class="token punctuation">&#123;</span>
+    LOG<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"Starting server"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">FileTxnSnapLog</span> txnLog <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">// 创建FileTxnLog和FileSnap实例，并保存刚启动时候日志数据</span>
+        txnLog <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">FileTxnSnapLog</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span>dataLogDir<span class="token punctuation">,</span> config<span class="token punctuation">.</span>dataDir<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">// 创建服务器</span>
+        <span class="token keyword">final</span> <span class="token class-name">ZooKeeperServer</span> zkServer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ZooKeeperServer</span><span class="token punctuation">(</span>txnLog<span class="token punctuation">,</span>
+                config<span class="token punctuation">.</span>tickTime<span class="token punctuation">,</span> config<span class="token punctuation">.</span>minSessionTimeout<span class="token punctuation">,</span> config<span class="token punctuation">.</span>maxSessionTimeout<span class="token punctuation">,</span> <span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        txnLog<span class="token punctuation">.</span><span class="token function">setServerStats</span><span class="token punctuation">(</span>zkServer<span class="token punctuation">.</span><span class="token function">serverStats</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        // 等到使用shutdownLatch的线程数清零就关闭服务器
-        shutdownLatch.await();
+        <span class="token comment">// 注册关闭服务器的处理器</span>
+        <span class="token keyword">final</span> <span class="token class-name">CountDownLatch</span> shutdownLatch <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CountDownLatch</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        zkServer<span class="token punctuation">.</span><span class="token function">registerServerShutdownHandler</span><span class="token punctuation">(</span>
+                <span class="token keyword">new</span> <span class="token class-name">ZooKeeperServerShutdownHandler</span><span class="token punctuation">(</span>shutdownLatch<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        shutdown();
+        <span class="token comment">// 启动 Admin server</span>
+        adminServer <span class="token operator">=</span> <span class="token class-name">AdminServerFactory</span><span class="token punctuation">.</span><span class="token function">createAdminServer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        adminServer<span class="token punctuation">.</span><span class="token function">setZooKeeperServer</span><span class="token punctuation">(</span>zkServer<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        adminServer<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        if (cnxnFactory != null) {
-            cnxnFactory.join();
-        }
-        if (secureCnxnFactory != null) {
-            secureCnxnFactory.join();
-        }
-        if (zkServer.canShutdown()) {
-            zkServer.shutdown(true);
-        }
-    } catch (InterruptedException e) {
-        // warn, but generally this is ok
-        LOG.warn(&quot;Server interrupted&quot;, e);
-    } finally {
-        if (txnLog != null) {
-            txnLog.close();
-        }
-    }
-}</code></pre>
-<h1 id="集群启动">2 集群启动</h1><pre><code class="java">public void runFromConfig(QuorumPeerConfig config)
-        throws IOException, AdminServerException
-{   
-    try {
-        //日志相关工具的加载
-        ManagedUtil.registerLog4jMBeans();
-    } catch (JMException e) {
-        LOG.warn(&quot;Unable to register log4j JMX control&quot;, e);
-    }
+        <span class="token comment">//启动NIOServerCnxnFactory</span>
+        <span class="token keyword">boolean</span> needStartZKServer <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+        <span class="token comment">//从解析出的配置中配置NIOServerCnxnFactory</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getClientPortAddress</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            cnxnFactory <span class="token operator">=</span> <span class="token class-name">ServerCnxnFactory</span><span class="token punctuation">.</span><span class="token function">createFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            cnxnFactory<span class="token punctuation">.</span><span class="token function">configure</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getClientPortAddress</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> config<span class="token punctuation">.</span><span class="token function">getMaxClientCnxns</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">//启动zookeeper server</span>
+            cnxnFactory<span class="token punctuation">.</span><span class="token function">startup</span><span class="token punctuation">(</span>zkServer<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            needStartZKServer <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getSecureClientPortAddress</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            secureCnxnFactory <span class="token operator">=</span> <span class="token class-name">ServerCnxnFactory</span><span class="token punctuation">.</span><span class="token function">createFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            secureCnxnFactory<span class="token punctuation">.</span><span class="token function">configure</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getSecureClientPortAddress</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> config<span class="token punctuation">.</span><span class="token function">getMaxClientCnxns</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            secureCnxnFactory<span class="token punctuation">.</span><span class="token function">startup</span><span class="token punctuation">(</span>zkServer<span class="token punctuation">,</span> needStartZKServer<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-    //创建NIOServerCnxnFactory
-    LOG.info(&quot;Starting quorum peer&quot;);
-    try {
-        ServerCnxnFactory cnxnFactory = null;
-        ServerCnxnFactory secureCnxnFactory = null;
+        containerManager <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ContainerManager</span><span class="token punctuation">(</span>zkServer<span class="token punctuation">.</span><span class="token function">getZKDatabase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> zkServer<span class="token punctuation">.</span>firstProcessor<span class="token punctuation">,</span>
+                <span class="token class-name">Integer</span><span class="token punctuation">.</span><span class="token function">getInteger</span><span class="token punctuation">(</span><span class="token string">"znode.container.checkIntervalMs"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span> <span class="token class-name">TimeUnit</span><span class="token punctuation">.</span>MINUTES<span class="token punctuation">.</span><span class="token function">toMillis</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                <span class="token class-name">Integer</span><span class="token punctuation">.</span><span class="token function">getInteger</span><span class="token punctuation">(</span><span class="token string">"znode.container.maxPerMinute"</span><span class="token punctuation">,</span> <span class="token number">10000</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span><span class="token punctuation">;</span>
+        containerManager<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        if (config.getClientPortAddress() != null) {
-            cnxnFactory = ServerCnxnFactory.createFactory();
-            cnxnFactory.configure(config.getClientPortAddress(),
-                    config.getMaxClientCnxns(),
-                    false);
-        }
+        <span class="token comment">// 等到使用shutdownLatch的线程数清零就关闭服务器</span>
+        shutdownLatch<span class="token punctuation">.</span><span class="token function">await</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        if (config.getSecureClientPortAddress() != null) {
-            secureCnxnFactory = ServerCnxnFactory.createFactory();
-            secureCnxnFactory.configure(config.getSecureClientPortAddress(),
-                    config.getMaxClientCnxns(),
-                    true);
-        }
+        <span class="token function">shutdown</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        // quorumPeer是和集群相关的配置信息
-        quorumPeer = getQuorumPeer();
-        quorumPeer.setTxnFactory(new FileTxnSnapLog(
-                    config.getDataLogDir(),
-                    config.getDataDir()));
-        quorumPeer.enableLocalSessions(config.areLocalSessionsEnabled());
-        quorumPeer.enableLocalSessionsUpgrading(
-            config.isLocalSessionsUpgradingEnabled());
-        //quorumPeer.setQuorumPeers(config.getAllMembers());
-        quorumPeer.setElectionType(config.getElectionAlg());
-        quorumPeer.setMyid(config.getServerId());
-        quorumPeer.setTickTime(config.getTickTime());
-        quorumPeer.setMinSessionTimeout(config.getMinSessionTimeout());
-        quorumPeer.setMaxSessionTimeout(config.getMaxSessionTimeout());
-        quorumPeer.setInitLimit(config.getInitLimit());
-        quorumPeer.setSyncLimit(config.getSyncLimit());
-        quorumPeer.setConfigFileName(config.getConfigFilename());
-        quorumPeer.setZKDatabase(new ZKDatabase(quorumPeer.getTxnFactory()));
-        quorumPeer.setQuorumVerifier(config.getQuorumVerifier(), false);
-        if (config.getLastSeenQuorumVerifier()!=null) {
-            quorumPeer.setLastSeenQuorumVerifier(config.getLastSeenQuorumVerifier(), false);
-        }
-        quorumPeer.initConfigInZKDatabase();
-        quorumPeer.setCnxnFactory(cnxnFactory);
-        quorumPeer.setSecureCnxnFactory(secureCnxnFactory);
-        quorumPeer.setSslQuorum(config.isSslQuorum());
-        quorumPeer.setUsePortUnification(config.shouldUsePortUnification());
-        quorumPeer.setLearnerType(config.getPeerType());
-        quorumPeer.setSyncEnabled(config.getSyncEnabled());
-        quorumPeer.setQuorumListenOnAllIPs(config.getQuorumListenOnAllIPs());
-        if (config.sslQuorumReloadCertFiles) {
-            quorumPeer.getX509Util().enableCertFileReloading();
-        }
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>cnxnFactory <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            cnxnFactory<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>secureCnxnFactory <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            secureCnxnFactory<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>zkServer<span class="token punctuation">.</span><span class="token function">canShutdown</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            zkServer<span class="token punctuation">.</span><span class="token function">shutdown</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">// warn, but generally this is ok</span>
+        LOG<span class="token punctuation">.</span><span class="token function">warn</span><span class="token punctuation">(</span><span class="token string">"Server interrupted"</span><span class="token punctuation">,</span> e<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>txnLog <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            txnLog<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-        // sets quorum sasl authentication configurations
-        quorumPeer.setQuorumSaslEnabled(config.quorumEnableSasl);
-        if(quorumPeer.isQuorumSaslAuthEnabled()){
-            quorumPeer.setQuorumServerSaslRequired(config.quorumServerRequireSasl);
-            quorumPeer.setQuorumLearnerSaslRequired(config.quorumLearnerRequireSasl);
-            quorumPeer.setQuorumServicePrincipal(config.quorumServicePrincipal);
-            quorumPeer.setQuorumServerLoginContext(config.quorumServerLoginContext);
-            quorumPeer.setQuorumLearnerLoginContext(config.quorumLearnerLoginContext);
-        }
-        quorumPeer.setQuorumCnxnThreadsSize(config.quorumCnxnThreadsSize);
-        //初始化
-        quorumPeer.initialize();
-        //quorumPeer的start方法，这是一个线程
-        quorumPeer.start();
-        //等待quorumPeer线程结束
-        quorumPeer.join();
-    } catch (InterruptedException e) {
-        // warn, but generally this is ok
-        LOG.warn(&quot;Quorum Peer interrupted&quot;, e);
-    }
-}</code></pre>
-<pre><code class="java">public synchronized void start() {
-    if (!getView().containsKey(myid)) {
-        throw new RuntimeException(&quot;My id &quot; + myid + &quot; not in the peer list&quot;);
-        }
-    loadDataBase();
-    startServerCnxnFactory();
-    try {
-        //启动adminServer
-        adminServer.start();
-    } catch (AdminServerException e) {
-        LOG.warn(&quot;Problem starting AdminServer&quot;, e);
-        System.out.println(e);
-    }
-    //开始leader选举，每个节点加入的时候都会进行一轮选举
-    startLeaderElection();
-    //开启线程执行run方法
-    super.start();
-}</code></pre>
-<pre><code class="java">public void run() {
-    updateThreadName();
-    //jmx监控相关
-    //...
+<h1 id="集群启动">2 集群启动</h1><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">runFromConfig</span><span class="token punctuation">(</span><span class="token class-name">QuorumPeerConfig</span> config<span class="token punctuation">)</span>
+        <span class="token keyword">throws</span> <span class="token class-name">IOException</span><span class="token punctuation">,</span> <span class="token class-name">AdminServerException</span>
+<span class="token punctuation">&#123;</span>   
+    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">//日志相关工具的加载</span>
+        <span class="token class-name">ManagedUtil</span><span class="token punctuation">.</span><span class="token function">registerLog4jMBeans</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">JMException</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        LOG<span class="token punctuation">.</span><span class="token function">warn</span><span class="token punctuation">(</span><span class="token string">"Unable to register log4j JMX control"</span><span class="token punctuation">,</span> e<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    try {
-        //主循环 main loop
-        while (running) {
-            //有四个状态：LOOKING、OBSERVING、FOLLOWING、LEADING
-            switch (getPeerState()) {
-            case LOOKING:
-                //刚启动的时候为LOOKING，正在选举
-                LOG.info(&quot;LOOKING&quot;);
-                //当前节点为只读节点，不关心
-                if (Boolean.getBoolean(&quot;readonlymode.enabled&quot;)) {
-                    //...
-                //不是只读节点
-                } else {
-                    try {
-                        reconfigFlagClear();
-                        if (shuttingDownLE) {
-                            shuttingDownLE = false;
-                            startLeaderElection();
-                            }
-                        //leader选举
-                        setCurrentVote(makeLEStrategy().lookForLeader());
-                    } catch (Exception e) {
-                        LOG.warn(&quot;Unexpected exception&quot;, e);
-                        setPeerState(ServerState.LOOKING);
-                    }                        
-                }
-                break;
-            //case ...
-}</code></pre>
-<h2 id="leader选举">2.1 leader选举</h2><pre><code class="java">public Vote lookForLeader() throws InterruptedException {
-    //jxm监控相关
-    //...
+    <span class="token comment">//创建NIOServerCnxnFactory</span>
+    LOG<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"Starting quorum peer"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">ServerCnxnFactory</span> cnxnFactory <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+        <span class="token class-name">ServerCnxnFactory</span> secureCnxnFactory <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
 
-    try {
-        //记录当前server接受其他server的本轮投票信息
-        HashMap&lt;Long, Vote&gt; recvset = new HashMap&lt;Long, Vote&gt;();
-        //选举接受后法定server的投票信息
-        HashMap&lt;Long, Vote&gt; outofelection = new HashMap&lt;Long, Vote&gt;();
-        //选举超时时间
-        int notTimeout = finalizeWait;
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getClientPortAddress</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            cnxnFactory <span class="token operator">=</span> <span class="token class-name">ServerCnxnFactory</span><span class="token punctuation">.</span><span class="token function">createFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            cnxnFactory<span class="token punctuation">.</span><span class="token function">configure</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getClientPortAddress</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                    config<span class="token punctuation">.</span><span class="token function">getMaxClientCnxns</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                    <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-        synchronized(this){
-            //更新逻辑时钟+1
-            logicalclock.incrementAndGet();
-            //初始化选票，给自己投一票，这里看出hashmap的key为myid
-            updateProposal(getInitId(), getInitLastLoggedZxid(), getPeerEpoch());
-        }
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getSecureClientPortAddress</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            secureCnxnFactory <span class="token operator">=</span> <span class="token class-name">ServerCnxnFactory</span><span class="token punctuation">.</span><span class="token function">createFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            secureCnxnFactory<span class="token punctuation">.</span><span class="token function">configure</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getSecureClientPortAddress</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                    config<span class="token punctuation">.</span><span class="token function">getMaxClientCnxns</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                    <span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-        LOG.info(&quot;New election. My id =  &quot; + self.getId() +
-                &quot;, proposed zxid=0x&quot; + Long.toHexString(proposedZxid));
-        //通知给所有其他server新的一票产生，放入sendqueue队列
-        sendNotifications();
+        <span class="token comment">// quorumPeer是和集群相关的配置信息</span>
+        quorumPeer <span class="token operator">=</span> <span class="token function">getQuorumPeer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setTxnFactory</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">FileTxnSnapLog</span><span class="token punctuation">(</span>
+                    config<span class="token punctuation">.</span><span class="token function">getDataLogDir</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                    config<span class="token punctuation">.</span><span class="token function">getDataDir</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">enableLocalSessions</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">areLocalSessionsEnabled</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">enableLocalSessionsUpgrading</span><span class="token punctuation">(</span>
+            config<span class="token punctuation">.</span><span class="token function">isLocalSessionsUpgradingEnabled</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//quorumPeer.setQuorumPeers(config.getAllMembers());</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setElectionType</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getElectionAlg</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setMyid</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getServerId</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setTickTime</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getTickTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setMinSessionTimeout</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getMinSessionTimeout</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setMaxSessionTimeout</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getMaxSessionTimeout</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setInitLimit</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getInitLimit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setSyncLimit</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getSyncLimit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setConfigFileName</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getConfigFilename</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setZKDatabase</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">ZKDatabase</span><span class="token punctuation">(</span>quorumPeer<span class="token punctuation">.</span><span class="token function">getTxnFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setQuorumVerifier</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getQuorumVerifier</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getLastSeenQuorumVerifier</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">!=</span><span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            quorumPeer<span class="token punctuation">.</span><span class="token function">setLastSeenQuorumVerifier</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getLastSeenQuorumVerifier</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">initConfigInZKDatabase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setCnxnFactory</span><span class="token punctuation">(</span>cnxnFactory<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setSecureCnxnFactory</span><span class="token punctuation">(</span>secureCnxnFactory<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setSslQuorum</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">isSslQuorum</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setUsePortUnification</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">shouldUsePortUnification</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setLearnerType</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getPeerType</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setSyncEnabled</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getSyncEnabled</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setQuorumListenOnAllIPs</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span><span class="token function">getQuorumListenOnAllIPs</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>config<span class="token punctuation">.</span>sslQuorumReloadCertFiles<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            quorumPeer<span class="token punctuation">.</span><span class="token function">getX509Util</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">enableCertFileReloading</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-        //如果当前还是LOOKING并且没有停止一直接受选票直到产生新leader
-        while ((self.getPeerState() == ServerState.LOOKING) &amp;&amp;
-                (!stop)){
+        <span class="token comment">// sets quorum sasl authentication configurations</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setQuorumSaslEnabled</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span>quorumEnableSasl<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>quorumPeer<span class="token punctuation">.</span><span class="token function">isQuorumSaslAuthEnabled</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            quorumPeer<span class="token punctuation">.</span><span class="token function">setQuorumServerSaslRequired</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span>quorumServerRequireSasl<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            quorumPeer<span class="token punctuation">.</span><span class="token function">setQuorumLearnerSaslRequired</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span>quorumLearnerRequireSasl<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            quorumPeer<span class="token punctuation">.</span><span class="token function">setQuorumServicePrincipal</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span>quorumServicePrincipal<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            quorumPeer<span class="token punctuation">.</span><span class="token function">setQuorumServerLoginContext</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span>quorumServerLoginContext<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            quorumPeer<span class="token punctuation">.</span><span class="token function">setQuorumLearnerLoginContext</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span>quorumLearnerLoginContext<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">setQuorumCnxnThreadsSize</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span>quorumCnxnThreadsSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//初始化</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">initialize</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//quorumPeer的start方法，这是一个线程</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//等待quorumPeer线程结束</span>
+        quorumPeer<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">InterruptedException</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">// warn, but generally this is ok</span>
+        LOG<span class="token punctuation">.</span><span class="token function">warn</span><span class="token punctuation">(</span><span class="token string">"Quorum Peer interrupted"</span><span class="token punctuation">,</span> e<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-            //从recvqueue队列中阻塞取出投票信息（其他server发来的）
-            Notification n = recvqueue.poll(notTimeout,
-                    TimeUnit.MILLISECONDS);
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">synchronized</span> <span class="token keyword">void</span> <span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">getView</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">containsKey</span><span class="token punctuation">(</span>myid<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">RuntimeException</span><span class="token punctuation">(</span><span class="token string">"My id "</span> <span class="token operator">+</span> myid <span class="token operator">+</span> <span class="token string">" not in the peer list"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token function">loadDataBase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">startServerCnxnFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">//启动adminServer</span>
+        adminServer<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">AdminServerException</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        LOG<span class="token punctuation">.</span><span class="token function">warn</span><span class="token punctuation">(</span><span class="token string">"Problem starting AdminServer"</span><span class="token punctuation">,</span> e<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token comment">//开始leader选举，每个节点加入的时候都会进行一轮选举</span>
+    <span class="token function">startLeaderElection</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//开启线程执行run方法</span>
+    <span class="token keyword">super</span><span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-            //判读选票信息是否为空
-            if(n == null){
-                //判断是否投递过选票，如果投递过，说明没有断开连接
-                if(manager.haveDelivered()){
-                    //重新发送选票信息
-                    sendNotifications();
-                //如果没有投递过，说明断开连接，重连
-                } else {
-                    manager.connectAll();
-                }
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">updateThreadName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//jmx监控相关</span>
+    <span class="token comment">//...</span>
 
-                //将接收选票时限延长了一倍
-                int tmpTimeOut = notTimeout*2;
-                notTimeout = (tmpTimeOut &lt; maxNotificationInterval?
-                        tmpTimeOut : maxNotificationInterval);
-                LOG.info(&quot;Notification time out: &quot; + notTimeout);
-            } 
-            //检查选举voter和投票的leader是否合法
-            else if (validVoter(n.sid) &amp;&amp; validVoter(n.leader)) {
-                //看voter的state状态
-                switch (n.state) {
-                //如果还是looking
-                case LOOKING:
-                    // 如果选票的epoch大于自己的逻辑时钟，说明选票是最新的，自己的选票这一轮已经过时
-                    if (n.electionEpoch &gt; logicalclock.get()) {
-                        //更新自己的逻辑时钟，并清空当前收到的其他server的投票
-                        logicalclock.set(n.electionEpoch);
-                        recvset.clear();
-                        //比较自己和选票中谁更适合做leader，根据zxid、peerEpoch做决定
-                        //并生成新的选票
-                        if(totalOrderPredicate(n.leader, n.zxid, n.peerEpoch,
-                                getInitId(), getInitLastLoggedZxid(), getPeerEpoch())) {
-                            updateProposal(n.leader, n.zxid, n.peerEpoch);
-                        } else {
-                            updateProposal(getInitId(),
-                                    getInitLastLoggedZxid(),
-                                    getPeerEpoch());
-                        }
-                        //发送新的投票给其他server
-                        sendNotifications();
-                    // 否则选票的epoch小于自己的逻辑时钟，说明该选票是过期的，不做操作
-                    } else if (n.electionEpoch &lt; logicalclock.get()) {
-                        if(LOG.isDebugEnabled()){
-                            LOG.debug(&quot;Notification election epoch is smaller than logicalclock. n.electionEpoch = 0x&quot;
-                                    + Long.toHexString(n.electionEpoch)
-                                    + &quot;, logicalclock=0x&quot; + Long.toHexString(logicalclock.get()));
-                        }
-                        break;
-                    // 等于，则还是比较自己和选票中谁更适合做leader，并生成新的选票
-                    } else if (totalOrderPredicate(n.leader, n.zxid, n.peerEpoch,
-                            proposedLeader, proposedZxid, proposedEpoch)) {
-                        updateProposal(n.leader, n.zxid, n.peerEpoch);
-                        sendNotifications();
-                    }
+    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">//主循环 main loop</span>
+        <span class="token keyword">while</span> <span class="token punctuation">(</span>running<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token comment">//有四个状态：LOOKING、OBSERVING、FOLLOWING、LEADING</span>
+            <span class="token keyword">switch</span> <span class="token punctuation">(</span><span class="token function">getPeerState</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">case</span> LOOKING<span class="token operator">:</span>
+                <span class="token comment">//刚启动的时候为LOOKING，正在选举</span>
+                LOG<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"LOOKING"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token comment">//当前节点为只读节点，不关心</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token class-name">Boolean</span><span class="token punctuation">.</span><span class="token function">getBoolean</span><span class="token punctuation">(</span><span class="token string">"readonlymode.enabled"</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                    <span class="token comment">//...</span>
+                <span class="token comment">//不是只读节点</span>
+                <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+                    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+                        <span class="token function">reconfigFlagClear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token keyword">if</span> <span class="token punctuation">(</span>shuttingDownLE<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                            shuttingDownLE <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+                            <span class="token function">startLeaderElection</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                            <span class="token punctuation">&#125;</span>
+                        <span class="token comment">//leader选举</span>
+                        <span class="token function">setCurrentVote</span><span class="token punctuation">(</span><span class="token function">makeLEStrategy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">lookForLeader</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                        LOG<span class="token punctuation">.</span><span class="token function">warn</span><span class="token punctuation">(</span><span class="token string">"Unexpected exception"</span><span class="token punctuation">,</span> e<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token function">setPeerState</span><span class="token punctuation">(</span><span class="token class-name">ServerState</span><span class="token punctuation">.</span>LOOKING<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">&#125;</span>                        
+                <span class="token punctuation">&#125;</span>
+                <span class="token keyword">break</span><span class="token punctuation">;</span>
+            <span class="token comment">//case ...</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-                    if(LOG.isDebugEnabled()){
-                        LOG.debug(&quot;Adding vote: from=&quot; + n.sid +
-                                &quot;, proposed leader=&quot; + n.leader +
-                                &quot;, proposed zxid=0x&quot; + Long.toHexString(n.zxid) +
-                                &quot;, proposed election epoch=0x&quot; + Long.toHexString(n.electionEpoch));
-                    }
+<h2 id="leader选举">2.1 leader选举</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">Vote</span> <span class="token function">lookForLeader</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">InterruptedException</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">//jxm监控相关</span>
+    <span class="token comment">//...</span>
+    
+    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">//记录当前server接受其他server的本轮投票信息</span>
+        <span class="token class-name">HashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Long</span><span class="token punctuation">,</span> <span class="token class-name">Vote</span><span class="token punctuation">></span></span> recvset <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Long</span><span class="token punctuation">,</span> <span class="token class-name">Vote</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//选举接受后法定server的投票信息</span>
+        <span class="token class-name">HashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Long</span><span class="token punctuation">,</span> <span class="token class-name">Vote</span><span class="token punctuation">></span></span> outofelection <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Long</span><span class="token punctuation">,</span> <span class="token class-name">Vote</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//选举超时时间</span>
+        <span class="token keyword">int</span> notTimeout <span class="token operator">=</span> finalizeWait<span class="token punctuation">;</span>
 
-                    // 将收到的选票放入recvset
-                    recvset.put(n.sid, new Vote(n.leader, n.zxid, n.electionEpoch, n.peerEpoch));
+        <span class="token keyword">synchronized</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token comment">//更新逻辑时钟+1</span>
+            logicalclock<span class="token punctuation">.</span><span class="token function">incrementAndGet</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">//初始化选票，给自己投一票，这里看出hashmap的key为myid</span>
+            <span class="token function">updateProposal</span><span class="token punctuation">(</span><span class="token function">getInitId</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">getInitLastLoggedZxid</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">getPeerEpoch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-                    if (termPredicate(recvset,
-                            new Vote(proposedLeader, proposedZxid,
-                                    logicalclock.get(), proposedEpoch))) {
+        LOG<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"New election. My id =  "</span> <span class="token operator">+</span> self<span class="token punctuation">.</span><span class="token function">getId</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span>
+                <span class="token string">", proposed zxid=0x"</span> <span class="token operator">+</span> <span class="token class-name">Long</span><span class="token punctuation">.</span><span class="token function">toHexString</span><span class="token punctuation">(</span>proposedZxid<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//通知给所有其他server新的一票产生，放入sendqueue队列</span>
+        <span class="token function">sendNotifications</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-                        // Verify if there is any change in the proposed leader
-                        while((n = recvqueue.poll(finalizeWait,
-                                TimeUnit.MILLISECONDS)) != null){
-                            if(totalOrderPredicate(n.leader, n.zxid, n.peerEpoch,
-                                    proposedLeader, proposedZxid, proposedEpoch)){
-                                recvqueue.put(n);
-                                break;
-                            }
-                        }
+        <span class="token comment">//如果当前还是LOOKING并且没有停止一直接受选票直到产生新leader</span>
+        <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>self<span class="token punctuation">.</span><span class="token function">getPeerState</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token class-name">ServerState</span><span class="token punctuation">.</span>LOOKING<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span>
+                <span class="token punctuation">(</span><span class="token operator">!</span>stop<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
 
-                        /*
-                            * This predicate is true once we don&#39;t read any new
+            <span class="token comment">//从recvqueue队列中阻塞取出投票信息（其他server发来的）</span>
+            <span class="token class-name">Notification</span> n <span class="token operator">=</span> recvqueue<span class="token punctuation">.</span><span class="token function">poll</span><span class="token punctuation">(</span>notTimeout<span class="token punctuation">,</span>
+                    <span class="token class-name">TimeUnit</span><span class="token punctuation">.</span>MILLISECONDS<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+            <span class="token comment">//判读选票信息是否为空</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>n <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                <span class="token comment">//判断是否投递过选票，如果投递过，说明没有断开连接</span>
+                <span class="token keyword">if</span><span class="token punctuation">(</span>manager<span class="token punctuation">.</span><span class="token function">haveDelivered</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                    <span class="token comment">//重新发送选票信息</span>
+                    <span class="token function">sendNotifications</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token comment">//如果没有投递过，说明断开连接，重连</span>
+                <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+                    manager<span class="token punctuation">.</span><span class="token function">connectAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span>
+
+                <span class="token comment">//将接收选票时限延长了一倍</span>
+                <span class="token keyword">int</span> tmpTimeOut <span class="token operator">=</span> notTimeout<span class="token operator">*</span><span class="token number">2</span><span class="token punctuation">;</span>
+                notTimeout <span class="token operator">=</span> <span class="token punctuation">(</span>tmpTimeOut <span class="token operator">&lt;</span> maxNotificationInterval<span class="token operator">?</span>
+                        tmpTimeOut <span class="token operator">:</span> maxNotificationInterval<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                LOG<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"Notification time out: "</span> <span class="token operator">+</span> notTimeout<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span> 
+            <span class="token comment">//检查选举voter和投票的leader是否合法</span>
+            <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">validVoter</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>sid<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token function">validVoter</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>leader<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                <span class="token comment">//看voter的state状态</span>
+                <span class="token keyword">switch</span> <span class="token punctuation">(</span>n<span class="token punctuation">.</span>state<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                <span class="token comment">//如果还是looking</span>
+                <span class="token keyword">case</span> LOOKING<span class="token operator">:</span>
+                    <span class="token comment">// 如果选票的epoch大于自己的逻辑时钟，说明选票是最新的，自己的选票这一轮已经过时</span>
+                    <span class="token keyword">if</span> <span class="token punctuation">(</span>n<span class="token punctuation">.</span>electionEpoch <span class="token operator">></span> logicalclock<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                        <span class="token comment">//更新自己的逻辑时钟，并清空当前收到的其他server的投票</span>
+                        logicalclock<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>electionEpoch<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        recvset<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token comment">//比较自己和选票中谁更适合做leader，根据zxid、peerEpoch做决定</span>
+                        <span class="token comment">//并生成新的选票</span>
+                        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">totalOrderPredicate</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>leader<span class="token punctuation">,</span> n<span class="token punctuation">.</span>zxid<span class="token punctuation">,</span> n<span class="token punctuation">.</span>peerEpoch<span class="token punctuation">,</span>
+                                <span class="token function">getInitId</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">getInitLastLoggedZxid</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">getPeerEpoch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                            <span class="token function">updateProposal</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>leader<span class="token punctuation">,</span> n<span class="token punctuation">.</span>zxid<span class="token punctuation">,</span> n<span class="token punctuation">.</span>peerEpoch<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+                            <span class="token function">updateProposal</span><span class="token punctuation">(</span><span class="token function">getInitId</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                                    <span class="token function">getInitLastLoggedZxid</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                                    <span class="token function">getPeerEpoch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token punctuation">&#125;</span>
+                        <span class="token comment">//发送新的投票给其他server</span>
+                        <span class="token function">sendNotifications</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token comment">// 否则选票的epoch小于自己的逻辑时钟，说明该选票是过期的，不做操作</span>
+                    <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>n<span class="token punctuation">.</span>electionEpoch <span class="token operator">&lt;</span> logicalclock<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                        <span class="token keyword">if</span><span class="token punctuation">(</span>LOG<span class="token punctuation">.</span><span class="token function">isDebugEnabled</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                            LOG<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"Notification election epoch is smaller than logicalclock. n.electionEpoch = 0x"</span>
+                                    <span class="token operator">+</span> <span class="token class-name">Long</span><span class="token punctuation">.</span><span class="token function">toHexString</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>electionEpoch<span class="token punctuation">)</span>
+                                    <span class="token operator">+</span> <span class="token string">", logicalclock=0x"</span> <span class="token operator">+</span> <span class="token class-name">Long</span><span class="token punctuation">.</span><span class="token function">toHexString</span><span class="token punctuation">(</span>logicalclock<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token punctuation">&#125;</span>
+                        <span class="token keyword">break</span><span class="token punctuation">;</span>
+                    <span class="token comment">// 等于，则还是比较自己和选票中谁更适合做leader，并生成新的选票</span>
+                    <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">totalOrderPredicate</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>leader<span class="token punctuation">,</span> n<span class="token punctuation">.</span>zxid<span class="token punctuation">,</span> n<span class="token punctuation">.</span>peerEpoch<span class="token punctuation">,</span>
+                            proposedLeader<span class="token punctuation">,</span> proposedZxid<span class="token punctuation">,</span> proposedEpoch<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                        <span class="token function">updateProposal</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>leader<span class="token punctuation">,</span> n<span class="token punctuation">.</span>zxid<span class="token punctuation">,</span> n<span class="token punctuation">.</span>peerEpoch<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token function">sendNotifications</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">&#125;</span>
+
+                    <span class="token keyword">if</span><span class="token punctuation">(</span>LOG<span class="token punctuation">.</span><span class="token function">isDebugEnabled</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                        LOG<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"Adding vote: from="</span> <span class="token operator">+</span> n<span class="token punctuation">.</span>sid <span class="token operator">+</span>
+                                <span class="token string">", proposed leader="</span> <span class="token operator">+</span> n<span class="token punctuation">.</span>leader <span class="token operator">+</span>
+                                <span class="token string">", proposed zxid=0x"</span> <span class="token operator">+</span> <span class="token class-name">Long</span><span class="token punctuation">.</span><span class="token function">toHexString</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>zxid<span class="token punctuation">)</span> <span class="token operator">+</span>
+                                <span class="token string">", proposed election epoch=0x"</span> <span class="token operator">+</span> <span class="token class-name">Long</span><span class="token punctuation">.</span><span class="token function">toHexString</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>electionEpoch<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">&#125;</span>
+
+                    <span class="token comment">// 将收到的选票放入recvset</span>
+                    recvset<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>sid<span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">Vote</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>leader<span class="token punctuation">,</span> n<span class="token punctuation">.</span>zxid<span class="token punctuation">,</span> n<span class="token punctuation">.</span>electionEpoch<span class="token punctuation">,</span> n<span class="token punctuation">.</span>peerEpoch<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">termPredicate</span><span class="token punctuation">(</span>recvset<span class="token punctuation">,</span>
+                            <span class="token keyword">new</span> <span class="token class-name">Vote</span><span class="token punctuation">(</span>proposedLeader<span class="token punctuation">,</span> proposedZxid<span class="token punctuation">,</span>
+                                    logicalclock<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> proposedEpoch<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+
+                        <span class="token comment">// Verify if there is any change in the proposed leader</span>
+                        <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token punctuation">(</span>n <span class="token operator">=</span> recvqueue<span class="token punctuation">.</span><span class="token function">poll</span><span class="token punctuation">(</span>finalizeWait<span class="token punctuation">,</span>
+                                <span class="token class-name">TimeUnit</span><span class="token punctuation">.</span>MILLISECONDS<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                            <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">totalOrderPredicate</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>leader<span class="token punctuation">,</span> n<span class="token punctuation">.</span>zxid<span class="token punctuation">,</span> n<span class="token punctuation">.</span>peerEpoch<span class="token punctuation">,</span>
+                                    proposedLeader<span class="token punctuation">,</span> proposedZxid<span class="token punctuation">,</span> proposedEpoch<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                                recvqueue<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                                <span class="token keyword">break</span><span class="token punctuation">;</span>
+                            <span class="token punctuation">&#125;</span>
+                        <span class="token punctuation">&#125;</span>
+
+                        <span class="token comment">/*
+                            * This predicate is true once we don't read any new
                             * relevant message from the reception queue
-                            */
-                        if (n == null) {
-                            self.setPeerState((proposedLeader == self.getId()) ?
-                                    ServerState.LEADING: learningState());
-                            Vote endVote = new Vote(proposedLeader,
-                                    proposedZxid, logicalclock.get(), 
-                                    proposedEpoch);
-                            leaveInstance(endVote);
-                            return endVote;
-                        }
-                    }
-                    break;
-                case OBSERVING:
-                    LOG.debug(&quot;Notification from observer: &quot; + n.sid);
-                    break;
-                case FOLLOWING:
-                case LEADING:
-                   //再次判断选举epoch是否等于逻辑时钟....
-            } else {
-                if (!validVoter(n.leader)) {
-                    LOG.warn(&quot;Ignoring notification for non-cluster member sid {} from sid {}&quot;, n.leader, n.sid);
-                }
-                if (!validVoter(n.sid)) {
-                    LOG.warn(&quot;Ignoring notification for sid {} from non-quorum member sid {}&quot;, n.leader, n.sid);
-                }
-            }
-        }
-        return null;
-    } finally {
-        //jmx相关...
-    }
-}</code></pre>
+                            */</span>
+                        <span class="token keyword">if</span> <span class="token punctuation">(</span>n <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                            self<span class="token punctuation">.</span><span class="token function">setPeerState</span><span class="token punctuation">(</span><span class="token punctuation">(</span>proposedLeader <span class="token operator">==</span> self<span class="token punctuation">.</span><span class="token function">getId</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">?</span>
+                                    <span class="token class-name">ServerState</span><span class="token punctuation">.</span>LEADING<span class="token operator">:</span> <span class="token function">learningState</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                            <span class="token class-name">Vote</span> endVote <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Vote</span><span class="token punctuation">(</span>proposedLeader<span class="token punctuation">,</span>
+                                    proposedZxid<span class="token punctuation">,</span> logicalclock<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> 
+                                    proposedEpoch<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                            <span class="token function">leaveInstance</span><span class="token punctuation">(</span>endVote<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                            <span class="token keyword">return</span> endVote<span class="token punctuation">;</span>
+                        <span class="token punctuation">&#125;</span>
+                    <span class="token punctuation">&#125;</span>
+                    <span class="token keyword">break</span><span class="token punctuation">;</span>
+                <span class="token keyword">case</span> OBSERVING<span class="token operator">:</span>
+                    LOG<span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">"Notification from observer: "</span> <span class="token operator">+</span> n<span class="token punctuation">.</span>sid<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token keyword">break</span><span class="token punctuation">;</span>
+                <span class="token keyword">case</span> FOLLOWING<span class="token operator">:</span>
+                <span class="token keyword">case</span> LEADING<span class="token operator">:</span>
+                   <span class="token comment">//再次判断选举epoch是否等于逻辑时钟....</span>
+            <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">validVoter</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>leader<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                    LOG<span class="token punctuation">.</span><span class="token function">warn</span><span class="token punctuation">(</span><span class="token string">"Ignoring notification for non-cluster member sid &#123;&#125; from sid &#123;&#125;"</span><span class="token punctuation">,</span> n<span class="token punctuation">.</span>leader<span class="token punctuation">,</span> n<span class="token punctuation">.</span>sid<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">validVoter</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>sid<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                    LOG<span class="token punctuation">.</span><span class="token function">warn</span><span class="token punctuation">(</span><span class="token string">"Ignoring notification for sid &#123;&#125; from non-quorum member sid &#123;&#125;"</span><span class="token punctuation">,</span> n<span class="token punctuation">.</span>leader<span class="token punctuation">,</span> n<span class="token punctuation">.</span>sid<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">return</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">//jmx相关...</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
             </div>
             <hr/>
@@ -1437,7 +1446,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

@@ -28,6 +28,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -402,7 +403,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    696
+                    695
                 </div>
                 
 
@@ -417,31 +418,32 @@
             <div id="articleContent">
                 <h1 id="快速失败">1 快速失败</h1><p>在用迭代器遍历一个集合对象时，如果遍历过程中对集合对象的内容进行了修改（增加、删除、修改），则会抛出 <code>Concurrent Modification Exception</code>。</p>
 <p>迭代器在遍历时直接访问集合中的内容，并且在遍历过程中使用一个 modCount 变量。集合在被遍历期间如果内容发生变化，就会改变 modCount 的值。每当迭代器使用 hashNext()/next()遍历下一个元素之前，都会检测 modCount 变量是否为 expectedModCount 值，是的话就返回遍历；否则抛出异常，终止遍历。</p>
-<p>这个机制我在之前的博客中<a href="../ArrayList源码分析/#toc-heading-8">ArrayList源码分析</a>中有提到，也分析了迭代器中关于判断modCount是否为期望值的源码部分。</p>
+<p>这个机制我在之前的博客中<a href="../ArrayList%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/#toc-heading-8">ArrayList源码分析</a>中有提到，也分析了迭代器中关于判断modCount是否为期望值的源码部分。</p>
 <p>下面主要来看安全失败(fail-safe)</p>
 <h1 id="安全失败">2 安全失败</h1><p>采用安全失败机制的集合容器，<strong>在遍历时不是直接在集合内容上访问的，而是先复制原有集合内容，在拷贝的集合上进行遍历。</strong> 这点和CopyOnWriteArrayList在修改上的的机制很一致。</p>
 <p>原理：由于迭代时是对原集合的拷贝进行遍历，所以在遍历过程中对原集合所作的修改并不能被迭代器检测到，所以不会触发 Concurrent Modification Exception。</p>
 <p>比如我们来看ConcurrentHashMap的迭代器：</p>
-<pre><code class="java">static class Traverser&lt;K,V&gt; {
-    Node&lt;K,V&gt;[] tab;        // current table; updated if resized
-    Node&lt;K,V&gt; next;         // the next entry to use
-    TableStack&lt;K,V&gt; stack, spare; // to save/restore on ForwardingNodes
-    int index;              // index of bin to use next
-    int baseIndex;          // current index of initial table
-    int baseLimit;          // index bound for initial table
-    final int baseSize;     // initial table size
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">static</span> <span class="token keyword">class</span> <span class="token class-name">Traverser</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">Node</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span><span class="token punctuation">[</span><span class="token punctuation">]</span> tab<span class="token punctuation">;</span>        <span class="token comment">// current table; updated if resized</span>
+    <span class="token class-name">Node</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> next<span class="token punctuation">;</span>         <span class="token comment">// the next entry to use</span>
+    <span class="token class-name">TableStack</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span> stack<span class="token punctuation">,</span> spare<span class="token punctuation">;</span> <span class="token comment">// to save/restore on ForwardingNodes</span>
+    <span class="token keyword">int</span> index<span class="token punctuation">;</span>              <span class="token comment">// index of bin to use next</span>
+    <span class="token keyword">int</span> baseIndex<span class="token punctuation">;</span>          <span class="token comment">// current index of initial table</span>
+    <span class="token keyword">int</span> baseLimit<span class="token punctuation">;</span>          <span class="token comment">// index bound for initial table</span>
+    <span class="token keyword">final</span> <span class="token keyword">int</span> baseSize<span class="token punctuation">;</span>     <span class="token comment">// initial table size</span>
 
-    Traverser(Node&lt;K,V&gt;[] tab, int size, int index, int limit) {
-        //在这里复制tab
-        this.tab = tab;
-        this.baseSize = size;
-        this.baseIndex = this.index = index;
-        this.baseLimit = limit;
-        this.next = null;
-    }
+    <span class="token class-name">Traverser</span><span class="token punctuation">(</span><span class="token class-name">Node</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">K</span><span class="token punctuation">,</span><span class="token class-name">V</span><span class="token punctuation">></span></span><span class="token punctuation">[</span><span class="token punctuation">]</span> tab<span class="token punctuation">,</span> <span class="token keyword">int</span> size<span class="token punctuation">,</span> <span class="token keyword">int</span> index<span class="token punctuation">,</span> <span class="token keyword">int</span> limit<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">//在这里复制tab</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>tab <span class="token operator">=</span> tab<span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>baseSize <span class="token operator">=</span> size<span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>baseIndex <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>index <span class="token operator">=</span> index<span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>baseLimit <span class="token operator">=</span> limit<span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>next <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    //遍历逻辑略
-}</code></pre>
+    <span class="token comment">//遍历逻辑略</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>缺点：基于拷贝内容的优点是避免了 Concurrent Modification Exception，但同样地，迭代器并不能访问到修改后的内容，即：迭代器遍历的是开始遍历那一刻拿到的集合拷贝，<strong>在遍历期间原集合发生的修改迭代器是不知道的。</strong></p>
 <p>场景：java.util.concurrent 包下的容器都是安全失败，可以在多线程下并发使用，并发修改。</p>
 <h1 id="总结">3 总结</h1><p>快速失败和安全失败是对迭代器而言的。</p>
@@ -879,8 +881,8 @@ ORM（对
                             1 原题给定两个有序整数数组 nums1 和 nums2 ，将 nums2 合并到 nums1 中，使得 num1 成为一个有序数组。
 说明： 
 
-初始化 nums1 和 nums2 的元素数量分别为 m 和 n。
-你可以假设 nums1 
+初始化 nums1 和 nums2 的元素数量分别为 m 和 n。
+你可以假设 nums1 
                         
                     </div>
                     <div class="publish-info">
@@ -1057,7 +1059,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

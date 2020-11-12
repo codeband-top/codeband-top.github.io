@@ -27,6 +27,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -401,7 +402,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    937
+                    943
                 </div>
                 
 
@@ -417,21 +418,23 @@
                 <p>先说一下。。以后可能不会怎么写Java相关的博客了，因为找到了字节跳动的实习工作，用Go/Python开发后端，所以这几天在抓紧时间学Go，在学Go的时候，了解到Go语言只有值传递，我突然就想起网上对Java是引用传递还是值传递有很多种说法，那么我的看法是：Java中同样只有值传递。理由且听我慢慢道来。</p>
 <h1 id="最简单的验证方法">1 最简单的验证方法</h1><p>其实要验证Java只有值传递有个非常简单的方法。首先我们要了解值传递和引用传递的区别是什么，其实“引用传递”这个词，在C++语言中听到得最多，在值传递中，实参是传入对象的一份拷贝，因此对参数的修改不会影响传入的对象。而在引用传递中，传递的是对象的一个别名，若创建引用后，原对象的地址发生改变，引用的对象依然不会改变，而这种机制目前我只在C++语言中听说过。（主要还是学过的编程语言太少）</p>
 <p>这种机制甚至在C语言中都没有，那么C语言要通过函数去改变一个参数该怎么办呢？正确的做法是<strong>指针传递</strong>。</p>
-<pre><code class="c">void swap(int *a,int *b)
-{
-    int temp;
-    temp = *a
-    *a = *b;
-    *b = temp;
-}</code></pre>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">void</span> <span class="token function">swap</span><span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span>a<span class="token punctuation">,</span><span class="token keyword">int</span> <span class="token operator">*</span>b<span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token keyword">int</span> temp<span class="token punctuation">;</span>
+    temp <span class="token operator">=</span> <span class="token operator">*</span>a
+    <span class="token operator">*</span>a <span class="token operator">=</span> <span class="token operator">*</span>b<span class="token punctuation">;</span>
+    <span class="token operator">*</span>b <span class="token operator">=</span> temp<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p><strong>指针传递</strong>可以改变传入的参数，那么它是引用传递吗？并不是，它只是传递了指针的值，而函数内部因为获取了指针的值，于是可以通过指针获取指向的对象，从而修改它。</p>
 <p><strong>指针传递</strong>在C++中也可以使用，而C++要实现同样的功能还可以使用引用传递：</p>
-<pre><code class="cpp">void swap(int&amp; a, int&amp; b)
-{
-    int swap = a;
-    a = b;
-    b = swap;
-}</code></pre>
+<pre class="language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">swap</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token operator">&amp;</span> a<span class="token punctuation">,</span> <span class="token keyword">int</span><span class="token operator">&amp;</span> b<span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token keyword">int</span> swap <span class="token operator">=</span> a<span class="token punctuation">;</span>
+    a <span class="token operator">=</span> b<span class="token punctuation">;</span>
+    b <span class="token operator">=</span> swap<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>那么这两种方法有什么区别呢？区别就是，在指针传递的方法中，改变指针的值，外部并不会变化。</p>
 <p>例如下面这段代码（引用传递）输出10，引用发生改变：</p>
 <iframe src="https://run.codetool.top/?id=36" frameborder="0" height="500" style="width:100%;border:1px solid #ccc;"></iframe>
@@ -443,11 +446,12 @@
 <iframe src="https://run.codetool.top/?id=39" frameborder="0" height="500" style="width:100%;border:1px solid #ccc;"></iframe>
 
 <p>既然网上很多资料说，Java除了基本类型，都是引用传递，那么我们这里就写了一个类进行测试，在函数内部去修改了一下获取的参数。</p>
-<p>你可以尝试运行这段代码，输出的结果仍是：<code>TestObject{value=1}</code>，说明它和C++中的<strong>指针传递</strong>的机制是一样的。这也是为什么我认为Java中都是值传递的原因。</p>
+<p>你可以尝试运行这段代码，输出的结果仍是：<code>TestObject&#123;value=1&#125;</code>，说明它和C++中的<strong>指针传递</strong>的机制是一样的。这也是为什么我认为Java中都是值传递的原因。</p>
 <h1 id="Java中不是没有指针吗？">2 Java中不是没有指针吗？</h1><p>Java只是对使用者封装了指针的概念，我们看下面这行代码：</p>
-<pre><code class="java">Object o = new Object();</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token class-name">Object</span> o <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Object</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
 <p><code>new Object()</code>实际上是在堆上创建了一个对象，<strong>而<code>o</code>这个局部变量，是分配在栈上的，一个八字节的引用（reference）类型，指向堆上的对象</strong> </p>
-<p>所以可以认为<code>o</code>就是一个指针，具体的机制在<a href="../深入理解java虚拟机第三版读书笔记03">深入理解java虚拟机第三版读书笔记03–1.3 对象的访问定位</a>中也有提到，<strong>HotSpot使用的对象访问定位的方式是直接指针访问，栈上的reference数据存储的就是对象在堆中的地址。</strong></p>
+<p>所以可以认为<code>o</code>就是一个指针，具体的机制在<a href="../%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%AC%E4%B8%89%E7%89%88%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003">深入理解java虚拟机第三版读书笔记03–1.3 对象的访问定位</a>中也有提到，<strong>HotSpot使用的对象访问定位的方式是直接指针访问，栈上的reference数据存储的就是对象在堆中的地址。</strong></p>
 <p>因此我倾向于认为，Java的这种传参方式，类似于C++中的指针传递，并没有引用传递的概念，因此可以说，Java中只有值传递。</p>
 
             </div>
@@ -874,8 +878,8 @@
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题给你一个整数数组 nums 。你可以选定任意的 正数 startValue 作为初始值。
-你需要从左到右遍历 nums 数组，并将 startValue 依次累加上 nums 数组中的值。
+                            1 原题给你一个整数数组 nums 。你可以选定任意的 正数 startValue 作为初始值。
+你需要从左到右遍历 nums 数组，并将 startValue 依次累加上 nums 数组中的值。
 请你在确保累加和始终大于等于 1 的前提下
                         
                     </div>
@@ -1053,7 +1057,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

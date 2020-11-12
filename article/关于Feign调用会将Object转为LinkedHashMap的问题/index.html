@@ -7,7 +7,8 @@
     <meta name="keywords" content="关于Feign调用会将对象嵌套的Map转为LinkedHashMap的问题, 代码段小站">
     <meta name="description" content="又踩到Feign坑了←_←（冷笑话）
 1 问题复现方法提供者，返回一个Result对象，并将一个MemberVo对象封装到了Result对象中的一个哈希表中：
-@ApiOperation(value = &amp;quot;根据用户id获取信息&amp;q">
+@ApiOperation(value = &#34;根据用户id获取信息&#34;)
+@Get">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -29,6 +30,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -403,7 +405,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    590
+                    587
                 </div>
                 
 
@@ -418,33 +420,39 @@
             <div id="articleContent">
                 <p>又踩到Feign坑了←_←（冷笑话）</p>
 <h1 id="问题复现">1 问题复现</h1><p>方法提供者，返回一个<code>Result</code>对象，并将一个<code>MemberVo</code>对象封装到了Result对象中的一个哈希表中：</p>
-<pre><code class="java">@ApiOperation(value = &quot;根据用户id获取信息&quot;)
-@GetMapping(&quot;/member/{id}&quot;)
-public Result getUserInfo(@PathVariable String id){
-    MemberVo loginInfoVo = memberService.getLoginInfo(id);
-    return Result.ok().data(&quot;item&quot;, loginInfoVo);
-}</code></pre>
-<p>Result的结构：</p>
-<pre><code class="java">public class Result {
-    private boolean flag;//是否成功
-    private Integer code;//返回码
-    private String message;//返回消息
-    private Map&lt;String,Object&gt; data = new HashMap&lt;&gt;();//返回数据
-    //...
-}</code></pre>
-<p>Feign客户端：</p>
-<pre><code class="java">@Component
-@FeignClient(value = &quot;service-ucenter&quot;,fallback = MemberFallback.class)
-public interface MemberFeign {
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@ApiOperation</span><span class="token punctuation">(</span>value <span class="token operator">=</span> <span class="token string">"根据用户id获取信息"</span><span class="token punctuation">)</span>
+<span class="token annotation punctuation">@GetMapping</span><span class="token punctuation">(</span><span class="token string">"/member/&#123;id&#125;"</span><span class="token punctuation">)</span>
+<span class="token keyword">public</span> <span class="token class-name">Result</span> <span class="token function">getUserInfo</span><span class="token punctuation">(</span><span class="token annotation punctuation">@PathVariable</span> <span class="token class-name">String</span> id<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+    <span class="token class-name">MemberVo</span> loginInfoVo <span class="token operator">=</span> memberService<span class="token punctuation">.</span><span class="token function">getLoginInfo</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token class-name">Result</span><span class="token punctuation">.</span><span class="token function">ok</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">data</span><span class="token punctuation">(</span><span class="token string">"item"</span><span class="token punctuation">,</span> loginInfoVo<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-    @GetMapping(&quot;/ucenter/member/{id}&quot;)
-    public Result getUserInfo(@PathVariable String id);
-}</code></pre>
+<p>Result的结构：</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Result</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">private</span> <span class="token keyword">boolean</span> flag<span class="token punctuation">;</span><span class="token comment">//是否成功</span>
+    <span class="token keyword">private</span> <span class="token class-name">Integer</span> code<span class="token punctuation">;</span><span class="token comment">//返回码</span>
+    <span class="token keyword">private</span> <span class="token class-name">String</span> message<span class="token punctuation">;</span><span class="token comment">//返回消息</span>
+    <span class="token keyword">private</span> <span class="token class-name">Map</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">,</span><span class="token class-name">Object</span><span class="token punctuation">></span></span> data <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//返回数据</span>
+    <span class="token comment">//...</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>Feign客户端：</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@Component</span>
+<span class="token annotation punctuation">@FeignClient</span><span class="token punctuation">(</span>value <span class="token operator">=</span> <span class="token string">"service-ucenter"</span><span class="token punctuation">,</span>fallback <span class="token operator">=</span> <span class="token class-name">MemberFallback</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span>
+<span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">MemberFeign</span> <span class="token punctuation">&#123;</span>
+
+    <span class="token annotation punctuation">@GetMapping</span><span class="token punctuation">(</span><span class="token string">"/ucenter/member/&#123;id&#125;"</span><span class="token punctuation">)</span>
+    <span class="token keyword">public</span> <span class="token class-name">Result</span> <span class="token function">getUserInfo</span><span class="token punctuation">(</span><span class="token annotation punctuation">@PathVariable</span> <span class="token class-name">String</span> id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>Feign调用该方法，想从Result对象的哈希表中取出<code>MemberVo</code>对象：</p>
-<pre><code class="java">Result userInfo = memberFeign.getUserInfo(memberId);
-MemberVo memberVo = (MemberVo) userInfo.getData().get(&quot;item&quot;);</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token class-name">Result</span> userInfo <span class="token operator">=</span> memberFeign<span class="token punctuation">.</span><span class="token function">getUserInfo</span><span class="token punctuation">(</span>memberId<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token class-name">MemberVo</span> memberVo <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">MemberVo</span><span class="token punctuation">)</span> userInfo<span class="token punctuation">.</span><span class="token function">getData</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"item"</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
 <p>就这两句话，看起来合情合理，我一开始也觉得应该没问题，结果报错：</p>
-<pre><code>java.util.LinkedHashMap cannot be cast to com.guli.ucenter.entity.vo.MemberVo</code></pre><h1 id="问题分析">2 问题分析</h1><p><img src="https://api.codetool.top/img/15885189465959.png" alt></p>
+<pre class="language-none"><code class="language-none">java.util.LinkedHashMap cannot be cast to com.guli.ucenter.entity.vo.MemberVo</code></pre>
+
+<h1 id="问题分析">2 问题分析</h1><p><img src="https://api.codetool.top/img/15885189465959.png"></p>
 <p>调试发现，Feign调用后取到的Result对象的data已经不是一个HashMap了，而是一个<code>LinkedHashMap</code>，里面存放的item对应的value，也变成了一个<code>LinkedHashMap</code>，保留了原来<code>MemberVo</code>对象的属性，但并不是一个<code>MemberVo</code>对象。</p>
 <p>原因其实不难想到，毕竟Feign调用的实质还是HTTP请求，中间还是经过了Json与对象的互转，转换过程中要进行对象关系映射，只能根据给它的类获取结构，而Result中data声明为一个Map接口，转换为LinkedHashMap也说得通，至于原来哈希表中的对象，根据Result类结构完全无法获知里面的哈希表中的数据到底是什么类型，当然也无法将它转换回原来的类对象。</p>
 <p>可以猜测Feign会将Map接口（体现为json的object）和map中的对象（也体现为json中的object）都会转换为LinkedHashMap实例，至于为什么是LinkedHashMap而不是HashMap可能是为了维持键值对之间的顺序。</p>
@@ -826,7 +834,7 @@ MemberVo memberVo = (MemberVo) userInfo.getData().get(&quot;item&quot;);</code><
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题给你一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a，b，c ，使得 a + b + c = 0 ？请你找出所有满足条件且不重复的三元组。
+                            1 原题给你一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a，b，c ，使得 a + b + c = 0 ？请你找出所有满足条件且不重复的三元组。
 注意： 答案中不可以包含重复的三元组。
 示例:
 给定数组 num
@@ -1064,7 +1072,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

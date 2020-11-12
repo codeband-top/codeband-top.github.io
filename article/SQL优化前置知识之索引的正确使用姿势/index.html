@@ -29,6 +29,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -407,7 +408,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    4.3k
+                    4.4k
                 </div>
                 
 
@@ -420,11 +421,11 @@
         <hr class="clearfix">
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <p>该文的前置知识：<a href="../SQL优化前置知识之优化前分析">SQL优化前置知识之优化前分析</a></p>
+                <p>该文的前置知识：<a href="../SQL%E4%BC%98%E5%8C%96%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86%E4%B9%8B%E4%BC%98%E5%8C%96%E5%89%8D%E5%88%86%E6%9E%90">SQL优化前置知识之优化前分析</a></p>
 <h1 id="索引失效">1 索引失效</h1><p>有的sql语句会不使用索引？在编写sql语句的时候应避免这些情况，一起来看看这些情况吧：</p>
 <h2 id="不遵从最左前缀规则">1.1 不遵从最左前缀规则</h2><p>如果索引了多列，要遵守最左前缀法则。指的是查询从索引的最左前列开始，并且不跳过索引中的列。</p>
 <p>最左前缀的原理来自于B+树对节点的排序规则：</p>
-<p>摘自<a href="../MySQL索引概述及索引的分类/">MySQL索引概述及索引的分类</a></p>
+<p>摘自<a href="../MySQL%E7%B4%A2%E5%BC%95%E6%A6%82%E8%BF%B0%E5%8F%8A%E7%B4%A2%E5%BC%95%E7%9A%84%E5%88%86%E7%B1%BB/">MySQL索引概述及索引的分类</a></p>
 <ul>
 <li>如果不是按照索引的最左列开始查找，则无法使用索引</li>
 <li>不能跳过索引中的列</li>
@@ -434,32 +435,38 @@
 <ol>
 <li>建立索引</li>
 </ol>
-<pre><code>create index idx_uname_pw_name on t_user(username,password,name);
+<pre class="language-none"><code class="language-none">create index idx_uname_pw_name on t_user(username,password,name);
 Query OK, 0 rows affected (0.05 sec)
-Records: 0  Duplicates: 0  Warnings: 0</code></pre><ol start="2">
+Records: 0  Duplicates: 0  Warnings: 0</code></pre>
+
+<ol start="2">
 <li>以最左前缀规则查询</li>
 </ol>
-<pre><code>mysql&gt; explain select * from t_user where username = &#39;super&#39;;
+<pre class="language-none"><code class="language-none">mysql&gt; explain select * from t_user where username &#x3D; &#39;super&#39;;
 +----+-------------+--------+------------+------+-------------------+-------------------+---------+-------+------+----------+-------------+
 | id | select_type | table  | partitions | type | possible_keys     | key               | key_len | ref   | rows | filtered | Extra       |
 +----+-------------+--------+------------+------+-------------------+-------------------+---------+-------+------+----------+-------------+
 |  1 | SIMPLE      | t_user | NULL       | ref  | idx_uname_pw_name | idx_uname_pw_name | 137     | const |    1 |   100.00 | Using index |
 +----+-------------+--------+------------+------+-------------------+-------------------+---------+-------+------+----------+-------------+
-1 row in set, 1 warning (0.00 sec)</code></pre><p>可见使用了索引</p>
+1 row in set, 1 warning (0.00 sec)</code></pre>
+
+<p>可见使用了索引</p>
 <ol start="3">
 <li>不以最左前缀规则查询</li>
 </ol>
-<pre><code>mysql&gt; explain select * from t_user where name = &#39;学生1&#39;;
+<pre class="language-none"><code class="language-none">mysql&gt; explain select * from t_user where name &#x3D; &#39;学生1&#39;;
 +----+-------------+--------+------------+-------+---------------+-------------------+---------+------+------+----------+--------------------------+
 | id | select_type | table  | partitions | type  | possible_keys | key               | key_len | ref  | rows | filtered | Extra                    |
 +----+-------------+--------+------------+-------+---------------+-------------------+---------+------+------+----------+--------------------------+
 |  1 | SIMPLE      | t_user | NULL       | index | NULL          | idx_uname_pw_name | 564     | NULL |    6 |    16.67 | Using where; Using index |
 +----+-------------+--------+------------+-------+---------------+-------------------+---------+------+------+----------+--------------------------+
-1 row in set, 1 warning (0.00 sec)</code></pre><p>可见此时type变为了”index”，扫描索引树。</p>
+1 row in set, 1 warning (0.00 sec)</code></pre>
+
+<p>可见此时type变为了”index”，扫描索引树。</p>
 <h2 id="在索引上使用表达式">1.2 在索引上使用表达式</h2><p>索引列上使用了表达式，如 where substr(a, 1, 3) = ‘hhh’，where a = a + 1，表达式是一大忌讳，再简单 MySQL 也不认。</p>
 <p>有时数据量不是大到严重影响速度时，一般可以先查出来，比如先查所有有订单记录的数据，再在程序中去筛选</p>
 <p>哪怕是该字段没有建立索引，但不能保证以后不在这个字段上建立索引，所以可以这么说：不要在任何字段上进行操作。</p>
-<pre><code>mysql&gt; explain select * from t_user where left(username,2) = &#39;ad&#39;;
+<pre class="language-none"><code class="language-none">mysql&gt; explain select * from t_user where left(username,2) &#x3D; &#39;ad&#39;;
 +----+-------------+--------+------------+-------+---------------+-------------------+---------+------+------+----------+--------------------------+
 | id | select_type | table  | partitions | type  | possible_keys | key               | key_len | ref  | rows | filtered | Extra                    |
 +----+-------------+--------+------------+-------+---------------+-------------------+---------+------+------+----------+--------------------------+
@@ -467,24 +474,26 @@ Records: 0  Duplicates: 0  Warnings: 0</code></pre><ol start="2">
 +----+-------------+--------+------------+-------+---------------+-------------------+---------+------+------+----------+--------------------------+
 1 row in set, 1 warning (0.00 sec)
 
-Note (Code 1003): /* select#1 */ select `test`.`t_user`.`id` AS `id`,`test`.`t_user`.`username` AS `username`,`test`.`t_user`.`password` AS `password`,`test`.`t_user`.`name` AS `name` from `test`.`t_user` where (left(`test`.`t_user`.`username`,2) = &#39;ad&#39;)</code></pre><h2 id="range-类型查询字段后面的索引无效">1.3 range 类型查询字段后面的索引无效</h2><p><img src="https://api.codetool.top/img/15834021284440.png" alt></p>
+Note (Code 1003): &#x2F;* select#1 *&#x2F; select &#96;test&#96;.&#96;t_user&#96;.&#96;id&#96; AS &#96;id&#96;,&#96;test&#96;.&#96;t_user&#96;.&#96;username&#96; AS &#96;username&#96;,&#96;test&#96;.&#96;t_user&#96;.&#96;password&#96; AS &#96;password&#96;,&#96;test&#96;.&#96;t_user&#96;.&#96;name&#96; AS &#96;name&#96; from &#96;test&#96;.&#96;t_user&#96; where (left(&#96;test&#96;.&#96;t_user&#96;.&#96;username&#96;,2) &#x3D; &#39;ad&#39;)</code></pre>
+
+<h2 id="range-类型查询字段后面的索引无效">1.3 range 类型查询字段后面的索引无效</h2><p><img src="https://api.codetool.top/img/15834021284440.png"></p>
 <p>最后一次只用到了两个索引<br>此时可以建一个只含前两个字段的索引<br>对<code>in()</code>无效，in仍可以使用索引。</p>
-<h2 id="varchar类型不加单引号，造成索引失效">1.4 varchar类型不加单引号，造成索引失效</h2><p><img src="https://api.codetool.top/img/15834024132813.png" alt></p>
+<h2 id="varchar类型不加单引号，造成索引失效">1.4 varchar类型不加单引号，造成索引失效</h2><p><img src="https://api.codetool.top/img/15834024132813.png"></p>
 <p>由于在查询时，没有对字符串加单引号，MySQL的查询优化器，会自动的进行类型转换，造成索引失效。</p>
 <h2 id="尽量使用覆盖索引，避免select">1.5 尽量使用覆盖索引，避免select *</h2><p>覆盖索引的概念，往下翻，<code>索引的特殊应用-&gt;覆盖索引</code></p>
-<p><img src="https://api.codetool.top/img/15834026032099.png" alt></p>
+<p><img src="https://api.codetool.top/img/15834026032099.png"></p>
 <p>如果查询列，超出索引列，也会降低性能。</p>
 <blockquote>
 <p><strong>TIP:</strong><br>using index ：使用覆盖索引的时候就会出现<br>using where：在查找使用索引的情况下，需要回表去查询所需的数据<br>using index condition：查找使用了索引，但是需要回表查询数据​<br>using index ; using where：查找使用了索引，但是需要的数据都在索引列中能找到，所以不需要回表查询数据</p>
 </blockquote>
-<h2 id="使用不等于时索引失效">1.6 使用不等于时索引失效</h2><p><img src="https://api.codetool.top/img/1583403565859.png" alt></p>
-<h2 id="is-not-null-时有时索引失效">1.7 is (not) null 时有时索引失效</h2><p><img src="https://api.codetool.top/img/15834033385073.png" alt></p>
+<h2 id="使用不等于时索引失效">1.6 使用不等于时索引失效</h2><p><img src="https://api.codetool.top/img/1583403565859.png"></p>
+<h2 id="is-not-null-时有时索引失效">1.7 is (not) null 时有时索引失效</h2><p><img src="https://api.codetool.top/img/15834033385073.png"></p>
 <p>失效的情况其实是MySQL评估使用索引比全表更慢，见最后一点。</p>
-<h2 id="like-以通配符开头会导致全表扫描">1.8 like 以通配符开头会导致全表扫描</h2><p><img src="https://api.codetool.top/img/15834035806892.png" alt></p>
-<h2 id="使用-or-时索引失效">1.9 使用 or 时索引失效</h2><p><img src="https://api.codetool.top/img/1583403593215.png" alt></p>
+<h2 id="like-以通配符开头会导致全表扫描">1.8 like 以通配符开头会导致全表扫描</h2><p><img src="https://api.codetool.top/img/15834035806892.png"></p>
+<h2 id="使用-or-时索引失效">1.9 使用 or 时索引失效</h2><p><img src="https://api.codetool.top/img/1583403593215.png"></p>
 <p>如果or前的条件中的列有索引，而后面的列中没有索引，那么涉及的索引都不会被用到。</p>
 <p>其实还蛮好理解的，因为没有索引的列符合条件也满足or，自然要全表扫描。</p>
-<h2 id="in-走索引，-not-in-索引失效">1.10 in 走索引， not in 索引失效</h2><p><img src="https://api.codetool.top/img/15834034738616.png" alt></p>
+<h2 id="in-走索引，-not-in-索引失效">1.10 in 走索引， not in 索引失效</h2><p><img src="https://api.codetool.top/img/15834034738616.png"></p>
 <h2 id="如果MySQL评估使用索引比全表更慢，则不使用索引。">1.11 如果MySQL评估使用索引比全表更慢，则不使用索引。</h2><p>这个东西就很玄学了，典型情况是查询的情况占了整表大多数。</p>
 <h1 id="索引的特殊应用">2 索引的特殊应用</h1><h2 id="InnoDB-AUTO-INCREMENT">2.1 InnoDB AUTO_INCREMENT</h2><h3 id="概述">2.1.1 概述</h3><p>如果正在使用 InnoDB 表并且没有什么数据需要聚集，那么可以定义一个代理键作为主键，这种主键的数据应该与应用无关，最简单的方法是使用 AUTO_INCREMENT 自增列。这样可以保证数据行是按顺序写入的，对于根据主键做关联操作的性能也会更好。</p>
 <p>最好避免随机的聚簇索引，特别是对于 IO 密集型应用，比如 UUID，它使得聚簇索引的插入变得完全随机，这是最坏的情况，使得数据没有任何聚集特性。</p>
@@ -535,11 +544,12 @@ Note (Code 1003): /* select#1 */ select `test`.`t_user`.`id` AS `id`,`test`.`t_u
 <p>假设 B 是一个选择性很低的列，只有 b1 和 b2 两种取值，那么查询可以写为 <code>A = a and B in(b1,b2) and C = c</code>。</p>
 <h2 id="避免多个范围条件">2.7 避免多个范围条件</h2><p>对于范围条件查询，MySQL 无法再使用范围列后面的其他索引列了，但是<strong>对于多个等值条件查询（in …）则没有这个限制。</strong></p>
 <p>假设有索引(A,B)，查询条件为 A &gt; a and B &lt; b，那么此时无法同时使用 A 和 B 的复合索引，只能用到 A 的索引。一定要用的话可以考虑将 A 转为 in(a1,a2…)。</p>
-<h1 id="查看索引使用情况">3 查看索引使用情况</h1><pre><code class="sql">show status like &#39;Handler_read%&#39;;    
+<h1 id="查看索引使用情况">3 查看索引使用情况</h1><pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">show</span> <span class="token keyword">status</span> <span class="token operator">like</span> <span class="token string">'Handler_read%'</span><span class="token punctuation">;</span>	
 
-show global status like &#39;Handler_read%&#39;;    </code></pre>
+<span class="token keyword">show</span> <span class="token keyword">global</span> <span class="token keyword">status</span> <span class="token operator">like</span> <span class="token string">'Handler_read%'</span><span class="token punctuation">;</span>	</code></pre>
+
 <p>这两条语句可以查看mysql索引的使用情况：</p>
-<pre><code>mysql&gt; show status like &#39;Handler_read%&#39;;
+<pre class="language-none"><code class="language-none">mysql&gt; show status like &#39;Handler_read%&#39;;
 +-----------------------+-------+
 | Variable_name         | Value |
 +-----------------------+-------+
@@ -551,7 +561,9 @@ show global status like &#39;Handler_read%&#39;;    </code></pre>
 | Handler_read_rnd      | 0     |
 | Handler_read_rnd_next | 18832 |
 +-----------------------+-------+
-7 rows in set (0.00 sec)</code></pre><p>Handler_read_first：索引中第一条被读的次数。如果较高，表示服务器正执行大量全索引扫描（这个值越低越好）。</p>
+7 rows in set (0.00 sec)</code></pre>
+
+<p>Handler_read_first：索引中第一条被读的次数。如果较高，表示服务器正执行大量全索引扫描（这个值越低越好）。</p>
 <p>Handler_read_key：如果索引正在工作，这个值代表一个行被索引值读的次数，如果值越低，表示索引得到的性能改善不高，因为索引不经常使用（这个值越高越好）。</p>
 <p>Handler_read_next ：按照键顺序读下一行的请求数。如果你用范围约束或如果执行索引扫描来查询索引列，该值增加。</p>
 <p>Handler_read_prev：按照键顺序读前一行的请求数。该读方法主要用于优化ORDER BY … DESC。</p>
@@ -1180,7 +1192,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

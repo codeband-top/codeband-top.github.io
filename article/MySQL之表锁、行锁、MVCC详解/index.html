@@ -29,6 +29,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -416,7 +417,7 @@
         <hr class="clearfix">
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <p>该文建议配合<a href="../数据库理论之并发控制/">数据库理论之并发控制</a>阅读。</p>
+                <p>该文建议配合<a href="../%E6%95%B0%E6%8D%AE%E5%BA%93%E7%90%86%E8%AE%BA%E4%B9%8B%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6/">数据库理论之并发控制</a>阅读。</p>
 <h1 id="概述">1 概述</h1><p>锁是计算机协调多个进程或线程并发访问某一资源的机制（避免争抢）。</p>
 <p>在数据库中，除传统的计算资源（如 CPU、RAM、I/O 等）的争用以外，数据也是一种供许多用户共享的资源。如何保证数据并发访问的一致性、有效性是所有数据库必须解决的一个问题，锁冲突也是影响数据库并发访问性能的一个重要因素。从这个角度来说，锁对数据库而言显得尤其重要，也更加复杂。</p>
 <h2 id="锁分类">1.1 锁分类</h2><p>从对数据操作的粒度分 ： </p>
@@ -497,16 +498,19 @@
 <p>在特定的场景中，表锁也可能有良好的性能。比如，READ LOCAL 表锁支持某些类型的并发写操作；另外，写锁也比读锁有更高的优先级，因此一个写锁请求可以会被插入到读锁队列的前面。</p>
 <p>尽管存储引擎可以管理自己的锁，服务器还是会使用各种有效的表锁来实现不同的目的。比如<strong>服务器在 ALTER TABLE 时使用表锁，而忽略存储引擎的锁机制。MyISAM 在读表前自动对表加读锁，在写表前自动对表加写锁。</strong></p>
 <h2 id="SQL语法">2.1 SQL语法</h2><p>添加表锁：</p>
-<pre><code class="sql">lock table table1 read/write , table2 read/write ,...</code></pre>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">lock</span> <span class="token keyword">table</span> table1 <span class="token keyword">read</span><span class="token operator">/</span><span class="token keyword">write</span> <span class="token punctuation">,</span> table2 <span class="token keyword">read</span><span class="token operator">/</span><span class="token keyword">write</span> <span class="token punctuation">,</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span></code></pre>
+
 <p>read为读锁，共享锁；write为写锁，独占锁。</p>
 <p>显示加过锁的表：</p>
-<pre><code class="sql">show open tables;</code></pre>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">show</span> <span class="token keyword">open</span> <span class="token keyword">tables</span><span class="token punctuation">;</span></code></pre>
+
 <ul>
 <li><code>In_use</code> : 表当前被查询使用的次数。如果该数为零，则表是打开的，但是当前没有被使用。为1代表已加锁。</li>
 <li><code>Name_locked</code>：表名称是否被锁定。名称锁定用于取消表或对表进行重命名等操作。</li>
 </ul>
 <p>释放表锁：</p>
-<pre><code class="sql">unlock tables;</code></pre>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">unlock</span> <span class="token keyword">tables</span><span class="token punctuation">;</span></code></pre>
+
 <h2 id="总结">2.2 总结</h2><ol>
 <li>对 MyISAM 表的读操作（加读锁），不会阻塞其他进程对同一表的读请求，但会阻塞对同一表的写请求。只有当读锁释放后，才会执行其它进程的写操作。</li>
 <li>对 MyISAM 表的写操作（加写锁），会阻塞其他进程对同一表的读和写操作，只有当写锁释放后，才会执行其它进程的读写操作。</li>
@@ -522,7 +526,7 @@
 <p><strong>对于<code>UPDATE</code>、<code>DELETE</code>和<code>INSERT</code>语句，InnoDB会自动给涉及的数据集加排他锁</strong></p>
 <p><strong>对于普通<code>SELECT</code>语句，InnoDB不会加任何锁，使用一致性非锁定读</strong></p>
 <h2 id="了解：一致性非锁定读">3.1 了解：一致性非锁定读</h2><p>一致性非锁定读是指InnoDB存储引擎通过行多版本控制（MVCC）的方式来读取当前执行时间数据库中行的数据。如果读取的行正在执行DELETE或UPDATE，这时读取操作不会因此去等待行上锁的释放，而是去读取行的一个快照数据。</p>
-<p><img src="https://api.codetool.top/img/15835025427688.png" alt></p>
+<p><img src="https://api.codetool.top/img/15835025427688.png"></p>
 <p>快照数据是该行的之前版本的数据，实现是通过undo段来完成（即为了回滚事务而产生的重做日志）。</p>
 <p>通过读取不同的快照版本实现不同的事务隔离级别：</p>
 <ul>
@@ -531,11 +535,12 @@
 </ul>
 <p><strong>一致性非锁定读是InnoDB默认的读取方式，不会占用和等待表上的锁。</strong></p>
 <h2 id="一致性锁定读">3.2 一致性锁定读</h2><p>某些情况下，用户需要显式地对数据库读取操作进行加锁以保证数据逻辑的一致性。可以通过以下语句显示给记录集加共享锁或排他锁（一致性锁定读）。</p>
-<pre><code class="sql">共享锁（S）：
-SELECT * FROM table_name WHERE ... LOCK IN SHARE MODE
+<pre class="language-sql" data-language="sql"><code class="language-sql">共享锁（S）：
+<span class="token keyword">SELECT</span> <span class="token operator">*</span> <span class="token keyword">FROM</span> table_name <span class="token keyword">WHERE</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token keyword">LOCK</span> <span class="token operator">IN</span> <span class="token keyword">SHARE</span> <span class="token keyword">MODE</span>
 
-排他锁（X) ：
-SELECT * FROM table_name WHERE ... FOR UPDATE</code></pre>
+排他锁（X<span class="token punctuation">)</span> ：
+<span class="token keyword">SELECT</span> <span class="token operator">*</span> <span class="token keyword">FROM</span> table_name <span class="token keyword">WHERE</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token keyword">FOR</span> <span class="token keyword">UPDATE</span></code></pre>
+
 <p>当事务提交了，锁就释放了。</p>
 <p>可以使用<code>show status like &#39;innodb_row_lock%&#39;;</code>查看innodb行锁的争用情况</p>
 <ul>
@@ -556,11 +561,13 @@ SELECT * FROM table_name WHERE ... FOR UPDATE</code></pre>
 <h3 id="next-key-lock">3.3.3 next-key lock</h3><p>行锁与间隙锁组合起来用就叫做 Next-Key Lock。<strong>锁定一个范围，并且锁定记录本身</strong>。对于行的查询，都是采用该方法，主要目的是阻止多个事务将记录插入到同一范围内，解决幻读的问题。</p>
 <p>InnoDB 工作在可重复读隔离级别下，并且会以 Next-Key Lock 的方式对数据行进行加锁，这样可以有效防止幻读的发生。Next-Key Lock 是行锁和间隙锁的组合，当 InnoDB 扫描索引记录的时候，会首先对索引记录加上行锁（Record Lock），再对索引记录两边的间隙加上间隙锁（Gap Lock）。加上间隙锁之后，其他事务就不能在这个间隙修改或者插入记录。</p>
 <p>如果一个索引有10，11，13和20这四个值，那么该索引可能被Next-key Locking的区间为：</p>
-<pre><code>(-∞,10]
+<pre class="language-none"><code class="language-none">(-∞,10]
 (10,11]
 (11,13]
 (13,20]
-(20,＋∞]</code></pre><p>若事务T1已经锁定了如下范围：</p>
+(20,＋∞]</code></pre>
+
+<p>若事务T1已经锁定了如下范围：</p>
 <p><code>(10,11]</code>，<code>(11,13]</code></p>
 <p>则插入新的记录12时，锁定的范围会变成：</p>
 <p><code>(10,11]</code>，<code>(11,12]</code>，<code>(12,13]</code></p>
@@ -568,7 +575,8 @@ SELECT * FROM table_name WHERE ... FOR UPDATE</code></pre>
 <h3 id="如何理解三种算法">3.3.4 如何理解三种算法</h3><p>我这里谈谈我自己的理解：</p>
 <p>对于唯一索引（比如主键），只要保证锁住该索引记录，就不可能出现幻读，这对应的就是Record Lock</p>
 <p>比如对于sql查询</p>
-<pre><code class="sql">select * from t_user where id = 5 for update;</code></pre>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> t_user <span class="token keyword">where</span> id <span class="token operator">=</span> <span class="token number">5</span> <span class="token keyword">for</span> <span class="token keyword">update</span><span class="token punctuation">;</span></code></pre>
+
 <p>这种情况就只会加一个Record Lock，第一次查询数据之后锁住了该记录，此后在同一事务内一直到第二次查询不可能会出现其他事务也将其他记录插入到id = 5这个位置。</p>
 <p>而如果不是唯一索引，第一次查询数据之后即使所住了该记录，但可能还会有记录被插到id = 5这个位置，所以此时需要范围索引，锁住索引为5这个值，对于范围查询，范围索引更重要。</p>
 
@@ -1182,7 +1190,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

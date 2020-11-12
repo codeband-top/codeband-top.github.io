@@ -32,6 +32,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -402,7 +403,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    7.9k
+                    8k
                 </div>
                 
 
@@ -415,7 +416,7 @@
         <hr class="clearfix">
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h1 id="并发进程">1 并发进程</h1><p><img src="https://api.codetool.top/img/15874794302366.png" alt></p>
+                <h1 id="并发进程">1 并发进程</h1><p><img src="https://api.codetool.top/img/15874794302366.png"></p>
 <h2 id="顺序程序设计">1.1 顺序程序设计</h2><p>顺序程序设计是把一个程序设计成一个顺序执行的程序模块，顺序的含义不但指一个程序模块内部，也指两个程序模块之间。</p>
 <p>顺序程序设计的特点：</p>
 <ul>
@@ -463,7 +464,7 @@
 </ul>
 </li>
 </ul>
-<h1 id="临界区管理">2 临界区管理</h1><p><img src="https://api.codetool.top/img/15874814349435.png" alt></p>
+<h1 id="临界区管理">2 临界区管理</h1><p><img src="https://api.codetool.top/img/15874814349435.png"></p>
 <h2 id="互斥与临界区">2.1 互斥与临界区</h2><p>并发进程中<strong>与共享变量有关的程序段叫“临界区”</strong>， 共享变量代表的资源叫“临界资源”。 </p>
 <p>与同一变量有关的临界区分散在各进程的程序段中，而各进程的执行速度不可预知。<strong>如果能保证进程在临界区执行时，不让另一个进程进入临界区，即各进程对共享变量的访问是互斥的，就不会造成与时间有关的错误</strong></p>
 <h2 id="临界区调度原则">2.2 临界区调度原则</h2><ul>
@@ -476,152 +477,155 @@
 <p>算法可行是指<strong>不能因为所选的调度策略造成进程饥饿甚至死锁</strong>。</p>
 <h2 id="软件管理临界区">2.3 软件管理临界区</h2><p>软件方法是为在具有一个处理器或共享主存的多处理器上执行的并发进程实现的，这种方法<strong>假定对主存中同一个单元的同时访问必定由存储器进行仲裁，使其串行化。</strong></p>
 <p>临界区管理的尝试：（下面是一段伪代码，非C语言）</p>
-<pre><code class="c">bool inside1=false;      /*P1不在其临界区内*/
-bool inside2=false;      /*P2不在其临界区内*/
-cobegin             /*cobegin和coend表示括号中的进程是一组并发进程*/
-process P1() {                
-    while(inside2);/*等待*/  
-    inside1=true;                  
-    /*临界区*/                      
-    inside1=false;                 
-}
+<pre class="language-c" data-language="c"><code class="language-c">bool inside1<span class="token operator">=</span>false<span class="token punctuation">;</span>      <span class="token comment">/*P1不在其临界区内*/</span>
+bool inside2<span class="token operator">=</span>false<span class="token punctuation">;</span>      <span class="token comment">/*P2不在其临界区内*/</span>
+cobegin             <span class="token comment">/*cobegin和coend表示括号中的进程是一组并发进程*/</span>
+process <span class="token function">P1</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>                
+    <span class="token keyword">while</span><span class="token punctuation">(</span>inside2<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">/*等待*/</span>  
+    inside1<span class="token operator">=</span>true<span class="token punctuation">;</span>                  
+    <span class="token comment">/*临界区*/</span>                      
+    inside1<span class="token operator">=</span>false<span class="token punctuation">;</span>                 
+<span class="token punctuation">&#125;</span>
 
-process P2() {
-    while(inside1);  /*等待*/
-    inside2=true;
-    /*临界区*/;
-    inside2=false;
-}
+process <span class="token function">P2</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">while</span><span class="token punctuation">(</span>inside1<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">/*等待*/</span>
+    inside2<span class="token operator">=</span>true<span class="token punctuation">;</span>
+    <span class="token comment">/*临界区*/</span><span class="token punctuation">;</span>
+    inside2<span class="token operator">=</span>false<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
 coend </code></pre>
+
 <p>这种方法看似没有问题，实则是错误的，</p>
-<p><img src="https://api.codetool.top/img/15874826788391.png" alt></p>
+<p><img src="https://api.codetool.top/img/15874826788391.png"></p>
 <p>如上图所示，由于P1执行的时候将inside1设为true存在一定的时间延迟（和上一个操作不是原子的），在这段延迟的时间内，P2发现inside1仍为false，于是也进入临界区执行。出现了两个进程同时进入临界区的情况。</p>
 <p>此外还有可能P1在临界区内失败（异常），导致无法将inside1置为false，使得其他进程再也无法进入临界区。</p>
 <p>除此之外还出现了许多尝试，但仍存在一些无法解决的问题。</p>
 <p>后来出现了两个真正实现了临界区管理的软件方法：Dekker算法和Peterson算法。由于软件实现临界区管理也不是主流，这里不重点研究了。</p>
-<p>Dekker算法的实现：（下面两段代码来自 <a href="https://blog.csdn.net/JustJavaC2016/article/details/78660768）" target="_blank" rel="noopener">https://blog.csdn.net/JustJavaC2016/article/details/78660768）</a></p>
-<pre><code class="cpp">#include&lt;stdio.h&gt;  
-#include&lt;stdlib.h&gt;  
-#include&lt;pthread.h&gt;  
-#define true 1  
-#define false 0  
-typedef int bool;  
-bool flag[2];  
-int turn;  
-void visit(int num)  
-{  
-    sleep(1);  
-    printf(&quot;P%d is visting\n&quot;,num);  
-}  
-void P0()  
-{  
-    while(true)  
-    {  
-        flag[0] = true;//P0想使用关键区。  
-        while(flag[1])//检查P1是不是也想用？  
-        {  
-            if(turn == 1)//如果P1想用，则查看P1是否具有访问权限？  
-            {  
-                flag[0] = false;//如果有，则P0放弃。  
-                while(turn == 1);//检查turn是否属于P1。  
-                flag[0] = true;//P0想使用。  
-            }  
-        }  
-        visit(0); //访问Critical Partition。  
-        turn = 1; //访问完成，将权限给P1。  
-        flag[0] = false;//P0结束使用。  
-    }  
-}  
-void P1()  
-{  
-    while(true)  
-    {  
-        flag[1] = true; //P1想使用关键区。  
-        while(flag[0]) //检查P0是不是也想用？  
-        {  
-            if(turn == 0) //如果P0想用，则查看P0是否具有访问权限？  
-            {  
-                flag[1] = false; //如果有，则P1放弃。  
-                while(turn == 0); //检查turn是否属于P1。  
-                flag[1] = true; // P1想使用。  
-            }  
+<p>Dekker算法的实现：（下面两段代码来自 <a target="_blank" rel="noopener" href="https://blog.csdn.net/JustJavaC2016/article/details/78660768%EF%BC%89">https://blog.csdn.net/JustJavaC2016/article/details/78660768）</a></p>
+<pre class="language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span><span class="token string">&lt;stdio.h></span>  </span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span><span class="token string">&lt;stdlib.h></span>  </span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span><span class="token string">&lt;pthread.h></span>  </span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token expression"><span class="token boolean">true</span> <span class="token number">1</span>  </span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token expression"><span class="token boolean">false</span> <span class="token number">0</span>  </span></span>
+<span class="token keyword">typedef</span> <span class="token keyword">int</span> <span class="token keyword">bool</span><span class="token punctuation">;</span>  
+<span class="token keyword">bool</span> flag<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">;</span>  
+<span class="token keyword">int</span> turn<span class="token punctuation">;</span>  
+<span class="token keyword">void</span> <span class="token function">visit</span><span class="token punctuation">(</span><span class="token keyword">int</span> num<span class="token punctuation">)</span>  
+<span class="token punctuation">&#123;</span>  
+    <span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"P%d is visting\n"</span><span class="token punctuation">,</span>num<span class="token punctuation">)</span><span class="token punctuation">;</span>  
+<span class="token punctuation">&#125;</span>  
+<span class="token keyword">void</span> <span class="token function">P0</span><span class="token punctuation">(</span><span class="token punctuation">)</span>  
+<span class="token punctuation">&#123;</span>  
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span>  
+    <span class="token punctuation">&#123;</span>  
+        flag<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span><span class="token comment">//P0想使用关键区。  </span>
+        <span class="token keyword">while</span><span class="token punctuation">(</span>flag<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token comment">//检查P1是不是也想用？  </span>
+        <span class="token punctuation">&#123;</span>  
+            <span class="token keyword">if</span><span class="token punctuation">(</span>turn <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token comment">//如果P1想用，则查看P1是否具有访问权限？  </span>
+            <span class="token punctuation">&#123;</span>  
+                flag<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span><span class="token comment">//如果有，则P0放弃。  </span>
+                <span class="token keyword">while</span><span class="token punctuation">(</span>turn <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//检查turn是否属于P1。  </span>
+                flag<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span><span class="token comment">//P0想使用。  </span>
+            <span class="token punctuation">&#125;</span>  
+        <span class="token punctuation">&#125;</span>  
+        <span class="token function">visit</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//访问Critical Partition。  </span>
+        turn <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token comment">//访问完成，将权限给P1。  </span>
+        flag<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span><span class="token comment">//P0结束使用。  </span>
+    <span class="token punctuation">&#125;</span>  
+<span class="token punctuation">&#125;</span>  
+<span class="token keyword">void</span> <span class="token function">P1</span><span class="token punctuation">(</span><span class="token punctuation">)</span>  
+<span class="token punctuation">&#123;</span>  
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span>  
+    <span class="token punctuation">&#123;</span>  
+        flag<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span> <span class="token comment">//P1想使用关键区。  </span>
+        <span class="token keyword">while</span><span class="token punctuation">(</span>flag<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token comment">//检查P0是不是也想用？  </span>
+        <span class="token punctuation">&#123;</span>  
+            <span class="token keyword">if</span><span class="token punctuation">(</span>turn <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token comment">//如果P0想用，则查看P0是否具有访问权限？  </span>
+            <span class="token punctuation">&#123;</span>  
+                flag<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span> <span class="token comment">//如果有，则P1放弃。  </span>
+                <span class="token keyword">while</span><span class="token punctuation">(</span>turn <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//检查turn是否属于P1。  </span>
+                flag<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span> <span class="token comment">// P1想使用。  </span>
+            <span class="token punctuation">&#125;</span>  
 
-        }  
-            visit(1); //访问Critical Partition。  
-        turn = 0; //访问完成，将权限给P0。  
-        flag[1] = false; //P1结束使用。  
-    }  
-}  
+        <span class="token punctuation">&#125;</span>  
+            <span class="token function">visit</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//访问Critical Partition。  </span>
+        turn <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token comment">//访问完成，将权限给P0。  </span>
+        flag<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span> <span class="token comment">//P1结束使用。  </span>
+    <span class="token punctuation">&#125;</span>  
+<span class="token punctuation">&#125;</span>  
 
-void main()  
-{  
-    pthread_t t1,t2;  
-    flag[0] = flag[1] = false;  
-    turn = 0;  
-    int err;  
-    err =  pthread_create(&amp;t1,NULL,(void*)P0,NULL);  
-    if(err != 0) exit(-1);  
-    err = pthread_create(&amp;t2,NULL,(void*)P1,NULL);  
-    if(err != 0 ) exit(-1);  
-    pthread_join(t1,NULL);  
-    pthread_join(t2,NULL);  
-    exit(0);  
-}  </code></pre>
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>  
+<span class="token punctuation">&#123;</span>  
+    pthread_t t1<span class="token punctuation">,</span>t2<span class="token punctuation">;</span>  
+    flag<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> flag<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>  
+    turn <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>  
+    <span class="token keyword">int</span> err<span class="token punctuation">;</span>  
+    err <span class="token operator">=</span>  <span class="token function">pthread_create</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>t1<span class="token punctuation">,</span><span class="token constant">NULL</span><span class="token punctuation">,</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span>P0<span class="token punctuation">,</span><span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+    <span class="token keyword">if</span><span class="token punctuation">(</span>err <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token function">exit</span><span class="token punctuation">(</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+    err <span class="token operator">=</span> <span class="token function">pthread_create</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>t2<span class="token punctuation">,</span><span class="token constant">NULL</span><span class="token punctuation">,</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span>P1<span class="token punctuation">,</span><span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+    <span class="token keyword">if</span><span class="token punctuation">(</span>err <span class="token operator">!=</span> <span class="token number">0</span> <span class="token punctuation">)</span> <span class="token function">exit</span><span class="token punctuation">(</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+    <span class="token function">pthread_join</span><span class="token punctuation">(</span>t1<span class="token punctuation">,</span><span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+    <span class="token function">pthread_join</span><span class="token punctuation">(</span>t2<span class="token punctuation">,</span><span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+    <span class="token function">exit</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+<span class="token punctuation">&#125;</span>  </code></pre>
+
 <p>Peterson算法的实现：</p>
-<pre><code class="cpp">#include&lt;stdio.h&gt;  
-#include&lt;stdlib.h&gt;  
-#include&lt;pthread.h&gt;  
-#define true 1  
-#define false 0  
-typedef int bool;  
-bool flag[2];  
-int turn;  
-void procedure0()  
-{  
-    while(true)  
-    {  
-        flag[0] = true;  
-        turn = 1;  
-        while(flag[1] &amp;&amp; turn == 1)
-        //退出while循环的条件就是，要么另一个线程  
-        //不想要使用关键区，要么此线程拥有访问权限。  
-        {  
-                sleep(1);  
-                printf(&quot;procedure0 is waiting!\n&quot;);  
-        }  
-        //critical section  
-        flag[0] = false;  
-    }  
-}  
-void procedure1()  
-{  
-    while(true)  
-    {  
-            flag[1] = true;  
-            turn = 0;  
-            while(flag[0] &amp;&amp; turn == 0)  
-            {  
-                    sleep(1);  
-                    printf(&quot;procedure1 is waiting!\n&quot;);  
-            }  
-            //critical section  
-            flag[1] = false;  
-    }  
-}  
-void main()  
-{  
-    pthread_t t1,t2;  
-    flag[0] = flag[1] = false;  
-    int err;  
-    turn = 0;  
-    err =  pthread_create(&amp;t1,NULL,(void*)procedure0,NULL);  
-    if(err != 0) exit(-1);  
-    err = pthread_create(&amp;t2,NULL,(void*)procedure1,NULL);  
-    if(err != 0 ) exit(-1);  
-    pthread_join(t1,NULL);  
-    pthread_join(t2,NULL);  
-    exit(0);  
-}  </code></pre>
+<pre class="language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span><span class="token string">&lt;stdio.h></span>  </span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span><span class="token string">&lt;stdlib.h></span>  </span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span><span class="token string">&lt;pthread.h></span>  </span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token expression"><span class="token boolean">true</span> <span class="token number">1</span>  </span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token expression"><span class="token boolean">false</span> <span class="token number">0</span>  </span></span>
+<span class="token keyword">typedef</span> <span class="token keyword">int</span> <span class="token keyword">bool</span><span class="token punctuation">;</span>  
+<span class="token keyword">bool</span> flag<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">;</span>  
+<span class="token keyword">int</span> turn<span class="token punctuation">;</span>  
+<span class="token keyword">void</span> <span class="token function">procedure0</span><span class="token punctuation">(</span><span class="token punctuation">)</span>  
+<span class="token punctuation">&#123;</span>  
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span>  
+    <span class="token punctuation">&#123;</span>  
+        flag<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>  
+        turn <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>  
+        <span class="token keyword">while</span><span class="token punctuation">(</span>flag<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> turn <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">)</span>
+        <span class="token comment">//退出while循环的条件就是，要么另一个线程  </span>
+        <span class="token comment">//不想要使用关键区，要么此线程拥有访问权限。  </span>
+        <span class="token punctuation">&#123;</span>  
+                <span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+                <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"procedure0 is waiting!\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+        <span class="token punctuation">&#125;</span>  
+        <span class="token comment">//critical section  </span>
+        flag<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>  
+    <span class="token punctuation">&#125;</span>  
+<span class="token punctuation">&#125;</span>  
+<span class="token keyword">void</span> <span class="token function">procedure1</span><span class="token punctuation">(</span><span class="token punctuation">)</span>  
+<span class="token punctuation">&#123;</span>  
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span>  
+    <span class="token punctuation">&#123;</span>  
+            flag<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>  
+            turn <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>  
+            <span class="token keyword">while</span><span class="token punctuation">(</span>flag<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> turn <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span>  
+            <span class="token punctuation">&#123;</span>  
+                    <span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+                    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"procedure1 is waiting!\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+            <span class="token punctuation">&#125;</span>  
+            <span class="token comment">//critical section  </span>
+            flag<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>  
+    <span class="token punctuation">&#125;</span>  
+<span class="token punctuation">&#125;</span>  
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>  
+<span class="token punctuation">&#123;</span>  
+    pthread_t t1<span class="token punctuation">,</span>t2<span class="token punctuation">;</span>  
+    flag<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> flag<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>  
+    <span class="token keyword">int</span> err<span class="token punctuation">;</span>  
+    turn <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>  
+    err <span class="token operator">=</span>  <span class="token function">pthread_create</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>t1<span class="token punctuation">,</span><span class="token constant">NULL</span><span class="token punctuation">,</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span>procedure0<span class="token punctuation">,</span><span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+    <span class="token keyword">if</span><span class="token punctuation">(</span>err <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token function">exit</span><span class="token punctuation">(</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+    err <span class="token operator">=</span> <span class="token function">pthread_create</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>t2<span class="token punctuation">,</span><span class="token constant">NULL</span><span class="token punctuation">,</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span>procedure1<span class="token punctuation">,</span><span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+    <span class="token keyword">if</span><span class="token punctuation">(</span>err <span class="token operator">!=</span> <span class="token number">0</span> <span class="token punctuation">)</span> <span class="token function">exit</span><span class="token punctuation">(</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+    <span class="token function">pthread_join</span><span class="token punctuation">(</span>t1<span class="token punctuation">,</span><span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+    <span class="token function">pthread_join</span><span class="token punctuation">(</span>t2<span class="token punctuation">,</span><span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+    <span class="token function">exit</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+<span class="token punctuation">&#125;</span>  </code></pre>
+
 <h2 id="硬件管理临界区">2.4 硬件管理临界区</h2><p>使用软件方法实现进程互斥使用临界资源是很困难的，他们通常能实现两个进程之间的互斥，很难控制多个进程的互斥。</p>
 <h3 id="关中断">2.4.1 关中断</h3><p>关中断是实现互斥的最简单方法之一。</p>
 <p>进程在测试标志之前，首先关中断，直到测试完并设置标志之后才开中断。进程在临界区执行期间，<strong>计算机系统不响应中断。因此不会转向调度，也就不会引起进程或线程切换，正在执行标志测试和设置的进程或线程不会被打断，从而保证了互斥。</strong></p>
@@ -633,64 +637,68 @@ void main()
 <h3 id="测试并设置指令">2.4.2 测试并设置指令</h3><p>其实就是<code>TestAndSet</code>，Java CAS的原理，操作系统层面提供的原子操作指令。</p>
 <p>因为该指令是原子的，就可以使用该指令管理一个互斥量，从而实现临界区管理。</p>
 <p>TS指令实现临界区管理的算法如下：（自旋锁）</p>
-<pre><code class="c">bool s=true;
+<pre class="language-c" data-language="c"><code class="language-c">bool s<span class="token operator">=</span>true<span class="token punctuation">;</span>
 cobegin
-process Pi()  { //i=1,2,...,n
-    while(!TS(s));        /*上锁*/
-    /*临界区*/;
-    s=true;               /*开锁*/
-}
+process <span class="token function">Pi</span><span class="token punctuation">(</span><span class="token punctuation">)</span>  <span class="token punctuation">&#123;</span> <span class="token comment">//i=1,2,...,n</span>
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">TS</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token comment">/*上锁*/</span>
+    <span class="token comment">/*临界区*/</span><span class="token punctuation">;</span>
+    s<span class="token operator">=</span>true<span class="token punctuation">;</span>               <span class="token comment">/*开锁*/</span>
+<span class="token punctuation">&#125;</span>
 coend</code></pre>
+
 <h3 id="对换指令">2.4.3 对换指令</h3><p>对换指令（swap）交换两个字的内容，在Intel 80x86中，对换指令称为<code>XCHG</code>指令</p>
 <p>swap指令也可以看作是同时设置两个值的原子指令实现，所以也可以用于临界区管理，思想类似。</p>
 <p><strong>软件方法和硬件方法都存在忙等问题（当一个进程正处在某临界区内，任何试图进入其临界区的进程都必须进入代码连续循环测试一个变量直到某个值出现为止），浪费了处理器的时间，不会成为一种通用的方法。</strong></p>
-<h1 id="信号量与PV操作">3 信号量与PV操作</h1><p><img src="https://api.codetool.top/img/15874850424979.png" alt></p>
+<h1 id="信号量与PV操作">3 信号量与PV操作</h1><p><img src="https://api.codetool.top/img/15874850424979.png"></p>
 <h2 id="信号量机制">3.1 信号量机制</h2><p>用户进程可以通过使用操作系统提供的<strong>一对原语</strong>来对信号量进行操作，从而很方便的实现了进程互斥、进程同步。</p>
 <p>信号量其实就是一个变量(可以是一个整数，也可以是更复杂的记录型变量)，可以<strong>用一个信号量来表示系统中某种资源的数量</strong>，比如:系统中只有一台打印机，就可以设置一个初值为1的信号量。</p>
 <p>一对原语：<code>wait(S)</code>原语和<code>signal(S)</code>原语，常简称为P、V操作。</p>
 <p><code>wait(S)</code>相当于占用一个S资源，<code>signal(S)</code>相当于释放一个S资源。</p>
 <h3 id="整型信号量">3.1.1 整型信号量</h3><p>用一个整数型的变量作为信号量，用来表示系统中某种资源的数量。下面是P、V原语的实现思想：</p>
-<pre><code class="c">int S = 1;          //初始化整型信号量S，表示当前系统中可用的打印机数
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">int</span> S <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>          <span class="token comment">//初始化整型信号量S，表示当前系统中可用的打印机数</span>
 
-void wait(int S){
-    while(S&lt;=0);    //如果资源数不够，就一直循环等待
-    S = S-1;        //如果资源数够，则占用一个资源
-}
+<span class="token keyword">void</span> <span class="token function">wait</span><span class="token punctuation">(</span><span class="token keyword">int</span> S<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+    <span class="token keyword">while</span><span class="token punctuation">(</span>S<span class="token operator">&lt;=</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token comment">//如果资源数不够，就一直循环等待</span>
+    S <span class="token operator">=</span> S<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>        <span class="token comment">//如果资源数够，则占用一个资源</span>
+<span class="token punctuation">&#125;</span>
 
-void signal(int S){
-    S = S+1;
-}</code></pre>
+<span class="token keyword">void</span> <span class="token function">signal</span><span class="token punctuation">(</span><span class="token keyword">int</span> S<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+    S <span class="token operator">=</span> S<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>进程Pn：</p>
-<pre><code class="c">wait(S);
-//使用打印机资源...
-signal(S);</code></pre>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token function">wait</span><span class="token punctuation">(</span>S<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">//使用打印机资源...</span>
+<span class="token function">signal</span><span class="token punctuation">(</span>S<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
 <h3 id="记录型信号量">3.1.2 记录型信号量</h3><p>（思维导图中的二值信号量和一般信号量都是属于这里的记录型信号量）</p>
 <p>整型信号量的缺陷是存在“忙等”问题，因此人们又提出了“记录型信号量”，即用记录型数据结构表示的信号量。</p>
-<pre><code class="cpp">/*记录型信号量的定义*/
-typedef struct {
-    int value;//剩余资源数
-    struct process *L;//等待队列
-} semaphore;
+<pre class="language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">/*记录型信号量的定义*/</span>
+<span class="token keyword">typedef</span> <span class="token keyword">struct</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">int</span> value<span class="token punctuation">;</span><span class="token comment">//剩余资源数</span>
+    <span class="token keyword">struct</span> <span class="token class-name">process</span> <span class="token operator">*</span>L<span class="token punctuation">;</span><span class="token comment">//等待队列</span>
+<span class="token punctuation">&#125;</span> semaphore<span class="token punctuation">;</span>
 
-void wait(semaphore S){
-    S.value--;
-    if(S.value&lt;0){
-        //如果剩余资源数不够
-        //使用block原语使进程从运行态进入阻塞
-        //并把进程挂到信号量S的等待队列(即阻塞队列)中
-        block(S.L);
-    }
-}
+<span class="token keyword">void</span> <span class="token function">wait</span><span class="token punctuation">(</span>semaphore S<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+    S<span class="token punctuation">.</span>value<span class="token operator">--</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>S<span class="token punctuation">.</span>value<span class="token operator">&lt;</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token comment">//如果剩余资源数不够</span>
+        <span class="token comment">//使用block原语使进程从运行态进入阻塞</span>
+        <span class="token comment">//并把进程挂到信号量S的等待队列(即阻塞队列)中</span>
+        <span class="token function">block</span><span class="token punctuation">(</span>S<span class="token punctuation">.</span>L<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
 
-void signal(semaphore S){
-    S.value++;
-    if(S.value&lt;=0){
-        //释放资源后，若还有别的进程在等待这种资源
-        //则使用wakeup原语唤醒等待队列中的个进程
-        //该进程从阻塞态变为就绪态
-        wakeup(S.L);
-    }
-}</code></pre>
+<span class="token keyword">void</span> <span class="token function">signal</span><span class="token punctuation">(</span>semaphore S<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+    S<span class="token punctuation">.</span>value<span class="token operator">++</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>S<span class="token punctuation">.</span>value<span class="token operator">&lt;=</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token comment">//释放资源后，若还有别的进程在等待这种资源</span>
+        <span class="token comment">//则使用wakeup原语唤醒等待队列中的个进程</span>
+        <span class="token comment">//该进程从阻塞态变为就绪态</span>
+        <span class="token function">wakeup</span><span class="token punctuation">(</span>S<span class="token punctuation">.</span>L<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>这里信号量的语义就是资源的个数，并且实现了让权等待，不会形成忙等。</p>
 <h2 id="信号量机制实现进程互斥">3.2 信号量机制实现进程互斥</h2><p>我们可以把临界区看作一种特殊的资源，为临界区抽象出一个互斥信号量<code>mutex</code>，<strong>它是二值的，初值为1</strong>，代表同一个时间只能有一个进程进入临界区。</p>
 <ul>
@@ -698,58 +706,60 @@ void signal(semaphore S){
 <li>在退出临界区之后执行<code>V(mutex)</code></li>
 </ul>
 <h2 id="信号量机制实现进程同步">3.3 信号量机制实现进程同步</h2><p>进程同步问题要求多个进程按一定次序先后执行一段代码。这个前驱关系可能是较复杂的，如下图所示，可以<strong>为每一对前驱关系各设置一个同步信号量</strong>，初值为0，<strong>要执行某操作前需要对前驱操作对应的信号量进行P操作，当完成了前驱操作时对对应的信号量执行V操作。</strong></p>
-<p><img src="https://api.codetool.top/img/15874890505885.png" alt></p>
-<pre><code>semaphore a = 0,b = 0,c = 0,d = 0,e = 0,f = 0,g = 0;
+<p><img src="https://api.codetool.top/img/15874890505885.png"></p>
+<pre class="language-none"><code class="language-none">semaphore a &#x3D; 0,b &#x3D; 0,c &#x3D; 0,d &#x3D; 0,e &#x3D; 0,f &#x3D; 0,g &#x3D; 0;
 
-P1(){
+P1()&#123;
     ...
     S1;
     V(a);
     V(b);
     ...
-}
+&#125;
 
-P2(){
+P2()&#123;
     ...
     P(a);
     S2;
     V(c);
     V(d);
     ...
-}
+&#125;
 
-P3(){
+P3()&#123;
     ...
     P(b);
     S3;
     V(g);
     ...
-}
+&#125;
 
-P4(){
+P4()&#123;
     ...
     P(c);
     S4;
     V(e);
     ...
-}
+&#125;
 
-P5(){
+P5()&#123;
     ...
     P(d);
     S5;
     V(f);
     ...
-}
+&#125;
 
-P6(){
+P6()&#123;
     ...
     P(e);
     P(f);
     P(g);
     S6;
     ...
-}</code></pre><h1 id="管程">4 管程</h1><p><img src="https://api.codetool.top/img/15875338871013.png" alt></p>
+&#125;</code></pre>
+
+<h1 id="管程">4 管程</h1><p><img src="https://api.codetool.top/img/15875338871013.png"></p>
 <h2 id="管程和条件变量">4.1 管程和条件变量</h2><h3 id="为什么要引入管程">4.1.1 为什么要引入管程</h3><p>信号量机制存在的问题：编写程序困难、易出错。</p>
 <p>管程：</p>
 <ul>
@@ -778,48 +788,49 @@ P6(){
 <li>管程有一个名字</li>
 </ol>
 <p>例如：(使用类C语言语法模拟管程结构)</p>
-<pre><code class="cpp">type ProducerConsumer = monitor{
-    condition full, empty;//条件变量用来实现同步排队
-    int count=0;//缓冲区中的产品数
-    void insert(Item item){//把产品item放入缓冲区
-        if (count ==N)
-            wait(full);
-        count++;
-        insert_item(item);
-        if (count = 1)
-            signal(empty);
-    }
-    Item remove(){//从缓冲区中取出一个产品
-        if (count ==0)
-            wait(empty);
-        count--;
-        if(count==N-1)
-            signal(full);
-        return remove_item()
-    }
-}
+<pre class="language-cpp" data-language="cpp"><code class="language-cpp">type ProducerConsumer <span class="token operator">=</span> monitor<span class="token punctuation">&#123;</span>
+    condition full<span class="token punctuation">,</span> empty<span class="token punctuation">;</span><span class="token comment">//条件变量用来实现同步排队</span>
+    <span class="token keyword">int</span> count<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span><span class="token comment">//缓冲区中的产品数</span>
+    <span class="token keyword">void</span> <span class="token function">insert</span><span class="token punctuation">(</span>Item item<span class="token punctuation">)</span><span class="token punctuation">&#123;</span><span class="token comment">//把产品item放入缓冲区</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>count <span class="token operator">==</span>N<span class="token punctuation">)</span>
+            <span class="token function">wait</span><span class="token punctuation">(</span>full<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        count<span class="token operator">++</span><span class="token punctuation">;</span>
+        <span class="token function">insert_item</span><span class="token punctuation">(</span>item<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>count <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">)</span>
+            <span class="token function">signal</span><span class="token punctuation">(</span>empty<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    Item <span class="token function">remove</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span><span class="token comment">//从缓冲区中取出一个产品</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>count <span class="token operator">==</span><span class="token number">0</span><span class="token punctuation">)</span>
+            <span class="token function">wait</span><span class="token punctuation">(</span>empty<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        count<span class="token operator">--</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>count<span class="token operator">==</span>N<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
+            <span class="token function">signal</span><span class="token punctuation">(</span>full<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token function">remove_item</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
 
-//生产者进程
-producer(){
-    while(1){
-        item = 生产一个产品;
-        ProducerConsumer.insert(item);
-    }
-}
+<span class="token comment">//生产者进程</span>
+<span class="token function">producer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        item <span class="token operator">=</span> 生产一个产品<span class="token punctuation">;</span>
+        ProducerConsumer<span class="token punctuation">.</span><span class="token function">insert</span><span class="token punctuation">(</span>item<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
 
-//消费者进程
-producer(){
-    while(1){
-        item = ProducerConsumer.remove(item);
+<span class="token comment">//消费者进程</span>
+<span class="token function">producer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        item <span class="token operator">=</span> ProducerConsumer<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>item<span class="token punctuation">)</span><span class="token punctuation">;</span>
         消费产品item   
-    }
-}</code></pre>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <h3 id="管程的条件变量">4.1.4 管程的条件变量</h3><p>条件变量是出现在管程内的一种数据结构，且<strong>只有在管程中才能被访问</strong>，它对管程内的所有过程是全局的，只能通过两个原语操作来控制它。</p>
 <ul>
 <li><code>wait()</code>：挂起调用进程并释放管程，直到另一个进程在该条件变量上执行<code>signal()</code>。</li>
 <li><code>signal( )</code>：如果存在其他进程由于对条件变量执行<code>wait()</code>而被挂起，便释放之；如果没有进程在等待，那么，信号不被保存。</li>
 </ul>
-<h1 id="死锁">5 死锁</h1><p><img src="https://api.codetool.top/img/15875359806127.png" alt></p>
+<h1 id="死锁">5 死锁</h1><p><img src="https://api.codetool.top/img/15875359806127.png"></p>
 <h2 id="死锁的产生">5.1 死锁的产生</h2><p>操作系统中的死锁指：如果<strong>在一个进程集合中的每个进程都在等待只能由该集合中的其他一个进程才能引发的事件</strong>，则称一组进程或系统此时发生死锁。</p>
 <p>死锁产生的例子：</p>
 <p>设系统有打印机、读卡机各一台，被进程Ｐ和Ｑ共享。两个进程并发执行，按下列次序请求和释放资源：</p>
@@ -846,8 +857,15 @@ producer(){
 <td align="center">释放打印机</td>
 <td align="center">释放打印机</td>
 </tr>
+<tr>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">在PV操作中对应</td>
+<td align="center"></td>
+</tr>
 </tbody></table>
-<p>在PV操作中对应</p>
 <table>
 <thead>
 <tr>
@@ -942,7 +960,7 @@ producer(){
 <li>把这个进程从集合中去掉, 系统的剩余资源更多了,<strong>反复执行上述步骤</strong>。</li>
 <li>最后,检查进程集合,若为空表明本次申请可行,系统处于安全状态,可实施本次分配;否则,有进程执行不完，系统处于不安全状态,本次资源分配暂不实施,让申请进程等待。 </li>
 </ul>
-<h3 id="死锁的检测和解除">5.3.3 死锁的检测和解除</h3><p>该部分参考自：<a href="http://www.360doc.com/content/16/0421/16/478627_552610896.shtml" target="_blank" rel="noopener">死锁的检测和解除</a></p>
+<h3 id="死锁的检测和解除">5.3.3 死锁的检测和解除</h3><p>该部分参考自：<a target="_blank" rel="noopener" href="http://www.360doc.com/content/16/0421/16/478627_552610896.shtml">死锁的检测和解除</a></p>
 <p>解决死锁问题的一条途径是死锁检测和解除，这种方法<strong>对资源的分配不加任何限制，也不采取死锁避免措施</strong>，但系统定时地运行一个“死锁检测”程序，判断系统内是否已出现死锁，<strong>如果检测到系统已发性了死锁，再采取措施解除它</strong>。</p>
 <p>进程-资源分配图：</p>
 <p>如图所示，用<strong>圆圈代表一个进程</strong>，用<strong>框代表一类资源</strong>。由于一种类型的资源可能有多个，用框中的一个点代表一类资源中的一个资源。<strong>从进程到资源的有向边叫请求边，表示该进程申请一个单位的该类资源；从资源到进程的边叫分配边，表示该类资源已经有一个资源被分配给了该进程。</strong></p>
@@ -1392,7 +1410,7 @@ producer(){
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题给定一个数组 nums，有一个大小为 k 的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 k 个数字。滑动窗口每次只向右移动一位。
+                            1 原题给定一个数组 nums，有一个大小为 k 的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 k 个数字。滑动窗口每次只向右移动一位。
 返回滑动窗口中的最大值。
 进阶：
 你能在线性时间复杂度内解决此题吗？
@@ -1573,7 +1591,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

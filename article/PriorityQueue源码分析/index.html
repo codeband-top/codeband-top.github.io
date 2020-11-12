@@ -31,6 +31,7 @@ PriorityQueue的核心操作就是堆的思想，">
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -430,171 +431,186 @@ PriorityQueue的核心操作就是堆的思想，">
 <li>PriorityQueue的内部是数组存储数据，默认容量是11。</li>
 <li>扩容方法是，如果原数组容量小于64个，则新容量是它的<code>2倍+2</code>（考虑到大概率插入双孩子节点），否则1.5倍增长</li>
 </ol>
-<h1 id="概要">2 概要</h1><p>昨天学习了<a href="../带有优先级的完全二叉树-堆">带有优先级的完全二叉树-堆</a>，提到了堆的一种应用就是实现优先级队列，今天我们就来看看jdk中优先级队列PriorityQueue的实现吧。</p>
+<h1 id="概要">2 概要</h1><p>昨天学习了<a href="../%E5%B8%A6%E6%9C%89%E4%BC%98%E5%85%88%E7%BA%A7%E7%9A%84%E5%AE%8C%E5%85%A8%E4%BA%8C%E5%8F%89%E6%A0%91-%E5%A0%86">带有优先级的完全二叉树-堆</a>，提到了堆的一种应用就是实现优先级队列，今天我们就来看看jdk中优先级队列PriorityQueue的实现吧。</p>
 <p>优先级队列顾名思义就是高优先级的元素先出，低优先级的元素后出（<strong>警告，是我想当然了，其实是低优先级的元素先出</strong>），所以一个优先级队列内的元素类型应该能比较其优先级。</p>
 <p>首先看PriorityQueue的声明：</p>
-<pre><code class="java">public class PriorityQueue&lt;E&gt; extends AbstractQueue&lt;E&gt;
-    implements java.io.Serializable</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">PriorityQueue</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">E</span><span class="token punctuation">></span></span> <span class="token keyword">extends</span> <span class="token class-name">AbstractQueue</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">E</span><span class="token punctuation">></span></span>
+    <span class="token keyword">implements</span> java<span class="token punctuation">.</span>io<span class="token punctuation">.</span><span class="token class-name">Serializable</span></code></pre>
+
 <p>和LinkedList一样继承了AbstractQueue，来自Queue接口，说明它的主要操作是<code>offer()</code>，<code>peek()</code>和<code>poll()</code></p>
 <p>但是泛型中并不是<code>E extends Comparable</code>，那它是怎么比较优先级的呢？</p>
 <h1 id="核心方法">3 核心方法</h1><h2 id="offer">3.1 offer</h2><p>我们直接来看<code>offer()</code>方法，offer方法可以构造出一个优先级队列出来，能让我们理解它的内部结构：</p>
-<pre><code class="java">public boolean offer(E e) {
-    if (e == null)
-        throw new NullPointerException();
-    modCount++;
-    int i = size;
-    // grow，看名字大概明白是扩容
-    if (i &gt;= queue.length)
-        grow(i + 1);
-    size = i + 1;
-    // queue[0]，大概明白内部是用数组来存储的数据
-    if (i == 0)
-        queue[0] = e;
-    else
-        // 注意！是不是似曾相识！
-        siftUp(i, e);
-    return true;
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">offer</span><span class="token punctuation">(</span><span class="token class-name">E</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>e <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span>
+        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">NullPointerException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    modCount<span class="token operator">++</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> i <span class="token operator">=</span> size<span class="token punctuation">;</span>
+    <span class="token comment">// grow，看名字大概明白是扩容</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>i <span class="token operator">>=</span> queue<span class="token punctuation">.</span>length<span class="token punctuation">)</span>
+        <span class="token function">grow</span><span class="token punctuation">(</span>i <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    size <span class="token operator">=</span> i <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token comment">// queue[0]，大概明白内部是用数组来存储的数据</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>i <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span>
+        queue<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> e<span class="token punctuation">;</span>
+    <span class="token keyword">else</span>
+        <span class="token comment">// 注意！是不是似曾相识！</span>
+        <span class="token function">siftUp</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span> e<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>我想看过我上一篇博客的看到siftUp就明白了，这不就是堆插入元素之后做一个向上堆化的操作嘛！这里可以直观地看出Java中PriorityQueue就是使用堆来实现的。</p>
 <p>继续看siftUp：</p>
-<pre><code class="java">private void siftUp(int k, E x) {
-    if (comparator != null)
-        siftUpUsingComparator(k, x);
-    else
-        siftUpComparable(k, x);
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">siftUp</span><span class="token punctuation">(</span><span class="token keyword">int</span> k<span class="token punctuation">,</span> <span class="token class-name">E</span> x<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>comparator <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span>
+        <span class="token function">siftUpUsingComparator</span><span class="token punctuation">(</span>k<span class="token punctuation">,</span> x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">else</span>
+        <span class="token function">siftUpComparable</span><span class="token punctuation">(</span>k<span class="token punctuation">,</span> x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>到这里大概就知道它是怎么比较优先级的了。因为PriorityQueue有几个带比较器的构造方法：</p>
 <ul>
-<li><code>public PriorityQueue(Comparator&lt;? super E&gt; comparator)</code></li>
+<li><code>public PriorityQueue(Comparator&lt;? super E&gt; comparator) </code></li>
 <li><code>public PriorityQueue(int initialCapacity,Comparator&lt;? super E&gt; comparator)</code></li>
 </ul>
 <p>通过比较器就可以比较它们的优先级了，如果没有比较器的话，就调用<code>siftUpComparable</code>方法，大概可以猜到是用Comparable接口进行比较。</p>
-<pre><code class="java">// 这里的k是原来要插入的数组下标
-private void siftUpComparable(int k, E x) {
-    Comparable&lt;? super E&gt; key = (Comparable&lt;? super E&gt;) x;
-    while (k &gt; 0) {
-        // 获取父节点的位置
-        int parent = (k - 1) &gt;&gt;&gt; 1;
-        Object e = queue[parent];
-        // 如果大于父节点的值（大于是泛指），不继续操作
-        if (key.compareTo((E) e) &gt;= 0)
-            break;
-        queue[k] = e;
-        k = parent;
-    }
-    queue[k] = key;
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">// 这里的k是原来要插入的数组下标</span>
+<span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">siftUpComparable</span><span class="token punctuation">(</span><span class="token keyword">int</span> k<span class="token punctuation">,</span> <span class="token class-name">E</span> x<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">Comparable</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">super</span> <span class="token class-name">E</span><span class="token punctuation">></span></span> key <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">Comparable</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">super</span> <span class="token class-name">E</span><span class="token punctuation">></span></span><span class="token punctuation">)</span> x<span class="token punctuation">;</span>
+    <span class="token keyword">while</span> <span class="token punctuation">(</span>k <span class="token operator">></span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">// 获取父节点的位置</span>
+        <span class="token keyword">int</span> parent <span class="token operator">=</span> <span class="token punctuation">(</span>k <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">>>></span> <span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token class-name">Object</span> e <span class="token operator">=</span> queue<span class="token punctuation">[</span>parent<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token comment">// 如果大于父节点的值（大于是泛指），不继续操作</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>key<span class="token punctuation">.</span><span class="token function">compareTo</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token class-name">E</span><span class="token punctuation">)</span> e<span class="token punctuation">)</span> <span class="token operator">>=</span> <span class="token number">0</span><span class="token punctuation">)</span>
+            <span class="token keyword">break</span><span class="token punctuation">;</span>
+        queue<span class="token punctuation">[</span>k<span class="token punctuation">]</span> <span class="token operator">=</span> e<span class="token punctuation">;</span>
+        k <span class="token operator">=</span> parent<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    queue<span class="token punctuation">[</span>k<span class="token punctuation">]</span> <span class="token operator">=</span> key<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>可以看出，这个向上堆化的操作是将值更小的元素放在堆顶（最小堆）</p>
 <p>于是继续来看<code>peek()</code>方法：</p>
-<h2 id="peek">3.2 peek</h2><pre><code class="java">public E peek() {
-    return (size == 0) ? null : (E) queue[0];
-}</code></pre>
+<h2 id="peek">3.2 peek</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">E</span> <span class="token function">peek</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> <span class="token punctuation">(</span>size <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token keyword">null</span> <span class="token operator">:</span> <span class="token punctuation">(</span><span class="token class-name">E</span><span class="token punctuation">)</span> queue<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>可以看出就是返回数组第一个元素。</p>
 <p>那么看<code>poll()</code>方法：</p>
-<h2 id="poll">3.3 poll</h2><pre><code class="java">public E poll() {
-    if (size == 0)
-        return null;
-    int s = --size;
-    modCount++;
-    E result = (E) queue[0];
-    E x = (E) queue[s];
-    queue[s] = null;
-    if (s != 0)
-        //向下堆化
-        siftDown(0, x);
-    return result;
-}</code></pre>
+<h2 id="poll">3.3 poll</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">E</span> <span class="token function">poll</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>size <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> s <span class="token operator">=</span> <span class="token operator">--</span>size<span class="token punctuation">;</span>
+    modCount<span class="token operator">++</span><span class="token punctuation">;</span>
+    <span class="token class-name">E</span> result <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">E</span><span class="token punctuation">)</span> queue<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token class-name">E</span> x <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">E</span><span class="token punctuation">)</span> queue<span class="token punctuation">[</span>s<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    queue<span class="token punctuation">[</span>s<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>s <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">)</span>
+        <span class="token comment">//向下堆化</span>
+        <span class="token function">siftDown</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> result<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>也很熟悉，就是堆的基本操作，移除堆顶元素，然后向下堆化。</p>
-<pre><code class="java">private void siftDownComparable(int k, E x) {
-    Comparable&lt;? super E&gt; key = (Comparable&lt;? super E&gt;)x;
-    int half = size &gt;&gt;&gt; 1;        // loop while a non-leaf
-    while (k &lt; half) {
-        // 左孩子位置 
-        int child = (k &lt;&lt; 1) + 1; // assume left child is least
-        Object c = queue[child];
-        // 右孩子位置
-        int right = child + 1;
-        if (right &lt; size &amp;&amp;
-            ((Comparable&lt;? super E&gt;) c).compareTo((E) queue[right]) &gt; 0)
-            c = queue[child = right];
-        if (key.compareTo((E) c) &lt;= 0)
-            break;
-        queue[k] = c;
-        k = child;
-    }
-    queue[k] = key;
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">siftDownComparable</span><span class="token punctuation">(</span><span class="token keyword">int</span> k<span class="token punctuation">,</span> <span class="token class-name">E</span> x<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">Comparable</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">super</span> <span class="token class-name">E</span><span class="token punctuation">></span></span> key <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">Comparable</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">super</span> <span class="token class-name">E</span><span class="token punctuation">></span></span><span class="token punctuation">)</span>x<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> half <span class="token operator">=</span> size <span class="token operator">>>></span> <span class="token number">1</span><span class="token punctuation">;</span>        <span class="token comment">// loop while a non-leaf</span>
+    <span class="token keyword">while</span> <span class="token punctuation">(</span>k <span class="token operator">&lt;</span> half<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">// 左孩子位置 </span>
+        <span class="token keyword">int</span> child <span class="token operator">=</span> <span class="token punctuation">(</span>k <span class="token operator">&lt;&lt;</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token comment">// assume left child is least</span>
+        <span class="token class-name">Object</span> c <span class="token operator">=</span> queue<span class="token punctuation">[</span>child<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token comment">// 右孩子位置</span>
+        <span class="token keyword">int</span> right <span class="token operator">=</span> child <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>right <span class="token operator">&lt;</span> size <span class="token operator">&amp;&amp;</span>
+            <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token class-name">Comparable</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">super</span> <span class="token class-name">E</span><span class="token punctuation">></span></span><span class="token punctuation">)</span> c<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">compareTo</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token class-name">E</span><span class="token punctuation">)</span> queue<span class="token punctuation">[</span>right<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">></span> <span class="token number">0</span><span class="token punctuation">)</span>
+            c <span class="token operator">=</span> queue<span class="token punctuation">[</span>child <span class="token operator">=</span> right<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>key<span class="token punctuation">.</span><span class="token function">compareTo</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token class-name">E</span><span class="token punctuation">)</span> c<span class="token punctuation">)</span> <span class="token operator">&lt;=</span> <span class="token number">0</span><span class="token punctuation">)</span>
+            <span class="token keyword">break</span><span class="token punctuation">;</span>
+        queue<span class="token punctuation">[</span>k<span class="token punctuation">]</span> <span class="token operator">=</span> c<span class="token punctuation">;</span>
+        k <span class="token operator">=</span> child<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    queue<span class="token punctuation">[</span>k<span class="token punctuation">]</span> <span class="token operator">=</span> key<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>目前为止，核心操作我们就看完了，说实话我之前一直以为它是个最大堆来着，毕竟总会觉得应该是大优先级的先出队列。然而<strong>实际上是最小堆</strong>，如果要改变它的排序顺序只能重写比较器传入。</p>
-<h1 id="构造方法与扩容">4 构造方法与扩容</h1><h2 id="从Collection构造">4.1 从Collection构造</h2><pre><code class="java">public PriorityQueue(Collection&lt;? extends E&gt; c) {
-    if (c instanceof SortedSet&lt;?&gt;) {
-        SortedSet&lt;? extends E&gt; ss = (SortedSet&lt;? extends E&gt;) c;
-        this.comparator = (Comparator&lt;? super E&gt;) ss.comparator();
-        initElementsFromCollection(ss);
-    }
-    else if (c instanceof PriorityQueue&lt;?&gt;) {
-        PriorityQueue&lt;? extends E&gt; pq = (PriorityQueue&lt;? extends E&gt;) c;
-        this.comparator = (Comparator&lt;? super E&gt;) pq.comparator();
-        initFromPriorityQueue(pq);
-    }
-    else {
-        this.comparator = null;
-        initFromCollection(c);
-    }
-}</code></pre>
+<h1 id="构造方法与扩容">4 构造方法与扩容</h1><h2 id="从Collection构造">4.1 从Collection构造</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">PriorityQueue</span><span class="token punctuation">(</span><span class="token class-name">Collection</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">extends</span> <span class="token class-name">E</span><span class="token punctuation">></span></span> c<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>c <span class="token keyword">instanceof</span> <span class="token class-name">SortedSet</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span><span class="token punctuation">></span></span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">SortedSet</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">extends</span> <span class="token class-name">E</span><span class="token punctuation">></span></span> ss <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">SortedSet</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">extends</span> <span class="token class-name">E</span><span class="token punctuation">></span></span><span class="token punctuation">)</span> c<span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>comparator <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">Comparator</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">super</span> <span class="token class-name">E</span><span class="token punctuation">></span></span><span class="token punctuation">)</span> ss<span class="token punctuation">.</span><span class="token function">comparator</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">initElementsFromCollection</span><span class="token punctuation">(</span>ss<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>c <span class="token keyword">instanceof</span> <span class="token class-name">PriorityQueue</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span><span class="token punctuation">></span></span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">PriorityQueue</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">extends</span> <span class="token class-name">E</span><span class="token punctuation">></span></span> pq <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">PriorityQueue</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">extends</span> <span class="token class-name">E</span><span class="token punctuation">></span></span><span class="token punctuation">)</span> c<span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>comparator <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">Comparator</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">super</span> <span class="token class-name">E</span><span class="token punctuation">></span></span><span class="token punctuation">)</span> pq<span class="token punctuation">.</span><span class="token function">comparator</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">initFromPriorityQueue</span><span class="token punctuation">(</span>pq<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>comparator <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+        <span class="token function">initFromCollection</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>PriorityQueue可以从SortedSet和另一个PriorityQueue中获取它的比较器，再进行构造。</p>
-<pre><code class="java">private void initFromCollection(Collection&lt;? extends E&gt; c) {
-    initElementsFromCollection(c);
-    heapify();
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">initFromCollection</span><span class="token punctuation">(</span><span class="token class-name">Collection</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">extends</span> <span class="token class-name">E</span><span class="token punctuation">></span></span> c<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">initElementsFromCollection</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">heapify</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>根据我们对堆的了解，看到这里大概就知道了先给数组赋值然后原地堆化。</p>
-<pre><code class="java">private void initElementsFromCollection(Collection&lt;? extends E&gt; c) {
-    Object[] a = c.toArray();
-    // If c.toArray incorrectly doesn&#39;t return Object[], copy it.
-    if (a.getClass() != Object[].class)
-        a = Arrays.copyOf(a, a.length, Object[].class);
-    int len = a.length;
-    if (len == 1 || this.comparator != null)
-        for (int i = 0; i &lt; len; i++)
-            if (a[i] == null)
-                throw new NullPointerException();
-    this.queue = a;
-    this.size = a.length;
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">initElementsFromCollection</span><span class="token punctuation">(</span><span class="token class-name">Collection</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">extends</span> <span class="token class-name">E</span><span class="token punctuation">></span></span> c<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">Object</span><span class="token punctuation">[</span><span class="token punctuation">]</span> a <span class="token operator">=</span> c<span class="token punctuation">.</span><span class="token function">toArray</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// If c.toArray incorrectly doesn't return Object[], copy it.</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>a<span class="token punctuation">.</span><span class="token function">getClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token class-name">Object</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span>
+        a <span class="token operator">=</span> <span class="token class-name">Arrays</span><span class="token punctuation">.</span><span class="token function">copyOf</span><span class="token punctuation">(</span>a<span class="token punctuation">,</span> a<span class="token punctuation">.</span>length<span class="token punctuation">,</span> <span class="token class-name">Object</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> len <span class="token operator">=</span> a<span class="token punctuation">.</span>length<span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>len <span class="token operator">==</span> <span class="token number">1</span> <span class="token operator">||</span> <span class="token keyword">this</span><span class="token punctuation">.</span>comparator <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> len<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>a<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span>
+                <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">NullPointerException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>queue <span class="token operator">=</span> a<span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>size <span class="token operator">=</span> a<span class="token punctuation">.</span>length<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>这个函数给数组赋值，值得注意的是容量就维持原集合的容量不变，大概考虑的是由另一个集合构造而来的PriorityQueue很大概率不会再添加元素</p>
-<pre><code class="java">private void heapify() {
-    for (int i = (size &gt;&gt;&gt; 1) - 1; i &gt;= 0; i--)
-        siftDown(i, (E) queue[i]);
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">heapify</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token punctuation">(</span>size <span class="token operator">>>></span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span> i <span class="token operator">>=</span> <span class="token number">0</span><span class="token punctuation">;</span> i<span class="token operator">--</span><span class="token punctuation">)</span>
+        <span class="token function">siftDown</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token class-name">E</span><span class="token punctuation">)</span> queue<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>这个函数就是给数组原地堆化了，<code>(size&gt;&gt;&gt;1)-1</code>就是数组最后一个非叶节点的位置，从这里开始向下堆化。</p>
 <h2 id="扩容">4.2 扩容</h2><p>PriorityQueue的默认构造方法是：</p>
-<pre><code class="java">public PriorityQueue() {
-    this(DEFAULT_INITIAL_CAPACITY, null);
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">PriorityQueue</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">this</span><span class="token punctuation">(</span>DEFAULT_INITIAL_CAPACITY<span class="token punctuation">,</span> <span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>找到它对应的构造方法：</p>
-<pre><code class="java">public PriorityQueue(int initialCapacity,
-                        Comparator&lt;? super E&gt; comparator) {
-    // Note: This restriction of at least one is not actually needed,
-    // but continues for 1.5 compatibility
-    if (initialCapacity &lt; 1)
-        throw new IllegalArgumentException();
-    this.queue = new Object[initialCapacity];
-    this.comparator = comparator;
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">PriorityQueue</span><span class="token punctuation">(</span><span class="token keyword">int</span> initialCapacity<span class="token punctuation">,</span>
+                        <span class="token class-name">Comparator</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span> <span class="token keyword">super</span> <span class="token class-name">E</span><span class="token punctuation">></span></span> comparator<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// Note: This restriction of at least one is not actually needed,</span>
+    <span class="token comment">// but continues for 1.5 compatibility</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>initialCapacity <span class="token operator">&lt;</span> <span class="token number">1</span><span class="token punctuation">)</span>
+        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IllegalArgumentException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>queue <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Object</span><span class="token punctuation">[</span>initialCapacity<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>comparator <span class="token operator">=</span> comparator<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>它需要传入一个数组的初始容量和一个comparator，而我们刚才看到默认的容量是<code>DEFAULT_INITIAL_CAPACITY</code>，找到它的定义</p>
-<pre><code class="java">private static final int DEFAULT_INITIAL_CAPACITY = 11;</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">int</span> DEFAULT_INITIAL_CAPACITY <span class="token operator">=</span> <span class="token number">11</span><span class="token punctuation">;</span></code></pre>
+
 <p>说明默认构造方法的初始容量是11。还记得在offer方法中见过一个grow方法，找到定义：</p>
-<pre><code class="java">private void grow(int minCapacity) {
-    int oldCapacity = queue.length;
-    // Double size if small; else grow by 50%
-    // 如果数组容量小于64个，则翻倍，否则1.5倍增长
-    int newCapacity = oldCapacity + ((oldCapacity &lt; 64) ?
-                                        (oldCapacity + 2) :
-                                        (oldCapacity &gt;&gt; 1));
-    // overflow-conscious code
-    if (newCapacity - MAX_ARRAY_SIZE &gt; 0)
-        newCapacity = hugeCapacity(minCapacity);
-    queue = Arrays.copyOf(queue, newCapacity);
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">grow</span><span class="token punctuation">(</span><span class="token keyword">int</span> minCapacity<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">int</span> oldCapacity <span class="token operator">=</span> queue<span class="token punctuation">.</span>length<span class="token punctuation">;</span>
+    <span class="token comment">// Double size if small; else grow by 50%</span>
+    <span class="token comment">// 如果数组容量小于64个，则翻倍，否则1.5倍增长</span>
+    <span class="token keyword">int</span> newCapacity <span class="token operator">=</span> oldCapacity <span class="token operator">+</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>oldCapacity <span class="token operator">&lt;</span> <span class="token number">64</span><span class="token punctuation">)</span> <span class="token operator">?</span>
+                                        <span class="token punctuation">(</span>oldCapacity <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token operator">:</span>
+                                        <span class="token punctuation">(</span>oldCapacity <span class="token operator">>></span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// overflow-conscious code</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>newCapacity <span class="token operator">-</span> MAX_ARRAY_SIZE <span class="token operator">></span> <span class="token number">0</span><span class="token punctuation">)</span>
+        newCapacity <span class="token operator">=</span> <span class="token function">hugeCapacity</span><span class="token punctuation">(</span>minCapacity<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    queue <span class="token operator">=</span> <span class="token class-name">Arrays</span><span class="token punctuation">.</span><span class="token function">copyOf</span><span class="token punctuation">(</span>queue<span class="token punctuation">,</span> newCapacity<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>需要注意的是，不同于ArrayList直接1.5倍扩容，PriorityQueue在数组容量小于64个的时候按2倍+2扩容。我想熟悉堆的朋友应该也能想到了，2倍+2正好是当前插入的节点右孩子的位置。说明jdk默认在一开始堆的尺寸很小的情况下一旦插入了一个节点则很有可能要插入它的双孩子节点。</p>
 
             </div>
@@ -1212,7 +1228,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

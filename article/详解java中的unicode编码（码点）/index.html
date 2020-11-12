@@ -29,6 +29,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -403,7 +404,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.5k
+                    1.6k
                 </div>
                 
 
@@ -417,7 +418,7 @@
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <p><strong>致谢：</strong></p>
-<p>本文参考网页：<br><a href="https://blog.csdn.net/vcj1009784814/article/details/93477957" target="_blank" rel="noopener">Unicode字符集以及UTF-8，UTF-16编码的总结 - vcj1009784814的博客 - CSDN博客</a></p>
+<p>本文参考网页：<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/vcj1009784814/article/details/93477957">Unicode字符集以及UTF-8，UTF-16编码的总结 - vcj1009784814的博客 - CSDN博客</a></p>
 <h1 id="Unicode">1 Unicode</h1><p>unicode的码点从U+0000到U+10FFFF，即共有<code>2^20+2^16-1=1114111</code>个码点。<br>通常来说，常见字符可以用2个字节（16位）来表示。但还有很多其他表意字符、辅助字符需要表示。</p>
 <p>Unicode将所有码点分成了17个代码级别，又称<strong>平面</strong>。</p>
 <p><img src="https://www.ibm.com/developerworks/cn/java/unicode-programming-language/image001.jpg" alt="unicode的17个平面"></p>
@@ -445,9 +446,9 @@
 <li>BMP中的有效码点，用固定2字节16位来为其编码，数值等于对应的码点，同UCS-2</li>
 <li>辅助平面中的有效码点，使用<strong>代理对</strong>进行编码。<strong>在BMP中，有一个范围的码点是未定义的</strong>，被称为<strong>代理区</strong>，其码点范围是<code>0xD800~0xDFFF</code>，共211个码点，代理区又被分为<strong>高代理码点</strong>和<strong>低代理码点</strong>，其中高代理码点范围是<code>0xD800~0XDBFF</code>，低代理码点范围是<code>0xDC00~0XDFFF</code>，高代理码点和低代理码点结合在一起，就表示一个辅助平面中的字符。由于辅助平面中的字符共有220个（<code>0x10000~0x10FFFF</code>），高代理码点和低代理码点皆有210个取值，两者结合，恰好有220种不同的组合。</li>
 </ul>
-<p><img src="https://s2.ax1x.com/2019/11/26/MzutAS.jpg" alt></p>
+<p><img src="https://s2.ax1x.com/2019/11/26/MzutAS.jpg"></p>
 <p>也就是说，UTF-16可以表示完unicode中的字符，BMP中的字符需要两个字节，其他的需要四个字节。</p>
-<h1 id="java中的unicode">2 java中的unicode</h1><p>这里使用到一个工具：<br><a href="https://www.qqxiuzi.cn/bianma/Unicode-UTF.php" target="_blank" rel="noopener">Unicode编码转换，UTF编码转换（UTF-8、UTF-16、UTF-32）</a></p>
+<h1 id="java中的unicode">2 java中的unicode</h1><p>这里使用到一个工具：<br><a target="_blank" rel="noopener" href="https://www.qqxiuzi.cn/bianma/Unicode-UTF.php">Unicode编码转换，UTF编码转换（UTF-8、UTF-16、UTF-32）</a></p>
 <h2 id="char">2.1 char</h2><p>java中的char是定长以16位（两个字节存储的），并且内部编码为utf-16。<br>也就是说，一个char只能表示BMP中的字符，若要表示一个辅助平面内的字符，需要两个char。</p>
 <p>来看一个BMP中的字符：”我”</p>
 <blockquote>
@@ -475,39 +476,43 @@
 <iframe src="https://run.codetool.top/?id=31" frameborder="0" height="500" style="width:100%;border:1px solid #ccc;"></iframe>
 
 <p>可见，如果String中存在非bmp中的字符，String会将它算成两个字符长度。看String.length()的源码也可知道这点：</p>
-<pre><code class="java">public int length() {
-    return value.length;
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> value<span class="token punctuation">.</span>length<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p><code>value</code>是String内部的一个字符数组。</p>
 <h2 id="java对码点计算的支持">2.3 java对码点计算的支持</h2><p>其实String中也提供了计算码点的方法：<code>String.codePointCount(int beginIndex, int endIndex)</code></p>
 <iframe src="https://run.codetool.top/?id=32" frameborder="0" height="500" style="width:100%;border:1px solid #ccc;"></iframe>
 
 
 <p>利用的是<code>Character</code>类能判断一个码点是否为代理码点：<br><code>Character.isHighSurrogate</code>：是否为高位代理码点</p>
-<pre><code class="java">public static boolean isHighSurrogate(char ch) {
-    // Help VM constant-fold; MAX_HIGH_SURROGATE + 1 == MIN_LOW_SURROGATE
-    return ch &gt;= MIN_HIGH_SURROGATE &amp;&amp; ch &lt; (MAX_HIGH_SURROGATE + 1);
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">boolean</span> <span class="token function">isHighSurrogate</span><span class="token punctuation">(</span><span class="token keyword">char</span> ch<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// Help VM constant-fold; MAX_HIGH_SURROGATE + 1 == MIN_LOW_SURROGATE</span>
+    <span class="token keyword">return</span> ch <span class="token operator">>=</span> MIN_HIGH_SURROGATE <span class="token operator">&amp;&amp;</span> ch <span class="token operator">&lt;</span> <span class="token punctuation">(</span>MAX_HIGH_SURROGATE <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>其中<code>MIN_HIGH_SURROGATE=\uD800</code>和<code>MAX_HIGH_SURROGATE=\uDBFF</code>，注明了高位代理码点的值边界。</p>
 <p><code>Character.isLowSurrogate</code>：是否为低位代理码点</p>
-<pre><code class="java">public static boolean isLowSurrogate(char ch) {
-    return ch &gt;= MIN_LOW_SURROGATE &amp;&amp; ch &lt; (MAX_LOW_SURROGATE + 1);
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">boolean</span> <span class="token function">isLowSurrogate</span><span class="token punctuation">(</span><span class="token keyword">char</span> ch<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> ch <span class="token operator">>=</span> MIN_LOW_SURROGATE <span class="token operator">&amp;&amp;</span> ch <span class="token operator">&lt;</span> <span class="token punctuation">(</span>MAX_LOW_SURROGATE <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>其中<code>MIN_HIGH_SURROGATE=\uDC00</code>和<code>MAX_HIGH_SURROGATE=\uDFFF</code>，注明了高位代理码点的值边界。</p>
 <p>要判断字符串内有没有代理码点，只需确定连续的两个码点一个是高位代理码点一个是低位代理码点就行了。</p>
 <p><code>String.codePointCount</code>依赖的方法<code>Character.codePointCountImpl</code>源码：</p>
-<pre><code class="java">static int codePointCountImpl(char[] a, int offset, int count) {
-    int endIndex = offset + count;
-    int n = count;
-    for (int i = offset; i &lt; endIndex; ) {
-        if (isHighSurrogate(a[i++]) &amp;&amp; i &lt; endIndex &amp;&amp;
-            isLowSurrogate(a[i])) {
-            n--;
-            i++;
-        }
-    }
-    return n;
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">codePointCountImpl</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token punctuation">[</span><span class="token punctuation">]</span> a<span class="token punctuation">,</span> <span class="token keyword">int</span> offset<span class="token punctuation">,</span> <span class="token keyword">int</span> count<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">int</span> endIndex <span class="token operator">=</span> offset <span class="token operator">+</span> count<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> n <span class="token operator">=</span> count<span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> offset<span class="token punctuation">;</span> i <span class="token operator">&lt;</span> endIndex<span class="token punctuation">;</span> <span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">isHighSurrogate</span><span class="token punctuation">(</span>a<span class="token punctuation">[</span>i<span class="token operator">++</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> i <span class="token operator">&lt;</span> endIndex <span class="token operator">&amp;&amp;</span>
+            <span class="token function">isLowSurrogate</span><span class="token punctuation">(</span>a<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            n<span class="token operator">--</span><span class="token punctuation">;</span>
+            i<span class="token operator">++</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">return</span> n<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>如果要遍历一个字符串中的字符，可能需要考虑是否有非kmp中的字符的情况。那么就需要用码点为单位来处理：</p>
 <p><strong>反例：</strong></p>
 <iframe src="https://run.codetool.top/?id=33" frameborder="0" height="500" style="width:100%;border:1px solid #ccc;"></iframe>
@@ -1120,7 +1125,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

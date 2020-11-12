@@ -29,6 +29,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -407,7 +408,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    881
+                    866
                 </div>
                 
 
@@ -424,56 +425,67 @@
 <p>今天介绍一个Java8的特性：Optional类，这个类我平时也不咋用，今天来研究一下。</p>
 <h1 id="Optional的介绍与创建">1 Optional的介绍与创建</h1><p>Optional可以看作一个对象的容器，内部可以有一个对象，也可以没有（为空）。</p>
 <p>通过下面的API可以创建一个Optional对象：</p>
-<pre><code class="java">// 将传入的参数包装为一个Optional容器，不允许是null，否则报NullPointerException
-Optional&lt;String&gt; optional = Optional.of(&quot;123&quot;);
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">// 将传入的参数包装为一个Optional容器，不允许是null，否则报NullPointerException</span>
+<span class="token class-name">Optional</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> optional <span class="token operator">=</span> <span class="token class-name">Optional</span><span class="token punctuation">.</span><span class="token function">of</span><span class="token punctuation">(</span><span class="token string">"123"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-// 如果参数是null，返回一个空容器，否则返回一个包装着该对象的容器
-Optional&lt;String&gt; optional = Optional.ofNullable(&quot;123&quot;);</code></pre>
+<span class="token comment">// 如果参数是null，返回一个空容器，否则返回一个包装着该对象的容器</span>
+<span class="token class-name">Optional</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> optional <span class="token operator">=</span> <span class="token class-name">Optional</span><span class="token punctuation">.</span><span class="token function">ofNullable</span><span class="token punctuation">(</span><span class="token string">"123"</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
 <p>获得了一个Optional对象之后，就有很多有意思的操作了：</p>
 <h1 id="Optional的操作方法">2 Optional的操作方法</h1><h2 id="get">2.1 get</h2><p>最简单的取出容器内的元素，就是get方法，注意<strong>如果容器为空，抛出<code>NoSuchElementException</code>异常</strong>：</p>
-<pre><code class="java">Optional&lt;String&gt; optional = Optional.ofNullable(&quot;123&quot;);
-// 获取容器中的值，如果容器为空，抛出NoSuchElementException异常
-System.out.println(optional.get());</code></pre>
-<h2 id="isPresent">2.2 isPresent</h2><p>判断容器中是否有值（不为空），返回一个布尔值：</p>
-<pre><code class="java">// 容器中是否有值（不为空）
-System.out.println(optional.isPresent());</code></pre>
-<h2 id="ifPresent">2.3 ifPresent</h2><p>ifPresent就要配合同是Java8特性的函数式接口来使用了，如果容器中存在值，就调用传入的一个Consumer来消耗它，例如：</p>
-<pre><code class="java">// 如果容器中存在值，则消费，不存在则不做任何事
-optional.ifPresent(e-&gt; System.out.println(e));</code></pre>
-<p>也可以使用方法引用来改写这行代码：</p>
-<pre><code class="java">optional.ifPresent(System.out::println);</code></pre>
-<h2 id="orElse">2.4 orElse</h2><p>如果容器为空，直接调用get方法会报异常，那么可以使用<code>orElse</code>方法获取一个值，它类似于HashMap的<code>getOrDefault</code>，如果容器为空，则返回传入的参数对象。</p>
-<pre><code class="java">// 如果容器为空，返回&quot;123&quot;，否则返回容器中的对象
-System.out.println(optional.orElse(&quot;123&quot;));</code></pre>
-<h2 id="orElseGet">2.5 orElseGet</h2><p>orElseGet和orElse很像，只是若容器为空<code>orElse</code>返回的对象是传入的参数，而<code>orElseGet</code>是通过传入的一个<code>Supplier</code>获取返回的对象：</p>
-<pre><code class="java">// 如果容器为空，返回&quot;123&quot;，否则返回容器中的对象
-System.out.println(optional.orElseGet(() -&gt; &quot;123&quot;));</code></pre>
-<h2 id="orElseThrow">2.6 orElseThrow</h2><p>orElseThrow要求提供一个异常的<code>Supplier</code>，如果容器为空，则抛出通过<code>Supplier</code>获取的异常。</p>
-<pre><code class="java">// 如果容器为空，抛出RuntimeException异常
-System.out.println(optional.orElseThrow(() -&gt; new RuntimeException()));</code></pre>
-<h2 id="filter">2.7 filter</h2><p>配合函数式接口来使用，传入一个Predicate用于过滤容器中的值，如果满足给定的条件，则保留容器中的值，否则返回一个空容器：</p>
-<pre><code class="java">public void testFilter(){
-    Optional&lt;Integer&gt; optional = Optional.of(3);
-    optional.filter(e-&gt;e&lt;0).ifPresent(System.out::println);
-}</code></pre>
-<h2 id="map">2.8 map</h2><p>map这个方法很有用，也是配合函数式接口来使用，传入一个Function，用返回的元素替换容器中的元素，注意如果容器原来为空的，则替换后也为空，如果返回的元素是null，也会包装为一个空容器。</p>
-<pre><code class="java">public void testFilter(){
-    Optional&lt;Integer&gt; optional = Optional.of(3);
-    optional.map(e-&gt;e+3).ifPresent(System.out::println);
-}</code></pre>
-<p>比较实用的做法是，获取一个对象内部字段，可以通过这个方法，避免空指针异常</p>
-<pre><code class="java">class User{
-    public Integer age;
-    public User(Integer age) {
-        this.age = age;
-    }
-}
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token class-name">Optional</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> optional <span class="token operator">=</span> <span class="token class-name">Optional</span><span class="token punctuation">.</span><span class="token function">ofNullable</span><span class="token punctuation">(</span><span class="token string">"123"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// 获取容器中的值，如果容器为空，抛出NoSuchElementException异常</span>
+<span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>optional<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
 
-@Test
-public void testMap(){
-    User user = new User(3);
-    Optional.ofNullable(user).map(e-&gt;e.age).ifPresent(System.out::println);
-}</code></pre>
+<h2 id="isPresent">2.2 isPresent</h2><p>判断容器中是否有值（不为空），返回一个布尔值：</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">// 容器中是否有值（不为空）</span>
+<span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>optional<span class="token punctuation">.</span><span class="token function">isPresent</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<h2 id="ifPresent">2.3 ifPresent</h2><p>ifPresent就要配合同是Java8特性的函数式接口来使用了，如果容器中存在值，就调用传入的一个Consumer来消耗它，例如：</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">// 如果容器中存在值，则消费，不存在则不做任何事</span>
+optional<span class="token punctuation">.</span><span class="token function">ifPresent</span><span class="token punctuation">(</span>e<span class="token operator">-></span> <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<p>也可以使用方法引用来改写这行代码：</p>
+<pre class="language-java" data-language="java"><code class="language-java">optional<span class="token punctuation">.</span><span class="token function">ifPresent</span><span class="token punctuation">(</span><span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token operator">::</span><span class="token function">println</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<h2 id="orElse">2.4 orElse</h2><p>如果容器为空，直接调用get方法会报异常，那么可以使用<code>orElse</code>方法获取一个值，它类似于HashMap的<code>getOrDefault</code>，如果容器为空，则返回传入的参数对象。</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">// 如果容器为空，返回"123"，否则返回容器中的对象</span>
+<span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>optional<span class="token punctuation">.</span><span class="token function">orElse</span><span class="token punctuation">(</span><span class="token string">"123"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<h2 id="orElseGet">2.5 orElseGet</h2><p>orElseGet和orElse很像，只是若容器为空<code>orElse</code>返回的对象是传入的参数，而<code>orElseGet</code>是通过传入的一个<code>Supplier</code>获取返回的对象：</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">// 如果容器为空，返回"123"，否则返回容器中的对象</span>
+<span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>optional<span class="token punctuation">.</span><span class="token function">orElseGet</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-></span> <span class="token string">"123"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<h2 id="orElseThrow">2.6 orElseThrow</h2><p>orElseThrow要求提供一个异常的<code>Supplier</code>，如果容器为空，则抛出通过<code>Supplier</code>获取的异常。</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">// 如果容器为空，抛出RuntimeException异常</span>
+<span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>optional<span class="token punctuation">.</span><span class="token function">orElseThrow</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-></span> <span class="token keyword">new</span> <span class="token class-name">RuntimeException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<h2 id="filter">2.7 filter</h2><p>配合函数式接口来使用，传入一个Predicate用于过滤容器中的值，如果满足给定的条件，则保留容器中的值，否则返回一个空容器：</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">testFilter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+    <span class="token class-name">Optional</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Integer</span><span class="token punctuation">></span></span> optional <span class="token operator">=</span> <span class="token class-name">Optional</span><span class="token punctuation">.</span><span class="token function">of</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    optional<span class="token punctuation">.</span><span class="token function">filter</span><span class="token punctuation">(</span>e<span class="token operator">-></span>e<span class="token operator">&lt;</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">ifPresent</span><span class="token punctuation">(</span><span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token operator">::</span><span class="token function">println</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h2 id="map">2.8 map</h2><p>map这个方法很有用，也是配合函数式接口来使用，传入一个Function，用返回的元素替换容器中的元素，注意如果容器原来为空的，则替换后也为空，如果返回的元素是null，也会包装为一个空容器。</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">testFilter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+    <span class="token class-name">Optional</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Integer</span><span class="token punctuation">></span></span> optional <span class="token operator">=</span> <span class="token class-name">Optional</span><span class="token punctuation">.</span><span class="token function">of</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    optional<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>e<span class="token operator">-></span>e<span class="token operator">+</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">ifPresent</span><span class="token punctuation">(</span><span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token operator">::</span><span class="token function">println</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>比较实用的做法是，获取一个对象内部字段，可以通过这个方法，避免空指针异常</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">User</span><span class="token punctuation">&#123;</span>
+    <span class="token keyword">public</span> <span class="token class-name">Integer</span> age<span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token class-name">User</span><span class="token punctuation">(</span><span class="token class-name">Integer</span> age<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>age <span class="token operator">=</span> age<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token annotation punctuation">@Test</span>
+<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">testMap</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+    <span class="token class-name">User</span> user <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">User</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">Optional</span><span class="token punctuation">.</span><span class="token function">ofNullable</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>e<span class="token operator">-></span>e<span class="token punctuation">.</span>age<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">ifPresent</span><span class="token punctuation">(</span><span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token operator">::</span><span class="token function">println</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <h2 id="flatMap">2.9 flatMap</h2><p>flatMap和map很像，区别在于，flatMap不允许替换的元素是null，否则会报<code>NullPointerException</code>异常</p>
 
             </div>
@@ -855,7 +867,7 @@ public void testMap(){
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题给你一个长度为 n 的整数数组 nums，其中 n &gt; 1，返回输出数组 output ，其中 output[i] 等于 nums 中除 nums[i] 之外其余各元素的乘积。
+                            1 原题给你一个长度为 n 的整数数组 nums，其中 n &gt; 1，返回输出数组 output ，其中 output[i] 等于 nums 中除 nums[i] 之外其余各元素的乘积。
 示例:
 
 输入： [1,2,3,4]输出： [2
@@ -1089,7 +1101,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

@@ -30,6 +30,7 @@ mysql&amp;gt">
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -422,30 +423,36 @@ mysql&amp;gt">
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <p>开启Mysql的查询缓存，当执行完全相同的SQL语句的时候，服务器就会直接从缓存中读取结果，当数据被修改，之前的缓存会失效，修改比较频繁的表不适合做查询缓存。</p>
-<p><img src="https://api.codetool.top/img/1583475530312.png" alt></p>
+<p><img src="https://api.codetool.top/img/1583475530312.png"></p>
 <h1 id="查询缓存配置">1 查询缓存配置</h1><p>查看当前的MySQL数据库是否支持查询缓存：</p>
-<pre><code>mysql&gt; SHOW VARIABLES LIKE &#39;have_query_cache&#39;;
+<pre class="language-none"><code class="language-none">mysql&gt; SHOW VARIABLES LIKE &#39;have_query_cache&#39;;
 +------------------+-------+
 | Variable_name    | Value |
 +------------------+-------+
 | have_query_cache | YES   |
 +------------------+-------+
-1 row in set (0.01 sec)</code></pre><p>查看当前MySQL是否开启了查询缓存 ：</p>
-<pre><code>mysql&gt; SHOW VARIABLES LIKE &#39;query_cache_type&#39;;
+1 row in set (0.01 sec)</code></pre>
+
+<p>查看当前MySQL是否开启了查询缓存 ：</p>
+<pre class="language-none"><code class="language-none">mysql&gt; SHOW VARIABLES LIKE &#39;query_cache_type&#39;;
 +------------------+-------+
 | Variable_name    | Value |
 +------------------+-------+
 | query_cache_type | OFF   |
 +------------------+-------+
-1 row in set (0.01 sec)</code></pre><p>查看查询缓存的占用大小 ：</p>
-<pre><code>mysql&gt; SHOW VARIABLES LIKE &#39;query_cache_size&#39;;
+1 row in set (0.01 sec)</code></pre>
+
+<p>查看查询缓存的占用大小 ：</p>
+<pre class="language-none"><code class="language-none">mysql&gt; SHOW VARIABLES LIKE &#39;query_cache_size&#39;;
 +------------------+----------+
 | Variable_name    | Value    |
 +------------------+----------+
 | query_cache_size | 16777216 |
 +------------------+----------+
-1 row in set (0.00 sec)</code></pre><p>查看查询缓存的状态变量：</p>
-<pre><code>mysql&gt; SHOW STATUS LIKE &#39;Qcache%&#39;;
+1 row in set (0.00 sec)</code></pre>
+
+<p>查看查询缓存的状态变量：</p>
+<pre class="language-none"><code class="language-none">mysql&gt; SHOW STATUS LIKE &#39;Qcache%&#39;;
 +-------------------------+----------+
 | Variable_name           | Value    |
 +-------------------------+----------+
@@ -458,7 +465,9 @@ mysql&amp;gt">
 | Qcache_queries_in_cache | 0        |
 | Qcache_total_blocks     | 1        |
 +-------------------------+----------+
-8 rows in set (0.00 sec)</code></pre><p>各个变量的含义如下：</p>
+8 rows in set (0.00 sec)</code></pre>
+
+<p>各个变量的含义如下：</p>
 <table>
 <thead>
 <tr>
@@ -527,19 +536,24 @@ mysql&amp;gt">
 <p><code>SQL_CACHE</code> : 如果查询结果是可缓存的，并且 query_cache_type 系统变量的值为ON或 DEMAND ，则缓存查询结果 。</p>
 <p><code>SQL_NO_CACHE</code> : 服务器不使用查询缓存。它既不检查查询缓存，也不检查结果是否已缓存，也不缓存查询结果。</p>
 <p>例子：</p>
-<pre><code class="SQL">SELECT SQL_CACHE id, name FROM customer;
+<pre class="language-SQL" data-language="SQL"><code class="language-SQL">SELECT SQL_CACHE id, name FROM customer;
 SELECT SQL_NO_CACHE id, name FROM customer;</code></pre>
+
 <h1 id="查询缓存失效的情况">4 查询缓存失效的情况</h1><h2 id="SQL-语句不一致">4.1 SQL 语句不一致</h2><p>要想命中查询缓存，查询的SQL语句必须一致。</p>
-<pre><code class="SQL">SQL1 : select count(*) from tb_item;
+<pre class="language-SQL" data-language="SQL"><code class="language-SQL">SQL1 : select count(*) from tb_item;
 SQL2 : Select count(*) from tb_item;</code></pre>
+
 <p>区分大小写</p>
-<h2 id="当查询语句中用到了函数">4.2 当查询语句中用到了函数</h2><pre><code class="SQL">SQL1 : select * from tb_item where updatetime &lt; now() limit 1;
+<h2 id="当查询语句中用到了函数">4.2 当查询语句中用到了函数</h2><pre class="language-SQL" data-language="SQL"><code class="language-SQL">SQL1 : select * from tb_item where updatetime &lt; now() limit 1;
 SQL2 : select user();
 SQL3 : select database();</code></pre>
+
 <p>这些自带函数每次查询都是不确定的，不会使用缓存。</p>
-<h2 id="不使用任何表查询语句">4.3 不使用任何表查询语句</h2><pre><code class="SQL">select &#39;A&#39;;</code></pre>
+<h2 id="不使用任何表查询语句">4.3 不使用任何表查询语句</h2><pre class="language-SQL" data-language="SQL"><code class="language-SQL">select &#39;A&#39;;</code></pre>
+
 <h2 id="查询系统数据库">4.4 查询系统数据库</h2><p>查询 mysql， information_schema或  performance_schema 数据库中的表时，不会走查询缓存。</p>
-<pre><code class="SQL">select * from information_schema.engines;</code></pre>
+<pre class="language-SQL" data-language="SQL"><code class="language-SQL">select * from information_schema.engines;</code></pre>
+
 <h2 id="在存储的函数，触发器或事件的主体内执行的查询">4.5 在存储的函数，触发器或事件的主体内执行的查询</h2><h2 id="表更改">4.6 表更改</h2><p>如果表更改，则使用该表的所有高速缓存查询都将变为无效并从高速缓存中删除。这包括使用<code>MERGE</code>映射到已更改表的表的查询。一个表可以被许多类型的语句改变, 如 <code>INSERT</code>， <code>UPDATE</code>， <code>DELETE</code>， <code>TRUNCATE TABLE</code>， <code>ALTER TABLE</code>， <code>DROP TABLE</code>，或 <code>DROP DATABASE</code> 。</p>
 
             </div>
@@ -1164,7 +1178,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

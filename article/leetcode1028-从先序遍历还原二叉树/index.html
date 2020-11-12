@@ -5,8 +5,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="keywords" content="leetcode1028-从先序遍历还原二叉树, 代码段小站">
-    <meta name="description" content="1 原题我们从二叉树的根节点 root 开始进行深度优先搜索。
-在遍历中的每个节点处，我们输出 D 条短划线（其中 D 是该节点的深度），然后输出该节点的值。（如果节点的深度为 D，则其直接子节点的深度为 D + 1。根节点的深度为 0）。">
+    <meta name="description" content="1 原题我们从二叉树的根节点 root 开始进行深度优先搜索。
+在遍历中的每个节点处，我们输出 D 条短划线（其中 D 是该节点的深度），然后输出该节点的值。（如果节点的深度为 *D*，则其直接子节点的深度为 *D + 1*。根节点的深度为">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -28,6 +28,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -402,7 +403,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    541
+                    553
                 </div>
                 
 
@@ -415,22 +416,22 @@
         <hr class="clearfix">
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h1 id="原题">1 原题</h1><p>我们从二叉树的根节点 <code>root</code> 开始进行深度优先搜索。</p>
-<p>在遍历中的每个节点处，我们输出 <code>D</code> 条短划线（其中 <code>D</code> 是该节点的深度），然后输出该节点的值。（如果节点的深度为 <em><code>D</code></em>，则其直接子节点的深度为 <em><code>D + 1</code></em>。根节点的深度为 <em><code>0</code></em>）。</p>
+                <h1 id="原题">1 原题</h1><p>我们从二叉树的根节点 <code>root</code> 开始进行深度优先搜索。</p>
+<p>在遍历中的每个节点处，我们输出 <code>D</code> 条短划线（其中 <code>D</code> 是该节点的深度），然后输出该节点的值。（如果节点的深度为 *<code>D</code>*，则其直接子节点的深度为 *<code>D + 1</code>*。根节点的深度为 *<code>0</code>*）。</p>
 <p>如果节点只有一个子节点，那么保证该子节点为左子节点。</p>
-<p>给出遍历输出 <code>S</code>，还原树并返回其根节点 <code>root</code>。</p>
+<p>给出遍历输出 <code>S</code>，还原树并返回其根节点 <code>root</code>。</p>
 <p><strong>示例 1:</strong></p>
-<p><img src="https://api.codetool.top/img/15924511889636.png" alt></p>
+<p><img src="https://api.codetool.top/img/15924511889636.png"></p>
 <blockquote>
 <p><strong>输入：</strong> “1-2–3–4-5–6–7”<br><strong>输出：</strong> [1,2,5,3,4,6,7]</p>
 </blockquote>
 <p><strong>示例 2:</strong></p>
-<p><img src="https://api.codetool.top/img/15924512241063.png" alt></p>
+<p><img src="https://api.codetool.top/img/15924512241063.png"></p>
 <blockquote>
 <p><strong>输入：</strong> “1-2–3—4-5–6—7”<br><strong>输出：</strong> [1,2,5,3,null,6,null,4,null,7]</p>
 </blockquote>
 <p><strong>示例 3:</strong></p>
-<p><img src="https://api.codetool.top/img/15924512434233.png" alt></p>
+<p><img src="https://api.codetool.top/img/15924512434233.png"></p>
 <blockquote>
 <p><strong>输入：</strong> “1-401–349—90–88”<br><strong>输出：</strong> [1,401,null,349,88,90]</p>
 </blockquote>
@@ -441,48 +442,47 @@
 </ul>
 <h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>好感动。。我也只能写得出这样的困难题了。</p>
 <p>用栈来模拟DFS的过程，并记录当前节点的深度和上一个节点的深度，如果当前节点的深度 = 上一个节点的深度+1，那么说明当前节点是上一个节点的子节点，否则需要将栈中的元素弹出。</p>
-<h2 id="代码">2.2 代码</h2><pre><code class="java">class Solution {
-    public TreeNode recoverFromPreorder(String S) {
-        Stack&lt;TreeNode&gt; stack = new Stack&lt;&gt;();
-        int num = 0;
-        int prevDepth = -1;
-        int depth = 0;
-        char[] chars = S.toCharArray();
-        TreeNode root = null;
-        for(int i = 0;i&lt;chars.length;i++){
-            // 是数字
-            if(Character.isDigit(chars[i])){
-                num = num*10+(chars[i]-&#39;0&#39;);
-                // 若是一个数字的结尾字符
-                if(i==chars.length-1 || !Character.isDigit(chars[i+1])){
-                    TreeNode node = new TreeNode(num);
-                    // 如果depth为0，记录当前节点为根节点
-                    if(depth == 0) root = node;
-                    // 如果depth不等于prevDepth+1，说明该节点不是上一个节点的子节点，需要从栈中弹出相应的元素个数
-                    if(depth != prevDepth + 1){
-                        for(int n = 0;n&lt;prevDepth+1-depth;n++)
-                            stack.pop();
-                    }
-                    // 将该节点添加到上一个节点的子节点
-                    if(!stack.isEmpty()){
-                        TreeNode prev = stack.peek();
-                        if(prev.left == null){
-                            prev.left = node;
-                        }else prev.right = node;
-                    }
-                    stack.push(node);
-                    num = 0;
-                    prevDepth = depth;
-                    depth = 0;
-                }
-            }
-            // 是中划线，深度+1
-            else depth ++;
-        }
-        return root;
-    }
-}</code></pre>
-
+<h2 id="代码">2.2 代码</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">public</span> <span class="token class-name">TreeNode</span> <span class="token function">recoverFromPreorder</span><span class="token punctuation">(</span><span class="token class-name">String</span> <span class="token class-name">S</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">Stack</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">TreeNode</span><span class="token punctuation">></span></span> stack <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Stack</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> num <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> prevDepth <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> depth <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token keyword">char</span><span class="token punctuation">[</span><span class="token punctuation">]</span> chars <span class="token operator">=</span> <span class="token class-name">S</span><span class="token punctuation">.</span><span class="token function">toCharArray</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">TreeNode</span> root <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>chars<span class="token punctuation">.</span>length<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token comment">// 是数字</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token class-name">Character</span><span class="token punctuation">.</span><span class="token function">isDigit</span><span class="token punctuation">(</span>chars<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                num <span class="token operator">=</span> num<span class="token operator">*</span><span class="token number">10</span><span class="token operator">+</span><span class="token punctuation">(</span>chars<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">-</span><span class="token string">'0'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token comment">// 若是一个数字的结尾字符</span>
+                <span class="token keyword">if</span><span class="token punctuation">(</span>i<span class="token operator">==</span>chars<span class="token punctuation">.</span>length<span class="token operator">-</span><span class="token number">1</span> <span class="token operator">||</span> <span class="token operator">!</span><span class="token class-name">Character</span><span class="token punctuation">.</span><span class="token function">isDigit</span><span class="token punctuation">(</span>chars<span class="token punctuation">[</span>i<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                    <span class="token class-name">TreeNode</span> node <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">TreeNode</span><span class="token punctuation">(</span>num<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token comment">// 如果depth为0，记录当前节点为根节点</span>
+                    <span class="token keyword">if</span><span class="token punctuation">(</span>depth <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> root <span class="token operator">=</span> node<span class="token punctuation">;</span>
+                    <span class="token comment">// 如果depth不等于prevDepth+1，说明该节点不是上一个节点的子节点，需要从栈中弹出相应的元素个数</span>
+                    <span class="token keyword">if</span><span class="token punctuation">(</span>depth <span class="token operator">!=</span> prevDepth <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> n <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>n<span class="token operator">&lt;</span>prevDepth<span class="token operator">+</span><span class="token number">1</span><span class="token operator">-</span>depth<span class="token punctuation">;</span>n<span class="token operator">++</span><span class="token punctuation">)</span>
+                            stack<span class="token punctuation">.</span><span class="token function">pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">&#125;</span>
+                    <span class="token comment">// 将该节点添加到上一个节点的子节点</span>
+                    <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>stack<span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                        <span class="token class-name">TreeNode</span> prev <span class="token operator">=</span> stack<span class="token punctuation">.</span><span class="token function">peek</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token keyword">if</span><span class="token punctuation">(</span>prev<span class="token punctuation">.</span>left <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                            prev<span class="token punctuation">.</span>left <span class="token operator">=</span> node<span class="token punctuation">;</span>
+                        <span class="token punctuation">&#125;</span><span class="token keyword">else</span> prev<span class="token punctuation">.</span>right <span class="token operator">=</span> node<span class="token punctuation">;</span>
+                    <span class="token punctuation">&#125;</span>
+                    stack<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    num <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+                    prevDepth <span class="token operator">=</span> depth<span class="token punctuation">;</span>
+                    depth <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span>
+            <span class="token punctuation">&#125;</span>
+            <span class="token comment">// 是中划线，深度+1</span>
+            <span class="token keyword">else</span> depth <span class="token operator">++</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">return</span> root<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
             </div>
             <hr/>
 
@@ -914,8 +914,8 @@
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题给定正整数数组 A，A[i] 表示第 i 个观光景点的评分，并且两个景点 i 和 j 之间的距离为 j - i。
-一对景点（i &lt; j）组成的观光组合的得分为（A[i] + A[j] + i - j）：景点的评分之和减去它们两
+                            1 原题给定正整数数组 A，A[i] 表示第 i 个观光景点的评分，并且两个景点 i 和 j 之间的距离为 j - i。
+一对景点（i &lt; j）组成的观光组合的得分为（A[i] + A[j] + i - j）：景点的评分之和减去它们两
                         
                     </div>
                     <div class="publish-info">
@@ -1092,7 +1092,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

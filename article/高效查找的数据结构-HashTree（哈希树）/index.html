@@ -30,6 +30,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -400,7 +401,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    716
+                    722
                 </div>
                 
 
@@ -414,9 +415,9 @@
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <p>本文参考资源：</p>
-<p><a href="https://blog.csdn.net/chinaleesunnyboy/article/details/79689542" target="_blank" rel="noopener">痴人说Hash - 哈希树 (HashTree)_Java_PinusLee阳光灿烂的生活-CSDN博客</a></p>
-<p><a href="https://blog.csdn.net/yang_yulei/article/details/46337405" target="_blank" rel="noopener">查找——图文翔解HashTree（哈希树）_Java_菜鸟的自留地-mooyang-CSDN博客</a></p>
-<p>该数据结构的设计者编写的文档：<a href="https://wenku.baidu.com/view/16b2c7abd1f34693daef3e58.html" target="_blank" rel="noopener">哈希树HashTree - 百度文库</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/chinaleesunnyboy/article/details/79689542">痴人说Hash - 哈希树 (HashTree)_Java_PinusLee阳光灿烂的生活-CSDN博客</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/yang_yulei/article/details/46337405">查找——图文翔解HashTree（哈希树）_Java_菜鸟的自留地-mooyang-CSDN博客</a></p>
+<p>该数据结构的设计者编写的文档：<a target="_blank" rel="noopener" href="https://wenku.baidu.com/view/16b2c7abd1f34693daef3e58.html">哈希树HashTree - 百度文库</a></p>
 <h1 id="概述">1 概述</h1><p>二叉排序树，平衡二叉树，红黑树等二叉排序树在数据量大的时候树高很深，我们不断向下找寻值时会比较很多次。二叉排序树自身是有顺序结构的，每个结点除最小结点和最大结点外都有前驱和后继，不论是排序还是搜索它的综合性能比较好，但是单独在搜索这一方面二叉排序树的性能就没有这次要讲的Hash树快了。</p>
 <h1 id="理论基础">2 理论基础</h1><p>Hash树的理论基础为质数分辨定理：</p>
 <blockquote>
@@ -425,22 +426,23 @@
 <p>基于这个理论，假设我们取前十个素数，能分辨的整数有<code>2*3*5*7*9*...*29 = 6 469 693 230</code>个数，也就是说如果有21亿个数字的话，我们查找的哪怕是最底层的也仅仅需要计算10次就能找到对应的数字，而这已经超出int类型的范围。</p>
 <p>而这个要分辩的整数，可以是数据库中的主键，可以是<strong>唯一标识某一对象的哈希码</strong>（不用哈希函数，保证不同对象的哈希码不冲突）。</p>
 <h1 id="哈希树的实现">3 哈希树的实现</h1><p>哈希树的结构：每一层节点的最大子节点数都不一样，对应这一层代表的质数值：</p>
-<p><img src="https://api.codetool.top/img/15818781442820.png" alt></p>
+<p><img src="https://api.codetool.top/img/15818781442820.png"></p>
 <p>java代码：</p>
-<pre><code class="java">private class Node{  //定义了一个内部类，每一个结点会有一个next数组  
-    public Node[] next = null;    //用来装子节点的下标表示余数
-    public Integer data = 0;        //数值
-    public boolean isDel = false;   //是否被删除的标记，作删除用
-    public Node(Integer data,Integer level){    //构造函数
-        next = new Node[level];
-        this.data = data;
-    }
-    public Node(Integer data){    //构造函数
-        this.data = data;
-    }
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">class</span> <span class="token class-name">Node</span><span class="token punctuation">&#123;</span>  <span class="token comment">//定义了一个内部类，每一个结点会有一个next数组  </span>
+    <span class="token keyword">public</span> <span class="token class-name">Node</span><span class="token punctuation">[</span><span class="token punctuation">]</span> next <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>    <span class="token comment">//用来装子节点的下标表示余数</span>
+    <span class="token keyword">public</span> <span class="token class-name">Integer</span> data <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>        <span class="token comment">//数值</span>
+    <span class="token keyword">public</span> <span class="token keyword">boolean</span> isDel <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>   <span class="token comment">//是否被删除的标记，作删除用</span>
+    <span class="token keyword">public</span> <span class="token class-name">Node</span><span class="token punctuation">(</span><span class="token class-name">Integer</span> data<span class="token punctuation">,</span><span class="token class-name">Integer</span> level<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>    <span class="token comment">//构造函数</span>
+        next <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Node</span><span class="token punctuation">[</span>level<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>data <span class="token operator">=</span> data<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">public</span> <span class="token class-name">Node</span><span class="token punctuation">(</span><span class="token class-name">Integer</span> data<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>    <span class="token comment">//构造函数</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>data <span class="token operator">=</span> data<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <h2 id="插入">3.1 插入</h2><p>求余看对应位置的结点，如果为空则在空处插入一个新节点，如果被逻辑删除了替换值再逻辑恢复，如果有值就继续往下找，继续求余判断。</p>
-<p><img src="https://api.codetool.top/img/15818793141041.png" alt></p>
+<p><img src="https://api.codetool.top/img/15818793141041.png"></p>
 <h2 id="查找">3.2 查找</h2><p>查找和插入的逻辑一样，按除余的方法一直找到某个位置</p>
 <h2 id="删除">3.3 删除</h2><p>HashTree的删除节点并不要求真正删除节点，只需要逻辑性地删除节点，先按查找的方法获取对应节点，<strong>把节点的isDel标记为true</strong>，这样如果新加入节点需要放在这个位置也能直接替换它。</p>
 
@@ -815,7 +817,7 @@
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题老师想给孩子们分发糖果，有 N 个孩子站成了一条直线，老师会根据每个孩子的表现，预先给他们评分。
+                            1 原题老师想给孩子们分发糖果，有 N 个孩子站成了一条直线，老师会根据每个孩子的表现，预先给他们评分。
 你需要按照以下要求，帮助老师给这些孩子分发糖果：
 
 每个孩子至少分配到 1 个糖果。
@@ -1051,7 +1053,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

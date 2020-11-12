@@ -29,6 +29,7 @@ spring 框架为我们提供了一组事务控制的接口。这组接口是在s
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -399,7 +400,7 @@ spring 框架为我们提供了一组事务控制的接口。这组接口是在s
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.8k
+                    1.7k
                 </div>
                 
 
@@ -416,81 +417,85 @@ spring 框架为我们提供了一组事务控制的接口。这组接口是在s
 <p>spring 框架为我们提供了一组事务控制的接口。这组接口是在<code>spring-tx-5.0.2.RELEASE.jar</code> 中。</p>
 <p>对于事务,需要通过标注告诉Spring在什么地方启用数据库事务功能。对于声明式事务,是使用<code>@Transactional</code>进行标注的。这个注解可以标注在类或者方法上，<strong>当它标注在类上时，代表这个类所有公共(public)非静态的方法都将启用事务功能。</strong> 在<code>@Transactional</code>中,还允许配置许多的属性,如事务的隔离级别和传播行为、异常类型,从而确定方法发生什么异常下回滚事务或者发生什么异常下不回滚事务等。这些配置内容,是在 Spring IoC容器在加载时就会将这些配置信息解析出来,然后把这些信息存到事务定义器(TransactionDefinition接口的实现类）里,并且记录哪些类或者方法需要启动事务功能,采取什么策略去执行事务。这个过程中,我们所需要做的只是给需要事务的类或者方法标注<code>@Transactional</code>和配置其属性而已,并不是很复杂。</p>
 <h1 id="Spring中的事务控制API介绍">1 Spring中的事务控制API介绍</h1><p>maven依赖：</p>
-<pre><code class="xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-tx&lt;/artifactId&gt;
-    &lt;version&gt;5.2.3.RELEASE&lt;/version&gt;
-&lt;/dependency&gt;</code></pre>
-<p>如果使用springboot可以配合jpa、mybatis，或者导入jdbc-starter，都会包含：</p>
-<pre><code class="xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;
-    &lt;version&gt;2.1.1&lt;/version&gt;
-&lt;/dependency&gt;</code></pre>
-<h2 id="PlatformTransactionManager">1.1 PlatformTransactionManager</h2><p>此接口是 spring 的事务管理器，它里面提供了我们常用的操作事务的方法</p>
-<pre><code class="java">public interface PlatformTransactionManager extends TransactionManager {
-    TransactionStatus getTransaction(@Nullable TransactionDefinition definition) throws TransactionException;
+<pre class="language-xml" data-language="xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-tx<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>5.2.3.RELEASE<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span></code></pre>
 
-    /*提交事务*/
-    void commit(TransactionStatus status) throws TransactionException;
-    /*回滚事务*/
-    void rollback(TransactionStatus status) throws TransactionException;
-}</code></pre>
+<p>如果使用springboot可以配合jpa、mybatis，或者导入jdbc-starter，都会包含：</p>
+<pre class="language-xml" data-language="xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.mybatis.spring.boot<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>mybatis-spring-boot-starter<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>2.1.1<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span></code></pre>
+
+<h2 id="PlatformTransactionManager">1.1 PlatformTransactionManager</h2><p>此接口是 spring 的事务管理器，它里面提供了我们常用的操作事务的方法</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">PlatformTransactionManager</span> <span class="token keyword">extends</span> <span class="token class-name">TransactionManager</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">TransactionStatus</span> <span class="token function">getTransaction</span><span class="token punctuation">(</span><span class="token annotation punctuation">@Nullable</span> <span class="token class-name">TransactionDefinition</span> definition<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">TransactionException</span><span class="token punctuation">;</span>
+
+    <span class="token comment">/*提交事务*/</span>
+    <span class="token keyword">void</span> <span class="token function">commit</span><span class="token punctuation">(</span><span class="token class-name">TransactionStatus</span> status<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">TransactionException</span><span class="token punctuation">;</span>
+    <span class="token comment">/*回滚事务*/</span>
+    <span class="token keyword">void</span> <span class="token function">rollback</span><span class="token punctuation">(</span><span class="token class-name">TransactionStatus</span> status<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">TransactionException</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>我们在开发中都是使用它的实现类，对于Mybatis，我们用的就是<code>org.springframework.jdbc.datasource.DataSourceTransactionManager</code></p>
 <h2 id="TransactionDefinition">1.2 TransactionDefinition</h2><p>它是事务的定义信息对象：</p>
-<pre><code class="java">public interface TransactionDefinition {
-    //传播行为
-    int PROPAGATION_REQUIRED = 0;
-    int PROPAGATION_SUPPORTS = 1;
-    int PROPAGATION_MANDATORY = 2;
-    int PROPAGATION_REQUIRES_NEW = 3;
-    int PROPAGATION_NOT_SUPPORTED = 4;
-    int PROPAGATION_NEVER = 5;
-    int PROPAGATION_NESTED = 6;
-    //事务隔离级别
-    //默认级别，可能是四个隔离级别中的一种
-    int ISOLATION_DEFAULT = -1;
-    //读未提交
-    int ISOLATION_READ_UNCOMMITTED = 1;
-    //读已提交
-    int ISOLATION_READ_COMMITTED = 2;
-    //重复读
-    int ISOLATION_REPEATABLE_READ = 4;
-    //串行化
-    int ISOLATION_SERIALIZABLE = 8;
-    int TIMEOUT_DEFAULT = -1;
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">TransactionDefinition</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">//传播行为</span>
+    <span class="token keyword">int</span> PROPAGATION_REQUIRED <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> PROPAGATION_SUPPORTS <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> PROPAGATION_MANDATORY <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> PROPAGATION_REQUIRES_NEW <span class="token operator">=</span> <span class="token number">3</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> PROPAGATION_NOT_SUPPORTED <span class="token operator">=</span> <span class="token number">4</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> PROPAGATION_NEVER <span class="token operator">=</span> <span class="token number">5</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> PROPAGATION_NESTED <span class="token operator">=</span> <span class="token number">6</span><span class="token punctuation">;</span>
+    <span class="token comment">//事务隔离级别</span>
+    <span class="token comment">//默认级别，可能是四个隔离级别中的一种</span>
+    <span class="token keyword">int</span> ISOLATION_DEFAULT <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token comment">//读未提交</span>
+    <span class="token keyword">int</span> ISOLATION_READ_UNCOMMITTED <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token comment">//读已提交</span>
+    <span class="token keyword">int</span> ISOLATION_READ_COMMITTED <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>
+    <span class="token comment">//重复读</span>
+    <span class="token keyword">int</span> ISOLATION_REPEATABLE_READ <span class="token operator">=</span> <span class="token number">4</span><span class="token punctuation">;</span>
+    <span class="token comment">//串行化</span>
+    <span class="token keyword">int</span> ISOLATION_SERIALIZABLE <span class="token operator">=</span> <span class="token number">8</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> TIMEOUT_DEFAULT <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
 
-    //获取事务传播行为
-    default int getPropagationBehavior() {
-        return 0;
-    }
+    <span class="token comment">//获取事务传播行为</span>
+    <span class="token keyword">default</span> <span class="token keyword">int</span> <span class="token function">getPropagationBehavior</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    //获取事务隔离级别
-    default int getIsolationLevel() {
-        return -1;
-    }
+    <span class="token comment">//获取事务隔离级别</span>
+    <span class="token keyword">default</span> <span class="token keyword">int</span> <span class="token function">getIsolationLevel</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    //获取事务超时时间
-    default int getTimeout() {
-        return -1;
-    }
+    <span class="token comment">//获取事务超时时间</span>
+    <span class="token keyword">default</span> <span class="token keyword">int</span> <span class="token function">getTimeout</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    //获取事务是否只读
-    default boolean isReadOnly() {
-        return false;
-    }
+    <span class="token comment">//获取事务是否只读</span>
+    <span class="token keyword">default</span> <span class="token keyword">boolean</span> <span class="token function">isReadOnly</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    //获取事务对象名称
-    @Nullable
-    default String getName() {
-        return null;
-    }
+    <span class="token comment">//获取事务对象名称</span>
+    <span class="token annotation punctuation">@Nullable</span>
+    <span class="token keyword">default</span> <span class="token class-name">String</span> <span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    static TransactionDefinition withDefaults() {
-        return StaticTransactionDefinition.INSTANCE;
-    }
-}</code></pre>
-<p>具体事务的隔离级别介绍见：<a href="../数据库理论之事务与恢复技术">数据库理论之事务与恢复技术</a></p>
+    <span class="token keyword">static</span> <span class="token class-name">TransactionDefinition</span> <span class="token function">withDefaults</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token class-name">StaticTransactionDefinition</span><span class="token punctuation">.</span>INSTANCE<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>具体事务的隔离级别介绍见：<a href="../%E6%95%B0%E6%8D%AE%E5%BA%93%E7%90%86%E8%AE%BA%E4%B9%8B%E4%BA%8B%E5%8A%A1%E4%B8%8E%E6%81%A2%E5%A4%8D%E6%8A%80%E6%9C%AF">数据库理论之事务与恢复技术</a></p>
 <p>对于事务的传播行为，有：</p>
 <ul>
 <li><code>REQUIRED</code>:如果当前没有事务，就新建一个事务，如果已经存在一个事务中，加入到这个事务中。一般的选择（默认值）</li>
@@ -501,22 +506,23 @@ spring 框架为我们提供了一组事务控制的接口。这组接口是在s
 <li><code>NEVER</code>:以非事务方式运行，如果当前存在事务，抛出异常</li>
 <li><code>NESTED</code>:如果当前存在事务，则在嵌套事务内执行。如果当前没有事务，则执行 REQUIRED 类似的操作。</li>
 </ul>
-<h2 id="TransactionStatus">1.3 TransactionStatus</h2><pre><code class="java">public interface TransactionStatus extends TransactionExecution, SavepointManager, Flushable {
-    //是否有存储点
-    boolean hasSavepoint();
+<h2 id="TransactionStatus">1.3 TransactionStatus</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">TransactionStatus</span> <span class="token keyword">extends</span> <span class="token class-name">TransactionExecution</span><span class="token punctuation">,</span> <span class="token class-name">SavepointManager</span><span class="token punctuation">,</span> <span class="token class-name">Flushable</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">//是否有存储点</span>
+	<span class="token keyword">boolean</span> <span class="token function">hasSavepoint</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    //刷新事务
-    @Override
-    void flush();
-}</code></pre>
-<p>对于TransactionExecution，还具有<code>isNewTransaction()</code>：是不是新的事务，<code>setRollbackOnly()</code>：设置事务回滚，<code>isRollbackOnly()</code>：事务是否回滚等方法。</p>
-<h1 id="XML配置事务管理">2 XML配置事务管理</h1><pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
-xmlns:aop=&quot;http://www.springframework.org/schema/aop&quot;
-xmlns:tx=&quot;http://www.springframework.org/schema/tx&quot;
-xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
-xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-xsi:schemaLocation=&quot;
+    <span class="token comment">//刷新事务</span>
+	<span class="token annotation punctuation">@Override</span>
+	<span class="token keyword">void</span> <span class="token function">flush</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>对于TransactionExecution，还具有<code>isNewTransaction()</code>：是不是新的事务，<code> setRollbackOnly()</code>：设置事务回滚，<code>isRollbackOnly()</code>：事务是否回滚等方法。</p>
+<h1 id="XML配置事务管理">2 XML配置事务管理</h1><pre class="language-xml" data-language="xml"><code class="language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8"?></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>beans</span> <span class="token attr-name">xmlns</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>http://www.springframework.org/schema/beans<span class="token punctuation">"</span></span>
+<span class="token attr-name"><span class="token namespace">xmlns:</span>aop</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>http://www.springframework.org/schema/aop<span class="token punctuation">"</span></span>
+<span class="token attr-name"><span class="token namespace">xmlns:</span>tx</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>http://www.springframework.org/schema/tx<span class="token punctuation">"</span></span>
+<span class="token attr-name"><span class="token namespace">xmlns:</span>context</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>http://www.springframework.org/schema/context<span class="token punctuation">"</span></span>
+<span class="token attr-name"><span class="token namespace">xmlns:</span>xsi</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>http://www.w3.org/2001/XMLSchema-instance<span class="token punctuation">"</span></span>
+<span class="token attr-name"><span class="token namespace">xsi:</span>schemaLocation</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>
 http://www.springframework.org/schema/beans
 http://www.springframework.org/schema/beans/spring-beans.xsd
 http://www.springframework.org/schema/aop
@@ -524,21 +530,21 @@ http://www.springframework.org/schema/aop/spring-aop.xsd
 http://www.springframework.org/schema/tx
 http://www.springframework.org/schema/tx/spring-tx.xsd
 http://www.springframework.org/schema/context
-http://www.springframework.org/schema/context/spring-context.xsd&quot;&gt;
+http://www.springframework.org/schema/context/spring-context.xsd<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
 
 
-&lt;!-- 省去DataSource配置 --&gt;
+<span class="token comment">&lt;!-- 省去DataSource配置 --></span>
 
-&lt;bean id=&quot;transactionManager&quot; class=&quot;org.springframework.jdbc.datasource.DataSourceTransactionManager&quot;&gt;
-    &lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot;&gt;&lt;/property&gt;
-&lt;/bean&gt;
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>bean</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>transactionManager<span class="token punctuation">"</span></span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>org.springframework.jdbc.datasource.DataSourceTransactionManager<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>dataSource<span class="token punctuation">"</span></span> <span class="token attr-name">ref</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>dataSource<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>property</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>bean</span><span class="token punctuation">></span></span>
 
-&lt;!-- 事务的配置 --&gt;
-&lt;tx:advice id=&quot;txAdvice&quot; transaction-manager=&quot;transactionManager&quot;&gt;
-&lt;/tx:advice&gt;
+<span class="token comment">&lt;!-- 事务的配置 --></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">tx:</span>advice</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>txAdvice<span class="token punctuation">"</span></span> <span class="token attr-name">transaction-manager</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>transactionManager<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token namespace">tx:</span>advice</span><span class="token punctuation">></span></span>
 
-&lt;tx:attributes&gt;
-    &lt;!-- 指定方法名称：是业务核心方法
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">tx:</span>attributes</span><span class="token punctuation">></span></span>
+    <span class="token comment">&lt;!-- 指定方法名称：是业务核心方法
     read-only：是否是只读事务。默认 false，不只读。
     isolation：指定事务的隔离级别。默认值是使用数据库的默认隔离级别。
     propagation：指定事务的传播行为。
@@ -547,20 +553,22 @@ http://www.springframework.org/schema/context/spring-context.xsd&quot;&gt;
     没有默认值，任何异常都回滚。
     no-rollback-for：用于指定一个异常，当产生该异常时，事务不回滚，产生其他异常时，事务回
     滚。没有默认值，任何异常都回滚。
-    --&gt;
-    &lt;tx:method name=&quot;*&quot; read-only=&quot;false&quot; propagation=&quot;REQUIRED&quot;/&gt;
-    &lt;tx:method name=&quot;find*&quot; read-only=&quot;true&quot; propagation=&quot;SUPPORTS&quot;/&gt;
-&lt;/tx:attributes&gt;
+    --></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">tx:</span>method</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>*<span class="token punctuation">"</span></span> <span class="token attr-name">read-only</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>false<span class="token punctuation">"</span></span> <span class="token attr-name">propagation</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>REQUIRED<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">tx:</span>method</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>find*<span class="token punctuation">"</span></span> <span class="token attr-name">read-only</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>true<span class="token punctuation">"</span></span> <span class="token attr-name">propagation</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>SUPPORTS<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token namespace">tx:</span>attributes</span><span class="token punctuation">></span></span>
 
-&lt;!-- 配置 aop --&gt;
-&lt;aop:config&gt;
-&lt;!-- 配置切入点表达式 --&gt;
-&lt;aop:pointcut expression=&quot;execution(* com.rhett.service.impl.*.*(..))&quot;
-id=&quot;pt1&quot;/&gt;
-&lt;/aop:config&gt;
+<span class="token comment">&lt;!-- 配置 aop --></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">aop:</span>config</span><span class="token punctuation">></span></span>
+<span class="token comment">&lt;!-- 配置切入点表达式 --></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">aop:</span>pointcut</span> <span class="token attr-name">expression</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>execution(* com.rhett.service.impl.*.*(..))<span class="token punctuation">"</span></span>
+<span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>pt1<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token namespace">aop:</span>config</span><span class="token punctuation">></span></span>
 
-&lt;!-- 在 aop:config 标签内部：建立事务的通知和切入点表达式的关系 --&gt;
-&lt;aop:advisor advice-ref=&quot;txAdvice&quot; pointcut-ref=&quot;pt1&quot;/&gt;</code></pre>
+<span class="token comment">&lt;!-- 在 aop:config 标签内部：建立事务的通知和切入点表达式的关系 --></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token namespace">aop:</span>advisor</span> <span class="token attr-name">advice-ref</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>txAdvice<span class="token punctuation">"</span></span> <span class="token attr-name">pointcut-ref</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>pt1<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span></code></pre>
+
+
 <h1 id="注解配置事务管理">3 注解配置事务管理</h1><ol>
 <li><p>首先注入事务管理器bean，可以通过注解<code>@Bean</code>，如果使用spring-boot，无论是<code>mybatis-spring-boot-starter</code>还是jpa-starter，都会自动帮我们注入一个相关的实例对象，我们只需要使用注解<code>@Transactional</code>即可。</p>
 </li>
@@ -569,33 +577,35 @@ id=&quot;pt1&quot;/&gt;
 <li><p>在业务层使用<code>@Transactional</code>注解，属性和xml中的类似。</p>
 </li>
 </ol>
-<pre><code class="java">@Service(&quot;accountService&quot;)
-@Transactional(readOnly=true,propagation=Propagation.SUPPORTS)
-public class AccountServiceImpl implements IAccountService {
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@Service</span><span class="token punctuation">(</span><span class="token string">"accountService"</span><span class="token punctuation">)</span>
+<span class="token annotation punctuation">@Transactional</span><span class="token punctuation">(</span>readOnly<span class="token operator">=</span><span class="token boolean">true</span><span class="token punctuation">,</span>propagation<span class="token operator">=</span><span class="token class-name">Propagation</span><span class="token punctuation">.</span>SUPPORTS<span class="token punctuation">)</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">AccountServiceImpl</span> <span class="token keyword">implements</span> <span class="token class-name">IAccountService</span> <span class="token punctuation">&#123;</span>
 
-    @Autowired
-    private IAccountDao accountDao;
+    <span class="token annotation punctuation">@Autowired</span>
+    <span class="token keyword">private</span> <span class="token class-name">IAccountDao</span> accountDao<span class="token punctuation">;</span>
 
-    @Override
-    public Account findAccountById(Integer id) {
-        return accountDao.findAccountById(id);
-    }
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> <span class="token class-name">Account</span> <span class="token function">findAccountById</span><span class="token punctuation">(</span><span class="token class-name">Integer</span> id<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> accountDao<span class="token punctuation">.</span><span class="token function">findAccountById</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    @Override
-    @Transactional(readOnly=false,propagation=Propagation.REQUIRED)
-    public void transfer(String sourceName, String targeName, Float money) {
-        //1.根据名称查询两个账户
-        Account source = accountDao.findAccountByName(sourceName);
-        Account target = accountDao.findAccountByName(targeName);
-        //2.修改两个账户的金额
-        source.setMoney(source.getMoney()-money);//转出账户减钱
-        target.setMoney(target.getMoney()+money);//转入账户加钱
-        //3.更新两个账户
-        accountDao.updateAccount(source);
-        //int i=1/0;
-        accountDao.updateAccount(target);
-    }
-}</code></pre>
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token annotation punctuation">@Transactional</span><span class="token punctuation">(</span>readOnly<span class="token operator">=</span><span class="token boolean">false</span><span class="token punctuation">,</span>propagation<span class="token operator">=</span><span class="token class-name">Propagation</span><span class="token punctuation">.</span>REQUIRED<span class="token punctuation">)</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">transfer</span><span class="token punctuation">(</span><span class="token class-name">String</span> sourceName<span class="token punctuation">,</span> <span class="token class-name">String</span> targeName<span class="token punctuation">,</span> <span class="token class-name">Float</span> money<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">//1.根据名称查询两个账户</span>
+        <span class="token class-name">Account</span> source <span class="token operator">=</span> accountDao<span class="token punctuation">.</span><span class="token function">findAccountByName</span><span class="token punctuation">(</span>sourceName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">Account</span> target <span class="token operator">=</span> accountDao<span class="token punctuation">.</span><span class="token function">findAccountByName</span><span class="token punctuation">(</span>targeName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//2.修改两个账户的金额</span>
+        source<span class="token punctuation">.</span><span class="token function">setMoney</span><span class="token punctuation">(</span>source<span class="token punctuation">.</span><span class="token function">getMoney</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-</span>money<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//转出账户减钱</span>
+        target<span class="token punctuation">.</span><span class="token function">setMoney</span><span class="token punctuation">(</span>target<span class="token punctuation">.</span><span class="token function">getMoney</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">+</span>money<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//转入账户加钱</span>
+        <span class="token comment">//3.更新两个账户</span>
+        accountDao<span class="token punctuation">.</span><span class="token function">updateAccount</span><span class="token punctuation">(</span>source<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//int i=1/0;</span>
+        accountDao<span class="token punctuation">.</span><span class="token function">updateAccount</span><span class="token punctuation">(</span>target<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+
 <h1 id="注意">4 注意</h1><p>因为Spring是通过AOP来实现管理事务的，如果某个类使用了<code>@Transactional</code>，但如果在这个类中的其他方法调用了该方法，称为”自调用”，没有经过代理对象，这种情况<code>@Transactional</code>就失效了。</p>
 
             </div>
@@ -1205,7 +1215,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

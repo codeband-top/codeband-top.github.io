@@ -31,6 +31,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -418,7 +419,7 @@
         <hr class="clearfix">
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h1 id="原题">1 原题</h1><p>实现 <a href="https://baike.baidu.com/item/strstr/811469" target="_blank" rel="noopener">strStr()</a> 函数。</p>
+                <h1 id="原题">1 原题</h1><p>实现 <a target="_blank" rel="noopener" href="https://baike.baidu.com/item/strstr/811469">strStr()</a> 函数。</p>
 <p>给定一个 haystack 字符串和一个 needle 字符串，在 haystack 字符串中找出 needle 字符串出现的第一个位置 (从0开始)。如果不存在，则返回 <strong>-1</strong>。</p>
 <p><strong>示例 1:</strong></p>
 <blockquote>
@@ -430,30 +431,32 @@
 </blockquote>
 <p><strong>说明:</strong></p>
 <p>当 <code>needle</code> 是空字符串时，我们应当返回什么值呢？这是一个在面试中很好的问题。</p>
-<p>对于本题而言，当 <code>needle</code> 是空字符串时我们应当返回 0 。这与C语言的 <a href="https://www.codetool.top/article/leetcode28-实现strStr/(https://baike.baidu.com/item/strstr/811469)">strstr()</a> 以及 Java的 <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html#indexOf(java.lang.String)" target="_blank" rel="noopener">indexOf()</a> 定义相符。</p>
+<p>对于本题而言，当 <code>needle</code> 是空字符串时我们应当返回 0 。这与C语言的 <a href="https://www.codetool.top/article/leetcode28-%E5%AE%9E%E7%8E%B0strStr/(https://baike.baidu.com/item/strstr/811469)">strstr()</a> 以及 Java的 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html#indexOf(java.lang.String)">indexOf()</a> 定义相符。</p>
 <h1 id="解法">2 解法</h1><h2 id="JDK-API">2.1 JDK API</h2><p>在leetcode上，当然可以投机取巧地使用String.indexof()方法，不用重复造轮子：</p>
-<pre><code class="java">class Solution {
-    public int strStr(String haystack, String needle) {
-        return haystack.indexOf(needle);
-    }
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">strStr</span><span class="token punctuation">(</span><span class="token class-name">String</span> haystack<span class="token punctuation">,</span> <span class="token class-name">String</span> needle<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> haystack<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span>needle<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>但这是一个经典的字符串精准<strong>模式匹配</strong>问题，历史上出现过很多解决这个问题的算法，掌握它们的思想还是有必要的：</p>
 <h2 id="BF算法（朴素算法）">2.2 BF算法（朴素算法）</h2><h3 id="思想">2.2.1 思想</h3><p>这是最直观、最简单的算法。从主串的第start个字符起和模式的第1个字符比较，如果相等继续逐个比较后续字符。比较过程中一旦发现不相等的情况，则回溯至主串中的第start+1个字符位置处，重新与模式P的字符进行比较。该算法效率较低。</p>
-<h3 id="代码">2.2.2 代码</h3><pre><code class="java">class Solution {
-    public int strStr(String haystack, String needle) {
-        int mainLen = haystack.length();
-        int subLen = needle.length();
-        if(needle.equals(&quot;&quot;)) return 0;//注意模式字符串为空的情况
-        for(int i=0;i&lt;mainLen;i++){
-            for(int j =0;j&lt;subLen;j++){
-                if(!(i+j&lt;mainLen)) return -1;//主串下标超出
-                if(!(haystack.charAt(i+j)==needle.charAt(j))) break;
-                else if(j == subLen-1) return i;//完全匹配，返回主串下标
-            }
-        }
-        return -1;
-    }
-}</code></pre>
+<h3 id="代码">2.2.2 代码</h3><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">strStr</span><span class="token punctuation">(</span><span class="token class-name">String</span> haystack<span class="token punctuation">,</span> <span class="token class-name">String</span> needle<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">int</span> mainLen <span class="token operator">=</span> haystack<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> subLen <span class="token operator">=</span> needle<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>needle<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">""</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span><span class="token comment">//注意模式字符串为空的情况</span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>mainLen<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> j <span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>j<span class="token operator">&lt;</span>subLen<span class="token punctuation">;</span>j<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token punctuation">(</span>i<span class="token operator">+</span>j<span class="token operator">&lt;</span>mainLen<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span><span class="token comment">//主串下标超出</span>
+                <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token punctuation">(</span>haystack<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token operator">+</span>j<span class="token punctuation">)</span><span class="token operator">==</span>needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>j<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">break</span><span class="token punctuation">;</span>
+                <span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span>j <span class="token operator">==</span> subLen<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token keyword">return</span> i<span class="token punctuation">;</span><span class="token comment">//完全匹配，返回主串下标</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>算法的复杂度为O[(i-j)j]</p>
 <h2 id="MP算法">2.3 MP算法</h2><h3 id="思路">2.3.1 思路</h3><blockquote>
 <p>指针不回溯，利用已得到的“部分匹配”结果，将模式向右“滑动”若干位置后继续比较。</p>
@@ -567,42 +570,43 @@
 </tr>
 </tbody></table>
 <p>Next(7)可以用于继续匹配（可能要求找出所有匹配的子字符串）。</p>
-<h3 id="代码-1">2.3.2 代码</h3><pre><code class="java">class Solution {
-    //获取next函数
-    public int[] next(String needle){
-        int len = needle.length();
-        int i = 0;
-        int j = -1;
-        int[] next = new int[len+1];
-        next[0] = -1;
-        while(i &lt; len){
-            while( j &gt; -1 &amp;&amp; needle.charAt(i)!=needle.charAt(j))
-                j = next[j];//j会有一个传递的效果，必须前一个i对应的j是1，下一个i对应的j才能是2。如果遇到不同的字符则j清零
-            next[++i] = ++j;
-        }
-        return next;
-    }
-    public int strStr(String haystack, String needle) {
-        int mainLen = haystack.length();
-        int subLen = needle.length();
-        if(needle.equals(&quot;&quot;)) return 0;//注意模式字符串为空的情况
-        if(mainLen&lt;subLen) return -1;
-        int[] next = next(needle);
-        int i = 0;
-        int j = 0;
+<h3 id="代码-1">2.3.2 代码</h3><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">//获取next函数</span>
+    <span class="token keyword">public</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">next</span><span class="token punctuation">(</span><span class="token class-name">String</span> needle<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token keyword">int</span> len <span class="token operator">=</span> needle<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> next <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">int</span><span class="token punctuation">[</span>len<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+        next<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token keyword">while</span><span class="token punctuation">(</span>i <span class="token operator">&lt;</span> len<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token keyword">while</span><span class="token punctuation">(</span> j <span class="token operator">></span> <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token operator">!=</span>needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>j<span class="token punctuation">)</span><span class="token punctuation">)</span>
+                j <span class="token operator">=</span> next<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">;</span><span class="token comment">//j会有一个传递的效果，必须前一个i对应的j是1，下一个i对应的j才能是2。如果遇到不同的字符则j清零</span>
+            next<span class="token punctuation">[</span><span class="token operator">++</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token operator">++</span>j<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">return</span> next<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">strStr</span><span class="token punctuation">(</span><span class="token class-name">String</span> haystack<span class="token punctuation">,</span> <span class="token class-name">String</span> needle<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">int</span> mainLen <span class="token operator">=</span> haystack<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> subLen <span class="token operator">=</span> needle<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>needle<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">""</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span><span class="token comment">//注意模式字符串为空的情况</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>mainLen<span class="token operator">&lt;</span>subLen<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> next <span class="token operator">=</span> <span class="token function">next</span><span class="token punctuation">(</span>needle<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        
+        <span class="token keyword">while</span><span class="token punctuation">(</span>j <span class="token operator">&lt;</span> mainLen<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token keyword">while</span><span class="token punctuation">(</span>i<span class="token operator">></span><span class="token operator">-</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span> <span class="token operator">!=</span> haystack<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>j<span class="token punctuation">)</span><span class="token punctuation">)</span>
+                i <span class="token operator">=</span> next<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+            i<span class="token operator">++</span><span class="token punctuation">;</span>
+            j<span class="token operator">++</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>i <span class="token operator">>=</span> subLen<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                <span class="token keyword">return</span> j<span class="token operator">-</span>i<span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-        while(j &lt; mainLen){
-            while(i&gt;-1 &amp;&amp; needle.charAt(i) != haystack.charAt(j))
-                i = next[i];
-            i++;
-            j++;
-            if(i &gt;= subLen){
-                return j-i;
-            }
-        }
-        return -1;
-    }
-}</code></pre>
 <h2 id="KMP算法">2.4 KMP算法</h2><h3 id="思路-1">2.4.1 思路</h3><p>在MP算法的基础上，还要避免最长前缀之后的那个字符不等于原来失配的那个字符。<br>下面在已知mpNext表的情况下，给出建立kmpNext表的规则。这个规则分为四种情况：</p>
 <ol>
 <li>如果mpNext[j] = 0且Pj = P0，则令kmpNext[j] = -1。</li>
@@ -658,49 +662,48 @@
 <td>0</td>
 </tr>
 </tbody></table>
-<h3 id="代码-2">2.4.2 代码</h3><pre><code class="java">class Solution {
-    //获取kmpNext数组
-    public int[] next(String needle){
-        int len = needle.length();
-        int i = 0;
-        int j = -1;
-        int[] next = new int[len+1];
-        next[0] = -1;
-        while(i &lt; len-1){
-            while( j &gt; -1 &amp;&amp; needle.charAt(i)!=needle.charAt(j))
-                j = next[j];
-            i++;
-            j++;
-            if(needle.charAt(i) == needle.charAt(j))
-                next[i] = next[j];
-            else
-                next[i] = j;
-        }
-        return next;
-    }
-
-    public int strStr(String haystack, String needle) {
-        int mainLen = haystack.length();
-        int subLen = needle.length();
-        if(needle.equals(&quot;&quot;)) return 0;//注意模式字符串为空的情况
-        if(mainLen&lt;subLen) return -1;
-        int[] next = next(needle);
-        int i = 0;
-        int j = 0;
-
-        while(j &lt; mainLen){
-            while(i&gt;-1 &amp;&amp; needle.charAt(i) != haystack.charAt(j))
-                i = next[i];
-            i++;
-            j++;
-            if(i &gt;= subLen){
-                return j-i;
-            }
-        }
-        return -1;
-    }
-}</code></pre>
-
+<h3 id="代码-2">2.4.2 代码</h3><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">//获取kmpNext数组</span>
+    <span class="token keyword">public</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token function">next</span><span class="token punctuation">(</span><span class="token class-name">String</span> needle<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token keyword">int</span> len <span class="token operator">=</span> needle<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> next <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">int</span><span class="token punctuation">[</span>len<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+        next<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token keyword">while</span><span class="token punctuation">(</span>i <span class="token operator">&lt;</span> len<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token keyword">while</span><span class="token punctuation">(</span> j <span class="token operator">></span> <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token operator">!=</span>needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>j<span class="token punctuation">)</span><span class="token punctuation">)</span>
+                j <span class="token operator">=</span> next<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">;</span>
+            i<span class="token operator">++</span><span class="token punctuation">;</span>
+            j<span class="token operator">++</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span> <span class="token operator">==</span> needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>j<span class="token punctuation">)</span><span class="token punctuation">)</span>
+                next<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> next<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">;</span>
+            <span class="token keyword">else</span>
+                next<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> j<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">return</span> next<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    
+    <span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">strStr</span><span class="token punctuation">(</span><span class="token class-name">String</span> haystack<span class="token punctuation">,</span> <span class="token class-name">String</span> needle<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">int</span> mainLen <span class="token operator">=</span> haystack<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> subLen <span class="token operator">=</span> needle<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>needle<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">""</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span><span class="token comment">//注意模式字符串为空的情况</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>mainLen<span class="token operator">&lt;</span>subLen<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> next <span class="token operator">=</span> <span class="token function">next</span><span class="token punctuation">(</span>needle<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        
+        <span class="token keyword">while</span><span class="token punctuation">(</span>j <span class="token operator">&lt;</span> mainLen<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token keyword">while</span><span class="token punctuation">(</span>i<span class="token operator">></span><span class="token operator">-</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> needle<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span> <span class="token operator">!=</span> haystack<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>j<span class="token punctuation">)</span><span class="token punctuation">)</span>
+                i <span class="token operator">=</span> next<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+            i<span class="token operator">++</span><span class="token punctuation">;</span>
+            j<span class="token operator">++</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>i <span class="token operator">>=</span> subLen<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                <span class="token keyword">return</span> j<span class="token operator">-</span>i<span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
             </div>
             <hr/>
 
@@ -1064,21 +1067,22 @@
             <div class="article-badge left-badge text-color">
                 <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/article/leetcode27-%E7%A7%BB%E9%99%A4%E5%85%83%E7%B4%A0/">
+                <a href="/article/leetcode209-%E9%95%BF%E5%BA%A6%E6%9C%80%E5%B0%8F%E7%9A%84%E5%AD%90%E6%95%B0%E7%BB%84/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/23.jpg" class="responsive-img" alt="leetcode27-移除元素">
+                        <img src="/medias/featureimages/19.jpg" class="responsive-img" alt="leetcode209-长度最小的子数组">
                         
-                        <span class="card-title">leetcode27-移除元素</span>
+                        <span class="card-title">leetcode209-长度最小的子数组</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题给定一个数组 nums 和一个值 val*，你需要原地移除所有数值等于 *val 的元素，返回移除后数组的新长度。
-不要使用额外的数组空间，你必须在原地修改输入数组并在使用 O(1) 额外空间的条件下完成。
-元素的顺序可以改变。你不
+                            1 原题给定一个含有 n 个正整数的数组和一个正整数 s ，找出该数组中满足其和 ≥ s 的长度最小的连续子数组。如果不存在符合条件的连续子数组，返回 0。
+示例:
+
+输入: s = 7, nums = [2,3,1,2,4,3]输出: 2
                         
                     </div>
                     <div class="publish-info">
@@ -1119,27 +1123,21 @@
                 下一篇&nbsp;<i class="fas fa-chevron-right"></i>
             </div>
             <div class="card">
-                <a href="/article/leetcode485-%E6%9C%80%E5%A4%A7%E8%BF%9E%E7%BB%AD1%E7%9A%84%E4%B8%AA%E6%95%B0/">
+                <a href="/article/leetcode27-%E7%A7%BB%E9%99%A4%E5%85%83%E7%B4%A0/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/0.jpg" class="responsive-img" alt="leetcode485-最大连续1的个数">
+                        <img src="/medias/featureimages/23.jpg" class="responsive-img" alt="leetcode27-移除元素">
                         
-                        <span class="card-title">leetcode485-最大连续1的个数</span>
+                        <span class="card-title">leetcode27-移除元素</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题给定一个二进制数组， 计算其中最大连续1的个数。
-示例 1:
-
-输入： [1,1,0,1,1,1]输出： 3解释： 开头的两位和最后的三位都是连续1，所以最大连续1的个数是 3.
-
-注意：
-
-输入的数组只包含0和1。
-输入数组的长度
+                            1 原题给定一个数组 nums 和一个值 val，你需要原地移除所有数值等于 val 的元素，返回移除后数组的新长度。
+不要使用额外的数组空间，你必须在原地修改输入数组并在使用 O(1) 额外空间的条件下完成。
+元素的顺序可以改变。你不需要
                         
                     </div>
                     <div class="publish-info">
@@ -1316,7 +1314,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

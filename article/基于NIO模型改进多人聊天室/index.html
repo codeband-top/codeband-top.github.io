@@ -8,8 +8,7 @@
     <meta name="description" content="第一版和第二版见基于BIO模型实现多人聊天室
 NIO介绍见：
 NIO、BIO模型对比实现文件的复制NIO网络编程之Selector介绍
-1 第三版：使用NIO模型改进1.1 服务端实现public class ChatServer {
-  ">
+1 第三版：使用NIO模型改进1.1 服务端实现public class ChatServer &amp;#12">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -31,6 +30,7 @@ NIO、BIO模型对比实现文件的复制NIO网络编程之Selector介绍
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -413,7 +413,7 @@ NIO、BIO模型对比实现文件的复制NIO网络编程之Selector介绍
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    868
+                    968
                 </div>
                 
 
@@ -426,278 +426,279 @@ NIO、BIO模型对比实现文件的复制NIO网络编程之Selector介绍
         <hr class="clearfix">
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <p>第一版和第二版见<a href="../基于BIO模型实现多人聊天室">基于BIO模型实现多人聊天室</a></p>
+                <p>第一版和第二版见<a href="../%E5%9F%BA%E4%BA%8EBIO%E6%A8%A1%E5%9E%8B%E5%AE%9E%E7%8E%B0%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4">基于BIO模型实现多人聊天室</a></p>
 <p>NIO介绍见：</p>
-<p><a href="../NIO、BIO模型对比实现文件的复制">NIO、BIO模型对比实现文件的复制</a><br><a href="../NIO网络编程之Selector介绍">NIO网络编程之Selector介绍</a></p>
-<h1 id="第三版：使用NIO模型改进">1 第三版：使用NIO模型改进</h1><h2 id="服务端实现">1.1 服务端实现</h2><pre><code class="java">public class ChatServer {
-    private static final int DEFAULT_PORT = 8888;
-    private static final String QUIT = &quot;quit&quot;;
-    private static final int Buffer = 1024;
+<p><a href="../NIO%E3%80%81BIO%E6%A8%A1%E5%9E%8B%E5%AF%B9%E6%AF%94%E5%AE%9E%E7%8E%B0%E6%96%87%E4%BB%B6%E7%9A%84%E5%A4%8D%E5%88%B6">NIO、BIO模型对比实现文件的复制</a><br><a href="../NIO%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E4%B9%8BSelector%E4%BB%8B%E7%BB%8D">NIO网络编程之Selector介绍</a></p>
+<h1 id="第三版：使用NIO模型改进">1 第三版：使用NIO模型改进</h1><h2 id="服务端实现">1.1 服务端实现</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">ChatServer</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">int</span> DEFAULT_PORT <span class="token operator">=</span> <span class="token number">8888</span><span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token class-name">String</span> QUIT <span class="token operator">=</span> <span class="token string">"quit"</span><span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">int</span> <span class="token class-name">Buffer</span> <span class="token operator">=</span> <span class="token number">1024</span><span class="token punctuation">;</span>
 
-    private ServerSocketChannel server;
-    private Selector selector;
-    private ByteBuffer rBuffer = ByteBuffer.allocate(Buffer);
-    private ByteBuffer wBuffer = ByteBuffer.allocate(Buffer);
-    private Charset charset = Charset.forName(&quot;UTF-8&quot;);
-    private int port;
+    <span class="token keyword">private</span> <span class="token class-name">ServerSocketChannel</span> server<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">Selector</span> selector<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">ByteBuffer</span> rBuffer <span class="token operator">=</span> <span class="token class-name">ByteBuffer</span><span class="token punctuation">.</span><span class="token function">allocate</span><span class="token punctuation">(</span><span class="token class-name">Buffer</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">ByteBuffer</span> wBuffer <span class="token operator">=</span> <span class="token class-name">ByteBuffer</span><span class="token punctuation">.</span><span class="token function">allocate</span><span class="token punctuation">(</span><span class="token class-name">Buffer</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">Charset</span> charset <span class="token operator">=</span> <span class="token class-name">Charset</span><span class="token punctuation">.</span><span class="token function">forName</span><span class="token punctuation">(</span><span class="token string">"UTF-8"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token keyword">int</span> port<span class="token punctuation">;</span>
 
-    public ChatServer() {
-    }
+    <span class="token keyword">public</span> <span class="token class-name">ChatServer</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token punctuation">&#125;</span>
 
-    public ChatServer(int port) {
-        this.port = port;
-    }
+    <span class="token keyword">public</span> <span class="token class-name">ChatServer</span><span class="token punctuation">(</span><span class="token keyword">int</span> port<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>port <span class="token operator">=</span> port<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    public void start(){
-        try {
-            server = ServerSocketChannel.open();
-            server.configureBlocking(false);//！！！
-            server.socket().bind(new InetSocketAddress(port));
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            server <span class="token operator">=</span> <span class="token class-name">ServerSocketChannel</span><span class="token punctuation">.</span><span class="token keyword">open</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            server<span class="token punctuation">.</span><span class="token function">configureBlocking</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//！！！</span>
+            server<span class="token punctuation">.</span><span class="token function">socket</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">InetSocketAddress</span><span class="token punctuation">(</span>port<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-            selector = Selector.open();
-            server.register(selector, SelectionKey.OP_ACCEPT);
-            System.out.println(&quot;启动服务器，监听端口：&quot;+port+&quot;...&quot;);
-            while (true) {
-                selector.select();
-                Set&lt;SelectionKey&gt; keys = selector.selectedKeys();
-                for(SelectionKey key:keys){
-                    //处理被触发的事件
-                    handles(key);
-                }
-                keys.clear();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            close(selector);
-        }
-    }
+            selector <span class="token operator">=</span> <span class="token class-name">Selector</span><span class="token punctuation">.</span><span class="token keyword">open</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            server<span class="token punctuation">.</span><span class="token function">register</span><span class="token punctuation">(</span>selector<span class="token punctuation">,</span> <span class="token class-name">SelectionKey</span><span class="token punctuation">.</span>OP_ACCEPT<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"启动服务器，监听端口："</span><span class="token operator">+</span>port<span class="token operator">+</span><span class="token string">"..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                selector<span class="token punctuation">.</span><span class="token function">select</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token class-name">Set</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">SelectionKey</span><span class="token punctuation">></span></span> keys <span class="token operator">=</span> selector<span class="token punctuation">.</span><span class="token function">selectedKeys</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token class-name">SelectionKey</span> key<span class="token operator">:</span>keys<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                    <span class="token comment">//处理被触发的事件</span>
+                    <span class="token function">handles</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span>
+                keys<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+            <span class="token function">close</span><span class="token punctuation">(</span>selector<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
 
-    private void handles(SelectionKey key) throws IOException {
-        // ACCEPT事件 - 和客户端建立了连接
-        if(key.isAcceptable()){
-            ServerSocketChannel server = (ServerSocketChannel) key.channel();
-            SocketChannel client = server.accept();
-            client.configureBlocking(false);
-            client.register(selector,SelectionKey.OP_READ);
-            System.out.println(getClientName(client) +&quot;已连接&quot;);
-        }
-        // READ事件 - 客户端发送了消息
-        else if(key.isReadable()){
-            SocketChannel client = (SocketChannel) key.channel();
-            String fwdMsg = receive(client);
-            if(fwdMsg.isEmpty()){
-                //客户端异常
-                key.cancel();
-                selector.wakeup();
-            }else{
-                System.out.println(getClientName(client)+&quot;:&quot;+fwdMsg);
-                // 检查用户是否退出
-                if(readyToQuit(fwdMsg)){
-                    key.cancel();
-                    selector.wakeup();
-                    System.out.println(getClientName(client)+&quot;已断开连接&quot;);
-                }else{
-                    forwardMessage(client,fwdMsg);
-                }
-            }
-        }
-    }
+    <span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">handles</span><span class="token punctuation">(</span><span class="token class-name">SelectionKey</span> key<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">IOException</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">// ACCEPT事件 - 和客户端建立了连接</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>key<span class="token punctuation">.</span><span class="token function">isAcceptable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token class-name">ServerSocketChannel</span> server <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">ServerSocketChannel</span><span class="token punctuation">)</span> key<span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">SocketChannel</span> client <span class="token operator">=</span> server<span class="token punctuation">.</span><span class="token function">accept</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            client<span class="token punctuation">.</span><span class="token function">configureBlocking</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            client<span class="token punctuation">.</span><span class="token function">register</span><span class="token punctuation">(</span>selector<span class="token punctuation">,</span><span class="token class-name">SelectionKey</span><span class="token punctuation">.</span>OP_READ<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token function">getClientName</span><span class="token punctuation">(</span>client<span class="token punctuation">)</span> <span class="token operator">+</span><span class="token string">"已连接"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token comment">// READ事件 - 客户端发送了消息</span>
+        <span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span>key<span class="token punctuation">.</span><span class="token function">isReadable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token class-name">SocketChannel</span> client <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">SocketChannel</span><span class="token punctuation">)</span> key<span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">String</span> fwdMsg <span class="token operator">=</span> <span class="token function">receive</span><span class="token punctuation">(</span>client<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>fwdMsg<span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                <span class="token comment">//客户端异常</span>
+                key<span class="token punctuation">.</span><span class="token function">cancel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                selector<span class="token punctuation">.</span><span class="token function">wakeup</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span><span class="token keyword">else</span><span class="token punctuation">&#123;</span>
+                <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token function">getClientName</span><span class="token punctuation">(</span>client<span class="token punctuation">)</span><span class="token operator">+</span><span class="token string">":"</span><span class="token operator">+</span>fwdMsg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token comment">// 检查用户是否退出</span>
+                <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">readyToQuit</span><span class="token punctuation">(</span>fwdMsg<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                    key<span class="token punctuation">.</span><span class="token function">cancel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    selector<span class="token punctuation">.</span><span class="token function">wakeup</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token function">getClientName</span><span class="token punctuation">(</span>client<span class="token punctuation">)</span><span class="token operator">+</span><span class="token string">"已断开连接"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span><span class="token keyword">else</span><span class="token punctuation">&#123;</span>
+                    <span class="token function">forwardMessage</span><span class="token punctuation">(</span>client<span class="token punctuation">,</span>fwdMsg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
 
-    private void forwardMessage(SocketChannel client, String fwdMsg) {
-        selector.keys().forEach(key-&gt;{
-            SelectableChannel connectedClient = key.channel();
-            if(connectedClient instanceof ServerSocketChannel) return;
-            if(key.isValid() &amp;&amp; !client.equals(connectedClient)){
-                wBuffer.clear();
-                wBuffer.put(charset.encode(getClientName(client)+&quot;:&quot;+fwdMsg));
-                wBuffer.flip();
-                while (wBuffer.hasRemaining()){
-                    try {
-                        ((SocketChannel)connectedClient).write(wBuffer);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-    }
+    <span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">forwardMessage</span><span class="token punctuation">(</span><span class="token class-name">SocketChannel</span> client<span class="token punctuation">,</span> <span class="token class-name">String</span> fwdMsg<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        selector<span class="token punctuation">.</span><span class="token function">keys</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">forEach</span><span class="token punctuation">(</span>key<span class="token operator">-></span><span class="token punctuation">&#123;</span>
+            <span class="token class-name">SelectableChannel</span> connectedClient <span class="token operator">=</span> key<span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>connectedClient <span class="token keyword">instanceof</span> <span class="token class-name">ServerSocketChannel</span><span class="token punctuation">)</span> <span class="token keyword">return</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>key<span class="token punctuation">.</span><span class="token function">isValid</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>client<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span>connectedClient<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                wBuffer<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                wBuffer<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>charset<span class="token punctuation">.</span><span class="token function">encode</span><span class="token punctuation">(</span><span class="token function">getClientName</span><span class="token punctuation">(</span>client<span class="token punctuation">)</span><span class="token operator">+</span><span class="token string">":"</span><span class="token operator">+</span>fwdMsg<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                wBuffer<span class="token punctuation">.</span><span class="token function">flip</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">while</span> <span class="token punctuation">(</span>wBuffer<span class="token punctuation">.</span><span class="token function">hasRemaining</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+                        <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token class-name">SocketChannel</span><span class="token punctuation">)</span>connectedClient<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span>wBuffer<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                        e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">&#125;</span>
+                <span class="token punctuation">&#125;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    private String receive(SocketChannel client) throws IOException {
-        rBuffer.clear();
-        while(client.read(rBuffer)&gt;0);
-        rBuffer.flip();
-        return String.valueOf(charset.decode(rBuffer));
-    }
+    <span class="token keyword">private</span> <span class="token class-name">String</span> <span class="token function">receive</span><span class="token punctuation">(</span><span class="token class-name">SocketChannel</span> client<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">IOException</span> <span class="token punctuation">&#123;</span>
+        rBuffer<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">while</span><span class="token punctuation">(</span>client<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span>rBuffer<span class="token punctuation">)</span><span class="token operator">></span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        rBuffer<span class="token punctuation">.</span><span class="token function">flip</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token class-name">String</span><span class="token punctuation">.</span><span class="token function">valueOf</span><span class="token punctuation">(</span>charset<span class="token punctuation">.</span><span class="token function">decode</span><span class="token punctuation">(</span>rBuffer<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    private String getClientName(SocketChannel client){
-        return &quot;客户端[&quot;+client.socket().getPort()+&quot;]&quot;;
-    }
+    <span class="token keyword">private</span> <span class="token class-name">String</span> <span class="token function">getClientName</span><span class="token punctuation">(</span><span class="token class-name">SocketChannel</span> client<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token string">"客户端["</span><span class="token operator">+</span>client<span class="token punctuation">.</span><span class="token function">socket</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getPort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">+</span><span class="token string">"]"</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    private boolean readyToQuit(String msg){
-        return QUIT.equals(msg);
-    }
-    private void close(Closeable... closeable){
-        for(Closeable c:closeable){
-            try {
-                c.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+    <span class="token keyword">private</span> <span class="token keyword">boolean</span> <span class="token function">readyToQuit</span><span class="token punctuation">(</span><span class="token class-name">String</span> msg<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> QUIT<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span>msg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">close</span><span class="token punctuation">(</span><span class="token class-name">Closeable</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> closeable<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token class-name">Closeable</span> c<span class="token operator">:</span>closeable<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+                c<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
 
-    public static void main(String[] args) {
-        ChatServer chatServer = new ChatServer(7777);
-        chatServer.start();
-    }
-}</code></pre>
-<h2 id="客户端实现">1.2 客户端实现</h2><pre><code class="java">public class ChatClient {
-    private static final String DEFAULT_SERVER_HOST = &quot;127.0.0.1&quot;;
-    private static final int DEFAULT_SERVER_PORT = 8888;
-    private static final String QUIT = &quot;quit&quot;;
-    private static final int BUFFER = 1024;
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">ChatServer</span> chatServer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ChatServer</span><span class="token punctuation">(</span><span class="token number">7777</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        chatServer<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-    private String host;
-    private int port;
-    private SocketChannel client;
-    private ByteBuffer rBuffer = ByteBuffer.allocate(BUFFER);
-    private ByteBuffer wBuffer = ByteBuffer.allocate(BUFFER);
-    private Selector selector;
-    private Charset charset = Charset.forName(&quot;UTF-8&quot;);
+<h2 id="客户端实现">1.2 客户端实现</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">ChatClient</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token class-name">String</span> DEFAULT_SERVER_HOST <span class="token operator">=</span> <span class="token string">"127.0.0.1"</span><span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">int</span> DEFAULT_SERVER_PORT <span class="token operator">=</span> <span class="token number">8888</span><span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token class-name">String</span> QUIT <span class="token operator">=</span> <span class="token string">"quit"</span><span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">int</span> BUFFER <span class="token operator">=</span> <span class="token number">1024</span><span class="token punctuation">;</span>
 
-    public ChatClient() {
-    }
+    <span class="token keyword">private</span> <span class="token class-name">String</span> host<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token keyword">int</span> port<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">SocketChannel</span> client<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">ByteBuffer</span> rBuffer <span class="token operator">=</span> <span class="token class-name">ByteBuffer</span><span class="token punctuation">.</span><span class="token function">allocate</span><span class="token punctuation">(</span>BUFFER<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">ByteBuffer</span> wBuffer <span class="token operator">=</span> <span class="token class-name">ByteBuffer</span><span class="token punctuation">.</span><span class="token function">allocate</span><span class="token punctuation">(</span>BUFFER<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">Selector</span> selector<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">Charset</span> charset <span class="token operator">=</span> <span class="token class-name">Charset</span><span class="token punctuation">.</span><span class="token function">forName</span><span class="token punctuation">(</span><span class="token string">"UTF-8"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    public ChatClient(String host, int port) {
-        this.host = host;
-        this.port = port;
-    }
-    public boolean readyToQuit(String msg){
-        return QUIT.equals(msg);
-    }
-    private void close(Closeable... closeable){
-        for(Closeable c:closeable){
-            try {
-                c.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    private void start(){
-        try {
-            client = SocketChannel.open();
-            client.configureBlocking(false);
+    <span class="token keyword">public</span> <span class="token class-name">ChatClient</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token punctuation">&#125;</span>
 
-            selector = Selector.open();
-            client.register(selector, SelectionKey.OP_CONNECT);
-            client.connect(new InetSocketAddress(host,port));
-            while (selector.isOpen()){
-                selector.select();
-                Set&lt;SelectionKey&gt; keys = selector.selectedKeys();
-                keys.forEach(key-&gt;{
-                    handles(key);
-                });
-                keys.clear();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClosedSelectorException e){
+    <span class="token keyword">public</span> <span class="token class-name">ChatClient</span><span class="token punctuation">(</span><span class="token class-name">String</span> host<span class="token punctuation">,</span> <span class="token keyword">int</span> port<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>host <span class="token operator">=</span> host<span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>port <span class="token operator">=</span> port<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">readyToQuit</span><span class="token punctuation">(</span><span class="token class-name">String</span> msg<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> QUIT<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span>msg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">close</span><span class="token punctuation">(</span><span class="token class-name">Closeable</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> closeable<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token class-name">Closeable</span> c<span class="token operator">:</span>closeable<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+                c<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            client <span class="token operator">=</span> <span class="token class-name">SocketChannel</span><span class="token punctuation">.</span><span class="token keyword">open</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            client<span class="token punctuation">.</span><span class="token function">configureBlocking</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        } finally {
-            close(selector);
-        }
-    }
+            selector <span class="token operator">=</span> <span class="token class-name">Selector</span><span class="token punctuation">.</span><span class="token keyword">open</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            client<span class="token punctuation">.</span><span class="token function">register</span><span class="token punctuation">(</span>selector<span class="token punctuation">,</span> <span class="token class-name">SelectionKey</span><span class="token punctuation">.</span>OP_CONNECT<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            client<span class="token punctuation">.</span><span class="token function">connect</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">InetSocketAddress</span><span class="token punctuation">(</span>host<span class="token punctuation">,</span>port<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">while</span> <span class="token punctuation">(</span>selector<span class="token punctuation">.</span><span class="token function">isOpen</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                selector<span class="token punctuation">.</span><span class="token function">select</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token class-name">Set</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">SelectionKey</span><span class="token punctuation">></span></span> keys <span class="token operator">=</span> selector<span class="token punctuation">.</span><span class="token function">selectedKeys</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                keys<span class="token punctuation">.</span><span class="token function">forEach</span><span class="token punctuation">(</span>key<span class="token operator">-></span><span class="token punctuation">&#123;</span>
+                    <span class="token function">handles</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                keys<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">ClosedSelectorException</span> e<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
 
-    private void handles(SelectionKey key) {
-        // CONNECT连接就绪事件
-        if (key.isConnectable()){
-            SocketChannel channel = (SocketChannel) key.channel();
-            if(client.isConnectionPending()){
-                try {
-                    client.finishConnect();
-                    //处理用户输入
-                    new Thread(new UserInputHandler(this)).start();
-                    client.register(selector,SelectionKey.OP_READ);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        // READ事件
-        else if(key.isReadable()){
-            SocketChannel client = (SocketChannel) key.channel();
-            String msg = null;
-            try {
-                msg = recieve(client);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if(msg.isEmpty()){
-                // 服务器异常
-                close(selector);
-            }else{
-                System.out.println(msg);
-            }
-        }
-    }
+        <span class="token punctuation">&#125;</span> <span class="token keyword">finally</span> <span class="token punctuation">&#123;</span>
+            <span class="token function">close</span><span class="token punctuation">(</span>selector<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
 
-    public void send(String msg) throws IOException {
-        if (msg.isEmpty()) return;
-        wBuffer.clear();
-        wBuffer.put(charset.encode(msg));
-        wBuffer.flip();
-        while (wBuffer.hasRemaining()){
-            client.write(wBuffer);
-        }
-        if(readyToQuit(msg)){
-            close(selector);
-        }
-    }
+    <span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">handles</span><span class="token punctuation">(</span><span class="token class-name">SelectionKey</span> key<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">// CONNECT连接就绪事件</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>key<span class="token punctuation">.</span><span class="token function">isConnectable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token class-name">SocketChannel</span> channel <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">SocketChannel</span><span class="token punctuation">)</span> key<span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>client<span class="token punctuation">.</span><span class="token function">isConnectionPending</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+                    client<span class="token punctuation">.</span><span class="token function">finishConnect</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token comment">//处理用户输入</span>
+                    <span class="token keyword">new</span> <span class="token class-name">Thread</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">UserInputHandler</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    client<span class="token punctuation">.</span><span class="token function">register</span><span class="token punctuation">(</span>selector<span class="token punctuation">,</span><span class="token class-name">SelectionKey</span><span class="token punctuation">.</span>OP_READ<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                    e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token comment">// READ事件</span>
+        <span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span>key<span class="token punctuation">.</span><span class="token function">isReadable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token class-name">SocketChannel</span> client <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">SocketChannel</span><span class="token punctuation">)</span> key<span class="token punctuation">.</span><span class="token function">channel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">String</span> msg <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+            <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+                msg <span class="token operator">=</span> <span class="token function">recieve</span><span class="token punctuation">(</span>client<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>msg<span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                <span class="token comment">// 服务器异常</span>
+                <span class="token function">close</span><span class="token punctuation">(</span>selector<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span><span class="token keyword">else</span><span class="token punctuation">&#123;</span>
+                <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>msg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
 
-    private String recieve(SocketChannel client) throws IOException {
-        rBuffer.clear();
-        while(client.read(rBuffer)&gt;0);
-        rBuffer.flip();
-        return String.valueOf(charset.decode(rBuffer));
-    }
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">send</span><span class="token punctuation">(</span><span class="token class-name">String</span> msg<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">IOException</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>msg<span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span><span class="token punctuation">;</span>
+        wBuffer<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        wBuffer<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>charset<span class="token punctuation">.</span><span class="token function">encode</span><span class="token punctuation">(</span>msg<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        wBuffer<span class="token punctuation">.</span><span class="token function">flip</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">while</span> <span class="token punctuation">(</span>wBuffer<span class="token punctuation">.</span><span class="token function">hasRemaining</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            client<span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span>wBuffer<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">readyToQuit</span><span class="token punctuation">(</span>msg<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token function">close</span><span class="token punctuation">(</span>selector<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
 
-    public static void main(String[] args) {
-        ChatClient client = new ChatClient(&quot;127.0.0.1&quot;,7777);
-        client.start();
-    }
-}</code></pre>
+    <span class="token keyword">private</span> <span class="token class-name">String</span> <span class="token function">recieve</span><span class="token punctuation">(</span><span class="token class-name">SocketChannel</span> client<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">IOException</span> <span class="token punctuation">&#123;</span>
+        rBuffer<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">while</span><span class="token punctuation">(</span>client<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span>rBuffer<span class="token punctuation">)</span><span class="token operator">></span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        rBuffer<span class="token punctuation">.</span><span class="token function">flip</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token class-name">String</span><span class="token punctuation">.</span><span class="token function">valueOf</span><span class="token punctuation">(</span>charset<span class="token punctuation">.</span><span class="token function">decode</span><span class="token punctuation">(</span>rBuffer<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">ChatClient</span> client <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ChatClient</span><span class="token punctuation">(</span><span class="token string">"127.0.0.1"</span><span class="token punctuation">,</span><span class="token number">7777</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        client<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>处理用户输入的线程：</p>
-<pre><code class="java">public class UserInputHandler implements Runnable{
-    private ChatClient chatClient;
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">UserInputHandler</span> <span class="token keyword">implements</span> <span class="token class-name">Runnable</span><span class="token punctuation">&#123;</span>
+    <span class="token keyword">private</span> <span class="token class-name">ChatClient</span> chatClient<span class="token punctuation">;</span>
 
-    public UserInputHandler(ChatClient chatClient){
-        this.chatClient = chatClient;
-    }
+    <span class="token keyword">public</span> <span class="token class-name">UserInputHandler</span><span class="token punctuation">(</span><span class="token class-name">ChatClient</span> chatClient<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>chatClient <span class="token operator">=</span> chatClient<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    @Override
-    public void run() {
-        try {
-            // 等待用户输入消息
-            BufferedReader consoleReader = new BufferedReader(
-                    new InputStreamReader(System.in)
-            );
-            while (true){
-                String input = consoleReader.readLine();
-                // 向服务器发送消息
-                chatClient.send(input);
-                // 检查用户是否准备退出
-                if(chatClient.readyToQuit(input)){
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-}</code></pre>
-
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            <span class="token comment">// 等待用户输入消息</span>
+            <span class="token class-name">BufferedReader</span> consoleReader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BufferedReader</span><span class="token punctuation">(</span>
+                    <span class="token keyword">new</span> <span class="token class-name">InputStreamReader</span><span class="token punctuation">(</span><span class="token class-name">System</span><span class="token punctuation">.</span>in<span class="token punctuation">)</span>
+            <span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                <span class="token class-name">String</span> input <span class="token operator">=</span> consoleReader<span class="token punctuation">.</span><span class="token function">readLine</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token comment">// 向服务器发送消息</span>
+                chatClient<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span>input<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token comment">// 检查用户是否准备退出</span>
+                <span class="token keyword">if</span><span class="token punctuation">(</span>chatClient<span class="token punctuation">.</span><span class="token function">readyToQuit</span><span class="token punctuation">(</span>input<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                    <span class="token keyword">break</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
             </div>
             <hr/>
 
@@ -1325,7 +1326,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

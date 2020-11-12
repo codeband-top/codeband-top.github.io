@@ -28,6 +28,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -452,17 +453,19 @@
 
 <p>这段代码发起了20个线程，每个线程对race变量进行10000次自增操作，如果这段代码能够正确并发的话，最后输出的结果应该是200000。但运行完这段代码之后，并不会获得期望的结果，而且会发现每次运行程序，输出的结果都不一样，都是一个小于200000的数字。</p>
 <p>问题就出在自增运算“race++”之中，反编译这段代码后，发现只有一行代码的increase()方法在Class文件中是由4条字节码指令构成。从字节码层面上已经很容易分析出并发失败的原因了：当getstatic指令把 race的值取到操作栈顶时，volatile关键字保证了race的值在此时是正确的，但是在执行iconst_1、iadd这些指令的时候，其他线程可能已经把race的值改变了，而操作栈顶的值就变成了过期的数据，所以 putstatic指令执行后就可能把较小的race值同步回主内存之中。</p>
-<pre><code>public static void increase();
+<pre class="language-none"><code class="language-none">public static void increase();
     Code:
-        Stack=2, Locals=0, Args_size=0
-        0:   getstatic       #13; //Field race:I
+        Stack&#x3D;2, Locals&#x3D;0, Args_size&#x3D;0
+        0:   getstatic       #13; &#x2F;&#x2F;Field race:I
         3:   iconst_1
         4:   iadd
-        5:   putstatic       #13; //Field race:I
+        5:   putstatic       #13; &#x2F;&#x2F;Field race:I
         8:   return
     LineNumberTable:
         line 14: 0         
-        line 15: 8</code></pre><p>由于volatile变量只能保证可见性，在不符合以下两条规则的运算场景中，我们仍然要通过加锁（使用synchronized、java.util.concurrent中的锁或原子类）来保证原子性：</p>
+        line 15: 8</code></pre>
+
+<p>由于volatile变量只能保证可见性，在不符合以下两条规则的运算场景中，我们仍然要通过加锁（使用synchronized、java.util.concurrent中的锁或原子类）来保证原子性：</p>
 <ul>
 <li>运算结果并不依赖变量的当前值，或者能够确保只有单一的线程修改变量的值。</li>
 <li>变量不需要与其他的状态变量共同参与不变约束。</li>
@@ -494,12 +497,13 @@
 <h3 id="有序性">2.5.3 有序性</h3><p>Java程序中天然的有序性可以总结为一句话：如果在本线程内观察，所有的操作都是有序的；如果在一个线程中观察另一个线程，所有的操作都是无序的。前半句是指“线程内似表现为串行的语义”，后半句是指“指令重排序”现象和“工作内存与主内存同步延迟”现象。</p>
 <p>Java语言提供了volatile和synchronized两个关键字来保证线程之间操作的有序性，volatile关键字本身就包含了禁止指令重排序的语义，而synchronized则是由“一个变量在同一个时刻只允许一条线程对其进行lock操作”这条规则获得的，这个规则决定了持有同一个锁的两个同步块只能串行地进入。</p>
 <h2 id="先行发生原则">2.6 先行发生原则</h2><p>先行发生是Java内存模型中定义的两项操作之间的偏序关系，比如说操作A先行发生于操作B，其实就是说在发生操作B之前，操作A产生的影响能被操作B 观察到，“影响”包括修改了内存中共享变量的值、发送了消息、调用了方法等。</p>
-<pre><code class="java">// 以下操作在线程A中执行 
-i = 1;
-// 以下操作在线程B中执行 
-j = i;
-// 以下操作在线程C中执行 
-i = 2;</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">// 以下操作在线程A中执行 </span>
+i <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token comment">// 以下操作在线程B中执行 </span>
+j <span class="token operator">=</span> i<span class="token punctuation">;</span>
+<span class="token comment">// 以下操作在线程C中执行 </span>
+i <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span></code></pre>
+
 <p>假设线程A中的操作“i=1”先行发生于线程B的操作“j=i”，那我们就可以确定在线程B的操作执行后，变量j的值一定是等于1，得出这个结论的依据有两个：一是根据先行发生原则，“i=1”的结果可以被观察到；二是线程C还没登场，线程A操作结束之后没有其他线程会修改变量i的值。现在再来考虑线程C，我们依然保持线程A和B之间的先行发生关系，而C出现在线程A和B的操作之间，但是C与B没有先行发生关系，那j的值会是多少呢？答案是不确定！1和2都有可能，因为线程C对变量i的影响可能会被线程B观察到，也可能不会，这时候线程B就存在读取到过期数据的风险，不具备多线程安全性。</p>
 <p>下面是Java内存模型下一些“天然的”先行发生关系，这些先行发生关系无须任何同步器协助就已经存在，可以在编码中直接使用。如果两个操作之间的关系不在此列，并且无法从下列规则推导出来，则它们就没有顺序性保障，虚拟机可以对它们随意地进行重排序。</p>
 <ul>
@@ -936,7 +940,7 @@ i = 2;</code></pre>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            1 原题给定一个整数序列：a1, a2, …, an，一个132模式的子序列 ai, aj, ak 被定义为：当 i &lt; j &lt; k 时，ai &lt; ak &lt; aj。设计一个算法，当给定有 n 个数字的序列时，验证这个
+                            1 原题给定一个整数序列：a1, a2, …, an，一个132模式的子序列 ai, aj, ak 被定义为：当 i &lt; j &lt; k 时，ai &lt; ak &lt; aj。设计一个算法，当给定有 n 个数字的序列时，验证这个
                         
                     </div>
                     <div class="publish-info">
@@ -994,10 +998,11 @@ i = 2;</code></pre>
 
 num 的长度小于 10002 且 ≥ k。
 num 不会包含任何前导零。
+ 
 
 示例 1：
 
-输入: num = “1432219”
+输入: num = “143221
                         
                     </div>
                     <div class="publish-info">
@@ -1174,7 +1179,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

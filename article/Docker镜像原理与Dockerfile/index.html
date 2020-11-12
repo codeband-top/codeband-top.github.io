@@ -29,6 +29,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -399,7 +400,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    918
+                    930
                 </div>
                 
 
@@ -418,51 +419,67 @@
 <p>当从一个镜像启动容器时，Docker会在最顶层加载一个读写文件系统作为容器</p>
 <h1 id="Docker-中一个centos镜像为什么只有200MB，而一个centos操作系统的iso文件要几个个G？">2 Docker 中一个centos镜像为什么只有200MB，而一个centos操作系统的iso文件要几个个G？</h1><p>Docker镜像是由特殊的文件系统叠加而成，<br>最底端是 <code>bootfs</code>，并使用宿主机的 <code>bootfs</code>。</p>
 <p>第二层是root文件系统<code>rootfs</code>,称为<code>base image</code><br>然后再往上可以叠加其他的镜像文件</p>
-<p><img src="https://api.codetool.top/img/15854771588983.png" alt></p>
+<p><img src="https://api.codetool.top/img/15854771588983.png"></p>
 <p>Centos的iso镜像文件包含<code>bootfs</code>和<code>rootfs</code>，而docker的centos镜像复用操作系统的<code>bootfs</code>，只有<code>rootfs</code>和其他镜像层</p>
 <p>Docker 中一个tomcat镜像为什么有500MB，而一个tomcat安装包只有70多MB？</p>
 <p>由于docker中镜像是分层的，tomcat虽然只有70多MB，但他需要依赖于父镜像和基础镜像，所有整个对外暴露的tomcat镜像大小500多MB</p>
 <p>使用<code>docker inspect 镜像名</code>也可以看到<code>layers</code>，即分层镜像。</p>
 <h1 id="dockerfile">3 dockerfile</h1><p>容器转成镜像：</p>
-<pre><code>docker commit 容器id 镜像名称:版本号</code></pre><p>压缩和解压：</p>
-<pre><code>docker save -o 压缩文件名称 镜像名称:版本号
-docker load -i 压缩文件名称</code></pre><p>除此之外，可以用dockerfile来制作镜像。</p>
-<h2 id="语法">3.1 语法</h2><h3 id="FROM-amp-RUN-amp-USER">3.1.1 FROM &amp; RUN &amp; USER</h3><pre><code class="dockerfile">From debian:wheezy
+<pre class="language-none"><code class="language-none">docker commit 容器id 镜像名称:版本号</code></pre>
+
+<p>压缩和解压：</p>
+<pre class="language-none"><code class="language-none">docker save -o 压缩文件名称 镜像名称:版本号
+docker load -i 压缩文件名称</code></pre>
+
+<p>除此之外，可以用dockerfile来制作镜像。</p>
+<h2 id="语法">3.1 语法</h2><h3 id="FROM-amp-RUN-amp-USER">3.1.1 FROM &amp; RUN &amp; USER</h3><pre class="language-dockerfile" data-language="dockerfile"><code class="language-dockerfile">From debian:wheezy
 USER cowsay
 Run apt-get update &amp;&amp; apt-get install -y cowsay fortune</code></pre>
+
 <p><code>FROM</code>指令指定初始镜像，这里使用debian，并且指定了wheezy版本</p>
 <p><code>USER</code>指定build或启动的时候，run cmd entrypoint执行时使用的用户。</p>
 <p><code>RUN</code>用于执行指令</p>
-<h3 id="ENTRYPOINT">3.1.2 ENTRYPOINT</h3><pre><code class="dockerfile">ENTRYPOINT [&quot;/usr/games/cowsay&quot;]</code></pre>
+<h3 id="ENTRYPOINT">3.1.2 ENTRYPOINT</h3><pre class="language-dockerfile" data-language="dockerfile"><code class="language-dockerfile">ENTRYPOINT [&quot;&#x2F;usr&#x2F;games&#x2F;cowsay&quot;]</code></pre>
+
 <p>ENTRYPOINT指定一个可执行文件，传给docker run作参数，一般在制作一些执行就关闭的容器中会使用。</p>
-<h3 id="COPY-amp-ADD">3.1.3 COPY &amp; ADD</h3><pre><code class="dockerfile">COPY entrypoint.sh /
-ADD entrypoint.sh /</code></pre>
+<h3 id="COPY-amp-ADD">3.1.3 COPY &amp; ADD</h3><pre class="language-dockerfile" data-language="dockerfile"><code class="language-dockerfile">COPY entrypoint.sh &#x2F;
+ADD entrypoint.sh &#x2F;</code></pre>
+
 <p>把一个文件从主机（可使用dockerfile所在路径的相对路径）复制到镜像的文件系统。COPY指令和ADD指令的唯一区别在于是否支持从远程URL获取资源。COPY指令只能从执行docker build所在的主机上读取资源并复制到镜像中。而ADD指令还支持通过URL从远程服务器读取资源并复制到镜像中。</p>
-<h3 id="ENV-amp-ARG">3.1.4 ENV &amp; ARG</h3><pre><code class="dockerfile">ENV NGINX_VERSION   1.17.9</code></pre>
+<h3 id="ENV-amp-ARG">3.1.4 ENV &amp; ARG</h3><pre class="language-dockerfile" data-language="dockerfile"><code class="language-dockerfile">ENV NGINX_VERSION   1.17.9</code></pre>
+
 <p>指定环境变量</p>
-<pre><code class="dockerfile">ARG some_variable_name=default_value
-
+<pre class="language-dockerfile" data-language="dockerfile"><code class="language-dockerfile">ARG some_variable_name&#x3D;default_value
+ 
 RUN echo &quot;Oh dang look at that $some_variable_name&quot;</code></pre>
+
 <p>可以用来作为构建的参数（当然也可以使用环境变量）。</p>
-<h3 id="MAINTAINER-amp-LABEL">3.1.5 MAINTAINER &amp; LABEL</h3><pre><code class="dockerfile">MAINTAINER John Smith &lt;john@smith.com&gt;
+<h3 id="MAINTAINER-amp-LABEL">3.1.5 MAINTAINER &amp; LABEL</h3><pre class="language-dockerfile" data-language="dockerfile"><code class="language-dockerfile">MAINTAINER John Smith &lt;john@smith.com&gt;
 
-LABEL maintainer=&quot;John Smith &lt;john@smith.com&gt;&quot;</code></pre>
+LABEL maintainer&#x3D;&quot;John Smith &lt;john@smith.com&gt;&quot;</code></pre>
+
 <p><code>MAINTAINER</code>设定作者的联系信息，可以使用<code>LABEL</code>代替，LABEL设置的属性最终可以在docker image的基本属性中查看</p>
-<h3 id="EXPOSE">3.1.6 EXPOSE</h3><pre><code class="dockerfile">EXPOSE 80</code></pre>
-<p>暴露端口</p>
-<h3 id="VOLUME-amp-WORKDIR">3.1.7 VOLUME &amp; WORKDIR</h3><pre><code class="dockerfile">VOLUME /data
+<h3 id="EXPOSE">3.1.6 EXPOSE</h3><pre class="language-dockerfile" data-language="dockerfile"><code class="language-dockerfile">EXPOSE 80</code></pre>
 
-WORKDIR /data</code></pre>
+<p>暴露端口</p>
+<h3 id="VOLUME-amp-WORKDIR">3.1.7 VOLUME &amp; WORKDIR</h3><pre class="language-dockerfile" data-language="dockerfile"><code class="language-dockerfile">VOLUME &#x2F;data
+
+WORKDIR &#x2F;data</code></pre>
+
 <p><code>VOLUME</code>定义外部可以挂载的数据卷，<code>WORKDIR</code>指定工作目录，如果没有自动创建</p>
 <h3 id="CMD">3.1.8 CMD</h3><p>第一种用法：</p>
-<pre><code class="dockerfile">CMD java -jar app.jar</code></pre>
+<pre class="language-dockerfile" data-language="dockerfile"><code class="language-dockerfile">CMD java -jar app.jar</code></pre>
+
 <p>运行一个可执行的文件并提供参数。</p>
 <p>第二种用法：为ENTRYPOINT指定参数。</p>
 <p>第三种用法：</p>
-<pre><code class="dockerfile">CMD[&quot;/bin/bash&quot;]</code></pre>
+<pre class="language-dockerfile" data-language="dockerfile"><code class="language-dockerfile">CMD[&quot;&#x2F;bin&#x2F;bash&quot;]</code></pre>
+
 <p>设置启动容器默认打开的终端</p>
-<h2 id="使用Dockerfile创建镜像">3.2 使用Dockerfile创建镜像</h2><pre><code>docker build -f ./centos_dockerfile -t vim_centos:1 .</code></pre><p><code>-f Dockerfile</code>指定dockerfile的位置</p>
-<p><code>-t image_name:tag</code>指定镜像的名字及标签</p>
+<h2 id="使用Dockerfile创建镜像">3.2 使用Dockerfile创建镜像</h2><pre class="language-none"><code class="language-none">docker build -f .&#x2F;centos_dockerfile -t vim_centos:1 .</code></pre>
+
+<p><code> -f Dockerfile</code>指定dockerfile的位置</p>
+<p><code> -t image_name:tag</code>指定镜像的名字及标签</p>
 
             </div>
             <hr/>
@@ -1063,7 +1080,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

@@ -10,10 +10,11 @@
 
 num 的长度小于 10002 且 ≥ k。
 num 不会包含任何前导零。
+ 
 
 示例 1：
 
-输入: num = “1432219”">
+输入: num = “143221">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -35,6 +36,7 @@ num 不会包含任何前导零。
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -409,7 +411,7 @@ num 不会包含任何前导零。
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    526
+                    536
                 </div>
                 
 
@@ -426,11 +428,13 @@ num 不会包含任何前导零。
 <p><strong>注意：</strong> </p>
 <ul>
 <li><em>num</em> 的长度小于 10002 且 ≥ <em>k</em>。</li>
-<li><em>num</em> 不会包含任何前导零。</li>
+<li><em>num</em> 不会包含任何前导零。
+ </li>
 </ul>
 <p><strong>示例 1：</strong></p>
 <blockquote>
-<p>输入: num = “1432219”, k = 3<br>输出: “1219”<br>解释: 移除掉三个数字 4, 3, 和 2 形成一个新的最小的数字 1219。  </p>
+<p>输入: num = “1432219”, k = 3<br>输出: “1219”<br>解释: 移除掉三个数字 4, 3, 和 2 形成一个新的最小的数字 1219。  
+ </p>
 </blockquote>
 <p><strong>示例 2：</strong></p>
 <blockquote>
@@ -443,38 +447,37 @@ num 不会包含任何前导零。
 <h1 id="解法">2 解法</h1><h2 id="思想">2.1 思想</h2><p>要在一个长度为length的字符数组中去掉k位，留下一个最小数字，则是要留下一个length-k位的数字，我们每一次都要保证在剩余位数充足的情况下选择最小的数字。</p>
 <p>对于示例一，<code>&quot;1432219&quot;</code>要选出<code>7-3=4</code>位数字，我们可以保留最后三位，在前五位中选出一个最小数字1，然后在剩下的<code>&quot;432219&quot;</code>中选出3位数字，我们可以保留最后两位，在前四位中选出一个最小数字2，然后在剩下的<code>&quot;219&quot;</code>中选出2位数字，我们可以保留最后一位，在前两位中选出一个最小数字1，然后在剩下的<code>&quot;9&quot;</code>中选出1位数字，选取9。</p>
 <p>得到的结果就是<code>&quot;1219&quot;</code></p>
-<h2 id="代码">2.2 代码</h2><pre><code class="java">class Solution {
-    public String removeKdigits(String num, int k) {
-        char[] nums = num.toCharArray();
-        int start = 0;//下一次选取数字开始的位置
-        int min = 0;
-        int origink = k;
-        char[] result = new char[nums.length-k];//保存结果
+<h2 id="代码">2.2 代码</h2><pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">removeKdigits</span><span class="token punctuation">(</span><span class="token class-name">String</span> num<span class="token punctuation">,</span> <span class="token keyword">int</span> k<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">char</span><span class="token punctuation">[</span><span class="token punctuation">]</span> nums <span class="token operator">=</span> num<span class="token punctuation">.</span><span class="token function">toCharArray</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> start <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span><span class="token comment">//下一次选取数字开始的位置</span>
+        <span class="token keyword">int</span> min <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> origink <span class="token operator">=</span> k<span class="token punctuation">;</span>
+        <span class="token keyword">char</span><span class="token punctuation">[</span><span class="token punctuation">]</span> result <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">char</span><span class="token punctuation">[</span>nums<span class="token punctuation">.</span>length<span class="token operator">-</span>k<span class="token punctuation">]</span><span class="token punctuation">;</span><span class="token comment">//保存结果</span>
 
-        while(k&lt;nums.length){
-            for(int i = start;i&lt;k+1;i++){//保留有限位数，选取最小数字
-                if(nums[i]&lt;nums[min]){
-                    min = i;
-                }
-            }
-            result[k-origink] = nums[min];
-            k++;
-            start = min+1;
-            min = start;
-        }
-        for(int i = 0;i&lt;=result.length;i++){//去除开头的0
-            if(i==result.length)
-                return &quot;0&quot;;
-            if(result[i]!=&#39;0&#39;){
-                result = Arrays.copyOfRange(result,i,result.length);
-                break;
-            }
-        }
+        <span class="token keyword">while</span><span class="token punctuation">(</span>k<span class="token operator">&lt;</span>nums<span class="token punctuation">.</span>length<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> start<span class="token punctuation">;</span>i<span class="token operator">&lt;</span>k<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span><span class="token comment">//保留有限位数，选取最小数字</span>
+                <span class="token keyword">if</span><span class="token punctuation">(</span>nums<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">&lt;</span>nums<span class="token punctuation">[</span>min<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                    min <span class="token operator">=</span> i<span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span>
+            <span class="token punctuation">&#125;</span>
+            result<span class="token punctuation">[</span>k<span class="token operator">-</span>origink<span class="token punctuation">]</span> <span class="token operator">=</span> nums<span class="token punctuation">[</span>min<span class="token punctuation">]</span><span class="token punctuation">;</span>
+            k<span class="token operator">++</span><span class="token punctuation">;</span>
+            start <span class="token operator">=</span> min<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">;</span>
+            min <span class="token operator">=</span> start<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;=</span>result<span class="token punctuation">.</span>length<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span><span class="token comment">//去除开头的0</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>i<span class="token operator">==</span>result<span class="token punctuation">.</span>length<span class="token punctuation">)</span>
+                <span class="token keyword">return</span> <span class="token string">"0"</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>result<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">!=</span><span class="token string">'0'</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+                result <span class="token operator">=</span> <span class="token class-name">Arrays</span><span class="token punctuation">.</span><span class="token function">copyOfRange</span><span class="token punctuation">(</span>result<span class="token punctuation">,</span>i<span class="token punctuation">,</span>result<span class="token punctuation">.</span>length<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">break</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
 
-        return String.valueOf(result);
-    }
-}</code></pre>
-
+        <span class="token keyword">return</span> <span class="token class-name">String</span><span class="token punctuation">.</span><span class="token function">valueOf</span><span class="token punctuation">(</span>result<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
             </div>
             <hr/>
 
@@ -932,12 +935,12 @@ num 不会包含任何前导零。
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
-                        <span class="chip bg-color">数据结构</span>
-                    </a>
-                    
                     <a href="/tags/leetcode/">
                         <span class="chip bg-color">leetcode</span>
+                    </a>
+                    
+                    <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
+                        <span class="chip bg-color">数据结构</span>
                     </a>
                     
                 </div>
@@ -1087,7 +1090,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

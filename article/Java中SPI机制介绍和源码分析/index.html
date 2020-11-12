@@ -29,6 +29,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -421,9 +422,9 @@
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <p>本文参考资源：</p>
-<p><a href="https://www.jianshu.com/p/46b42f7f593c" target="_blank" rel="noopener">高级开发必须理解的Java中SPI机制 - 简书</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/46b42f7f593c">高级开发必须理解的Java中SPI机制 - 简书</a></p>
 <h1 id="什么是SPI">1 什么是SPI</h1><p>SPI全称为Service Provider Interface，是一种服务发现机制。SPI 的本质是将接口实现类的全限定名配置在文件中，并由服务加载器读取配置文件,加载实现类。这样可以在运行时，动态为接口替换实现类。正因此特性，我们可以很容易的通过SPI机制为我们的程序提供拓展功能。</p>
-<p><img src="https://api.codetool.top/img/15846228922492.webp" alt></p>
+<p><img src="https://api.codetool.top/img/15846228922492.webp"></p>
 <p>应用场景：</p>
 <ul>
 <li>数据库驱动加载接口实现类的加载<br>JDBC加载不同类型数据库的驱动</li>
@@ -439,195 +440,212 @@
 <li>SPI的<strong>实现类必须携带一个不带参数的构造方法</strong></li>
 </ol>
 <h2 id="示例">2.2 示例</h2><p>创建接口<code>Markable</code>和实现类<code>RedMark</code>,<code>BlackMark</code>，结构如下图所示：</p>
-<p><img src="https://api.codetool.top/img/15846240671099.png" alt></p>
-<pre><code class="java">public interface Markable {
-    void mark();
-}</code></pre>
-<pre><code class="java">public class RedMark implements Markable {
-    public void mark() {
-        System.out.println(&quot;红色标记&quot;);
-    }
-}</code></pre>
-<pre><code class="java">public class BlackMark implements Markable {
-    public void mark() {
-        System.out.println(&quot;黑色标记&quot;);
-    }
-}</code></pre>
+<p><img src="https://api.codetool.top/img/15846240671099.png"></p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">Markable</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">void</span> <span class="token function">mark</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">RedMark</span> <span class="token keyword">implements</span> <span class="token class-name">Markable</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">mark</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"红色标记"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">BlackMark</span> <span class="token keyword">implements</span> <span class="token class-name">Markable</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">mark</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"黑色标记"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>在resources下面建立文件夹<code>/META-INF/services/</code>，添加文件<code>com.rhett.service.Markable</code>，内容为</p>
-<pre><code>com.rhett.service.impl.BlackMark
-com.rhett.service.impl.RedMark</code></pre><p>进行测试：</p>
-<pre><code class="java">public class SpiTest {
-    public static void main(String[] args) {
-        ServiceLoader&lt;Markable&gt; serviceLoader = ServiceLoader.load(Markable.class);
-        Iterator&lt;Markable&gt; iterator = serviceLoader.iterator();
-        while (iterator.hasNext()){
-            Markable markable = iterator.next();
-            markable.mark();
-        }
-    }
-}</code></pre>
+<pre class="language-none"><code class="language-none">com.rhett.service.impl.BlackMark
+com.rhett.service.impl.RedMark</code></pre>
+
+<p>进行测试：</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">SpiTest</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">ServiceLoader</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Markable</span><span class="token punctuation">></span></span> serviceLoader <span class="token operator">=</span> <span class="token class-name">ServiceLoader</span><span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token class-name">Markable</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">Iterator</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Markable</span><span class="token punctuation">></span></span> iterator <span class="token operator">=</span> serviceLoader<span class="token punctuation">.</span><span class="token function">iterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">while</span> <span class="token punctuation">(</span>iterator<span class="token punctuation">.</span><span class="token function">hasNext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+            <span class="token class-name">Markable</span> markable <span class="token operator">=</span> iterator<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            markable<span class="token punctuation">.</span><span class="token function">mark</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <h2 id="源码分析">2.3 源码分析</h2><p>load流程：</p>
-<pre><code class="java">public static &lt;S&gt; ServiceLoader&lt;S&gt; load(Class&lt;S&gt; service) {
-    ClassLoader cl = Thread.currentThread().getContextClassLoader();//获得当前类加载器
-    return ServiceLoader.load(service, cl);
-}</code></pre>
-<pre><code class="java">public static &lt;S&gt; ServiceLoader&lt;S&gt; load(Class&lt;S&gt; service,
-                                        ClassLoader loader)
-{
-    return new ServiceLoader&lt;&gt;(service, loader);
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">S</span><span class="token punctuation">></span></span> <span class="token class-name">ServiceLoader</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">S</span><span class="token punctuation">></span></span> <span class="token function">load</span><span class="token punctuation">(</span><span class="token class-name">Class</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">S</span><span class="token punctuation">></span></span> service<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">ClassLoader</span> cl <span class="token operator">=</span> <span class="token class-name">Thread</span><span class="token punctuation">.</span><span class="token function">currentThread</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getContextClassLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//获得当前类加载器</span>
+    <span class="token keyword">return</span> <span class="token class-name">ServiceLoader</span><span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>service<span class="token punctuation">,</span> cl<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">S</span><span class="token punctuation">></span></span> <span class="token class-name">ServiceLoader</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">S</span><span class="token punctuation">></span></span> <span class="token function">load</span><span class="token punctuation">(</span><span class="token class-name">Class</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">S</span><span class="token punctuation">></span></span> service<span class="token punctuation">,</span>
+                                        <span class="token class-name">ClassLoader</span> loader<span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">ServiceLoader</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span>service<span class="token punctuation">,</span> loader<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>ServiceLoader类：</p>
-<pre><code class="java">public final class ServiceLoader&lt;S&gt;
-    implements Iterable&lt;S&gt;
-{
-    private static final String PREFIX = &quot;META-INF/services/&quot;;
-    // 代表传入的接口
-    private final Class&lt;S&gt; service;
-    // 用于定位、加载和初始化实现类
-    private final ClassLoader loader;
-    // 访问权限上下文
-    private final AccessControlContext acc;
-    // 缓存提供器
-    private LinkedHashMap&lt;String,S&gt; providers = new LinkedHashMap&lt;&gt;();
-    // 当前的懒查询的迭代器
-    private LazyIterator lookupIterator;
-    //...
-}</code></pre>
-<pre><code class="java">private ServiceLoader(Class&lt;S&gt; svc, ClassLoader cl) {
-    //传入的接口不为空
-    service = Objects.requireNonNull(svc, &quot;Service interface cannot be null&quot;);
-    //如果类加载器为null默认使用应用程序类加载器
-    loader = (cl == null) ? ClassLoader.getSystemClassLoader() : cl;
-    //acc：AccessControlContext，访问权限相关
-    acc = (System.getSecurityManager() != null) ? AccessController.getContext() : null;
-    //跟进
-    reload();
-}</code></pre>
-<pre><code class="java">public void reload() {
-    //清空缓存表
-    providers.clear();
-    //实例化一个LazyIterator
-    lookupIterator = new LazyIterator(service, loader);
-}</code></pre>
-<pre><code class="java">//将接口、loader赋值给迭代器中的成员变量
-private LazyIterator(Class&lt;S&gt; service, ClassLoader loader) {
-    this.service = service;
-    this.loader = loader;
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">final</span> <span class="token keyword">class</span> <span class="token class-name">ServiceLoader</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">S</span><span class="token punctuation">></span></span>
+    <span class="token keyword">implements</span> <span class="token class-name">Iterable</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">S</span><span class="token punctuation">></span></span>
+<span class="token punctuation">&#123;</span>
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token class-name">String</span> PREFIX <span class="token operator">=</span> <span class="token string">"META-INF/services/"</span><span class="token punctuation">;</span>
+    <span class="token comment">// 代表传入的接口</span>
+    <span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token class-name">Class</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">S</span><span class="token punctuation">></span></span> service<span class="token punctuation">;</span>
+    <span class="token comment">// 用于定位、加载和初始化实现类</span>
+    <span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token class-name">ClassLoader</span> loader<span class="token punctuation">;</span>
+    <span class="token comment">// 访问权限上下文</span>
+    <span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token class-name">AccessControlContext</span> acc<span class="token punctuation">;</span>
+    <span class="token comment">// 缓存提供器</span>
+    <span class="token keyword">private</span> <span class="token class-name">LinkedHashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">,</span><span class="token class-name">S</span><span class="token punctuation">></span></span> providers <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">LinkedHashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// 当前的懒查询的迭代器</span>
+    <span class="token keyword">private</span> <span class="token class-name">LazyIterator</span> lookupIterator<span class="token punctuation">;</span>
+    <span class="token comment">//...</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token class-name">ServiceLoader</span><span class="token punctuation">(</span><span class="token class-name">Class</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">S</span><span class="token punctuation">></span></span> svc<span class="token punctuation">,</span> <span class="token class-name">ClassLoader</span> cl<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">//传入的接口不为空</span>
+    service <span class="token operator">=</span> <span class="token class-name">Objects</span><span class="token punctuation">.</span><span class="token function">requireNonNull</span><span class="token punctuation">(</span>svc<span class="token punctuation">,</span> <span class="token string">"Service interface cannot be null"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//如果类加载器为null默认使用应用程序类加载器</span>
+    loader <span class="token operator">=</span> <span class="token punctuation">(</span>cl <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token class-name">ClassLoader</span><span class="token punctuation">.</span><span class="token function">getSystemClassLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">:</span> cl<span class="token punctuation">;</span>
+    <span class="token comment">//acc：AccessControlContext，访问权限相关</span>
+    acc <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">System</span><span class="token punctuation">.</span><span class="token function">getSecurityManager</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token class-name">AccessController</span><span class="token punctuation">.</span><span class="token function">getContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token comment">//跟进</span>
+    <span class="token function">reload</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">reload</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">//清空缓存表</span>
+    providers<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//实例化一个LazyIterator</span>
+    lookupIterator <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">LazyIterator</span><span class="token punctuation">(</span>service<span class="token punctuation">,</span> loader<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">//将接口、loader赋值给迭代器中的成员变量</span>
+<span class="token keyword">private</span> <span class="token class-name">LazyIterator</span><span class="token punctuation">(</span><span class="token class-name">Class</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">S</span><span class="token punctuation">></span></span> service<span class="token punctuation">,</span> <span class="token class-name">ClassLoader</span> loader<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>service <span class="token operator">=</span> service<span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>loader <span class="token operator">=</span> loader<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>LazyIterator类：</p>
-<pre><code class="java">private class LazyIterator
-        implements Iterator&lt;S&gt;
-{
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">class</span> <span class="token class-name">LazyIterator</span>
+        <span class="token keyword">implements</span> <span class="token class-name">Iterator</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">S</span><span class="token punctuation">></span></span>
+<span class="token punctuation">&#123;</span>
 
-    Class&lt;S&gt; service;
-    ClassLoader loader;
-    Enumeration&lt;URL&gt; configs = null;
-    Iterator&lt;String&gt; pending = null;
-    String nextName = null;
-    //...
-}</code></pre>
+    <span class="token class-name">Class</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">S</span><span class="token punctuation">></span></span> service<span class="token punctuation">;</span>
+    <span class="token class-name">ClassLoader</span> loader<span class="token punctuation">;</span>
+    <span class="token class-name">Enumeration</span><span class="token generics"><span class="token punctuation">&lt;</span>URL<span class="token punctuation">></span></span> configs <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token class-name">Iterator</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> pending <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token class-name">String</span> nextName <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token comment">//...</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>获取iterator方法：</p>
-<pre><code class="java">public Iterator&lt;S&gt; iterator() {
-    return new Iterator&lt;S&gt;() {
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">Iterator</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">S</span><span class="token punctuation">></span></span> <span class="token function">iterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Iterator</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">S</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
 
-        Iterator&lt;Map.Entry&lt;String,S&gt;&gt; knownProviders
-            = providers.entrySet().iterator();
+        <span class="token class-name">Iterator</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Map</span><span class="token punctuation">.</span><span class="token class-name">Entry</span><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">,</span><span class="token class-name">S</span><span class="token punctuation">></span><span class="token punctuation">></span></span> knownProviders
+            <span class="token operator">=</span> providers<span class="token punctuation">.</span><span class="token function">entrySet</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">iterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        public boolean hasNext() {=
-            if (knownProviders.hasNext())
-                return true;
-            return lookupIterator.hasNext();
-        }
+        <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">hasNext</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span><span class="token operator">=</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>knownProviders<span class="token punctuation">.</span><span class="token function">hasNext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+                <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> lookupIterator<span class="token punctuation">.</span><span class="token function">hasNext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-        public S next() {
-            //如果缓存表中有，从缓存表（hashmap）中取
-            if (knownProviders.hasNext())
-                return knownProviders.next().getValue();
-            //否则使用懒查询迭代器的next方法
-            return lookupIterator.next();
-        }
+        <span class="token keyword">public</span> <span class="token class-name">S</span> <span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token comment">//如果缓存表中有，从缓存表（hashmap）中取</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>knownProviders<span class="token punctuation">.</span><span class="token function">hasNext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+                <span class="token keyword">return</span> knownProviders<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">//否则使用懒查询迭代器的next方法</span>
+            <span class="token keyword">return</span> lookupIterator<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
+        <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">remove</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">UnsupportedOperationException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
 
-    };
-}</code></pre>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>lookupIterator的next：</p>
-<pre><code class="java">public S next() {
-    //之前赋值过的访问权限上下文
-    if (acc == null) {
-        return nextService();
-    } else {
-        PrivilegedAction&lt;S&gt; action = new PrivilegedAction&lt;S&gt;() {
-            public S run() { return nextService(); }
-        };
-        return AccessController.doPrivileged(action, acc);
-    }
-}</code></pre>
-<pre><code class="java">private S nextService() {
-    //是否有下一个服务，如果有这里就获取了nextName
-    if (!hasNextService())
-        throw new NoSuchElementException();
-    //cn得到了下一个要加载的实现类全限定名
-    String cn = nextName;
-    nextName = null;
-    Class&lt;?&gt; c = null;
-    try {
-        //使用Class.forName即通过反射使用类加载器加载类，赋值给了类中的c变量
-        c = Class.forName(cn, false, loader);
-    } catch (ClassNotFoundException x) {
-        fail(service,
-                &quot;Provider &quot; + cn + &quot; not found&quot;);
-    }
-    if (!service.isAssignableFrom(c)) {
-        fail(service,
-                &quot;Provider &quot; + cn  + &quot; not a subtype&quot;);
-    }
-    try {
-        //将C转换为指定类型的对象
-        S p = service.cast(c.newInstance());
-        //并放入了缓存表
-        providers.put(cn, p);
-        return p;
-    } catch (Throwable x) {
-        fail(service,
-                &quot;Provider &quot; + cn + &quot; could not be instantiated&quot;,
-                x);
-    }
-    throw new Error();          // This cannot happen
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">S</span> <span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">//之前赋值过的访问权限上下文</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>acc <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token function">nextService</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">PrivilegedAction</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">S</span><span class="token punctuation">></span></span> action <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">PrivilegedAction</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">S</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">public</span> <span class="token class-name">S</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token keyword">return</span> <span class="token function">nextService</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token class-name">AccessController</span><span class="token punctuation">.</span><span class="token function">doPrivileged</span><span class="token punctuation">(</span>action<span class="token punctuation">,</span> acc<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token class-name">S</span> <span class="token function">nextService</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">//是否有下一个服务，如果有这里就获取了nextName</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">hasNextService</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">NoSuchElementException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//cn得到了下一个要加载的实现类全限定名</span>
+    <span class="token class-name">String</span> cn <span class="token operator">=</span> nextName<span class="token punctuation">;</span>
+    nextName <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token class-name">Class</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token operator">?</span><span class="token punctuation">></span></span> c <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">//使用Class.forName即通过反射使用类加载器加载类，赋值给了类中的c变量</span>
+        c <span class="token operator">=</span> <span class="token class-name">Class</span><span class="token punctuation">.</span><span class="token function">forName</span><span class="token punctuation">(</span>cn<span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">,</span> loader<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">ClassNotFoundException</span> x<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">fail</span><span class="token punctuation">(</span>service<span class="token punctuation">,</span>
+                <span class="token string">"Provider "</span> <span class="token operator">+</span> cn <span class="token operator">+</span> <span class="token string">" not found"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>service<span class="token punctuation">.</span><span class="token function">isAssignableFrom</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">fail</span><span class="token punctuation">(</span>service<span class="token punctuation">,</span>
+                <span class="token string">"Provider "</span> <span class="token operator">+</span> cn  <span class="token operator">+</span> <span class="token string">" not a subtype"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">//将C转换为指定类型的对象</span>
+        <span class="token class-name">S</span> p <span class="token operator">=</span> service<span class="token punctuation">.</span><span class="token function">cast</span><span class="token punctuation">(</span>c<span class="token punctuation">.</span><span class="token function">newInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//并放入了缓存表</span>
+        providers<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>cn<span class="token punctuation">,</span> p<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> p<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Throwable</span> x<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">fail</span><span class="token punctuation">(</span>service<span class="token punctuation">,</span>
+                <span class="token string">"Provider "</span> <span class="token operator">+</span> cn <span class="token operator">+</span> <span class="token string">" could not be instantiated"</span><span class="token punctuation">,</span>
+                x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>          <span class="token comment">// This cannot happen</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>获取下一个要加载的实现类全限定名的方法：</p>
-<pre><code class="java">private boolean hasNextService() {
-    //如果nextName不为空
-    if (nextName != null) {
-        return true;
-    }
-    //configs为空，即还没有读取过资源
-    if (configs == null) {
-        try {
-            // PREFIX就是/META-INF/resources，拼接接口的全限定名
-            String fullName = PREFIX + service.getName();
-            //加载文件资源，会返回一个Enumeration&lt;URL&gt;对象
-            if (loader == null)
-                configs = ClassLoader.getSystemResources(fullName);
-            else
-                configs = loader.getResources(fullName);
-        } catch (IOException x) {
-            fail(service, &quot;Error locating configuration files&quot;, x);
-        }
-    }
-    //给pending赋值，pending是一个Iterator&lt;String&gt;，这里就是实现类全限定名的迭代器
-    while ((pending == null) || !pending.hasNext()) {
-        if (!configs.hasMoreElements()) {
-            return false;
-        }
-        pending = parse(service, configs.nextElement());
-    }
-    // 将nextName设置为迭代器中的下一个类全限定名
-    nextName = pending.next();
-    return true;
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">boolean</span> <span class="token function">hasNextService</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">//如果nextName不为空</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>nextName <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token comment">//configs为空，即还没有读取过资源</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>configs <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            <span class="token comment">// PREFIX就是/META-INF/resources，拼接接口的全限定名</span>
+            <span class="token class-name">String</span> fullName <span class="token operator">=</span> PREFIX <span class="token operator">+</span> service<span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">//加载文件资源，会返回一个Enumeration&lt;URL>对象</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>loader <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span>
+                configs <span class="token operator">=</span> <span class="token class-name">ClassLoader</span><span class="token punctuation">.</span><span class="token function">getSystemResources</span><span class="token punctuation">(</span>fullName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">else</span>
+                configs <span class="token operator">=</span> loader<span class="token punctuation">.</span><span class="token function">getResources</span><span class="token punctuation">(</span>fullName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> x<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token function">fail</span><span class="token punctuation">(</span>service<span class="token punctuation">,</span> <span class="token string">"Error locating configuration files"</span><span class="token punctuation">,</span> x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token comment">//给pending赋值，pending是一个Iterator&lt;String>，这里就是实现类全限定名的迭代器</span>
+    <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>pending <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token operator">!</span>pending<span class="token punctuation">.</span><span class="token function">hasNext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>configs<span class="token punctuation">.</span><span class="token function">hasMoreElements</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        pending <span class="token operator">=</span> <span class="token function">parse</span><span class="token punctuation">(</span>service<span class="token punctuation">,</span> configs<span class="token punctuation">.</span><span class="token function">nextElement</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token comment">// 将nextName设置为迭代器中的下一个类全限定名</span>
+    nextName <span class="token operator">=</span> pending<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <h2 id="原生SPI的优缺点">2.4 原生SPI的优缺点</h2><p><strong>优点：</strong></p>
 <p>使用Java SPI机制的优势是<strong>实现解耦</strong>，使得第三方服务模块的装配控制的逻辑与调用者的业务代码分离，而不是耦合在一起。应用程序可以根据实际业务情况启用框架扩展或替换框架组件。</p>
 <p>并且因为它会加载jar包中资源的特点，可以动态扩充接口的实现类，并使得源框架不必关心接口的实现类的路径。</p>
@@ -1251,7 +1269,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

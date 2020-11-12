@@ -29,6 +29,7 @@ JAVA9 String新特性，说说你不知道的东西_Java_人在江湖-CSDN博客
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -411,7 +412,7 @@ JAVA9 String新特性，说说你不知道的东西_Java_人在江湖-CSDN博客
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.4k
+                    1.5k
                 </div>
                 
 
@@ -425,7 +426,7 @@ JAVA9 String新特性，说说你不知道的东西_Java_人在江湖-CSDN博客
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <p>本文参考资源：</p>
-<p><a href="https://blog.csdn.net/qq_41376740/article/details/80143215" target="_blank" rel="noopener">JAVA9 String新特性，说说你不知道的东西_Java_人在江湖-CSDN博客</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41376740/article/details/80143215">JAVA9 String新特性，说说你不知道的东西_Java_人在江湖-CSDN博客</a></p>
 <h1 id="StringBuffer和StringBuilder的区别">1 StringBuffer和StringBuilder的区别</h1><p>这里谈的是JDK8中StringBuffer和StringBuilder的实现，JDK9后随着String的变化，这两个类的实现也有了些许变化。</p>
 <ol>
 <li>String是不可变的，String类和它的内部value数组都被声明为final。因此通常对字符串进行拼接操作总是会生成一个新的String对象，效率较低。</li>
@@ -435,29 +436,31 @@ JAVA9 String新特性，说说你不知道的东西_Java_人在江湖-CSDN博客
 </ol>
 <p><img src="https://api.codetool.top/img/15864128585274.png" alt="StringBuffer和StringBuilder的关系"></p>
 <p>AbstractStringBuilder中append的实现：</p>
-<pre><code class="java">public AbstractStringBuilder append(String str) {
-    if (str == null)
-        return appendNull();
-    int len = str.length();
-    ensureCapacityInternal(count + len);
-    str.getChars(0, len, value, count);
-    count += len;
-    return this;
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">AbstractStringBuilder</span> <span class="token function">append</span><span class="token punctuation">(</span><span class="token class-name">String</span> str<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>str <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token function">appendNull</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> len <span class="token operator">=</span> str<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">ensureCapacityInternal</span><span class="token punctuation">(</span>count <span class="token operator">+</span> len<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    str<span class="token punctuation">.</span><span class="token function">getChars</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> len<span class="token punctuation">,</span> value<span class="token punctuation">,</span> count<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    count <span class="token operator">+=</span> len<span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>String中getChars的实现：（由String负责将自己内部数组内容附加到builder中的数组末尾）</p>
-<pre><code class="java">public void getChars(int srcBegin, int srcEnd, char dst[], int dstBegin) {
-    if (srcBegin &lt; 0) {
-        throw new StringIndexOutOfBoundsException(srcBegin);
-    }
-    if (srcEnd &gt; value.length) {
-        throw new StringIndexOutOfBoundsException(srcEnd);
-    }
-    if (srcBegin &gt; srcEnd) {
-        throw new StringIndexOutOfBoundsException(srcEnd - srcBegin);
-    }
-    System.arraycopy(value, srcBegin, dst, dstBegin, srcEnd - srcBegin);
-}</code></pre>
-<h1 id="JDK9-String解读">2 JDK9 String解读</h1><p>很久之前，我在<a href="../详解java中的unicode编码（码点）">详解java中的unicode编码（码点）</a>中提到，java使用的char编码就是UTF-16，并且String的底层也是一个char数组。</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">getChars</span><span class="token punctuation">(</span><span class="token keyword">int</span> srcBegin<span class="token punctuation">,</span> <span class="token keyword">int</span> srcEnd<span class="token punctuation">,</span> <span class="token keyword">char</span> dst<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token keyword">int</span> dstBegin<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>srcBegin <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">StringIndexOutOfBoundsException</span><span class="token punctuation">(</span>srcBegin<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>srcEnd <span class="token operator">></span> value<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">StringIndexOutOfBoundsException</span><span class="token punctuation">(</span>srcEnd<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>srcBegin <span class="token operator">></span> srcEnd<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">StringIndexOutOfBoundsException</span><span class="token punctuation">(</span>srcEnd <span class="token operator">-</span> srcBegin<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token class-name">System</span><span class="token punctuation">.</span><span class="token function">arraycopy</span><span class="token punctuation">(</span>value<span class="token punctuation">,</span> srcBegin<span class="token punctuation">,</span> dst<span class="token punctuation">,</span> dstBegin<span class="token punctuation">,</span> srcEnd <span class="token operator">-</span> srcBegin<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h1 id="JDK9-String解读">2 JDK9 String解读</h1><p>很久之前，我在<a href="../%E8%AF%A6%E8%A7%A3java%E4%B8%AD%E7%9A%84unicode%E7%BC%96%E7%A0%81%EF%BC%88%E7%A0%81%E7%82%B9%EF%BC%89">详解java中的unicode编码（码点）</a>中提到，java使用的char编码就是UTF-16，并且String的底层也是一个char数组。</p>
 <p>UTF-16的编码规则是什么，这里复习一下：</p>
 <ul>
 <li>BMP（基本多语言平面）内的字符，统一使用2个字节表示，我们称其为一个码点，它已经可以表示大多数常见文字。</li>
@@ -476,46 +479,50 @@ JAVA9 String新特性，说说你不知道的东西_Java_人在江湖-CSDN博客
 <p>可以看到占用空间直接减少了1/2。</p>
 <p>由于byte数组的使用方式，引申出了两个类StringLatin1和StringUTF16两个类，分担String类的操作。</p>
 <p>我们来看看JDK9中String几个方法的源码：</p>
-<pre><code class="java">public int codePointCount(int beginIndex, int endIndex) {
-    if (beginIndex &lt; 0 || beginIndex &gt; endIndex ||
-        endIndex &gt; length()) {
-        throw new IndexOutOfBoundsException();
-    }
-    if (isLatin1()) {
-        return endIndex - beginIndex;
-    }
-    return StringUTF16.codePointCount(value, beginIndex, endIndex);
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">codePointCount</span><span class="token punctuation">(</span><span class="token keyword">int</span> beginIndex<span class="token punctuation">,</span> <span class="token keyword">int</span> endIndex<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>beginIndex <span class="token operator">&lt;</span> <span class="token number">0</span> <span class="token operator">||</span> beginIndex <span class="token operator">></span> endIndex <span class="token operator">||</span>
+        endIndex <span class="token operator">></span> <span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">IndexOutOfBoundsException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">isLatin1</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> endIndex <span class="token operator">-</span> beginIndex<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">return</span> <span class="token class-name">StringUTF16</span><span class="token punctuation">.</span><span class="token function">codePointCount</span><span class="token punctuation">(</span>value<span class="token punctuation">,</span> beginIndex<span class="token punctuation">,</span> endIndex<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>这个方法用于计算码点数，对于latin1编码，自然就是byte数组的长度。对于UTF16，和JDK8中的思想类似：</p>
-<pre><code class="java">private static int codePointCount(byte[] value, int beginIndex, int endIndex, boolean checked) {
-    assert beginIndex &lt;= endIndex;
-    int count = endIndex - beginIndex;
-    int i = beginIndex;
-    if (checked &amp;&amp; i &lt; endIndex) {
-        checkBoundsBeginEnd(i, endIndex, value);
-    }
-    for (; i &lt; endIndex - 1; ) {
-        if (Character.isHighSurrogate(getChar(value, i++)) &amp;&amp;
-            Character.isLowSurrogate(getChar(value, i))) {
-            count--;
-            i++;
-        }
-    }
-    return count;
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">codePointCount</span><span class="token punctuation">(</span><span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> value<span class="token punctuation">,</span> <span class="token keyword">int</span> beginIndex<span class="token punctuation">,</span> <span class="token keyword">int</span> endIndex<span class="token punctuation">,</span> <span class="token keyword">boolean</span> checked<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">assert</span> beginIndex <span class="token operator">&lt;=</span> endIndex<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> count <span class="token operator">=</span> endIndex <span class="token operator">-</span> beginIndex<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> i <span class="token operator">=</span> beginIndex<span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>checked <span class="token operator">&amp;&amp;</span> i <span class="token operator">&lt;</span> endIndex<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">checkBoundsBeginEnd</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span> endIndex<span class="token punctuation">,</span> value<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> endIndex <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token class-name">Character</span><span class="token punctuation">.</span><span class="token function">isHighSurrogate</span><span class="token punctuation">(</span><span class="token function">getChar</span><span class="token punctuation">(</span>value<span class="token punctuation">,</span> i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span>
+            <span class="token class-name">Character</span><span class="token punctuation">.</span><span class="token function">isLowSurrogate</span><span class="token punctuation">(</span><span class="token function">getChar</span><span class="token punctuation">(</span>value<span class="token punctuation">,</span> i<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            count<span class="token operator">--</span><span class="token punctuation">;</span>
+            i<span class="token operator">++</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">return</span> count<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>再来看<code>length()</code>:</p>
-<pre><code class="java">public int length() {
-    return value.length &gt;&gt; coder();
-}</code></pre>
-<pre><code class="java">static final boolean COMPACT_STRINGS;
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">int</span> <span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> value<span class="token punctuation">.</span>length <span class="token operator">>></span> <span class="token function">coder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
 
-static {
-    COMPACT_STRINGS = true;
-}
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">boolean</span> COMPACT_STRINGS<span class="token punctuation">;</span>
 
-byte coder() {
-    return COMPACT_STRINGS ? coder : UTF16;
-}</code></pre>
+<span class="token keyword">static</span> <span class="token punctuation">&#123;</span>
+    COMPACT_STRINGS <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">byte</span> <span class="token function">coder</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> COMPACT_STRINGS <span class="token operator">?</span> coder <span class="token operator">:</span> UTF16<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>javadoc对<code>COMPACT_STRINGS</code>的解释是：</p>
 <blockquote>
 <p>If String compaction is disabled, the bytes in value are always encoded in UTF16</p>
@@ -523,51 +530,56 @@ byte coder() {
 <p>即COMPACT_STRINGS默认是开启的，即同时支持UTF16和LATIN1，但具体的编译器可以将其关闭，使其只支持UTF16。</p>
 <p>这里计算长度的方法依然很简单，对于LATIN1就是byte数组的长度，对于UTF16则是byte数组长度除以2。</p>
 <p>JDK9中对字符串的改动带来的问题是什么呢？可能有人知道，java中数组的大小是有上限的，许多集合类都有下面这个字段：</p>
-<pre><code class="java">/**
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token comment">/**
 * The maximum size of array to allocate.
 * Some VMs reserve some header words in an array.
 * Attempts to allocate larger arrays may result in
 * OutOfMemoryError: Requested array size exceeds VM limit
-*/
-private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;</code></pre>
+*/</span>
+<span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">int</span> MAX_ARRAY_SIZE <span class="token operator">=</span> <span class="token class-name">Integer</span><span class="token punctuation">.</span>MAX_VALUE <span class="token operator">-</span> <span class="token number">8</span><span class="token punctuation">;</span></code></pre>
+
 <p>即数组的大小上限不应该超过<code>Integer.MAX_VALUE - 8</code>，那么大小相等的情况下，JDK9中byte数组自然也就比JDK8中的char数组能存储的信息少了1/2。</p>
 <h1 id="JDK9带来的StringBuffer-StringBuilder变化">3 JDK9带来的StringBuffer/StringBuilder变化</h1><p>JDK9中String的改版，使得StringBuffer/StringBuilder的实现也有了小变化。如下所示：</p>
-<pre><code class="java">abstract class AbstractStringBuilder implements Appendable, CharSequence {
-    /**
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">abstract</span> <span class="token keyword">class</span> <span class="token class-name">AbstractStringBuilder</span> <span class="token keyword">implements</span> <span class="token class-name">Appendable</span><span class="token punctuation">,</span> <span class="token class-name">CharSequence</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">/**
      * The value is used for character storage.
-     */
-    byte[] value;
+     */</span>
+    <span class="token keyword">byte</span><span class="token punctuation">[</span><span class="token punctuation">]</span> value<span class="token punctuation">;</span>
 
-    /**
-     * The id of the encoding used to encode the bytes in {@code value}.
-     */
-    byte coder;
-    //...
-}</code></pre>
+    <span class="token comment">/**
+     * The id of the encoding used to encode the bytes in &#123;@code value&#125;.
+     */</span>
+    <span class="token keyword">byte</span> coder<span class="token punctuation">;</span>
+    <span class="token comment">//...</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>AbstractStringBuilder中的内部数组也变为了byte数组，并且增加了coder字段。</p>
-<pre><code class="java">public AbstractStringBuilder append(String str) {
-    if (str == null) {
-        return appendNull();
-    }
-    int len = str.length();
-    ensureCapacityInternal(count + len);
-    putStringAt(count, str);
-    count += len;
-    return this;
-}</code></pre>
-<pre><code class="java">private final void putStringAt(int index, String str) {
-    if (getCoder() != str.coder()) {
-        inflate();
-    }
-    str.getBytes(value, index, coder);
-}</code></pre>
-<pre><code class="java">void getBytes(byte dst[], int dstBegin, byte coder) {
-    if (coder() == coder) {
-        System.arraycopy(value, 0, dst, dstBegin &lt;&lt; coder, value.length);
-    } else {    // this.coder == LATIN &amp;&amp; coder == UTF16
-        StringLatin1.inflate(value, 0, dst, dstBegin, value.length);
-    }
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token class-name">AbstractStringBuilder</span> <span class="token function">append</span><span class="token punctuation">(</span><span class="token class-name">String</span> str<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>str <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token function">appendNull</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">int</span> len <span class="token operator">=</span> str<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">ensureCapacityInternal</span><span class="token punctuation">(</span>count <span class="token operator">+</span> len<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">putStringAt</span><span class="token punctuation">(</span>count<span class="token punctuation">,</span> str<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    count <span class="token operator">+=</span> len<span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">final</span> <span class="token keyword">void</span> <span class="token function">putStringAt</span><span class="token punctuation">(</span><span class="token keyword">int</span> index<span class="token punctuation">,</span> <span class="token class-name">String</span> str<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">getCoder</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">!=</span> str<span class="token punctuation">.</span><span class="token function">coder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">inflate</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    str<span class="token punctuation">.</span><span class="token function">getBytes</span><span class="token punctuation">(</span>value<span class="token punctuation">,</span> index<span class="token punctuation">,</span> coder<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">void</span> <span class="token function">getBytes</span><span class="token punctuation">(</span><span class="token keyword">byte</span> dst<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token keyword">int</span> dstBegin<span class="token punctuation">,</span> <span class="token keyword">byte</span> coder<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">coder</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> coder<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">System</span><span class="token punctuation">.</span><span class="token function">arraycopy</span><span class="token punctuation">(</span>value<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> dst<span class="token punctuation">,</span> dstBegin <span class="token operator">&lt;&lt;</span> coder<span class="token punctuation">,</span> value<span class="token punctuation">.</span>length<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>    <span class="token comment">// this.coder == LATIN &amp;&amp; coder == UTF16</span>
+        <span class="token class-name">StringLatin1</span><span class="token punctuation">.</span><span class="token function">inflate</span><span class="token punctuation">(</span>value<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> dst<span class="token punctuation">,</span> dstBegin<span class="token punctuation">,</span> value<span class="token punctuation">.</span>length<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>可以看到加入了一些对coder的判断，Builder和String必须维持相同的coder。</p>
 
             </div>
@@ -1196,7 +1208,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

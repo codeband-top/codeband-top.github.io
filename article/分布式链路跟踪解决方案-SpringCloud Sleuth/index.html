@@ -27,6 +27,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -401,7 +402,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    497
+                    487
                 </div>
                 
 
@@ -421,44 +422,48 @@
 <li>Trace:类似于树结构的Span集合,表示一条调用链路,存在唯一标识</li>
 <li>span:表示调用链路来源,通俗的理解span就是一次请求信息</li>
 </ul>
-<p><img src="https://api.codetool.top/img/15849290755080.png" alt></p>
+<p><img src="https://api.codetool.top/img/15849290755080.png"></p>
 <p>各span通过parent id关联起来，下图展示了span的父子关系：</p>
-<p><img src="https://api.codetool.top/img/15849291558396.png" alt></p>
+<p><img src="https://api.codetool.top/img/15849291558396.png"></p>
 <h1 id="使用示例">3 使用示例</h1><h2 id="zipkin的下载和运行">3.1 zipkin的下载和运行</h2><p>SpringCloud从F版起已不需要自己构建Zipkin Server了，只需调用jar包即可</p>
-<p>下载地址： <a href="https://dl.bintray.com/openzipkin/maven/io/zipkin/java/zipkin-server/" target="_blank" rel="noopener">https://dl.bintray.com/openzipkin/maven/io/zipkin/java/zipkin-server/</a></p>
+<p>下载地址： <a target="_blank" rel="noopener" href="https://dl.bintray.com/openzipkin/maven/io/zipkin/java/zipkin-server/">https://dl.bintray.com/openzipkin/maven/io/zipkin/java/zipkin-server/</a></p>
 <p>这里选择<code>2.12.9/zipkin-server-2.12.9-exec.jar</code>下载。</p>
 <p>下载完成之后直接运行：</p>
-<p><img src="https://api.codetool.top/img/15849289118046.png" alt></p>
-<p>运行成功之后，浏览器访问 <a href="http://localhost:9411/" target="_blank" rel="noopener">http://localhost:9411/</a> 就能看到管理界面了</p>
+<p><img src="https://api.codetool.top/img/15849289118046.png"></p>
+<p>运行成功之后，浏览器访问 <a target="_blank" rel="noopener" href="http://localhost:9411/">http://localhost:9411/</a> 就能看到管理界面了</p>
 <h2 id="创建项目">3.2 创建项目</h2><p>在之前的<code>cloud-provider-payment8001</code>和<code>cloud-consumer-order80</code>中添加依赖：</p>
-<pre><code class="xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-cloud-starter-zipkin&lt;/artifactId&gt;
-&lt;/dependency&gt;</code></pre>
+<pre class="language-xml" data-language="xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework.cloud<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-cloud-starter-zipkin<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span></code></pre>
+
 <p>两个模块配置添加：</p>
-<pre><code class="yaml">spring:
-  zipkin:
-    base-url: http://localhost:9411
-  sleuth:
-    sampler:
-      # 采样率，1代表全部采集
-      probability: 1</code></pre>
+<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">spring</span><span class="token punctuation">:</span>
+  <span class="token key atrule">zipkin</span><span class="token punctuation">:</span>
+    <span class="token key atrule">base-url</span><span class="token punctuation">:</span> http<span class="token punctuation">:</span>//localhost<span class="token punctuation">:</span><span class="token number">9411</span>
+  <span class="token key atrule">sleuth</span><span class="token punctuation">:</span>
+    <span class="token key atrule">sampler</span><span class="token punctuation">:</span>
+      <span class="token comment"># 采样率，1代表全部采集</span>
+      <span class="token key atrule">probability</span><span class="token punctuation">:</span> <span class="token number">1</span></code></pre>
+
 <p>8001添加一个controller方法：</p>
-<pre><code class="java">@GetMapping(&quot;/payment/zipkin&quot;)
-public String paymentZipkin(){
-    return &quot;payment zipkin invoke&quot;;
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@GetMapping</span><span class="token punctuation">(</span><span class="token string">"/payment/zipkin"</span><span class="token punctuation">)</span>
+<span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">paymentZipkin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> <span class="token string">"payment zipkin invoke"</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>80添加一个controller方法：</p>
-<pre><code class="java">@GetMapping(&quot;/consumer/payment/zipkin&quot;)
-public String paymentZipkin(){
-    return restTemplate.getForObject(PAYMENT_URL+&quot;/payment/zipkin&quot;,String.class);
-}</code></pre>
-<p>访问 <a href="http://localhost/consumer/payment/zipkin" target="_blank" rel="noopener">http://localhost/consumer/payment/zipkin</a> ，查看zipkin界面显示</p>
-<p><img src="https://api.codetool.top/img/1584932861336.png" alt></p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@GetMapping</span><span class="token punctuation">(</span><span class="token string">"/consumer/payment/zipkin"</span><span class="token punctuation">)</span>
+<span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">paymentZipkin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> restTemplate<span class="token punctuation">.</span><span class="token function">getForObject</span><span class="token punctuation">(</span>PAYMENT_URL<span class="token operator">+</span><span class="token string">"/payment/zipkin"</span><span class="token punctuation">,</span><span class="token class-name">String</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>访问 <a target="_blank" rel="noopener" href="http://localhost/consumer/payment/zipkin">http://localhost/consumer/payment/zipkin</a> ，查看zipkin界面显示</p>
+<p><img src="https://api.codetool.top/img/1584932861336.png"></p>
 <p>可以查看到相关的调用，发生错误的情况也能看到</p>
-<p><img src="https://api.codetool.top/img/15849329241929.png" alt></p>
+<p><img src="https://api.codetool.top/img/15849329241929.png"></p>
 <p>查看详细信息：</p>
-<p><img src="https://api.codetool.top/img/15849330161456.png" alt></p>
+<p><img src="https://api.codetool.top/img/15849330161456.png"></p>
 
             </div>
             <hr/>
@@ -1067,7 +1072,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             

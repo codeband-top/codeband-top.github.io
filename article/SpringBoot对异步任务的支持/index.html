@@ -29,6 +29,7 @@
     <link rel="stylesheet" type="text/css" href="/libs/prism/prism.css">
     <script src="/libs/jquery/jquery.min.js"></script>
     
+<meta name="generator" content="Hexo 5.2.0"><link rel="alternate" href="/rss2.xml" title="代码段小站" type="application/rss+xml">
 </head>
 
 
@@ -399,7 +400,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    491
+                    493
                 </div>
                 
 
@@ -416,85 +417,91 @@
 <p>在方法上加上注解<code>@Async</code>将该方法标记为异步任务。</p>
 <p>用法和FutureTask+Callable差不多，可以返回AsyncResult类型，它是Future的一个实现类。</p>
 <p>例：</p>
-<pre><code class="java">@Async
-public Future&lt;String&gt; asyncTask() throws InterruptedException{
-    Thread.sleep(2000);
-    return new AsyncResult&lt;&gt;(&quot;任务完成&quot;);
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@Async</span>
+<span class="token keyword">public</span> <span class="token class-name">Future</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> <span class="token function">asyncTask</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">InterruptedException</span><span class="token punctuation">&#123;</span>
+    <span class="token class-name">Thread</span><span class="token punctuation">.</span><span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">2000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">AsyncResult</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token string">"任务完成"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <h1 id="异步线程池">2 异步线程池</h1><p>如果一直使用<code>@Async</code>不配合线程池，会消耗很多资源，效率变低，Spring中有一个AsyncConfigurer接口，可以通过它配置线程池。</p>
-<pre><code class="java">public interface AsyncConfigurer {
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">AsyncConfigurer</span> <span class="token punctuation">&#123;</span>
 
-    //获取线程池
-    @Nullable
-    default Executor getAsyncExecutor() {
-        return null;
-    }
+    <span class="token comment">//获取线程池</span>
+	<span class="token annotation punctuation">@Nullable</span>
+	<span class="token keyword">default</span> <span class="token class-name">Executor</span> <span class="token function">getAsyncExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+		<span class="token keyword">return</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+	<span class="token punctuation">&#125;</span>
 
-    //异步异常处理器
-    @Nullable
-    default AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-        return null;
-    }
-}</code></pre>
+    <span class="token comment">//异步异常处理器</span>
+	<span class="token annotation punctuation">@Nullable</span>
+	<span class="token keyword">default</span> <span class="token class-name">AsyncUncaughtExceptionHandler</span> <span class="token function">getAsyncUncaughtExceptionHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+		<span class="token keyword">return</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+	<span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>于是我们可以创建一个配置类，在这里面写实现,<code>@EnableAsync</code> 注解放到这个配置类上面可以增加可读性。</p>
-<pre><code class="java">@Configuration
-@Slf4j
-public class AsyncConfig implements AsyncConfigurer {
-    @Override
-    public Executor getAsyncExecutor() {
-        log.info(&quot;正在创建线程池&quot;);
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(10);
-        executor.setMaxPoolSize(30);
-        executor.setQueueCapacity(2000);
-        executor.setThreadNamePrefix(&quot;global-thread-pool-&quot;);
-        executor.initialize();
-        return executor;
-    }
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@Configuration</span>
+<span class="token annotation punctuation">@Slf4j</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">AsyncConfig</span> <span class="token keyword">implements</span> <span class="token class-name">AsyncConfigurer</span> <span class="token punctuation">&#123;</span>
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> <span class="token class-name">Executor</span> <span class="token function">getAsyncExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        log<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"正在创建线程池"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">ThreadPoolTaskExecutor</span> executor <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ThreadPoolTaskExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        executor<span class="token punctuation">.</span><span class="token function">setCorePoolSize</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        executor<span class="token punctuation">.</span><span class="token function">setMaxPoolSize</span><span class="token punctuation">(</span><span class="token number">30</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        executor<span class="token punctuation">.</span><span class="token function">setQueueCapacity</span><span class="token punctuation">(</span><span class="token number">2000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        executor<span class="token punctuation">.</span><span class="token function">setThreadNamePrefix</span><span class="token punctuation">(</span><span class="token string">"global-thread-pool-"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        executor<span class="token punctuation">.</span><span class="token function">initialize</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> executor<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>这样创建的线程池是全局的，也就是说默认使用<code>@Async</code>标注的方法都会从这个线程池中取线程，我们可以测试一下：</p>
-<pre><code class="java">@Async
-public void testPool() throws InterruptedException {
-    System.out.println(Thread.currentThread().getName());
-    Thread.sleep(1000);
-}</code></pre>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@Async</span>
+<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">testPool</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">InterruptedException</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token class-name">Thread</span><span class="token punctuation">.</span><span class="token function">currentThread</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">Thread</span><span class="token punctuation">.</span><span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">1000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>输出：</p>
-<pre><code>global-thread-pool-1</code></pre><p>如果我们想让它灵活度更高一点，可以往IoC容器中注入一些Executor，使用<code>@Async(&quot;&quot;)</code>的value来指定一个要使用的线程池的bean名称。</p>
+<pre class="language-none"><code class="language-none">global-thread-pool-1</code></pre>
+
+<p>如果我们想让它灵活度更高一点，可以往IoC容器中注入一些Executor，使用<code>@Async(&quot;&quot;)</code>的value来指定一个要使用的线程池的bean名称。</p>
 <p>例如，给配置类中添加注入Executor bean的方法：</p>
-<pre><code class="java">@Configuration
-@Slf4j
-public class AsyncConfig implements AsyncConfigurer {
-    @Override
-    public Executor getAsyncExecutor() {
-        log.info(&quot;正在创建线程池&quot;);
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(10);
-        executor.setMaxPoolSize(30);
-        executor.setQueueCapacity(2000);
-        executor.setThreadNamePrefix(&quot;global-thread-pool-&quot;);
-        executor.initialize();
-        return executor;
-    }
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@Configuration</span>
+<span class="token annotation punctuation">@Slf4j</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">AsyncConfig</span> <span class="token keyword">implements</span> <span class="token class-name">AsyncConfigurer</span> <span class="token punctuation">&#123;</span>
+    <span class="token annotation punctuation">@Override</span>
+    <span class="token keyword">public</span> <span class="token class-name">Executor</span> <span class="token function">getAsyncExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        log<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"正在创建线程池"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">ThreadPoolTaskExecutor</span> executor <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ThreadPoolTaskExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        executor<span class="token punctuation">.</span><span class="token function">setCorePoolSize</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        executor<span class="token punctuation">.</span><span class="token function">setMaxPoolSize</span><span class="token punctuation">(</span><span class="token number">30</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        executor<span class="token punctuation">.</span><span class="token function">setQueueCapacity</span><span class="token punctuation">(</span><span class="token number">2000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        executor<span class="token punctuation">.</span><span class="token function">setThreadNamePrefix</span><span class="token punctuation">(</span><span class="token string">"global-thread-pool-"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        executor<span class="token punctuation">.</span><span class="token function">initialize</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> executor<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
 
-    @Bean(&quot;bigExecutor&quot;)
-    public Executor getBigExecutor() {
-        log.info(&quot;正在创建线程池&quot;);
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(50);
-        executor.setMaxPoolSize(80);
-        executor.setQueueCapacity(80);
-        executor.setThreadNamePrefix(&quot;big-thread-pool-&quot;);
-        executor.initialize();
-        return executor;
-    }
-}</code></pre>
+    <span class="token annotation punctuation">@Bean</span><span class="token punctuation">(</span><span class="token string">"bigExecutor"</span><span class="token punctuation">)</span>
+    <span class="token keyword">public</span> <span class="token class-name">Executor</span> <span class="token function">getBigExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        log<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"正在创建线程池"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">ThreadPoolTaskExecutor</span> executor <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ThreadPoolTaskExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        executor<span class="token punctuation">.</span><span class="token function">setCorePoolSize</span><span class="token punctuation">(</span><span class="token number">50</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        executor<span class="token punctuation">.</span><span class="token function">setMaxPoolSize</span><span class="token punctuation">(</span><span class="token number">80</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        executor<span class="token punctuation">.</span><span class="token function">setQueueCapacity</span><span class="token punctuation">(</span><span class="token number">80</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        executor<span class="token punctuation">.</span><span class="token function">setThreadNamePrefix</span><span class="token punctuation">(</span><span class="token string">"big-thread-pool-"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        executor<span class="token punctuation">.</span><span class="token function">initialize</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> executor<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
 <p>指定使用线程池：</p>
-<pre><code class="java">@Async(&quot;bigExecutor&quot;)
-public void testBigPool() throws InterruptedException {
-    System.out.println(Thread.currentThread().getName());
-    Thread.sleep(1000);
-}</code></pre>
-
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@Async</span><span class="token punctuation">(</span><span class="token string">"bigExecutor"</span><span class="token punctuation">)</span>
+<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">testBigPool</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">InterruptedException</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token class-name">Thread</span><span class="token punctuation">.</span><span class="token function">currentThread</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">Thread</span><span class="token punctuation">.</span><span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">1000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
             </div>
             <hr/>
 
@@ -1099,7 +1106,7 @@ code[class*="language-"], pre[class*="language-"] { white-space: pre !important;
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">634k</span>&nbsp;字
+                class="white-color">635.6k</span>&nbsp;字
             
             
             
